@@ -1,0 +1,124 @@
+.page {
+  max-width: 46rem;
+  margin: 0 auto;
+  padding: 2.5rem 1.25rem 4rem;
+}
+
+.message {
+  margin: 2rem 0;
+  color: var(--ink-soft);
+}
+
+.header {
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid var(--edge);
+}
+
+.title {
+  margin: 0 0 0.6rem;
+  font-size: 2rem;
+  letter-spacing: -0.02em;
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.tag {
+  padding: 0.15rem 0.5rem;
+  font-size: 0.75rem;
+  color: var(--ink-soft);
+  background: var(--card);
+  border: 1px solid var(--edge);
+  border-radius: 999px;
+}
+
+.meta {
+  display: flex;
+  gap: 1.25rem;
+  margin: 0.9rem 0 0;
+  font-size: 0.9rem;
+  color: var(--ink-soft);
+}
+
+.section {
+  margin-top: 2rem;
+}
+
+.sectionHeading {
+  margin: 0 0 0.75rem;
+  font-size: 1.1rem;
+}
+
+.stepper {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: var(--card);
+  border: 1px solid var(--edge);
+  border-radius: 0.75rem;
+}
+
+.stepperLabel {
+  margin-right: auto;
+  font-size: 0.9rem;
+  color: var(--ink-soft);
+}
+
+.stepButton {
+  width: 2.1rem;
+  height: 2.1rem;
+  font-size: 1.1rem;
+  font-family: inherit;
+  color: inherit;
+  background: var(--paper);
+  border: 1px solid var(--edge);
+  border-radius: 0.5rem;
+  cursor: pointer;
+}
+
+.stepButton:hover {
+  border-color: var(--accent);
+}
+
+.servingsCount {
+  min-width: 2rem;
+  text-align: center;
+  font-size: 1.15rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.ingredients {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ingredientRow {
+  padding: 0.45rem 0;
+  border-bottom: 1px dashed var(--edge);
+}
+
+.steps {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.step {
+  padding: 0.5rem 0;
+}
+
+.back {
+  display: inline-block;
+  margin-top: 2.5rem;
+  color: var(--accent);
+  font-size: 0.95rem;
+}
+
+.back:hover {
+  text-decoration: underline;
+}

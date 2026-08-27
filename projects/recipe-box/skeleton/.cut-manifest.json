@@ -1,0 +1,123 @@
+{
+  "slug": "recipe-box",
+  "cuts": [
+    {
+      "id": "cut-list-fetch",
+      "file": "app/RecipeList.tsx",
+      "line": 53,
+      "lines_removed": 12
+    },
+    {
+      "id": "cut-list-search-url",
+      "file": "app/RecipeList.tsx",
+      "line": 80,
+      "lines_removed": 9
+    },
+    {
+      "id": "cut-list-tag-toggle",
+      "file": "app/RecipeList.tsx",
+      "line": 94,
+      "lines_removed": 9
+    },
+    {
+      "id": "cut-list-cards",
+      "file": "app/RecipeList.tsx",
+      "line": 109,
+      "lines_removed": 21
+    },
+    {
+      "id": "cut-api-recipe-get",
+      "file": "app/api/recipes/[id]/route.ts",
+      "line": 19,
+      "lines_removed": 7
+    },
+    {
+      "id": "cut-api-recipes-filter",
+      "file": "app/api/recipes/route.ts",
+      "line": 20,
+      "lines_removed": 9
+    },
+    {
+      "id": "cut-api-tags-list",
+      "file": "app/api/tags/route.ts",
+      "line": 18,
+      "lines_removed": 2
+    },
+    {
+      "id": "cut-recipe-servings",
+      "file": "app/recipes/[id]/RecipeView.tsx",
+      "line": 19,
+      "lines_removed": 1
+    },
+    {
+      "id": "cut-recipe-scale-quantity",
+      "file": "app/recipes/[id]/RecipeView.tsx",
+      "line": 33,
+      "lines_removed": 1
+    },
+    {
+      "id": "cut-recipe-rows",
+      "file": "app/recipes/[id]/RecipeView.tsx",
+      "line": 42,
+      "lines_removed": 9
+    },
+    {
+      "id": "cut-recipe-fetch",
+      "file": "app/recipes/[id]/page.tsx",
+      "line": 24,
+      "lines_removed": 13
+    },
+    {
+      "id": "cut-fraction-scale",
+      "file": "lib/fractions.ts",
+      "line": 55,
+      "lines_removed": 4
+    },
+    {
+      "id": "cut-store-read-all",
+      "file": "lib/store.ts",
+      "line": 15,
+      "lines_removed": 3
+    },
+    {
+      "id": "cut-store-find-one",
+      "file": "lib/store.ts",
+      "line": 30,
+      "lines_removed": 1
+    }
+  ],
+  "count": 14,
+  "by_session": {
+    "1": [
+      "cut-list-cards",
+      "cut-list-fetch",
+      "cut-store-read-all"
+    ],
+    "2": [
+      "cut-api-recipes-filter",
+      "cut-api-tags-list",
+      "cut-list-search-url",
+      "cut-list-tag-toggle"
+    ],
+    "3": [
+      "cut-api-recipe-get",
+      "cut-recipe-fetch",
+      "cut-recipe-rows",
+      "cut-store-find-one"
+    ],
+    "4": [
+      "cut-fraction-scale",
+      "cut-recipe-scale-quantity",
+      "cut-recipe-servings"
+    ]
+  },
+  "typecheck": {
+    "ran": true,
+    "ok": true,
+    "error_count": 0,
+    "errors": [],
+    "missing_return": [],
+    "hint": ""
+  },
+  "ok": true
+}

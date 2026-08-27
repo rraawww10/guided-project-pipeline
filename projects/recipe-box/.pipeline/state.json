@@ -1,7 +1,7 @@
 {
   "slug": "recipe-box",
   "created": "2026-08-26T09:47:38+00:00",
-  "phase": "code",
+  "phase": "pack",
   "retries": {
     "spec": 0,
     "code": 0,
@@ -13,8 +13,16 @@
       "at": "2026-08-27T05:48:46+00:00",
       "note": "Round 4: 0 blocking, 2 worth a look, down from 4/4 (round 3) and 4/6 (round 2). Approved under the stopping rule declared at the round-3 rejection: approve when every remaining finding sits in a column a downstream checker owns. INTEGRITY NOTE: the approved spec is NOT the one the Spec Breaker read. W1 (written list useEffect had no stale-reply guard; typing fires one request per keystroke with no debounce, and c-2-4/c-2-6 both assert a card count after typing) landed in the 'nothing catches it' column, which the declared rule rejects on. Rather than a fifth round for two sentences, the Breaker's own suggested wording was applied by hand to spec.md 'Who owns the fetch', the cut-list-fetch hint in both files, and spec.json sc-list.owns: let ignore = false ships written above the marker, cleanup () => { ignore = true } below it, and the student's block writes to state only while ignore is clear. The cleanup return sits outside the markers per the round-1 cut-point lesson. Linter clean and every hint and check in spec.json verified verbatim in spec.md after the edit, but those two sentences have had no adversarial pass - if a defect shows up in the list refetch, look there first. W2 accepted with eyes open: session 3 carries three new files plus 4 cuts and is now the timing risk; nothing before step 9 measures teaching minutes, so the Pack Writer may time it over 40 and the fix at that point is a spec rebalance that invalidates the build. Carried to phase 3: c-3-2 and c-3-5 go green with cut-store-read-all open as well as cut-store-find-one, so the pack must pair them with c-3-1/c-3-3 and never present either alone."
     },
-    "gate2": null,
-    "gate3": null
+    "gate2": {
+      "approved": true,
+      "at": "2026-08-27T06:59:02+00:00",
+      "note": "22/22 green on app/; step 8 pre-verified"
+    },
+    "gate3": {
+      "approved": true,
+      "at": "2026-08-27T09:07:45+00:00",
+      "note": "Pack complete, 6 files. Deploy clean (install: 'added 31 packages', no CVE advisory; next 15.5.24). Skeleton verified: 22/22 fail with cuts open, mismatches []. KNOWN: session 3 times at 45 min vs the 40 cap - W2 from the round-4 ambiguity report, surfaced at step 9 as lessons.md predicted. Not fixed in the artifacts: pack/session-3.md documents three reliefs and recommends shipping cut-store-find-one written on the handout copy. skeleton/ is left byte-for-byte as verified, so skeleton-check.json stays true."
+    }
   },
   "steps": [
     {
@@ -147,6 +155,24 @@
       "step": "lint",
       "ok": true,
       "at": "2026-08-27T06:35:21+00:00",
+      "detail": ""
+    },
+    {
+      "step": "cut",
+      "ok": true,
+      "at": "2026-08-27T07:04:28+00:00",
+      "detail": ""
+    },
+    {
+      "step": "deploy",
+      "ok": true,
+      "at": "2026-08-27T07:25:06+00:00",
+      "detail": ""
+    },
+    {
+      "step": "ship",
+      "ok": true,
+      "at": "2026-08-27T09:07:48+00:00",
       "detail": ""
     }
   ],

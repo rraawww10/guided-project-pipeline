@@ -1,0 +1,483 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="22" skipped="0" tests="22" time="301.453" timestamp="2026-08-27T12:29:27.009138+05:30" hostname="nxtwave-Z790-D-AX"><testcase classname="skeleton.verify.test_api_recipes" name="test_c_1_1_recipes_list_returns_200_with_the_eight_seed_recipes" time="0.031"><failure message="AssertionError: expected the 8 seed recipes, got 0&#10;assert 0 == 8&#10; +  where 0 = len([])">api = &lt;httpx.Client object at 0x74380f3e0740&gt;
+
+    def test_c_1_1_recipes_list_returns_200_with_the_eight_seed_recipes(api):
+        """c-1-1: GET /api/recipes returns 200 with a JSON array of the 8 seed recipes."""
+        response = api.get("/api/recipes")
+        assert response.status_code == 200, response.text
+        body = response.json()
+        assert isinstance(body, list), f"expected a JSON array, got {type(body).__name__}"
+&gt;       assert len(body) == 8, f"expected the 8 seed recipes, got {len(body)}"
+E       AssertionError: expected the 8 seed recipes, got 0
+E       assert 0 == 8
+E        +  where 0 = len([])
+
+skeleton/verify/test_api_recipes.py:17: AssertionError</failure></testcase><testcase classname="skeleton.verify.test_api_recipes" name="test_c_1_2_recipes_list_holds_eight_objects_and_the_pasta_entry_in_full" time="0.014"><failure message="AssertionError: expected 8 objects, got 0&#10;assert 0 == 8&#10; +  where 0 = len([])">api = &lt;httpx.Client object at 0x74380ef566f0&gt;
+
+    def test_c_1_2_recipes_list_holds_eight_objects_and_the_pasta_entry_in_full(api):
+        """c-1-2: 8 objects, and the lemon-garlic-pasta entry has id
+        lemon-garlic-pasta, title Lemon Garlic Pasta, tags quick and vegetarian,
+        minutes 20 and serves 4."""
+        body = api.get("/api/recipes").json()
+        assert isinstance(body, list), f"expected a JSON array, got {type(body).__name__}"
+&gt;       assert len(body) == 8, f"expected 8 objects, got {len(body)}"
+E       AssertionError: expected 8 objects, got 0
+E       assert 0 == 8
+E        +  where 0 = len([])
+
+skeleton/verify/test_api_recipes.py:28: AssertionError</failure></testcase><testcase classname="skeleton.verify.test_api_recipes" name="test_c_2_1_query_filter_is_case_insensitive" time="0.014"><failure message="AssertionError: []&#10;assert [] == ['Garlic Flat...Garlic Pasta']&#10;  &#10;  Right contains 2 more items, first extra item: 'Garlic Flatbread'&#10;  Use -v to get more diff">api = &lt;httpx.Client object at 0x74380ef564e0&gt;
+
+    def test_c_2_1_query_filter_is_case_insensitive(api):
+        """c-2-1: ?q=garlic and ?q=GARLIC each return 200 with the same 2 recipes,
+        Lemon Garlic Pasta and Garlic Flatbread."""
+        lower = api.get("/api/recipes", params={"q": "garlic"})
+        upper = api.get("/api/recipes", params={"q": "GARLIC"})
+        assert lower.status_code == 200, lower.text
+        assert upper.status_code == 200, upper.text
+    
+        expected = ["Lemon Garlic Pasta", "Garlic Flatbread"]
+&gt;       assert sorted(titles(lower.json())) == sorted(expected), titles(lower.json())
+E       AssertionError: []
+E       assert [] == ['Garlic Flat...Garlic Pasta']
+E         
+E         Right contains 2 more items, first extra item: 'Garlic Flatbread'
+E         Use -v to get more diff
+
+skeleton/verify/test_api_recipes.py:49: AssertionError</failure></testcase><testcase classname="skeleton.verify.test_api_recipes" name="test_c_2_2_tag_filter_alone_and_together_with_the_query" time="0.013"><failure message="AssertionError: []&#10;assert [] == ['Banana Brea...ic Flatbread']&#10;  &#10;  Right contains 2 more items, first extra item: 'Banana Bread'&#10;  Use -v to get more diff">api = &lt;httpx.Client object at 0x74380ef8e8d0&gt;
+
+    def test_c_2_2_tag_filter_alone_and_together_with_the_query(api):
+        """c-2-2: ?tag=baking returns the 2 baking recipes, Banana Bread and Garlic
+        Flatbread, and ?q=garlic&amp;tag=baking returns 1, Garlic Flatbread."""
+        tagged = api.get("/api/recipes", params={"tag": "baking"})
+        assert tagged.status_code == 200, tagged.text
+&gt;       assert sorted(titles(tagged.json())) == ["Banana Bread", "Garlic Flatbread"], (
+            titles(tagged.json())
+        )
+E       AssertionError: []
+E       assert [] == ['Banana Brea...ic Flatbread']
+E         
+E         Right contains 2 more items, first extra item: 'Banana Bread'
+E         Use -v to get more diff
+
+skeleton/verify/test_api_recipes.py:59: AssertionError</failure></testcase><testcase classname="skeleton.verify.test_api_recipes" name="test_c_3_1_recipe_get_returns_200_with_the_stored_recipe" time="0.014"><failure message="AssertionError: got 501: {&quot;error&quot;:&quot;not implemented&quot;}&#10;assert 501 == 200&#10; +  where 501 = &lt;Response [501 Not Implemented]&gt;.status_code">api = &lt;httpx.Client object at 0x74380ef8e210&gt;
+
+    def test_c_3_1_recipe_get_returns_200_with_the_stored_recipe(api):
+        """c-3-1: GET /api/recipes/lemon-garlic-pasta returns 200 with that recipe,
+        its 7 ingredients and its 4 steps."""
+        response = api.get("/api/recipes/lemon-garlic-pasta")
+&gt;       assert response.status_code == 200, f"got {response.status_code}: {response.text}"
+E       AssertionError: got 501: {"error":"not implemented"}
+E       assert 501 == 200
+E        +  where 501 = &lt;Response [501 Not Implemented]&gt;.status_code
+
+skeleton/verify/test_api_recipes.py:72: AssertionError</failure></testcase><testcase classname="skeleton.verify.test_api_recipes" name="test_c_3_2_recipe_get_returns_404_with_an_error_body_for_an_unknown_id" time="0.012"><failure message="AssertionError: got 501: {&quot;error&quot;:&quot;not implemented&quot;}&#10;assert 501 == 404&#10; +  where 501 = &lt;Response [501 Not Implemented]&gt;.status_code">api = &lt;httpx.Client object at 0x74380efa0170&gt;
+
+    def test_c_3_2_recipe_get_returns_404_with_an_error_body_for_an_unknown_id(api):
+        """c-3-2: GET /api/recipes/not-a-recipe returns 404 with a JSON body holding
+        an error field."""
+        response = api.get("/api/recipes/not-a-recipe")
+&gt;       assert response.status_code == 404, f"got {response.status_code}: {response.text}"
+E       AssertionError: got 501: {"error":"not implemented"}
+E       assert 501 == 404
+E        +  where 501 = &lt;Response [501 Not Implemented]&gt;.status_code
+
+skeleton/verify/test_api_recipes.py:86: AssertionError</failure></testcase><testcase classname="skeleton.verify.test_api_tags" name="test_c_2_3_tags_list_returns_the_five_distinct_tags_in_order" time="0.017"><failure message="AssertionError: got 501: {&quot;error&quot;:&quot;not implemented&quot;}&#10;assert 501 == 200&#10; +  where 501 = &lt;Response [501 Not Implemented]&gt;.status_code">api = &lt;httpx.Client object at 0x74380efa15b0&gt;
+
+    def test_c_2_3_tags_list_returns_the_five_distinct_tags_in_order(api):
+        """c-2-3: GET /api/tags returns 200 with the JSON array baking, one-pot,
+        quick, spicy, vegetarian in alphabetical order."""
+        response = api.get("/api/tags")
+&gt;       assert response.status_code == 200, f"got {response.status_code}: {response.text}"
+E       AssertionError: got 501: {"error":"not implemented"}
+E       assert 501 == 200
+E        +  where 501 = &lt;Response [501 Not Implemented]&gt;.status_code
+
+skeleton/verify/test_api_tags.py:11: AssertionError</failure></testcase><testcase classname="skeleton.verify.test_ui_list" name="test_c_1_3_list_renders_one_card_per_seed_recipe" time="20.275"><failure message="AssertionError: Locator expected to have count '8'&#10;Actual value: 0 &#10;Call log:&#10;  - Expect &quot;to_have_count&quot; with timeout 20000ms&#10;  - waiting for get_by_test_id(&quot;recipe-card&quot;)&#10;    44 × locator resolved to 0 elements&#10;       - unexpected value &quot;0&quot;">page = &lt;Page url='http://127.0.0.1:53183/'&gt;
+
+    def test_c_1_3_list_renders_one_card_per_seed_recipe(page):
+        """c-1-3: sc-list renders one recipe-card element per recipe, 8 of them for
+        the 8 seed recipes."""
+        open_list(page)
+&gt;       expect(cards(page)).to_have_count(8, timeout=LOAD_TIMEOUT)
+E       AssertionError: Locator expected to have count '8'
+E       Actual value: 0 
+E       Call log:
+E         - Expect "to_have_count" with timeout 20000ms
+E         - waiting for get_by_test_id("recipe-card")
+E           44 × locator resolved to 0 elements
+E              - unexpected value "0"
+
+skeleton/verify/test_ui_list.py:36: AssertionError</failure></testcase><testcase classname="skeleton.verify.test_ui_list" name="test_c_1_4_pasta_card_links_and_reads_its_title_minutes_and_serves" time="20.061"><failure message="AssertionError: Locator expected to have count '1'&#10;Actual value: 0 &#10;Call log:&#10;  - Expect &quot;to_have_count&quot; with timeout 20000ms&#10;  - waiting for locator(&quot;a[data-testid=\&quot;recipe-card\&quot;][href=\&quot;/recipes/lemon-garlic-pasta\&quot;]&quot;)&#10;    44 × locator resolved to 0 elements&#10;       - unexpected value &quot;0&quot;">page = &lt;Page url='http://127.0.0.1:53183/'&gt;
+
+    def test_c_1_4_pasta_card_links_and_reads_its_title_minutes_and_serves(page):
+        """c-1-4: the Lemon Garlic Pasta title sits inside a recipe-card linking to
+        /recipes/lemon-garlic-pasta whose card-minutes reads 20 min and whose
+        card-serves reads Serves 4."""
+        open_list(page)
+        card = page.locator('a[data-testid="recipe-card"][href="/recipes/lemon-garlic-pasta"]')
+&gt;       expect(card).to_have_count(1, timeout=LOAD_TIMEOUT)
+E       AssertionError: Locator expected to have count '1'
+E       Actual value: 0 
+E       Call log:
+E         - Expect "to_have_count" with timeout 20000ms
+E         - waiting for locator("a[data-testid=\"recipe-card\"][href=\"/recipes/lemon-garlic-pasta\"]")
+E           44 × locator resolved to 0 elements
+E              - unexpected value "0"
+
+skeleton/verify/test_ui_list.py:45: AssertionError</failure></testcase><testcase classname="skeleton.verify.test_ui_list" name="test_c_1_5_every_card_carries_one_card_tag_per_tag" time="20.068"><failure message="AssertionError: Locator expected to have count '8'&#10;Actual value: 0 &#10;Call log:&#10;  - Expect &quot;to_have_count&quot; with timeout 20000ms&#10;  - waiting for get_by_test_id(&quot;recipe-card&quot;)&#10;    44 × locator resolved to 0 elements&#10;       - unexpected value &quot;0&quot;">page = &lt;Page url='http://127.0.0.1:53183/'&gt;
+
+    def test_c_1_5_every_card_carries_one_card_tag_per_tag(page):
+        """c-1-5: one card-tag element per tag of that recipe on every card, 2 on
+        the Lemon Garlic Pasta card reading quick and vegetarian."""
+        open_list(page)
+&gt;       expect(cards(page)).to_have_count(8, timeout=LOAD_TIMEOUT)
+E       AssertionError: Locator expected to have count '8'
+E       Actual value: 0 
+E       Call log:
+E         - Expect "to_have_count" with timeout 20000ms
+E         - waiting for get_by_test_id("recipe-card")
+E           44 × locator resolved to 0 elements
+E              - unexpected value "0"
+
+skeleton/verify/test_ui_list.py:55: AssertionError</failure></testcase><testcase classname="skeleton.verify.test_ui_list" name="test_c_2_4_typing_in_the_search_box_filters_the_list_and_the_url" time="20.040"><failure message="AssertionError: Locator expected to have count '8'&#10;Actual value: 0 &#10;Call log:&#10;  - Expect &quot;to_have_count&quot; with timeout 20000ms&#10;  - waiting for get_by_test_id(&quot;recipe-card&quot;)&#10;    44 × locator resolved to 0 elements&#10;       - unexpected value &quot;0&quot;">page = &lt;Page url='http://127.0.0.1:53183/'&gt;
+
+    def test_c_2_4_typing_in_the_search_box_filters_the_list_and_the_url(page):
+        """c-2-4: 2 cards and the URL /?q=garlic after garlic is typed, then the
+        message No recipes match and 0 cards after the box is changed to zzz."""
+&gt;       loaded_list(page)
+
+skeleton/verify/test_ui_list.py:75: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+page = &lt;Page url='http://127.0.0.1:53183/'&gt;
+
+    def loaded_list(page) -&gt; None:
+        """Open / and wait for the 8 unfiltered cards.
+    
+        Synchronisation, not an extra assertion: the search box and the chips are
+        inert until React has hydrated, and a card on screen is the proof that the
+        effect which fetches the list has already run in the browser.
+        """
+        open_list(page)
+&gt;       expect(cards(page)).to_have_count(8, timeout=LOAD_TIMEOUT)
+E       AssertionError: Locator expected to have count '8'
+E       Actual value: 0 
+E       Call log:
+E         - Expect "to_have_count" with timeout 20000ms
+E         - waiting for get_by_test_id("recipe-card")
+E           44 × locator resolved to 0 elements
+E              - unexpected value "0"
+
+skeleton/verify/test_ui_list.py:29: AssertionError</failure></testcase><testcase classname="skeleton.verify.test_ui_list" name="test_c_2_5_the_tag_chip_toggles_the_list_and_the_url" time="20.051"><failure message="AssertionError: Locator expected to have count '8'&#10;Actual value: 0 &#10;Call log:&#10;  - Expect &quot;to_have_count&quot; with timeout 20000ms&#10;  - waiting for get_by_test_id(&quot;recipe-card&quot;)&#10;    44 × locator resolved to 0 elements&#10;       - unexpected value &quot;0&quot;">page = &lt;Page url='http://127.0.0.1:53183/'&gt;
+
+    def test_c_2_5_the_tag_chip_toggles_the_list_and_the_url(page):
+        """c-2-5: 2 cards and the URL /?tag=baking after the baking filter-tag chip
+        is clicked, then 8 cards and the URL / after the same chip is clicked again."""
+&gt;       loaded_list(page)
+
+skeleton/verify/test_ui_list.py:89: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+page = &lt;Page url='http://127.0.0.1:53183/'&gt;
+
+    def loaded_list(page) -&gt; None:
+        """Open / and wait for the 8 unfiltered cards.
+    
+        Synchronisation, not an extra assertion: the search box and the chips are
+        inert until React has hydrated, and a card on screen is the proof that the
+        effect which fetches the list has already run in the browser.
+        """
+        open_list(page)
+&gt;       expect(cards(page)).to_have_count(8, timeout=LOAD_TIMEOUT)
+E       AssertionError: Locator expected to have count '8'
+E       Actual value: 0 
+E       Call log:
+E         - Expect "to_have_count" with timeout 20000ms
+E         - waiting for get_by_test_id("recipe-card")
+E           44 × locator resolved to 0 elements
+E              - unexpected value "0"
+
+skeleton/verify/test_ui_list.py:29: AssertionError</failure></testcase><testcase classname="skeleton.verify.test_ui_list" name="test_c_2_6_the_chip_keeps_the_search_the_box_already_put_in_the_url" time="20.073"><failure message="AssertionError: Locator expected to have count '8'&#10;Actual value: 0 &#10;Call log:&#10;  - Expect &quot;to_have_count&quot; with timeout 20000ms&#10;  - waiting for get_by_test_id(&quot;recipe-card&quot;)&#10;    44 × locator resolved to 0 elements&#10;       - unexpected value &quot;0&quot;">page = &lt;Page url='http://127.0.0.1:53183/'&gt;
+
+    def test_c_2_6_the_chip_keeps_the_search_the_box_already_put_in_the_url(page):
+        """c-2-6: 1 card reading Garlic Flatbread and a URL holding q=garlic and
+        tag=baking, after garlic is typed, the URL reaches /?q=garlic, and the
+        baking filter-tag chip is then clicked."""
+&gt;       loaded_list(page)
+
+skeleton/verify/test_ui_list.py:107: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+page = &lt;Page url='http://127.0.0.1:53183/'&gt;
+
+    def loaded_list(page) -&gt; None:
+        """Open / and wait for the 8 unfiltered cards.
+    
+        Synchronisation, not an extra assertion: the search box and the chips are
+        inert until React has hydrated, and a card on screen is the proof that the
+        effect which fetches the list has already run in the browser.
+        """
+        open_list(page)
+&gt;       expect(cards(page)).to_have_count(8, timeout=LOAD_TIMEOUT)
+E       AssertionError: Locator expected to have count '8'
+E       Actual value: 0 
+E       Call log:
+E         - Expect "to_have_count" with timeout 20000ms
+E         - waiting for get_by_test_id("recipe-card")
+E           44 × locator resolved to 0 elements
+E              - unexpected value "0"
+
+skeleton/verify/test_ui_list.py:29: AssertionError</failure></testcase><testcase classname="skeleton.verify.test_ui_recipe" name="test_c_3_3_pasta_renders_one_ingredient_row_per_ingredient" time="20.098"><failure message="AssertionError: Locator expected to have count '7'&#10;Actual value: 0 &#10;Call log:&#10;  - Expect &quot;to_have_count&quot; with timeout 20000ms&#10;  - waiting for get_by_test_id(&quot;ingredient-row&quot;)&#10;    44 × locator resolved to 0 elements&#10;       - unexpected value &quot;0&quot;">page = &lt;Page url='http://127.0.0.1:53183/recipes/lemon-garlic-pasta'&gt;
+
+    def test_c_3_3_pasta_renders_one_ingredient_row_per_ingredient(page):
+        """c-3-3: 7 ingredient-row elements at /recipes/lemon-garlic-pasta, the
+        olive oil row reading 2 tbsp olive oil and the lemon row reading 1 lemon."""
+        open_recipe(page, "lemon-garlic-pasta")
+&gt;       rows = row_texts(page, 7)
+               ^^^^^^^^^^^^^^^^^^
+
+skeleton/verify/test_ui_recipe.py:23: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+page = &lt;Page url='http://127.0.0.1:53183/recipes/lemon-garlic-pasta'&gt;
+expected = 7
+
+    def row_texts(page: Page, expected: int) -&gt; list[str]:
+        """Wait for exactly `expected` ingredient-row elements, then read them."""
+        rows = ingredient_rows(page)
+&gt;       expect(rows).to_have_count(expected, timeout=LOAD_TIMEOUT)
+E       AssertionError: Locator expected to have count '7'
+E       Actual value: 0 
+E       Call log:
+E         - Expect "to_have_count" with timeout 20000ms
+E         - waiting for get_by_test_id("ingredient-row")
+E           44 × locator resolved to 0 elements
+E              - unexpected value "0"
+
+skeleton/verify/helpers.py:183: AssertionError</failure></testcase><testcase classname="skeleton.verify.test_ui_recipe" name="test_c_3_4_pasta_renders_four_numbered_steps_in_stored_order" time="20.050"><failure message="AssertionError: Locator expected to have count '4'&#10;Actual value: 0 &#10;Call log:&#10;  - Expect &quot;to_have_count&quot; with timeout 20000ms&#10;  - waiting for get_by_test_id(&quot;step&quot;)&#10;    44 × locator resolved to 0 elements&#10;       - unexpected value &quot;0&quot;">page = &lt;Page url='http://127.0.0.1:53183/recipes/lemon-garlic-pasta'&gt;
+
+    def test_c_3_4_pasta_renders_four_numbered_steps_in_stored_order(page):
+        """c-3-4: 4 step elements in stored order at /recipes/lemon-garlic-pasta,
+        the text of the first beginning 1. Boil the spaghetti."""
+        open_recipe(page, "lemon-garlic-pasta")
+        steps = page.get_by_test_id("step")
+&gt;       expect(steps).to_have_count(4, timeout=LOAD_TIMEOUT)
+E       AssertionError: Locator expected to have count '4'
+E       Actual value: 0 
+E       Call log:
+E         - Expect "to_have_count" with timeout 20000ms
+E         - waiting for get_by_test_id("step")
+E           44 × locator resolved to 0 elements
+E              - unexpected value "0"
+
+skeleton/verify/test_ui_recipe.py:35: AssertionError</failure></testcase><testcase classname="skeleton.verify.test_ui_recipe" name="test_c_3_5_an_unknown_id_shows_the_not_found_message" time="20.060"><failure message="AssertionError: Locator expected to be visible&#10;Actual value: None&#10;Error: element(s) not found &#10;Call log:&#10;  - Expect &quot;to_be_visible&quot; with timeout 20000ms&#10;  - waiting for get_by_text(&quot;Recipe not found&quot;)&#10;&#10;Aria snapshot:&#10;- main:&#10;  - paragraph: Loading recipe&#10;- alert">page = &lt;Page url='http://127.0.0.1:53183/recipes/not-a-recipe'&gt;
+
+    def test_c_3_5_an_unknown_id_shows_the_not_found_message(page):
+        """c-3-5: sc-recipe displays the message Recipe not found at the route
+        /recipes/not-a-recipe."""
+        open_recipe(page, "not-a-recipe")
+&gt;       expect(page.get_by_text("Recipe not found")).to_be_visible(timeout=LOAD_TIMEOUT)
+E       AssertionError: Locator expected to be visible
+E       Actual value: None
+E       Error: element(s) not found 
+E       Call log:
+E         - Expect "to_be_visible" with timeout 20000ms
+E         - waiting for get_by_text("Recipe not found")
+E       
+E       Aria snapshot:
+E       - main:
+E         - paragraph: Loading recipe
+E       - alert
+
+skeleton/verify/test_ui_recipe.py:47: AssertionError</failure></testcase><testcase classname="skeleton.verify.test_ui_servings" name="test_c_4_1_two_plus_clicks_take_the_count_from_four_to_six" time="20.043"><failure message="AssertionError: Locator expected to have text '4'&#10;Actual value: None&#10;Error: element(s) not found &#10;Call log:&#10;  - Expect &quot;to_have_text&quot; with timeout 20000ms&#10;  - waiting for get_by_test_id(&quot;servings-count&quot;)&#10;&#10;Aria snapshot:&#10;- main:&#10;  - paragraph: Loading recipe&#10;- alert">page = &lt;Page url='http://127.0.0.1:53183/recipes/lemon-garlic-pasta'&gt;
+
+    def test_c_4_1_two_plus_clicks_take_the_count_from_four_to_six(page):
+        """c-4-1: servings-count reads 6 after the plus control is clicked 2 times
+        at /recipes/lemon-garlic-pasta, which is stored as serves 4."""
+&gt;       open_pasta(page)
+
+skeleton/verify/test_ui_servings.py:47: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+page = &lt;Page url='http://127.0.0.1:53183/recipes/lemon-garlic-pasta'&gt;
+
+    def open_pasta(page) -&gt; None:
+        """Open /recipes/lemon-garlic-pasta and wait for its loaded state.
+    
+        Synchronisation: the stepper is inert until the recipe has arrived and the
+        view has mounted, and the count starts on the stored serves of 4.
+        """
+        open_recipe(page, "lemon-garlic-pasta")
+&gt;       expect(servings_count(page)).to_have_text("4", timeout=LOAD_TIMEOUT)
+E       AssertionError: Locator expected to have text '4'
+E       Actual value: None
+E       Error: element(s) not found 
+E       Call log:
+E         - Expect "to_have_text" with timeout 20000ms
+E         - waiting for get_by_test_id("servings-count")
+E       
+E       Aria snapshot:
+E       - main:
+E         - paragraph: Loading recipe
+E       - alert
+
+skeleton/verify/test_ui_servings.py:30: AssertionError</failure></testcase><testcase classname="skeleton.verify.test_ui_servings" name="test_c_4_2_whole_quantity_scales_from_four_to_six_servings" time="20.093"><failure message="AssertionError: Locator expected to have text '4'&#10;Actual value: None&#10;Error: element(s) not found &#10;Call log:&#10;  - Expect &quot;to_have_text&quot; with timeout 20000ms&#10;  - waiting for get_by_test_id(&quot;servings-count&quot;)&#10;&#10;Aria snapshot:&#10;- main:&#10;  - paragraph: Loading recipe&#10;- alert">page = &lt;Page url='http://127.0.0.1:53183/recipes/lemon-garlic-pasta'&gt;
+
+    def test_c_4_2_whole_quantity_scales_from_four_to_six_servings(page):
+        """c-4-2: an ingredient-row reads 3 tbsp olive oil after 2 plus clicks take
+        the count from the stored 4 to 6, where the stored quantity is 2 tbsp."""
+&gt;       open_pasta(page)
+
+skeleton/verify/test_ui_servings.py:55: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+page = &lt;Page url='http://127.0.0.1:53183/recipes/lemon-garlic-pasta'&gt;
+
+    def open_pasta(page) -&gt; None:
+        """Open /recipes/lemon-garlic-pasta and wait for its loaded state.
+    
+        Synchronisation: the stepper is inert until the recipe has arrived and the
+        view has mounted, and the count starts on the stored serves of 4.
+        """
+        open_recipe(page, "lemon-garlic-pasta")
+&gt;       expect(servings_count(page)).to_have_text("4", timeout=LOAD_TIMEOUT)
+E       AssertionError: Locator expected to have text '4'
+E       Actual value: None
+E       Error: element(s) not found 
+E       Call log:
+E         - Expect "to_have_text" with timeout 20000ms
+E         - waiting for get_by_test_id("servings-count")
+E       
+E       Aria snapshot:
+E       - main:
+E         - paragraph: Loading recipe
+E       - alert
+
+skeleton/verify/test_ui_servings.py:30: AssertionError</failure></testcase><testcase classname="skeleton.verify.test_ui_servings" name="test_c_4_3_fraction_scales_and_reduces_from_four_to_six_servings" time="20.051"><failure message="AssertionError: Locator expected to have text '4'&#10;Actual value: None&#10;Error: element(s) not found &#10;Call log:&#10;  - Expect &quot;to_have_text&quot; with timeout 20000ms&#10;  - waiting for get_by_test_id(&quot;servings-count&quot;)&#10;&#10;Aria snapshot:&#10;- main:&#10;  - paragraph: Loading recipe&#10;- alert">page = &lt;Page url='http://127.0.0.1:53183/recipes/lemon-garlic-pasta'&gt;
+
+    def test_c_4_3_fraction_scales_and_reduces_from_four_to_six_servings(page):
+        """c-4-3: an ingredient-row reads 1/2 tsp chilli flakes after 2 plus clicks
+        take the count from the stored 4 to 6, where the stored quantity is 1/3 tsp."""
+&gt;       open_pasta(page)
+
+skeleton/verify/test_ui_servings.py:64: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+page = &lt;Page url='http://127.0.0.1:53183/recipes/lemon-garlic-pasta'&gt;
+
+    def open_pasta(page) -&gt; None:
+        """Open /recipes/lemon-garlic-pasta and wait for its loaded state.
+    
+        Synchronisation: the stepper is inert until the recipe has arrived and the
+        view has mounted, and the count starts on the stored serves of 4.
+        """
+        open_recipe(page, "lemon-garlic-pasta")
+&gt;       expect(servings_count(page)).to_have_text("4", timeout=LOAD_TIMEOUT)
+E       AssertionError: Locator expected to have text '4'
+E       Actual value: None
+E       Error: element(s) not found 
+E       Call log:
+E         - Expect "to_have_text" with timeout 20000ms
+E         - waiting for get_by_test_id("servings-count")
+E       
+E       Aria snapshot:
+E       - main:
+E         - paragraph: Loading recipe
+E       - alert
+
+skeleton/verify/test_ui_servings.py:30: AssertionError</failure></testcase><testcase classname="skeleton.verify.test_ui_servings" name="test_c_4_4_up_then_down_lands_back_on_the_stored_quantity" time="20.078"><failure message="AssertionError: Locator expected to have text '4'&#10;Actual value: None&#10;Error: element(s) not found &#10;Call log:&#10;  - Expect &quot;to_have_text&quot; with timeout 20000ms&#10;  - waiting for get_by_test_id(&quot;servings-count&quot;)&#10;&#10;Aria snapshot:&#10;- main:&#10;  - paragraph: Loading recipe&#10;- alert">page = &lt;Page url='http://127.0.0.1:53183/recipes/lemon-garlic-pasta'&gt;
+
+    def test_c_4_4_up_then_down_lands_back_on_the_stored_quantity(page):
+        """c-4-4: an ingredient-row reads 1/2 tsp chilli flakes after 2 plus clicks,
+        then 1/3 tsp chilli flakes again after 2 minus clicks."""
+&gt;       open_pasta(page)
+
+skeleton/verify/test_ui_servings.py:73: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+page = &lt;Page url='http://127.0.0.1:53183/recipes/lemon-garlic-pasta'&gt;
+
+    def open_pasta(page) -&gt; None:
+        """Open /recipes/lemon-garlic-pasta and wait for its loaded state.
+    
+        Synchronisation: the stepper is inert until the recipe has arrived and the
+        view has mounted, and the count starts on the stored serves of 4.
+        """
+        open_recipe(page, "lemon-garlic-pasta")
+&gt;       expect(servings_count(page)).to_have_text("4", timeout=LOAD_TIMEOUT)
+E       AssertionError: Locator expected to have text '4'
+E       Actual value: None
+E       Error: element(s) not found 
+E       Call log:
+E         - Expect "to_have_text" with timeout 20000ms
+E         - waiting for get_by_test_id("servings-count")
+E       
+E       Aria snapshot:
+E       - main:
+E         - paragraph: Loading recipe
+E       - alert
+
+skeleton/verify/test_ui_servings.py:30: AssertionError</failure></testcase><testcase classname="skeleton.verify.test_ui_servings" name="test_c_4_5_lower_clamp_holds_the_count_at_one" time="20.060"><failure message="AssertionError: Locator expected to have text '4'&#10;Actual value: None&#10;Error: element(s) not found &#10;Call log:&#10;  - Expect &quot;to_have_text&quot; with timeout 20000ms&#10;  - waiting for get_by_test_id(&quot;servings-count&quot;)&#10;&#10;Aria snapshot:&#10;- main:&#10;  - paragraph: Loading recipe&#10;- alert">page = &lt;Page url='http://127.0.0.1:53183/recipes/lemon-garlic-pasta'&gt;
+
+    def test_c_4_5_lower_clamp_holds_the_count_at_one(page):
+        """c-4-5: servings-count reads 1 after the minus control is clicked 4 times
+        at /recipes/lemon-garlic-pasta, which is stored as serves 4."""
+&gt;       open_pasta(page)
+
+skeleton/verify/test_ui_servings.py:83: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+page = &lt;Page url='http://127.0.0.1:53183/recipes/lemon-garlic-pasta'&gt;
+
+    def open_pasta(page) -&gt; None:
+        """Open /recipes/lemon-garlic-pasta and wait for its loaded state.
+    
+        Synchronisation: the stepper is inert until the recipe has arrived and the
+        view has mounted, and the count starts on the stored serves of 4.
+        """
+        open_recipe(page, "lemon-garlic-pasta")
+&gt;       expect(servings_count(page)).to_have_text("4", timeout=LOAD_TIMEOUT)
+E       AssertionError: Locator expected to have text '4'
+E       Actual value: None
+E       Error: element(s) not found 
+E       Call log:
+E         - Expect "to_have_text" with timeout 20000ms
+E         - waiting for get_by_test_id("servings-count")
+E       
+E       Aria snapshot:
+E       - main:
+E         - paragraph: Loading recipe
+E       - alert
+
+skeleton/verify/test_ui_servings.py:30: AssertionError</failure></testcase><testcase classname="skeleton.verify.test_ui_servings" name="test_c_4_6_upper_clamp_holds_the_count_at_twenty_four" time="20.077"><failure message="AssertionError: Locator expected to have text '4'&#10;Actual value: None&#10;Error: element(s) not found &#10;Call log:&#10;  - Expect &quot;to_have_text&quot; with timeout 20000ms&#10;  - waiting for get_by_test_id(&quot;servings-count&quot;)&#10;&#10;Aria snapshot:&#10;- main:&#10;  - paragraph: Loading recipe&#10;- alert">page = &lt;Page url='http://127.0.0.1:53183/recipes/lemon-garlic-pasta'&gt;
+
+    def test_c_4_6_upper_clamp_holds_the_count_at_twenty_four(page):
+        """c-4-6: servings-count reads 24 after the plus control is clicked 21 times
+        at /recipes/lemon-garlic-pasta, which is stored as serves 4."""
+&gt;       open_pasta(page)
+
+skeleton/verify/test_ui_servings.py:92: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+page = &lt;Page url='http://127.0.0.1:53183/recipes/lemon-garlic-pasta'&gt;
+
+    def open_pasta(page) -&gt; None:
+        """Open /recipes/lemon-garlic-pasta and wait for its loaded state.
+    
+        Synchronisation: the stepper is inert until the recipe has arrived and the
+        view has mounted, and the count starts on the stored serves of 4.
+        """
+        open_recipe(page, "lemon-garlic-pasta")
+&gt;       expect(servings_count(page)).to_have_text("4", timeout=LOAD_TIMEOUT)
+E       AssertionError: Locator expected to have text '4'
+E       Actual value: None
+E       Error: element(s) not found 
+E       Call log:
+E         - Expect "to_have_text" with timeout 20000ms
+E         - waiting for get_by_test_id("servings-count")
+E       
+E       Aria snapshot:
+E       - main:
+E         - paragraph: Loading recipe
+E       - alert
+
+skeleton/verify/test_ui_servings.py:30: AssertionError</failure></testcase></testsuite></testsuites>
