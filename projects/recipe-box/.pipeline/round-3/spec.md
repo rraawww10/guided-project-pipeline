@@ -148,10 +148,7 @@ All three are GET. The store is read on every request; nothing writes to disk.
 | `ep-recipe-get` | GET | `/api/recipes/[id]` | none | `Recipe` | 200, 404 | session 3 |
 
 `GET /api/recipes` returns whole `Recipe` objects, ingredients and steps included.
-There is no separate summary type; the list screen reads the fields it shows. Its
-handler body ships written in session 1 - `cut-api-recipes-filter` in session 2 is the
-only cut in that file - so it answers 200 from the first run, with `[]` while
-`cut-store-read-all` is open.
+There is no separate summary type; the list screen reads the fields it shows.
 
 `q` matches a substring of the title, ignoring letter case. `tag` matches one tag
 exactly. A parameter that is missing or empty narrows nothing, so bare
@@ -166,12 +163,9 @@ screen and stays clickable no matter which recipes the list is showing.
 ## Screens
 
 Both screens are read by tests through their markup, so every element a criterion
-counts carries a `data-testid`. These eight are the whole list. One string a criterion
-reads has no hook of its own: a card's title is plain text inside that card's
-`recipe-card` element, and `c-1-4` and `c-2-6` read it there rather than through a
-testid, so the table below promises no hook for it.
-No criterion depends on a CSS class name: CSS modules hash class names at build time,
-and a hashed name is not something a test can select on.
+counts or reads carries a `data-testid`. These eight are the whole list. No criterion
+depends on a CSS class name: CSS modules hash class names at build time, and a hashed
+name is not something a test can select on.
 
 | testid | screen | what one element holds |
 |---|---|---|
@@ -209,28 +203,19 @@ follows the card's link like the rest of the card. `c-2-5` and `c-2-6` click the
 filter bar's chip.
 
 The tag bar's own `GET /api/tags` call ships written in `app/RecipeList.tsx`, outside
-every cut. It is the only thing that sets the `tags` state, and it sets it only when
-the reply is a 200. The filter bar renders one `filter-tag` button per entry in `tags`
-and the tag names are hardcoded nowhere, so the bar is empty until session 2 fills
-`cut-api-tags-list`, and the cards session 1 is graded on are unaffected by it. The
-search box renders from session 1 too, but nothing is wired to it until session 2 fills
-`cut-list-search-url`: a session-1 student can type in it and the list will not move,
-and nothing session 1 is graded on depends on it.
+every cut, and renders no chips when the reply is not a 200. The bar is therefore
+empty until session 2 fills `cut-api-tags-list`, and the cards session 1 is graded on
+are unaffected by it. The search box renders from session 1 too, but nothing is wired
+to it until session 2 fills `cut-list-search-url`: a session-1 student can type in it
+and the list will not move, and nothing session 1 is graded on depends on it.
 
-**What holds the screen's state.** `app/RecipeList.tsx` holds three pieces of state,
-all declared outside every cut:
+**What holds the screen's state.** `app/RecipeList.tsx` holds exactly two pieces of
+state, both declared outside every cut:
 
 ```ts
 const [recipes, setRecipes] = useState<Recipe[]>([])
 const [status,  setStatus]  = useState<'loading' | 'loaded'>('loading')
-const [tags,    setTags]    = useState<string[]>([])
 ```
-
-`tags` starts at `[]`, and the written `GET /api/tags` call above is the only thing
-that sets it. With `cut-api-tags-list` open that endpoint answers 501, `tags` stays
-`[]` and the filter bar renders no buttons, which is what keeps `cut-api-tags-list` a
-real grading cut for `c-2-5` and `c-2-6` rather than a block whose absence a hardcoded
-chip list would hide.
 
 `status` starts at `'loading'` and `cut-list-fetch` is the only code in the file that
 moves it. The three screen states are what the reader sees, not three values of one
@@ -243,22 +228,13 @@ grid, which is what a session-1 student sees on the first run.
 
 **Who owns the fetch.** `const qs = searchParams.toString()` ships written, the
 `useEffect` call and its dependency array `[qs]` ship written, and `cut-list-fetch` is
-the body of that effect. Because both controls write to the URL on every keystroke with
-no debounce, several replies can be in flight at once and the last to arrive must not
-win. The written wrapper therefore carries the stale-reply guard: `let ignore = false`
-ships written above the marker, and below the marker the effect returns a cleanup `() =>
-{ ignore = true }`, so a reply for a superseded query string is discarded. The student's
-block writes to state only while `ignore` is still clear. The guard is never the
-student's to add - the cleanup `return` sits outside the markers, so the skeleton still
-compiles with the block replaced by its hint comment. The refetch-on-URL-change
-behaviour that session 2 needs is therefore already in the file when session 2 starts;
-the student's block is the call itself. The effect moves `status` to `'loaded'` only
-when the reply is a 200, so no non-200 reply can put a non-array into `recipes`. `GET
-/api/recipes` ships written and answers 200 from session 1 onwards, so a session-1
-student who has filled `cut-list-fetch` with `cut-store-read-all` still open sees `No
-recipes match` rather than `Loading recipes`. `status` never returns to `'loading'` once
-a reply has arrived, so a refetch leaves the cards that are already on screen in place
-rather than flashing the loading message.
+the body of that effect. The refetch-on-URL-change behaviour that session 2 needs is
+therefore already in the file when session 2 starts; the student's block is the call
+itself. The effect moves `status` to `'loaded'` only when the reply is a 200, so while
+`cut-api-recipes-list` is still open the endpoint's 501 leaves the screen on
+`Loading recipes` instead of putting a non-array into `recipes`. `status` never
+returns to `'loading'` once a reply has arrived, so a refetch leaves the cards that
+are already on screen in place rather than flashing the loading message.
 
 **Who writes the URL.** The search box and the chips write to the URL; the URL drives
 the fetch. Nothing else holds the filter. Both write on every change - no debounce, no
@@ -373,53 +349,31 @@ second half of `c-2-4`, and `not-found` by `c-3-5`.
 Session 1 and 2 finish the list screen, session 3 and 4 finish the recipe screen. One
 milestone each, and each session ends with something a student can run.
 
-**Why session 1 carries three cut points and sessions 2 and 3 carry four.** Session 1
-introduces every file the project stands on - `lib/types.ts`, `data/recipes.json` with
-its 8 recipes, `lib/store.ts`, `lib/fractions.ts`, `app/page.tsx` and
-`app/RecipeList.tsx` with its state, its `qs`, its `useEffect`, its `replaceQuery`
-helper and its loading and no-match branches - and teaches five new concepts on top of
-that reading. So `app/api/recipes/route.ts` ships written in session 1 and the session
-holds three cuts: `cut-store-read-all`, `cut-list-fetch` and `cut-list-cards`. The
-endpoint is still graded, because `c-1-1` and `c-1-2` fail on the `[]` that
-`readAllRecipes` falls back to while `cut-store-read-all` is open. Do not add a fourth
-cut to session 1 in a later revision: the reason it holds three is setup weight, and no
-linter measures that. Session 4 holds three cuts as well, for the opposite reason: it
-introduces no file, no endpoint and no screen, and its three blocks are the densest
-arithmetic in the project, carrying six criteria between them.
-
 Four rules the final code follows, so the generated skeleton behaves:
 
 1. A cut point is a block inside a function, and the code around it compiles while the
    block is a hint comment. No cut removes a declaration that code outside it uses:
    where a block produces a value the code below it reads, the variable is declared
-   above the opening marker and the block assigns to it. `let cards: ReactNode[] = []`
-   is declared above `cut-list-cards`, the block assigns its card elements to `cards`,
-   and the component's `return` renders `cards`.
-2. A later session's cut must leave the earlier sessions' criteria passing.
-   `app/api/recipes/route.ts` carries exactly one cut, `cut-api-recipes-filter`, and
-   everything around it ships written: the handler's `const all = readAllRecipes()` and
-   `let shown = all` are both written above that block, and the handler returns
-   `shown`. With the block open, `shown` is still `all`, so the endpoint answers 200
-   with every recipe the store gave it and session 1's criteria pass unchanged. Each
-   ingredient row is likewise a copy of the stored ingredient before
-   `cut-recipe-scale-quantity` replaces the copy's quantity, so with that block open
-   session 3 shows the stored quantities.
+   above the opening marker and the block assigns to it. `cut-list-cards` assigns its
+   card elements to a `ReactNode[]` declared above the marker, and the component's
+   `return` renders that variable.
+2. A later session's cut must leave the earlier sessions' criteria passing. The route
+   handler holds `let shown = all` before `cut-api-recipes-filter`, and each ingredient
+   row is a copy of the stored ingredient before `cut-recipe-scale-quantity` replaces
+   the copy's quantity. With those blocks still open, session 1 returns all 8 recipes
+   and session 3 shows the stored quantities.
 3. Each cut id appears exactly once in the final code, between its markers.
 4. A cut that would otherwise remove its function's only `return` keeps a typed
    fallback return outside the markers, as the last statement of the function:
    `return []` in `readAllRecipes`, `return null` in `findRecipe`, `return stored` in
    `scaleQuantity`, and
-   `return NextResponse.json({ error: 'not implemented' }, { status: 501 })` in the two
-   route handlers whose whole reply is inside a cut, `/api/tags` and
-   `/api/recipes/[id]`. `/api/recipes` needs no such fallback: its
-   `return NextResponse.json(shown)` ships written, outside `cut-api-recipes-filter`,
-   so that handler always answers 200 - with `[]` while `cut-store-read-all` is open,
-   which `c-1-1` and `c-1-2` both reject. The skeleton then typechecks, and only the
-   criteria of the session that owns the open block fail. Once a block is filled the
-   fallback below it is unreachable and stays in the file, because the cutter replaces
-   only what lies between the markers. 501 belongs to the skeleton alone: in the
-   finished project every block is written and the endpoints answer only the statuses
-   in the table above.
+   `return NextResponse.json({ error: 'not implemented' }, { status: 501 })` in each of
+   the three route handlers. The skeleton then typechecks, and only the criteria of the
+   session that owns the open block fail. Once a block is filled the fallback below it
+   is unreachable and stays in the file, because the cutter replaces only what lies
+   between the markers. 501 belongs to the skeleton alone: in the finished project
+   every block is written and the endpoints answer only the statuses in the table
+   above.
 
 **How a criterion names its cuts.** One convention, applied to all 22 criteria: a
 criterion lists every cut that lies on the code path it exercises, cuts from earlier
@@ -427,19 +381,11 @@ sessions included. A screen criterion therefore names the store and route-handle
 that feed it as well as its own screen cuts. Fill all of them and the criterion is
 green; leave any of them open and it is not proven.
 
-**Two criteria that a subset already satisfies.** These two are the whole list, and
-they are session 3's. Session 1 was checked for the same defect: `c-1-2` is worded to
-count 8 objects and read one named entry, so `readAllRecipes`'s `return []` cannot
-satisfy it, and `c-1-4` reads a card's link, so `cut-list-cards` cannot be half-filled
-into a green result. Session 4 was checked too: `cut-recipe-scale-quantity` calls
-`scaleQuantity`, so `c-4-2`, `c-4-3` and `c-4-4` all still need `cut-fraction-scale`
-filled.
-
-`c-3-2` and `c-3-5` both assert the 404 path, and `findRecipe`'s rule-4 fallback is
-`return null` - the same answer a real miss gives. Fill `cut-api-recipe-get` and
-`cut-recipe-fetch` and both go green with `cut-store-find-one` still open, because a
-store that finds nothing and a store that correctly finds nothing are
-indistinguishable from outside. `Recipe | null` admits no
+**Two criteria that a subset already satisfies.** `c-3-2` and `c-3-5` both assert the
+404 path, and `findRecipe`'s rule-4 fallback is `return null` - the same answer a real
+miss gives. Fill `cut-api-recipe-get` and `cut-recipe-fetch` and both go green with
+`cut-store-find-one` still open, because a store that finds nothing and a store that
+correctly finds nothing are indistinguishable from outside. `Recipe | null` admits no
 other typed fallback, so this is recorded rather than fixed: session 3 is still graded
 correctly as a whole, because `c-3-1` and `c-3-3` both need the real lookup. A per-cut
 checkpoint must pair `c-3-2` with `c-3-1` and never present it as proof on its own.
@@ -449,49 +395,42 @@ checkpoint must pair `c-3-2` with `c-3-1` and never present it as proof on its o
 **Goal.** Serve every recipe from the JSON store through a route handler and render
 one card per recipe on the list screen.
 
-**Teaches.** Route handlers in the App Router, read in the `GET /api/recipes` handler
-that ships written; reading a JSON file on the server with node fs; typing a response
-with a shared TypeScript type; fetching into React state with useEffect; rendering a
-list with map and keys.
+**Teaches.** Route handlers in the App Router; reading a JSON file on the server with
+node fs; typing a response with a shared TypeScript type; fetching into React state
+with useEffect; rendering a list with map and keys.
 
 **Builds.** `ep-recipes-list`, `sc-list`.
 
 **Acceptance criteria.**
 
 - `c-1-1` GET /api/recipes returns 200 with a JSON array of the 8 seed recipes —
-  cuts `cut-store-read-all`
-- `c-1-2` GET /api/recipes returns 8 objects, and its lemon-garlic-pasta entry has id
-  lemon-garlic-pasta, title Lemon Garlic Pasta, a tags array of quick and vegetarian,
-  minutes 20 and serves 4 — cuts `cut-store-read-all`
+  cuts `cut-store-read-all`, `cut-api-recipes-list`
+- `c-1-2` GET /api/recipes returns each recipe with an id, a title, a tags array, a
+  minutes number and a serves number — cuts `cut-store-read-all`,
+  `cut-api-recipes-list`
 - `c-1-3` sc-list renders one recipe-card element per recipe, 8 of them for the 8 seed
-  recipes — cuts `cut-store-read-all`, `cut-list-fetch`, `cut-list-cards`
-- `c-1-4` sc-list displays the title Lemon Garlic Pasta inside a recipe-card that links
-  to /recipes/lemon-garlic-pasta and whose card-minutes element reads 20 min and whose
-  card-serves element reads Serves 4 — cuts `cut-store-read-all`, `cut-list-fetch`,
+  recipes — cuts `cut-store-read-all`, `cut-api-recipes-list`, `cut-list-fetch`,
   `cut-list-cards`
+- `c-1-4` sc-list displays the title Lemon Garlic Pasta on a recipe-card whose
+  card-minutes element reads 20 min and whose card-serves element reads Serves 4 —
+  cuts `cut-store-read-all`, `cut-api-recipes-list`, `cut-list-fetch`, `cut-list-cards`
 - `c-1-5` sc-list renders one card-tag element per tag of that recipe on every card,
   2 on the Lemon Garlic Pasta card reading quick and vegetarian — cuts
-  `cut-store-read-all`, `cut-list-fetch`, `cut-list-cards`
-
-`c-1-2` counts the 8 objects and names one entry's fields rather than asserting the
-shape of each element, because a per-element assertion is vacuously true over the empty
-array `readAllRecipes` falls back to while `cut-store-read-all` is open. `c-1-4` reads
-the card's link, so the list's only navigation is graded and a card rendered without it
-fails session 1 rather than shipping.
+  `cut-store-read-all`, `cut-api-recipes-list`, `cut-list-fetch`, `cut-list-cards`
 
 **Cut points.**
 
 - `cut-store-read-all` in `lib/store.ts` — Read the recipes JSON file from disk and
   return every recipe in it as an array of Recipe objects.
+- `cut-api-recipes-list` in `app/api/recipes/route.ts` — Send the recipes the handler
+  has back to the browser as a JSON array with status 200.
 - `cut-list-fetch` in `app/RecipeList.tsx` — Ask the recipes endpoint for the list,
-  passing the page query string straight through, and when the reply is a 200 and the
-  ignore flag the wrapper declares is still clear, put the array it answers with into
-  the recipes state and set the status to loaded.
+  passing the page query string straight through, and when the reply is a 200 put the
+  array it answers with into the recipes state and set the status to loaded.
 - `cut-list-cards` in `app/RecipeList.tsx` — Turn the recipes array into one
-  recipe-card element per recipe and assign them to `cards`, each element a link to
-  that recipe's page at /recipes/ followed by its id, holding its title, a card-tag
-  element per tag, its minutes in a card-minutes element and its serves count in a
-  card-serves element.
+  recipe-card element per recipe, each one a link to that recipe page holding its
+  title, a card-tag element per tag, its minutes in a card-minutes element and its
+  serves count in a card-serves element.
 
 ### Session 2 - Search and tag filter
 
@@ -509,28 +448,29 @@ one control does not drop the other control's parameter.
 
 - `c-2-1` GET /api/recipes?q=garlic and GET /api/recipes?q=GARLIC each return 200 with
   the same 2 recipes, Lemon Garlic Pasta and Garlic Flatbread — cuts
-  `cut-store-read-all`, `cut-api-recipes-filter`
+  `cut-store-read-all`, `cut-api-recipes-list`, `cut-api-recipes-filter`
 - `c-2-2` GET /api/recipes?tag=baking returns 200 with the 2 recipes tagged baking,
   Banana Bread and Garlic Flatbread, and GET /api/recipes?q=garlic&tag=baking returns
   200 with 1 recipe, Garlic Flatbread — cuts `cut-store-read-all`,
-  `cut-api-recipes-filter`
+  `cut-api-recipes-list`, `cut-api-recipes-filter`
 - `c-2-3` GET /api/tags returns 200 with the JSON array baking, one-pot, quick, spicy,
   vegetarian in alphabetical order — cuts `cut-store-read-all`, `cut-api-tags-list`
 - `c-2-4` sc-list renders 2 recipe-card elements and the page URL reads /?q=garlic
   after garlic is typed into the search box, then displays the message No recipes match
   and renders 0 recipe-card elements after the box is changed to zzz — cuts
-  `cut-store-read-all`, `cut-api-recipes-filter`, `cut-list-fetch`, `cut-list-cards`,
-  `cut-list-search-url`
+  `cut-store-read-all`, `cut-api-recipes-list`, `cut-api-recipes-filter`,
+  `cut-list-fetch`, `cut-list-cards`, `cut-list-search-url`
 - `c-2-5` sc-list renders 2 recipe-card elements and the page URL reads /?tag=baking
   after the filter-tag chip reading baking is clicked, then renders 8 recipe-card
   elements and the URL reads / after that same filter-tag chip is clicked a second time
-  — cuts `cut-store-read-all`, `cut-api-recipes-filter`, `cut-api-tags-list`,
-  `cut-list-fetch`, `cut-list-cards`, `cut-list-tag-toggle`
+  — cuts `cut-store-read-all`, `cut-api-recipes-list`, `cut-api-recipes-filter`,
+  `cut-api-tags-list`, `cut-list-fetch`, `cut-list-cards`, `cut-list-tag-toggle`
 - `c-2-6` sc-list renders 1 recipe-card element reading Garlic Flatbread and the page
   URL has q set to garlic and tag set to baking, after garlic is typed into the search
   box, the URL reaches /?q=garlic, and the filter-tag chip reading baking is then
-  clicked — cuts `cut-store-read-all`, `cut-api-recipes-filter`, `cut-api-tags-list`,
-  `cut-list-fetch`, `cut-list-cards`, `cut-list-search-url`, `cut-list-tag-toggle`
+  clicked — cuts `cut-store-read-all`, `cut-api-recipes-list`,
+  `cut-api-recipes-filter`, `cut-api-tags-list`, `cut-list-fetch`, `cut-list-cards`,
+  `cut-list-search-url`, `cut-list-tag-toggle`
 
 `c-2-6` is the criterion that catches a control which rebuilds the query string from
 scratch instead of from the string the page already has. It waits for the URL to reach
@@ -541,8 +481,7 @@ string that already holds `q`.
 
 - `cut-api-recipes-filter` in `app/api/recipes/route.ts` — Keep only the recipes whose
   title contains the q parameter, ignoring letter case, and whose tags include the tag
-  parameter, and assign the result to `shown`; a parameter that is missing or empty
-  narrows nothing.
+  parameter; a parameter that is missing or empty narrows nothing.
 - `cut-api-tags-list` in `app/api/tags/route.ts` — Collect the tags of every recipe
   into one list without duplicates, sort it alphabetically and return it as a JSON
   array of strings.
@@ -599,8 +538,8 @@ response status in a client component; rendering a not-found state.
   named in the route; on a 200 reply put the recipe into state and set the status to
   loaded, and on a 404 reply set the status to not-found.
 - `cut-recipe-rows` in `app/recipes/[id]/RecipeView.tsx` — Render one ingredient-row
-  element for every entry in rows, its text reading `formatQuantity` of that row's
-  quantity, then the unit when that ingredient has one, then the item name.
+  element for every entry in rows, its text reading the formatted quantity, then the
+  unit when that ingredient has one, then the item name.
 
 ### Session 4 - Scale the servings
 
@@ -663,5 +602,5 @@ twenty-first click is the one the upper clamp answers.
   into the servings state, holding it at 1 when it would drop below 1 and at 24 when it
   would climb above 24.
 - `cut-recipe-scale-quantity` in `app/recipes/[id]/RecipeView.tsx` — Replace the
-  quantity of the row copy by calling `scaleQuantity` with that ingredient's stored
-  quantity, the recipe's serves count and the servings count on screen.
+  quantity of the row copy with the stored quantity of that ingredient scaled from the
+  recipe's serves count to the servings count on screen.

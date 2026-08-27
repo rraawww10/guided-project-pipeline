@@ -1,0 +1,113 @@
+.page {
+  max-width: 60rem;
+  margin: 0 auto;
+  padding: 2.5rem 1.25rem 4rem;
+}
+
+.heading {
+  margin: 0 0 0.25rem;
+  font-size: 2rem;
+  letter-spacing: -0.02em;
+}
+
+.tagline {
+  margin: 0 0 1.75rem;
+  color: var(--ink-soft);
+}
+
+.search {
+  width: 100%;
+  padding: 0.7rem 0.9rem;
+  font-size: 1rem;
+  font-family: inherit;
+  color: inherit;
+  background: var(--card);
+  border: 1px solid var(--edge);
+  border-radius: 0.6rem;
+}
+
+.search:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.filterBar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 1rem 0 1.75rem;
+}
+
+.filterTag,
+.filterTagActive {
+  padding: 0.3rem 0.75rem;
+  font-size: 0.85rem;
+  font-family: inherit;
+  border-radius: 999px;
+  border: 1px solid var(--edge);
+  cursor: pointer;
+}
+
+.filterTag {
+  background: var(--card);
+  color: var(--ink-soft);
+}
+
+.filterTagActive {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.message {
+  margin: 2rem 0;
+  color: var(--ink-soft);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+  gap: 1rem;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding: 1rem 1.1rem 1.1rem;
+  background: var(--card);
+  border: 1px solid var(--edge);
+  border-radius: 0.75rem;
+}
+
+.card:hover {
+  border-color: var(--accent);
+}
+
+.cardTitle {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.cardTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.cardTag {
+  padding: 0.15rem 0.5rem;
+  font-size: 0.75rem;
+  color: var(--ink-soft);
+  background: var(--paper);
+  border: 1px solid var(--edge);
+  border-radius: 999px;
+}
+
+.cardMeta {
+  display: flex;
+  justify-content: space-between;
+  margin-top: auto;
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+}

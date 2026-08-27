@@ -1,14 +1,18 @@
 {
   "slug": "recipe-box",
   "created": "2026-08-26T09:47:38+00:00",
-  "phase": "spec",
+  "phase": "code",
   "retries": {
     "spec": 0,
     "code": 0,
     "pack": 0
   },
   "gates": {
-    "gate1": null,
+    "gate1": {
+      "approved": true,
+      "at": "2026-08-27T05:48:46+00:00",
+      "note": "Round 4: 0 blocking, 2 worth a look, down from 4/4 (round 3) and 4/6 (round 2). Approved under the stopping rule declared at the round-3 rejection: approve when every remaining finding sits in a column a downstream checker owns. INTEGRITY NOTE: the approved spec is NOT the one the Spec Breaker read. W1 (written list useEffect had no stale-reply guard; typing fires one request per keystroke with no debounce, and c-2-4/c-2-6 both assert a card count after typing) landed in the 'nothing catches it' column, which the declared rule rejects on. Rather than a fifth round for two sentences, the Breaker's own suggested wording was applied by hand to spec.md 'Who owns the fetch', the cut-list-fetch hint in both files, and spec.json sc-list.owns: let ignore = false ships written above the marker, cleanup () => { ignore = true } below it, and the student's block writes to state only while ignore is clear. The cleanup return sits outside the markers per the round-1 cut-point lesson. Linter clean and every hint and check in spec.json verified verbatim in spec.md after the edit, but those two sentences have had no adversarial pass - if a defect shows up in the list refetch, look there first. W2 accepted with eyes open: session 3 carries three new files plus 4 cuts and is now the timing risk; nothing before step 9 measures teaching minutes, so the Pack Writer may time it over 40 and the fix at that point is a spec rebalance that invalidates the build. Carried to phase 3: c-3-2 and c-3-5 go green with cut-store-read-all open as well as cut-store-find-one, so the pack must pair them with c-3-1/c-3-3 and never present either alone."
+    },
     "gate2": null,
     "gate3": null
   },
@@ -41,6 +45,108 @@
       "step": "lint",
       "ok": true,
       "at": "2026-08-26T11:05:25+00:00",
+      "detail": ""
+    },
+    {
+      "step": "lint",
+      "ok": true,
+      "at": "2026-08-27T05:00:50+00:00",
+      "detail": ""
+    },
+    {
+      "step": "revise:round-3",
+      "ok": true,
+      "at": "2026-08-27T05:22:35+00:00",
+      "detail": "spec.md, spec.json, lint.json, ambiguity.md"
+    },
+    {
+      "step": "lint",
+      "ok": true,
+      "at": "2026-08-27T05:27:16+00:00",
+      "detail": ""
+    },
+    {
+      "step": "lint",
+      "ok": true,
+      "at": "2026-08-27T05:28:11+00:00",
+      "detail": ""
+    },
+    {
+      "step": "lint",
+      "ok": true,
+      "at": "2026-08-27T05:29:09+00:00",
+      "detail": ""
+    },
+    {
+      "step": "lint",
+      "ok": true,
+      "at": "2026-08-27T05:29:28+00:00",
+      "detail": ""
+    },
+    {
+      "step": "lint",
+      "ok": true,
+      "at": "2026-08-27T05:29:47+00:00",
+      "detail": ""
+    },
+    {
+      "step": "lint",
+      "ok": true,
+      "at": "2026-08-27T05:42:47+00:00",
+      "detail": ""
+    },
+    {
+      "step": "lint",
+      "ok": true,
+      "at": "2026-08-27T05:42:59+00:00",
+      "detail": ""
+    },
+    {
+      "step": "test:app",
+      "ok": true,
+      "at": "2026-08-27T06:15:35+00:00",
+      "detail": ""
+    },
+    {
+      "step": "test:app",
+      "ok": true,
+      "at": "2026-08-27T06:17:29+00:00",
+      "detail": ""
+    },
+    {
+      "step": "test:app",
+      "ok": true,
+      "at": "2026-08-27T06:17:51+00:00",
+      "detail": ""
+    },
+    {
+      "step": "test:app",
+      "ok": true,
+      "at": "2026-08-27T06:18:03+00:00",
+      "detail": ""
+    },
+    {
+      "step": "test:app",
+      "ok": true,
+      "at": "2026-08-27T06:18:15+00:00",
+      "detail": ""
+    },
+    {
+      "step": "test:app",
+      "ok": true,
+      "at": "2026-08-27T06:18:27+00:00",
+      "detail": ""
+    },
+    {
+      "step": "lint",
+      "ok": true,
+      "at": "2026-08-27T06:33:42+00:00",
+      "detail": ""
+    },
+    {
+      "step": "lint",
+      "ok": true,
+      "at": "2026-08-27T06:35:21+00:00",
       "detail": ""
     }
   ],

@@ -1,0 +1,189 @@
+[
+  {
+    "id": "lemon-garlic-pasta",
+    "title": "Lemon Garlic Pasta",
+    "tags": ["quick", "vegetarian"],
+    "minutes": 20,
+    "serves": 4,
+    "ingredients": [
+      { "item": "spaghetti", "quantity": { "num": 400, "den": 1 }, "unit": "g" },
+      { "item": "olive oil", "quantity": { "num": 2, "den": 1 }, "unit": "tbsp" },
+      { "item": "garlic", "quantity": { "num": 4, "den": 1 }, "unit": "clove" },
+      { "item": "chilli flakes", "quantity": { "num": 1, "den": 3 }, "unit": "tsp" },
+      { "item": "lemon", "quantity": { "num": 1, "den": 1 }, "unit": "" },
+      { "item": "flat-leaf parsley", "quantity": { "num": 1, "den": 2 }, "unit": "cup" },
+      { "item": "salt", "quantity": { "num": 1, "den": 2 }, "unit": "tsp" }
+    ],
+    "steps": [
+      "Boil the spaghetti in salted water until it still has a bite.",
+      "Warm the oil in a wide pan with the sliced garlic and the chilli flakes.",
+      "Toss the drained spaghetti through the oil with the lemon juice and the parsley.",
+      "Taste, add the salt, and serve."
+    ]
+  },
+  {
+    "id": "chickpea-curry",
+    "title": "Chickpea Curry",
+    "tags": ["one-pot", "spicy", "vegetarian"],
+    "minutes": 35,
+    "serves": 4,
+    "ingredients": [
+      { "item": "chickpeas", "quantity": { "num": 480, "den": 1 }, "unit": "g" },
+      { "item": "onion", "quantity": { "num": 2, "den": 1 }, "unit": "" },
+      { "item": "garlic", "quantity": { "num": 3, "den": 1 }, "unit": "clove" },
+      { "item": "ginger", "quantity": { "num": 1, "den": 2 }, "unit": "tbsp" },
+      { "item": "ground cumin", "quantity": { "num": 3, "den": 4 }, "unit": "tsp" },
+      { "item": "chilli powder", "quantity": { "num": 1, "den": 3 }, "unit": "tsp" },
+      { "item": "chopped tomatoes", "quantity": { "num": 400, "den": 1 }, "unit": "g" },
+      { "item": "coconut milk", "quantity": { "num": 1, "den": 2 }, "unit": "cup" },
+      { "item": "coriander", "quantity": { "num": 1, "den": 4 }, "unit": "cup" }
+    ],
+    "steps": [
+      "Soften the diced onion in oil in a deep pan.",
+      "Stir in the garlic, the ginger, the cumin and the chilli powder for a minute.",
+      "Add the tomatoes and the drained chickpeas and simmer for twenty minutes.",
+      "Pour in the coconut milk and let it thicken.",
+      "Scatter the coriander over the top and serve."
+    ]
+  },
+  {
+    "id": "banana-bread",
+    "title": "Banana Bread",
+    "tags": ["baking", "vegetarian"],
+    "minutes": 60,
+    "serves": 8,
+    "ingredients": [
+      { "item": "ripe bananas", "quantity": { "num": 3, "den": 1 }, "unit": "" },
+      { "item": "plain flour", "quantity": { "num": 2, "den": 1 }, "unit": "cup" },
+      { "item": "caster sugar", "quantity": { "num": 3, "den": 4 }, "unit": "cup" },
+      { "item": "melted butter", "quantity": { "num": 1, "den": 2 }, "unit": "cup" },
+      { "item": "eggs", "quantity": { "num": 2, "den": 1 }, "unit": "" },
+      { "item": "baking soda", "quantity": { "num": 1, "den": 1 }, "unit": "tsp" },
+      { "item": "ground cinnamon", "quantity": { "num": 1, "den": 3 }, "unit": "tsp" },
+      { "item": "salt", "quantity": { "num": 1, "den": 4 }, "unit": "tsp" }
+    ],
+    "steps": [
+      "Heat the oven to 180C and line a loaf tin.",
+      "Mash the bananas and beat in the butter, the sugar and the eggs.",
+      "Fold in the flour, the baking soda, the cinnamon and the salt.",
+      "Pour into the tin and bake for fifty minutes.",
+      "Cool in the tin before slicing."
+    ]
+  },
+  {
+    "id": "chicken-noodle-soup",
+    "title": "Chicken Noodle Soup",
+    "tags": ["one-pot"],
+    "minutes": 40,
+    "serves": 6,
+    "ingredients": [
+      { "item": "chicken thighs", "quantity": { "num": 600, "den": 1 }, "unit": "g" },
+      { "item": "egg noodles", "quantity": { "num": 300, "den": 1 }, "unit": "g" },
+      { "item": "carrots", "quantity": { "num": 3, "den": 1 }, "unit": "" },
+      { "item": "celery", "quantity": { "num": 2, "den": 1 }, "unit": "" },
+      { "item": "chicken stock", "quantity": { "num": 3, "den": 2 }, "unit": "cup" },
+      { "item": "black pepper", "quantity": { "num": 1, "den": 2 }, "unit": "tsp" },
+      { "item": "flat-leaf parsley", "quantity": { "num": 1, "den": 4 }, "unit": "cup" }
+    ],
+    "steps": [
+      "Bring the stock and the chicken to a gentle simmer in a large pot.",
+      "Lift the chicken out after twenty minutes and shred it.",
+      "Add the sliced carrots and celery and cook until they give.",
+      "Return the chicken with the noodles and cook for six minutes.",
+      "Season with the pepper and finish with the parsley."
+    ]
+  },
+  {
+    "id": "chilli-prawn-rice",
+    "title": "Chilli Prawn Rice",
+    "tags": ["one-pot", "quick", "spicy"],
+    "minutes": 25,
+    "serves": 3,
+    "ingredients": [
+      { "item": "prawns", "quantity": { "num": 300, "den": 1 }, "unit": "g" },
+      { "item": "jasmine rice", "quantity": { "num": 3, "den": 2 }, "unit": "cup" },
+      { "item": "red chillies", "quantity": { "num": 2, "den": 1 }, "unit": "" },
+      { "item": "garlic", "quantity": { "num": 3, "den": 1 }, "unit": "clove" },
+      { "item": "fish sauce", "quantity": { "num": 2, "den": 3 }, "unit": "tbsp" },
+      { "item": "lime", "quantity": { "num": 1, "den": 1 }, "unit": "" },
+      { "item": "spring onions", "quantity": { "num": 3, "den": 4 }, "unit": "cup" }
+    ],
+    "steps": [
+      "Rinse the rice and set it to cook with its water.",
+      "Fry the chillies and the garlic hard in a hot pan.",
+      "Add the prawns and the fish sauce and cook until they turn.",
+      "Fork the rice through the pan and squeeze the lime over it.",
+      "Top with the spring onions."
+    ]
+  },
+  {
+    "id": "pesto-pasta-salad",
+    "title": "Pesto Pasta Salad",
+    "tags": ["quick", "vegetarian"],
+    "minutes": 15,
+    "serves": 6,
+    "ingredients": [
+      { "item": "fusilli", "quantity": { "num": 500, "den": 1 }, "unit": "g" },
+      { "item": "basil pesto", "quantity": { "num": 3, "den": 4 }, "unit": "cup" },
+      { "item": "cherry tomatoes", "quantity": { "num": 250, "den": 1 }, "unit": "g" },
+      { "item": "mozzarella pearls", "quantity": { "num": 1, "den": 2 }, "unit": "cup" },
+      { "item": "pine nuts", "quantity": { "num": 1, "den": 3 }, "unit": "cup" },
+      { "item": "lemon", "quantity": { "num": 1, "den": 2 }, "unit": "" },
+      { "item": "black pepper", "quantity": { "num": 1, "den": 4 }, "unit": "tsp" }
+    ],
+    "steps": [
+      "Boil the fusilli and cool it under the tap.",
+      "Toast the pine nuts in a dry pan until they smell of it.",
+      "Stir the pesto through the pasta with the lemon juice.",
+      "Fold in the tomatoes, the mozzarella and the pine nuts and season."
+    ]
+  },
+  {
+    "id": "beef-stew",
+    "title": "Beef Stew",
+    "tags": ["one-pot"],
+    "minutes": 90,
+    "serves": 6,
+    "ingredients": [
+      { "item": "stewing beef", "quantity": { "num": 900, "den": 1 }, "unit": "g" },
+      { "item": "plain flour", "quantity": { "num": 1, "den": 3 }, "unit": "cup" },
+      { "item": "onions", "quantity": { "num": 2, "den": 1 }, "unit": "" },
+      { "item": "carrots", "quantity": { "num": 4, "den": 1 }, "unit": "" },
+      { "item": "beef stock", "quantity": { "num": 5, "den": 2 }, "unit": "cup" },
+      { "item": "tomato puree", "quantity": { "num": 3, "den": 2 }, "unit": "tbsp" },
+      { "item": "thyme", "quantity": { "num": 3, "den": 4 }, "unit": "tsp" },
+      { "item": "bay leaves", "quantity": { "num": 2, "den": 1 }, "unit": "" }
+    ],
+    "steps": [
+      "Toss the beef in the flour and brown it in batches.",
+      "Soften the onions in the same pot.",
+      "Return the beef with the stock, the puree, the thyme and the bay leaves.",
+      "Cover and cook low for an hour.",
+      "Add the carrots and give it twenty minutes more.",
+      "Lift out the bay leaves before serving."
+    ]
+  },
+  {
+    "id": "garlic-flatbread",
+    "title": "Garlic Flatbread",
+    "tags": ["baking", "quick"],
+    "minutes": 40,
+    "serves": 4,
+    "ingredients": [
+      { "item": "plain flour", "quantity": { "num": 5, "den": 2 }, "unit": "cup" },
+      { "item": "natural yoghurt", "quantity": { "num": 3, "den": 4 }, "unit": "cup" },
+      { "item": "baking powder", "quantity": { "num": 2, "den": 1 }, "unit": "tsp" },
+      { "item": "salt", "quantity": { "num": 1, "den": 2 }, "unit": "tsp" },
+      { "item": "garlic", "quantity": { "num": 4, "den": 1 }, "unit": "clove" },
+      { "item": "butter", "quantity": { "num": 1, "den": 3 }, "unit": "cup" },
+      { "item": "coriander", "quantity": { "num": 1, "den": 4 }, "unit": "cup" }
+    ],
+    "steps": [
+      "Work the flour, the yoghurt, the baking powder and the salt into a soft dough.",
+      "Rest it under a cloth for twenty minutes.",
+      "Roll it into four rounds and cook them in a dry hot pan.",
+      "Melt the butter with the crushed garlic.",
+      "Brush the breads and scatter the coriander over them."
+    ]
+  }
+]

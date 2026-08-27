@@ -18,8 +18,7 @@
       "response": "Recipe[]",
       "status": [
         200
-      ],
-      "note": "Built in session 1 with its handler body written; cut-api-recipes-filter in session 2 is the only cut in the file. It has no 501 skeleton fallback, because its return NextResponse.json(shown) lies outside that cut, so it answers 200 with [] while cut-store-read-all is open."
+      ]
     },
     {
       "id": "ep-tags-list",
@@ -49,7 +48,7 @@
       "route": "/",
       "elements": [
         "search box with the accessible name Search recipes, uncontrolled, defaultValue from useSearchParams",
-        "tag chip filter bar of one filter-tag button per entry in the tags state, filled by the written GET /api/tags call, always all five tags once that endpoint answers",
+        "tag chip filter bar of filter-tag buttons built from GET /api/tags, always all five tags",
         "recipe card grid",
         "recipe-card holding the title, one card-tag per tag, card-minutes and card-serves",
         "no-match message reading No recipes match",
@@ -68,9 +67,8 @@
         "card-serves",
         "filter-tag"
       ],
-      "state_shape": "three pieces of state, all declared outside every cut: recipes: Recipe[] starting at [], status: 'loading' | 'loaded' starting at 'loading', and tags: string[] starting at []. The written GET /api/tags call is the only thing that sets tags, and only on a 200 reply; the filter bar renders one filter-tag button per entry in tags and hardcodes no tag name, so the bar is empty until cut-api-tags-list is filled. loading is status loading, empty is status loaded with recipes.length 0, loaded is status loaded with at least one recipe",
-      "owns": "const qs = searchParams.toString(), the useEffect call and its dependency array [qs] all ship written; cut-list-fetch is the body of that effect; let ignore = false ships written above the marker and the cleanup () => { ignore = true } below it, so a reply for a superseded query string is discarded and the student's block writes to state only while ignore is clear and the only code that moves status off loading, and it moves it only on a 200 reply; replaceQuery ships written and both URL cuts end by calling it, so the / rather than /? decision is never the student's",
-      "testid_note": "Every element a criterion counts carries a data-testid. A card's title has no testid of its own: c-1-4 and c-2-6 read it as text inside that card's recipe-card element. No criterion depends on a CSS class name."
+      "state_shape": "recipes: Recipe[] starting at [], status: 'loading' | 'loaded' starting at 'loading'; loading is status loading, empty is status loaded with recipes.length 0, loaded is status loaded with at least one recipe",
+      "owns": "const qs = searchParams.toString(), the useEffect call and its dependency array [qs] all ship written; cut-list-fetch is the body of that effect and the only code that moves status off loading, and it moves it only on a 200 reply; replaceQuery ships written and both URL cuts end by calling it, so the / rather than /? decision is never the student's"
     },
     {
       "id": "sc-recipe",
@@ -98,14 +96,14 @@
       "owns": "the id comes from useParams and the useEffect call and its dependency array [id] ship written; cut-recipe-fetch is the body of that effect and the only code that moves status off loading"
     }
   ],
-  "cut_convention": "A criterion lists every cut that lies on the code path it exercises, cuts from earlier sessions included. Fill all of them and the criterion is green; leave any of them open and it is not proven. app/api/recipes/route.ts carries exactly one cut, cut-api-recipes-filter: the handler's const all = readAllRecipes() and let shown = all both ship written above that block, the handler returns shown, and it therefore answers 200 from session 1 onwards with no 501 fallback. c-3-2 and c-3-5 are the only two criteria a proper subset already satisfies - see their note fields. Session 1's c-1-2 and c-1-4 and session 4's c-4-2 to c-4-4 were checked for the same defect and admit no subset pass.",
+  "cut_convention": "A criterion lists every cut that lies on the code path it exercises, cuts from earlier sessions included. Fill all of them and the criterion is green; leave any of them open and it is not proven. c-3-2 and c-3-5 are the two criteria a proper subset already satisfies - see their note fields.",
   "sessions": [
     {
       "n": 1,
       "title": "The recipe list",
       "goal": "Serve every recipe from the JSON store through a route handler and render one card per recipe on the list screen.",
       "teaches": [
-        "route handlers in the App Router, read in the GET /api/recipes handler that ships written",
+        "route handlers in the App Router",
         "reading a JSON file on the server with node fs",
         "typing a response with a shared TypeScript type",
         "fetching into React state with useEffect",
@@ -121,17 +119,18 @@
           "check": "GET /api/recipes returns 200 with a JSON array of the 8 seed recipes",
           "target": "ep-recipes-list",
           "cuts": [
-            "cut-store-read-all"
+            "cut-store-read-all",
+            "cut-api-recipes-list"
           ]
         },
         {
           "id": "c-1-2",
-          "check": "GET /api/recipes returns 8 objects, and its lemon-garlic-pasta entry has id lemon-garlic-pasta, title Lemon Garlic Pasta, a tags array of quick and vegetarian, minutes 20 and serves 4",
+          "check": "GET /api/recipes returns each recipe with an id, a title, a tags array, a minutes number and a serves number",
           "target": "ep-recipes-list",
           "cuts": [
-            "cut-store-read-all"
-          ],
-          "note": "Counts the 8 objects and names one entry's fields rather than asserting the shape of each element, because a per-element assertion is vacuously true over the empty array readAllRecipes falls back to while cut-store-read-all is open."
+            "cut-store-read-all",
+            "cut-api-recipes-list"
+          ]
         },
         {
           "id": "c-1-3",
@@ -139,20 +138,21 @@
           "target": "sc-list",
           "cuts": [
             "cut-store-read-all",
+            "cut-api-recipes-list",
             "cut-list-fetch",
             "cut-list-cards"
           ]
         },
         {
           "id": "c-1-4",
-          "check": "sc-list displays the title Lemon Garlic Pasta inside a recipe-card that links to /recipes/lemon-garlic-pasta and whose card-minutes element reads 20 min and whose card-serves element reads Serves 4",
+          "check": "sc-list displays the title Lemon Garlic Pasta on a recipe-card whose card-minutes element reads 20 min and whose card-serves element reads Serves 4",
           "target": "sc-list",
           "cuts": [
             "cut-store-read-all",
+            "cut-api-recipes-list",
             "cut-list-fetch",
             "cut-list-cards"
-          ],
-          "note": "Reads the card's href, so the list's only navigation is graded. The title has no testid: read it as text inside the recipe-card element."
+          ]
         },
         {
           "id": "c-1-5",
@@ -160,6 +160,7 @@
           "target": "sc-list",
           "cuts": [
             "cut-store-read-all",
+            "cut-api-recipes-list",
             "cut-list-fetch",
             "cut-list-cards"
           ]
@@ -172,17 +173,21 @@
           "hint": "Read the recipes JSON file from disk and return every recipe in it as an array of Recipe objects."
         },
         {
+          "id": "cut-api-recipes-list",
+          "file": "app/api/recipes/route.ts",
+          "hint": "Send the recipes the handler has back to the browser as a JSON array with status 200."
+        },
+        {
           "id": "cut-list-fetch",
           "file": "app/RecipeList.tsx",
-          "hint": "Ask the recipes endpoint for the list, passing the page query string straight through, and when the reply is a 200 and the ignore flag the wrapper declares is still clear, put the array it answers with into the recipes state and set the status to loaded."
+          "hint": "Ask the recipes endpoint for the list, passing the page query string straight through, and when the reply is a 200 put the array it answers with into the recipes state and set the status to loaded."
         },
         {
           "id": "cut-list-cards",
           "file": "app/RecipeList.tsx",
-          "hint": "Turn the recipes array into one recipe-card element per recipe and assign them to `cards`, each element a link to that recipe's page at /recipes/ followed by its id, holding its title, a card-tag element per tag, its minutes in a card-minutes element and its serves count in a card-serves element."
+          "hint": "Turn the recipes array into one recipe-card element per recipe, each one a link to that recipe page holding its title, a card-tag element per tag, its minutes in a card-minutes element and its serves count in a card-serves element."
         }
-      ],
-      "weight_note": "Session 1 introduces lib/types.ts, data/recipes.json with its 8 recipes, lib/store.ts, lib/fractions.ts, app/page.tsx and app/RecipeList.tsx, so it holds three cut points against sessions 2 and 3's four. app/api/recipes/route.ts ships written; the endpoint is still graded, because c-1-1 and c-1-2 both fail on the [] that readAllRecipes falls back to while cut-store-read-all is open. Do not add a fourth cut to session 1 in a later revision."
+      ]
     },
     {
       "n": 2,
@@ -209,6 +214,7 @@
           "target": "ep-recipes-list",
           "cuts": [
             "cut-store-read-all",
+            "cut-api-recipes-list",
             "cut-api-recipes-filter"
           ]
         },
@@ -218,6 +224,7 @@
           "target": "ep-recipes-list",
           "cuts": [
             "cut-store-read-all",
+            "cut-api-recipes-list",
             "cut-api-recipes-filter"
           ]
         },
@@ -236,6 +243,7 @@
           "target": "sc-list",
           "cuts": [
             "cut-store-read-all",
+            "cut-api-recipes-list",
             "cut-api-recipes-filter",
             "cut-list-fetch",
             "cut-list-cards",
@@ -249,6 +257,7 @@
           "target": "sc-list",
           "cuts": [
             "cut-store-read-all",
+            "cut-api-recipes-list",
             "cut-api-recipes-filter",
             "cut-api-tags-list",
             "cut-list-fetch",
@@ -263,6 +272,7 @@
           "target": "sc-list",
           "cuts": [
             "cut-store-read-all",
+            "cut-api-recipes-list",
             "cut-api-recipes-filter",
             "cut-api-tags-list",
             "cut-list-fetch",
@@ -277,7 +287,7 @@
         {
           "id": "cut-api-recipes-filter",
           "file": "app/api/recipes/route.ts",
-          "hint": "Keep only the recipes whose title contains the q parameter, ignoring letter case, and whose tags include the tag parameter, and assign the result to `shown`; a parameter that is missing or empty narrows nothing."
+          "hint": "Keep only the recipes whose title contains the q parameter, ignoring letter case, and whose tags include the tag parameter; a parameter that is missing or empty narrows nothing."
         },
         {
           "id": "cut-api-tags-list",
@@ -388,7 +398,7 @@
         {
           "id": "cut-recipe-rows",
           "file": "app/recipes/[id]/RecipeView.tsx",
-          "hint": "Render one ingredient-row element for every entry in rows, its text reading `formatQuantity` of that row's quantity, then the unit when that ingredient has one, then the item name."
+          "hint": "Render one ingredient-row element for every entry in rows, its text reading the formatted quantity, then the unit when that ingredient has one, then the item name."
         }
       ]
     },
@@ -506,7 +516,7 @@
         {
           "id": "cut-recipe-scale-quantity",
           "file": "app/recipes/[id]/RecipeView.tsx",
-          "hint": "Replace the quantity of the row copy by calling `scaleQuantity` with that ingredient's stored quantity, the recipe's serves count and the servings count on screen."
+          "hint": "Replace the quantity of the row copy with the stored quantity of that ingredient scaled from the recipe's serves count to the servings count on screen."
         }
       ]
     }
