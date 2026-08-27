@@ -1,0 +1,28 @@
+{
+  "ok": true,
+  "target": "app",
+  "preview": "http://127.0.0.1:52237",
+  "seconds": 10.8,
+  "steps": [
+    {
+      "step": "fresh copy",
+      "ok": true,
+      "detail": "/tmp/gp-deploy-tip-split-1onqm_a5/app"
+    },
+    {
+      "step": "install",
+      "ok": true,
+      "detail": "npm warn deprecated next@15.1.6: This version has a security vulnerability. Please upgrade to a patched version. See https://nextjs.org/blog/CVE-2025-66478 for more details.\n"
+    },
+    {
+      "step": "build",
+      "ok": true,
+      "detail": "\n> tip-split@0.0.0 build\n> next build\n\n   \u25b2 Next.js 15.1.6\n\n   Creating an optimized production build ...\n \u2713 Compiled successfully\n   Linting and checking validity of types ...\n   Collecting page data ...\n   Generating static pages (0/4) ...\n   Generating static pages (1/4) \n   Generating static pages (2/4) \n   Generating static pages (3/4) \n \u2713 Generating static pages (4/4)\n   Finalizing page optimization ...\n   Collecting build traces ...\n\nRoute (app)                              Size     First Load JS\n\u250c \u25cb /                                    919 B           110 kB\n\u251c \u25cb /_not-found                          979 B           106 kB\n\u251c \u0192 /api/bills                           139 B           105 kB\n\u251c \u0192 /api/bills/[id]                      139 B           105 kB\n\u2514 \u0192 /bills/[id]                          1.49 kB         110 kB\n+ First Load JS shared by all            105 kB\n  \u251c chunks/4bd1b696-dc53661a9e7a1ea0.js  52.9 kB\n  \u251c chunks/517-02529fc427dcf653.js       50.5 kB\n  \u2514 other shared chunks (total)          1.93 kB\n\n\n\u25cb  (Static)   prerendered as static content\n\u0192  (Dynamic)  server-rendered on demand\n\n"
+    },
+    {
+      "step": "preview",
+      "ok": true,
+      "detail": "http://127.0.0.1:52237"
+    }
+  ]
+}

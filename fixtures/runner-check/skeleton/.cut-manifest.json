@@ -1,0 +1,33 @@
+{
+  "slug": "runner-check",
+  "cuts": [
+    {
+      "id": "cut-api-health",
+      "file": "app/api/health/route.ts",
+      "line": 6,
+      "lines_removed": 2
+    },
+    {
+      "id": "cut-ui-items",
+      "file": "app/page.tsx",
+      "line": 8,
+      "lines_removed": 3
+    }
+  ],
+  "count": 2,
+  "by_session": {
+    "1": [
+      "cut-api-health",
+      "cut-ui-items"
+    ]
+  },
+  "typecheck": {
+    "ran": true,
+    "ok": true,
+    "error_count": 0,
+    "errors": [],
+    "missing_return": [],
+    "hint": ""
+  },
+  "ok": true
+}

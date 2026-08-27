@@ -1,0 +1,19 @@
+node_modules/
+.env
+.env.*
+!.env.example
+.venv/
+venv/
+__pycache__/
+*.pyc
+dist/
+build/
+*.log
+.DS_Store
+.vscode/
+.idea/
+
+# Build output
+.next/
+# Packaged snapshots - too large for GitHub (100MB file limit)
+*.zip

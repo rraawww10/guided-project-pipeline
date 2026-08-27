@@ -1,0 +1,403 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="17" skipped="0" tests="17" time="261.241" timestamp="2026-08-26T17:47:32.905738+05:30" hostname="nxtwave-Z790-D-AX"><testcase classname="skeleton.verify.test_api_bills" name="test_c_1_1_bills_list_returns_200_with_the_six_seed_bills" time="0.026"><failure message="AssertionError: {&quot;error&quot;:&quot;not implemented&quot;}&#10;assert 501 == 200&#10; +  where 501 = &lt;Response [501 Not Implemented]&gt;.status_code">api = &lt;httpx.Client object at 0x7e0a98207ad0&gt;
+
+    def test_c_1_1_bills_list_returns_200_with_the_six_seed_bills(api):
+        """c-1-1: GET /api/bills returns 200 with a JSON array of the 6 seed bills."""
+        response = api.get("/api/bills")
+&gt;       assert response.status_code == 200, response.text
+E       AssertionError: {"error":"not implemented"}
+E       assert 501 == 200
+E        +  where 501 = &lt;Response [501 Not Implemented]&gt;.status_code
+
+skeleton/verify/test_api_bills.py:10: AssertionError</failure></testcase><testcase classname="skeleton.verify.test_api_bills" name="test_c_1_2_bills_list_holds_six_whole_bill_objects" time="0.012"><failure message="AssertionError: expected a JSON array, got dict&#10;assert False&#10; +  where False = isinstance({'error': 'not implemented'}, list)">api = &lt;httpx.Client object at 0x7e0a982f9280&gt;
+
+    def test_c_1_2_bills_list_holds_six_whole_bill_objects(api):
+        """c-1-2: 6 bills, each with id, place, date, totalPaise, tipPercent, people."""
+        body = api.get("/api/bills").json()
+&gt;       assert isinstance(body, list), f"expected a JSON array, got {type(body).__name__}"
+E       AssertionError: expected a JSON array, got dict
+E       assert False
+E        +  where False = isinstance({'error': 'not implemented'}, list)
+
+skeleton/verify/test_api_bills.py:19: AssertionError</failure></testcase><testcase classname="skeleton.verify.test_api_bills" name="test_c_2_1_bill_get_returns_200_with_the_stored_bill" time="0.012"><failure message="AssertionError: {&quot;error&quot;:&quot;not implemented&quot;}&#10;assert 501 == 200&#10; +  where 501 = &lt;Response [501 Not Implemented]&gt;.status_code">api = &lt;httpx.Client object at 0x7e0a982f9610&gt;
+
+    def test_c_2_1_bill_get_returns_200_with_the_stored_bill(api):
+        """c-2-1: GET /api/bills/anand-bhavan returns 200 with that bill."""
+        response = api.get("/api/bills/anand-bhavan")
+&gt;       assert response.status_code == 200, response.text
+E       AssertionError: {"error":"not implemented"}
+E       assert 501 == 200
+E        +  where 501 = &lt;Response [501 Not Implemented]&gt;.status_code
+
+skeleton/verify/test_api_bills.py:39: AssertionError</failure></testcase><testcase classname="skeleton.verify.test_api_bills" name="test_c_2_2_bill_get_returns_404_with_an_error_body_for_an_unknown_id" time="0.011"><failure message="AssertionError: got 501: {&quot;error&quot;:&quot;not implemented&quot;}&#10;assert 501 == 404&#10; +  where 501 = &lt;Response [501 Not Implemented]&gt;.status_code">api = &lt;httpx.Client object at 0x7e0a982fb170&gt;
+
+    def test_c_2_2_bill_get_returns_404_with_an_error_body_for_an_unknown_id(api):
+        """c-2-2: GET /api/bills/not-a-bill returns 404 with a JSON body holding error."""
+        response = api.get("/api/bills/not-a-bill")
+&gt;       assert response.status_code == 404, f"got {response.status_code}: {response.text}"
+E       AssertionError: got 501: {"error":"not implemented"}
+E       assert 501 == 404
+E        +  where 501 = &lt;Response [501 Not Implemented]&gt;.status_code
+
+skeleton/verify/test_api_bills.py:50: AssertionError</failure></testcase><testcase classname="skeleton.verify.test_ui_bill" name="test_c_2_3_bill_shows_its_stored_fields" time="20.291"><failure message="AssertionError: Locator expected to be attached&#10;Actual value: None&#10;Error: element(s) not found &#10;Call log:&#10;  - Expect &quot;to_be_attached&quot; with timeout 20000ms&#10;  - waiting for get_by_test_id(&quot;bill-place&quot;)&#10;&#10;Aria snapshot:&#10;- main:&#10;  - paragraph: Loading bill&#10;- alert">page = &lt;Page url='http://127.0.0.1:41283/bills/anand-bhavan'&gt;
+
+    def test_c_2_3_bill_shows_its_stored_fields(page):
+        """c-2-3: place, date, total, tip percent and saved split for anand-bhavan."""
+&gt;       open_bill(page, "anand-bhavan")
+
+skeleton/verify/test_ui_bill.py:13: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+page = &lt;Page url='http://127.0.0.1:41283/bills/anand-bhavan'&gt;
+bill_id = 'anand-bhavan'
+
+    def open_bill(page: Page, bill_id: str) -&gt; None:
+        """Open sc-bill for a bill the store holds and wait for its loaded state."""
+        page.goto(f"{BASE_URL}/bills/{bill_id}", wait_until="domcontentloaded")
+&gt;       expect(page.get_by_test_id("bill-place")).to_be_attached(timeout=LOAD_TIMEOUT)
+E       AssertionError: Locator expected to be attached
+E       Actual value: None
+E       Error: element(s) not found 
+E       Call log:
+E         - Expect "to_be_attached" with timeout 20000ms
+E         - waiting for get_by_test_id("bill-place")
+E       
+E       Aria snapshot:
+E       - main:
+E         - paragraph: Loading bill
+E       - alert
+
+skeleton/verify/helpers.py:57: AssertionError</failure></testcase><testcase classname="skeleton.verify.test_ui_bill" name="test_c_2_4_bill_shows_the_tip_and_grand_total" time="20.054"><failure message="AssertionError: Locator expected to be attached&#10;Actual value: None&#10;Error: element(s) not found &#10;Call log:&#10;  - Expect &quot;to_be_attached&quot; with timeout 20000ms&#10;  - waiting for get_by_test_id(&quot;bill-place&quot;)&#10;&#10;Aria snapshot:&#10;- main:&#10;  - paragraph: Loading bill&#10;- alert">page = &lt;Page url='http://127.0.0.1:41283/bills/anand-bhavan'&gt;
+
+    def test_c_2_4_bill_shows_the_tip_and_grand_total(page):
+        """c-2-4: 124000 paise at 10 percent gives a tip of the rupee 124.00 and a
+        grand total of the rupee 1364.00."""
+&gt;       open_bill(page, "anand-bhavan")
+
+skeleton/verify/test_ui_bill.py:24: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+page = &lt;Page url='http://127.0.0.1:41283/bills/anand-bhavan'&gt;
+bill_id = 'anand-bhavan'
+
+    def open_bill(page: Page, bill_id: str) -&gt; None:
+        """Open sc-bill for a bill the store holds and wait for its loaded state."""
+        page.goto(f"{BASE_URL}/bills/{bill_id}", wait_until="domcontentloaded")
+&gt;       expect(page.get_by_test_id("bill-place")).to_be_attached(timeout=LOAD_TIMEOUT)
+E       AssertionError: Locator expected to be attached
+E       Actual value: None
+E       Error: element(s) not found 
+E       Call log:
+E         - Expect "to_be_attached" with timeout 20000ms
+E         - waiting for get_by_test_id("bill-place")
+E       
+E       Aria snapshot:
+E       - main:
+E         - paragraph: Loading bill
+E       - alert
+
+skeleton/verify/helpers.py:57: AssertionError</failure></testcase><testcase classname="skeleton.verify.test_ui_bill" name="test_c_2_5_unknown_bill_shows_not_found_and_the_back_link" time="20.061"><failure message="AssertionError: Locator expected to have count '1'&#10;Actual value: 0 &#10;Call log:&#10;  - Expect &quot;to_have_count&quot; with timeout 20000ms&#10;  - waiting for get_by_text(&quot;Bill not found&quot;, exact=True)&#10;    44 × locator resolved to 0 elements&#10;       - unexpected value &quot;0&quot;">page = &lt;Page url='http://127.0.0.1:41283/bills/not-a-bill'&gt;
+
+    def test_c_2_5_unknown_bill_shows_not_found_and_the_back_link(page):
+        """c-2-5: /bills/not-a-bill shows Bill not found and a link named
+        Back to saved bills whose href is /."""
+        open_bill_raw(page, "not-a-bill")
+&gt;       expect(page.get_by_text("Bill not found", exact=True)).to_have_count(
+            1, timeout=LOAD_TIMEOUT
+        )
+E       AssertionError: Locator expected to have count '1'
+E       Actual value: 0 
+E       Call log:
+E         - Expect "to_have_count" with timeout 20000ms
+E         - waiting for get_by_text("Bill not found", exact=True)
+E           44 × locator resolved to 0 elements
+E              - unexpected value "0"
+
+skeleton/verify/test_ui_bill.py:35: AssertionError</failure></testcase><testcase classname="skeleton.verify.test_ui_bill" name="test_c_2_6_tip_rounds_half_up" time="20.060"><failure message="AssertionError: Locator expected to be attached&#10;Actual value: None&#10;Error: element(s) not found &#10;Call log:&#10;  - Expect &quot;to_be_attached&quot; with timeout 20000ms&#10;  - waiting for get_by_test_id(&quot;bill-place&quot;)&#10;&#10;Aria snapshot:&#10;- main:&#10;  - paragraph: Loading bill&#10;- alert">page = &lt;Page url='http://127.0.0.1:41283/bills/kabab-junction'&gt;
+
+    def test_c_2_6_tip_rounds_half_up(page):
+        """c-2-6: 87550 paise at 7 percent is 6128.5 paise and rounds up to 6129,
+        so the tip reads the rupee 61.29 and the grand total the rupee 936.79."""
+&gt;       open_bill(page, "kabab-junction")
+
+skeleton/verify/test_ui_bill.py:46: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+page = &lt;Page url='http://127.0.0.1:41283/bills/kabab-junction'&gt;
+bill_id = 'kabab-junction'
+
+    def open_bill(page: Page, bill_id: str) -&gt; None:
+        """Open sc-bill for a bill the store holds and wait for its loaded state."""
+        page.goto(f"{BASE_URL}/bills/{bill_id}", wait_until="domcontentloaded")
+&gt;       expect(page.get_by_test_id("bill-place")).to_be_attached(timeout=LOAD_TIMEOUT)
+E       AssertionError: Locator expected to be attached
+E       Actual value: None
+E       Error: element(s) not found 
+E       Call log:
+E         - Expect "to_be_attached" with timeout 20000ms
+E         - waiting for get_by_test_id("bill-place")
+E       
+E       Aria snapshot:
+E       - main:
+E         - paragraph: Loading bill
+E       - alert
+
+skeleton/verify/helpers.py:57: AssertionError</failure></testcase><testcase classname="skeleton.verify.test_ui_list" name="test_c_1_3_list_renders_one_card_per_seed_bill" time="20.049"><failure message="AssertionError: Locator expected to be attached&#10;Actual value: None&#10;Error: element(s) not found &#10;Call log:&#10;  - Expect &quot;to_be_attached&quot; with timeout 20000ms&#10;  - waiting for get_by_test_id(&quot;bill-card&quot;).first&#10;&#10;Aria snapshot:&#10;- main:&#10;  - heading &quot;Saved bills&quot; [level=1]&#10;  - paragraph: Loading saved bills&#10;- alert">page = &lt;Page url='http://127.0.0.1:41283/'&gt;
+
+    def test_c_1_3_list_renders_one_card_per_seed_bill(page):
+        """c-1-3: sc-list renders 6 bill-card elements for the 6 seed bills."""
+&gt;       open_list(page)
+
+skeleton/verify/test_ui_list.py:11: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+page = &lt;Page url='http://127.0.0.1:41283/'&gt;
+
+    def open_list(page: Page) -&gt; None:
+        """Open sc-list and wait until it has left its loading state."""
+        page.goto(f"{BASE_URL}/", wait_until="domcontentloaded")
+&gt;       expect(page.get_by_test_id("bill-card").first).to_be_attached(timeout=LOAD_TIMEOUT)
+E       AssertionError: Locator expected to be attached
+E       Actual value: None
+E       Error: element(s) not found 
+E       Call log:
+E         - Expect "to_be_attached" with timeout 20000ms
+E         - waiting for get_by_test_id("bill-card").first
+E       
+E       Aria snapshot:
+E       - main:
+E         - heading "Saved bills" [level=1]
+E         - paragraph: Loading saved bills
+E       - alert
+
+skeleton/verify/helpers.py:51: AssertionError</failure></testcase><testcase classname="skeleton.verify.test_ui_list" name="test_c_1_4_anand_bhavan_card_links_and_reads_its_fields" time="20.055"><failure message="AssertionError: Locator expected to be attached&#10;Actual value: None&#10;Error: element(s) not found &#10;Call log:&#10;  - Expect &quot;to_be_attached&quot; with timeout 20000ms&#10;  - waiting for get_by_test_id(&quot;bill-card&quot;).first&#10;&#10;Aria snapshot:&#10;- main:&#10;  - heading &quot;Saved bills&quot; [level=1]&#10;  - paragraph: Loading saved bills&#10;- alert">page = &lt;Page url='http://127.0.0.1:41283/'&gt;
+
+    def test_c_1_4_anand_bhavan_card_links_and_reads_its_fields(page):
+        """c-1-4: the anand-bhavan card is a link to /bills/anand-bhavan holding
+        card-place Anand Bhavan, card-date 2026-03-14, card-total the rupee total
+        and card-people Split 4 ways."""
+&gt;       open_list(page)
+
+skeleton/verify/test_ui_list.py:19: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+page = &lt;Page url='http://127.0.0.1:41283/'&gt;
+
+    def open_list(page: Page) -&gt; None:
+        """Open sc-list and wait until it has left its loading state."""
+        page.goto(f"{BASE_URL}/", wait_until="domcontentloaded")
+&gt;       expect(page.get_by_test_id("bill-card").first).to_be_attached(timeout=LOAD_TIMEOUT)
+E       AssertionError: Locator expected to be attached
+E       Actual value: None
+E       Error: element(s) not found 
+E       Call log:
+E         - Expect "to_be_attached" with timeout 20000ms
+E         - waiting for get_by_test_id("bill-card").first
+E       
+E       Aria snapshot:
+E       - main:
+E         - heading "Saved bills" [level=1]
+E         - paragraph: Loading saved bills
+E       - alert
+
+skeleton/verify/helpers.py:51: AssertionError</failure></testcase><testcase classname="skeleton.verify.test_ui_list" name="test_c_1_5_cards_are_in_the_order_the_endpoint_returns" time="20.071"><failure message="AssertionError: Locator expected to be attached&#10;Actual value: None&#10;Error: element(s) not found &#10;Call log:&#10;  - Expect &quot;to_be_attached&quot; with timeout 20000ms&#10;  - waiting for get_by_test_id(&quot;bill-card&quot;).first&#10;&#10;Aria snapshot:&#10;- main:&#10;  - heading &quot;Saved bills&quot; [level=1]&#10;  - paragraph: Loading saved bills&#10;- alert">page = &lt;Page url='http://127.0.0.1:41283/'&gt;
+
+    def test_c_1_5_cards_are_in_the_order_the_endpoint_returns(page):
+        """c-1-5: the 6 cards sit in store order, first Anand Bhavan, last Kurry Kulture."""
+&gt;       open_list(page)
+
+skeleton/verify/test_ui_list.py:30: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+page = &lt;Page url='http://127.0.0.1:41283/'&gt;
+
+    def open_list(page: Page) -&gt; None:
+        """Open sc-list and wait until it has left its loading state."""
+        page.goto(f"{BASE_URL}/", wait_until="domcontentloaded")
+&gt;       expect(page.get_by_test_id("bill-card").first).to_be_attached(timeout=LOAD_TIMEOUT)
+E       AssertionError: Locator expected to be attached
+E       Actual value: None
+E       Error: element(s) not found 
+E       Call log:
+E         - Expect "to_be_attached" with timeout 20000ms
+E         - waiting for get_by_test_id("bill-card").first
+E       
+E       Aria snapshot:
+E       - main:
+E         - heading "Saved bills" [level=1]
+E         - paragraph: Loading saved bills
+E       - alert
+
+skeleton/verify/helpers.py:51: AssertionError</failure></testcase><testcase classname="skeleton.verify.test_ui_split" name="test_c_3_1_stored_split_renders_one_row_per_person" time="20.058"><failure message="AssertionError: Locator expected to be attached&#10;Actual value: None&#10;Error: element(s) not found &#10;Call log:&#10;  - Expect &quot;to_be_attached&quot; with timeout 20000ms&#10;  - waiting for get_by_test_id(&quot;bill-place&quot;)&#10;&#10;Aria snapshot:&#10;- main:&#10;  - paragraph: Loading bill&#10;- alert">page = &lt;Page url='http://127.0.0.1:41283/bills/anand-bhavan'&gt;
+
+    def test_c_3_1_stored_split_renders_one_row_per_person(page):
+        """c-3-1: 4 share-row elements reading Person 1..4 at the rupee 341.00."""
+&gt;       open_bill(page, "anand-bhavan")
+
+skeleton/verify/test_ui_split.py:23: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+page = &lt;Page url='http://127.0.0.1:41283/bills/anand-bhavan'&gt;
+bill_id = 'anand-bhavan'
+
+    def open_bill(page: Page, bill_id: str) -&gt; None:
+        """Open sc-bill for a bill the store holds and wait for its loaded state."""
+        page.goto(f"{BASE_URL}/bills/{bill_id}", wait_until="domcontentloaded")
+&gt;       expect(page.get_by_test_id("bill-place")).to_be_attached(timeout=LOAD_TIMEOUT)
+E       AssertionError: Locator expected to be attached
+E       Actual value: None
+E       Error: element(s) not found 
+E       Call log:
+E         - Expect "to_be_attached" with timeout 20000ms
+E         - waiting for get_by_test_id("bill-place")
+E       
+E       Aria snapshot:
+E       - main:
+E         - paragraph: Loading bill
+E       - alert
+
+skeleton/verify/helpers.py:57: AssertionError</failure></testcase><testcase classname="skeleton.verify.test_ui_split" name="test_c_3_2_one_fewer_click_shows_three_people_and_three_rows" time="20.069"><failure message="AssertionError: Locator expected to be attached&#10;Actual value: None&#10;Error: element(s) not found &#10;Call log:&#10;  - Expect &quot;to_be_attached&quot; with timeout 20000ms&#10;  - waiting for get_by_test_id(&quot;bill-place&quot;)&#10;&#10;Aria snapshot:&#10;- main:&#10;  - paragraph: Loading bill&#10;- alert">page = &lt;Page url='http://127.0.0.1:41283/bills/anand-bhavan'&gt;
+
+    def test_c_3_2_one_fewer_click_shows_three_people_and_three_rows(page):
+        """c-3-2: people-count reads 3 and 3 share-row elements render after one
+        click of Fewer people."""
+&gt;       open_bill(page, "anand-bhavan")
+
+skeleton/verify/test_ui_split.py:30: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+page = &lt;Page url='http://127.0.0.1:41283/bills/anand-bhavan'&gt;
+bill_id = 'anand-bhavan'
+
+    def open_bill(page: Page, bill_id: str) -&gt; None:
+        """Open sc-bill for a bill the store holds and wait for its loaded state."""
+        page.goto(f"{BASE_URL}/bills/{bill_id}", wait_until="domcontentloaded")
+&gt;       expect(page.get_by_test_id("bill-place")).to_be_attached(timeout=LOAD_TIMEOUT)
+E       AssertionError: Locator expected to be attached
+E       Actual value: None
+E       Error: element(s) not found 
+E       Call log:
+E         - Expect "to_be_attached" with timeout 20000ms
+E         - waiting for get_by_test_id("bill-place")
+E       
+E       Aria snapshot:
+E       - main:
+E         - paragraph: Loading bill
+E       - alert
+
+skeleton/verify/helpers.py:57: AssertionError</failure></testcase><testcase classname="skeleton.verify.test_ui_split" name="test_c_3_3_three_way_split_hands_the_leftover_paise_to_the_first_people" time="20.058"><failure message="AssertionError: Locator expected to be attached&#10;Actual value: None&#10;Error: element(s) not found &#10;Call log:&#10;  - Expect &quot;to_be_attached&quot; with timeout 20000ms&#10;  - waiting for get_by_test_id(&quot;bill-place&quot;)&#10;&#10;Aria snapshot:&#10;- main:&#10;  - paragraph: Loading bill&#10;- alert">page = &lt;Page url='http://127.0.0.1:41283/bills/anand-bhavan'&gt;
+
+    def test_c_3_3_three_way_split_hands_the_leftover_paise_to_the_first_people(page):
+        """c-3-3: 136400 paise across 3 leaves 2 paise over, so the rows read
+        454.67, 454.67 and 454.66."""
+&gt;       open_bill(page, "anand-bhavan")
+
+skeleton/verify/test_ui_split.py:39: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+page = &lt;Page url='http://127.0.0.1:41283/bills/anand-bhavan'&gt;
+bill_id = 'anand-bhavan'
+
+    def open_bill(page: Page, bill_id: str) -&gt; None:
+        """Open sc-bill for a bill the store holds and wait for its loaded state."""
+        page.goto(f"{BASE_URL}/bills/{bill_id}", wait_until="domcontentloaded")
+&gt;       expect(page.get_by_test_id("bill-place")).to_be_attached(timeout=LOAD_TIMEOUT)
+E       AssertionError: Locator expected to be attached
+E       Actual value: None
+E       Error: element(s) not found 
+E       Call log:
+E         - Expect "to_be_attached" with timeout 20000ms
+E         - waiting for get_by_test_id("bill-place")
+E       
+E       Aria snapshot:
+E       - main:
+E         - paragraph: Loading bill
+E       - alert
+
+skeleton/verify/helpers.py:57: AssertionError</failure></testcase><testcase classname="skeleton.verify.test_ui_split" name="test_c_3_4_down_then_up_lands_back_on_the_stored_split" time="20.067"><failure message="AssertionError: Locator expected to be attached&#10;Actual value: None&#10;Error: element(s) not found &#10;Call log:&#10;  - Expect &quot;to_be_attached&quot; with timeout 20000ms&#10;  - waiting for get_by_test_id(&quot;bill-place&quot;)&#10;&#10;Aria snapshot:&#10;- main:&#10;  - paragraph: Loading bill&#10;- alert">page = &lt;Page url='http://127.0.0.1:41283/bills/anand-bhavan'&gt;
+
+    def test_c_3_4_down_then_up_lands_back_on_the_stored_split(page):
+        """c-3-4: 4 to 3 to 4, asserting the intermediate 3 as well as the four
+        341.00 rows the return to 4 rebuilds."""
+&gt;       open_bill(page, "anand-bhavan")
+
+skeleton/verify/test_ui_split.py:51: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+page = &lt;Page url='http://127.0.0.1:41283/bills/anand-bhavan'&gt;
+bill_id = 'anand-bhavan'
+
+    def open_bill(page: Page, bill_id: str) -&gt; None:
+        """Open sc-bill for a bill the store holds and wait for its loaded state."""
+        page.goto(f"{BASE_URL}/bills/{bill_id}", wait_until="domcontentloaded")
+&gt;       expect(page.get_by_test_id("bill-place")).to_be_attached(timeout=LOAD_TIMEOUT)
+E       AssertionError: Locator expected to be attached
+E       Actual value: None
+E       Error: element(s) not found 
+E       Call log:
+E         - Expect "to_be_attached" with timeout 20000ms
+E         - waiting for get_by_test_id("bill-place")
+E       
+E       Aria snapshot:
+E       - main:
+E         - paragraph: Loading bill
+E       - alert
+
+skeleton/verify/helpers.py:57: AssertionError</failure></testcase><testcase classname="skeleton.verify.test_ui_split" name="test_c_3_5_lower_clamp_holds_the_count_at_one" time="20.048"><failure message="AssertionError: Locator expected to be attached&#10;Actual value: None&#10;Error: element(s) not found &#10;Call log:&#10;  - Expect &quot;to_be_attached&quot; with timeout 20000ms&#10;  - waiting for get_by_test_id(&quot;bill-place&quot;)&#10;&#10;Aria snapshot:&#10;- main:&#10;  - paragraph: Loading bill&#10;- alert">page = &lt;Page url='http://127.0.0.1:41283/bills/anand-bhavan'&gt;
+
+    def test_c_3_5_lower_clamp_holds_the_count_at_one(page):
+        """c-3-5: four clicks of Fewer people from 4 walk 3, 2, 1 and then clamp at
+        1, leaving one row for the whole 136400 paise."""
+&gt;       open_bill(page, "anand-bhavan")
+
+skeleton/verify/test_ui_split.py:62: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+page = &lt;Page url='http://127.0.0.1:41283/bills/anand-bhavan'&gt;
+bill_id = 'anand-bhavan'
+
+    def open_bill(page: Page, bill_id: str) -&gt; None:
+        """Open sc-bill for a bill the store holds and wait for its loaded state."""
+        page.goto(f"{BASE_URL}/bills/{bill_id}", wait_until="domcontentloaded")
+&gt;       expect(page.get_by_test_id("bill-place")).to_be_attached(timeout=LOAD_TIMEOUT)
+E       AssertionError: Locator expected to be attached
+E       Actual value: None
+E       Error: element(s) not found 
+E       Call log:
+E         - Expect "to_be_attached" with timeout 20000ms
+E         - waiting for get_by_test_id("bill-place")
+E       
+E       Aria snapshot:
+E       - main:
+E         - paragraph: Loading bill
+E       - alert
+
+skeleton/verify/helpers.py:57: AssertionError</failure></testcase><testcase classname="skeleton.verify.test_ui_split" name="test_c_3_6_upper_clamp_holds_the_count_at_twenty" time="20.104"><failure message="AssertionError: Locator expected to be attached&#10;Actual value: None&#10;Error: element(s) not found &#10;Call log:&#10;  - Expect &quot;to_be_attached&quot; with timeout 20000ms&#10;  - waiting for get_by_test_id(&quot;bill-place&quot;)&#10;&#10;Aria snapshot:&#10;- main:&#10;  - paragraph: Loading bill&#10;- alert">page = &lt;Page url='http://127.0.0.1:41283/bills/anand-bhavan'&gt;
+
+    def test_c_3_6_upper_clamp_holds_the_count_at_twenty(page):
+        """c-3-6: seventeen clicks of More people from 4 reach 20 in sixteen and the
+        seventeenth is answered by the clamp."""
+&gt;       open_bill(page, "anand-bhavan")
+
+skeleton/verify/test_ui_split.py:71: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+page = &lt;Page url='http://127.0.0.1:41283/bills/anand-bhavan'&gt;
+bill_id = 'anand-bhavan'
+
+    def open_bill(page: Page, bill_id: str) -&gt; None:
+        """Open sc-bill for a bill the store holds and wait for its loaded state."""
+        page.goto(f"{BASE_URL}/bills/{bill_id}", wait_until="domcontentloaded")
+&gt;       expect(page.get_by_test_id("bill-place")).to_be_attached(timeout=LOAD_TIMEOUT)
+E       AssertionError: Locator expected to be attached
+E       Actual value: None
+E       Error: element(s) not found 
+E       Call log:
+E         - Expect "to_be_attached" with timeout 20000ms
+E         - waiting for get_by_test_id("bill-place")
+E       
+E       Aria snapshot:
+E       - main:
+E         - paragraph: Loading bill
+E       - alert
+
+skeleton/verify/helpers.py:57: AssertionError</failure></testcase></testsuite></testsuites>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="3" time="6.449" timestamp="2026-08-26T16:56:27.081541+05:30" hostname="nxtwave-Z790-D-AX"><testcase classname="skeleton.verify.test_api_health" name="test_health_returns_ok" time="0.027"><failure message="assert 501 == 200&#10; +  where 501 = &lt;Response [501 Not Implemented]&gt;.status_code">def test_health_returns_ok():
+        r = httpx.get(f"{BASE}/api/health", timeout=30)
+&gt;       assert r.status_code == 200
+E       assert 501 == 200
+E        +  where 501 = &lt;Response [501 Not Implemented]&gt;.status_code
+
+skeleton/verify/test_api_health.py:9: AssertionError</failure></testcase><testcase classname="skeleton.verify.test_ui_home" name="test_renders_three_items" time="5.773"><failure message="AssertionError: Locator expected to have count '3'&#10;Actual value: 0 &#10;Call log:&#10;  - Expect &quot;to_have_count&quot; with timeout 5000ms&#10;  - waiting for get_by_test_id(&quot;item&quot;)&#10;    14 × locator resolved to 0 elements&#10;       - unexpected value &quot;0&quot;">page = &lt;Page url='http://127.0.0.1:54427/'&gt;
+
+    def test_renders_three_items(page):
+        page.goto(BASE, wait_until="networkidle")
+&gt;       expect(page.get_by_test_id("item")).to_have_count(3)
+E       AssertionError: Locator expected to have count '3'
+E       Actual value: 0 
+E       Call log:
+E         - Expect "to_have_count" with timeout 5000ms
+E         - waiting for get_by_test_id("item")
+E           14 × locator resolved to 0 elements
+E              - unexpected value "0"
+
+skeleton/verify/test_ui_home.py:19: AssertionError</failure></testcase><testcase classname="skeleton.verify.test_ui_home" name="test_shows_heading" time="0.595" /></testsuite></testsuites>

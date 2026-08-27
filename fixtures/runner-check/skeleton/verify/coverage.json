@@ -1,0 +1,5 @@
+{
+  "c-1-1": {"test": "verify/test_api_health.py::test_health_returns_ok"},
+  "c-1-2": {"test": "verify/test_ui_home.py::test_renders_three_items"},
+  "c-1-3": {"test": "verify/test_ui_home.py::test_shows_heading"}
+}

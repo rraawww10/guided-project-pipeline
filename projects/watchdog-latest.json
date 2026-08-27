@@ -1,0 +1,19 @@
+{
+  "at": "2026-08-26T12:32:52+00:00",
+  "ok": true,
+  "checked": 1,
+  "broken": [],
+  "runs": [
+    {
+      "slug": "tip-split",
+      "ok": true,
+      "broken_criteria": [],
+      "counts": {
+        "pass": 17,
+        "fail": 0,
+        "skip": 0,
+        "missing": 0
+      }
+    }
+  ]
+}

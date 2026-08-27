@@ -1,0 +1,344 @@
+{
+  "slug": "recipe-box",
+  "title": "Recipe Box",
+  "track": "fullstack",
+  "sessions_planned": 4,
+  "stack": ["next", "react", "typescript"],
+  "source": null,
+  "endpoints": [
+    {
+      "id": "ep-recipes-list",
+      "method": "GET",
+      "path": "/api/recipes",
+      "request": "optional q and tag query parameters",
+      "response": "Recipe[]",
+      "status": [200]
+    },
+    {
+      "id": "ep-tags-list",
+      "method": "GET",
+      "path": "/api/tags",
+      "request": null,
+      "response": "string[]",
+      "status": [200]
+    },
+    {
+      "id": "ep-recipe-get",
+      "method": "GET",
+      "path": "/api/recipes/[id]",
+      "request": null,
+      "response": "Recipe",
+      "status": [200, 404]
+    }
+  ],
+  "screens": [
+    {
+      "id": "sc-list",
+      "route": "/",
+      "elements": [
+        "search box with the accessible name Search recipes",
+        "tag chip filter bar of filter-tag buttons built from GET /api/tags",
+        "recipe card grid",
+        "recipe-card holding the title, one card-tag per tag, card-minutes and card-serves",
+        "no-match message reading No recipes match",
+        "loading message reading Loading recipes"
+      ],
+      "states": ["loading", "loaded", "empty"],
+      "testids": ["recipe-card", "card-tag", "card-minutes", "card-serves", "filter-tag"]
+    },
+    {
+      "id": "sc-recipe",
+      "route": "/recipes/[id]",
+      "elements": [
+        "recipe header with the title, a chip per tag, the minutes and the stored serves as Written for 4",
+        "servings stepper of a Fewer servings control, the servings-count number and a More servings control",
+        "ingredient-row holding the quantity, the unit when there is one, and the item on one line",
+        "numbered list of step elements",
+        "back link with the accessible name Back to all recipes",
+        "not-found message reading Recipe not found",
+        "loading message reading Loading recipe"
+      ],
+      "states": ["loading", "loaded", "not-found"],
+      "testids": ["ingredient-row", "step", "servings-count"]
+    }
+  ],
+  "sessions": [
+    {
+      "n": 1,
+      "title": "The recipe list",
+      "goal": "Serve every recipe from the JSON store through a route handler and render one card per recipe on the list screen.",
+      "teaches": [
+        "route handlers in the App Router",
+        "reading a JSON file on the server with node fs",
+        "typing a response with a shared TypeScript type",
+        "fetching into React state with useEffect",
+        "rendering a list with map and keys"
+      ],
+      "builds": ["ep-recipes-list", "sc-list"],
+      "criteria": [
+        {
+          "id": "c-1-1",
+          "check": "GET /api/recipes returns 200 with a JSON array of the 8 seed recipes",
+          "target": "ep-recipes-list",
+          "cuts": ["cut-store-read-all", "cut-api-recipes-list"]
+        },
+        {
+          "id": "c-1-2",
+          "check": "GET /api/recipes returns each recipe with an id, a title, a tags array, a minutes number and a serves number",
+          "target": "ep-recipes-list",
+          "cuts": ["cut-store-read-all", "cut-api-recipes-list"]
+        },
+        {
+          "id": "c-1-3",
+          "check": "sc-list renders one recipe-card element per recipe, 8 of them for the 8 seed recipes",
+          "target": "sc-list",
+          "cuts": ["cut-list-fetch", "cut-list-cards"]
+        },
+        {
+          "id": "c-1-4",
+          "check": "sc-list displays the title Lemon Garlic Pasta on a recipe-card whose card-minutes element reads 20 min and whose card-serves element reads Serves 4",
+          "target": "sc-list",
+          "cuts": ["cut-list-cards"]
+        },
+        {
+          "id": "c-1-5",
+          "check": "sc-list renders one card-tag element per tag of that recipe on every card, 2 on the Lemon Garlic Pasta card reading quick and vegetarian",
+          "target": "sc-list",
+          "cuts": ["cut-list-cards"]
+        }
+      ],
+      "cuts": [
+        {
+          "id": "cut-store-read-all",
+          "file": "lib/store.ts",
+          "hint": "Read the recipes JSON file from disk and return every recipe in it as an array of Recipe objects."
+        },
+        {
+          "id": "cut-api-recipes-list",
+          "file": "app/api/recipes/route.ts",
+          "hint": "Send the recipes the handler has back to the browser as a JSON array with status 200."
+        },
+        {
+          "id": "cut-list-fetch",
+          "file": "app/RecipeList.tsx",
+          "hint": "Ask the recipes endpoint for the list, passing the page query string straight through, and put the array it answers with into state."
+        },
+        {
+          "id": "cut-list-cards",
+          "file": "app/RecipeList.tsx",
+          "hint": "Turn the recipes array into one recipe-card element per recipe, each one a link to that recipe page holding its title, a card-tag element per tag, its minutes in a card-minutes element and its serves count in a card-serves element."
+        }
+      ]
+    },
+    {
+      "n": 2,
+      "title": "Search and tag filter",
+      "goal": "Filter the list by title text and by one tag inside the route handler, and keep both choices in the page URL.",
+      "teaches": [
+        "reading searchParams inside a route handler",
+        "case-insensitive substring matching",
+        "deriving a distinct sorted list with Set and flatMap",
+        "useSearchParams and router.replace",
+        "keeping screen state in the URL so a filtered list is a link"
+      ],
+      "builds": ["ep-tags-list"],
+      "extends": ["ep-recipes-list", "sc-list"],
+      "criteria": [
+        {
+          "id": "c-2-1",
+          "check": "GET /api/recipes?q=garlic returns 200 with the 2 recipes whose title contains garlic in any letter case",
+          "target": "ep-recipes-list",
+          "cuts": ["cut-api-recipes-filter"]
+        },
+        {
+          "id": "c-2-2",
+          "check": "GET /api/recipes?tag=baking returns 200 with the 2 recipes tagged baking",
+          "target": "ep-recipes-list",
+          "cuts": ["cut-api-recipes-filter"]
+        },
+        {
+          "id": "c-2-3",
+          "check": "GET /api/recipes?q=garlic&tag=baking returns 200 with 1 recipe, Garlic Flatbread",
+          "target": "ep-recipes-list",
+          "cuts": ["cut-api-recipes-filter"]
+        },
+        {
+          "id": "c-2-4",
+          "check": "GET /api/tags returns 200 with the JSON array baking, one-pot, quick, spicy, vegetarian in alphabetical order",
+          "target": "ep-tags-list",
+          "cuts": ["cut-api-tags-list"]
+        },
+        {
+          "id": "c-2-5",
+          "check": "sc-list renders 2 recipe-card elements and the page URL reads /?q=garlic after garlic is typed into the search box",
+          "target": "sc-list",
+          "cuts": ["cut-list-search-url", "cut-api-recipes-filter"]
+        },
+        {
+          "id": "c-2-6",
+          "check": "sc-list renders 2 recipe-card elements and the page URL reads /?tag=baking after the filter-tag chip reading baking is clicked, then renders 8 and the URL reads / after that same filter-tag chip is clicked a second time",
+          "target": "sc-list",
+          "cuts": ["cut-list-tag-toggle", "cut-api-recipes-filter"]
+        }
+      ],
+      "cuts": [
+        {
+          "id": "cut-api-recipes-filter",
+          "file": "app/api/recipes/route.ts",
+          "hint": "Keep only the recipes whose title contains the q parameter, ignoring letter case, and whose tags include the tag parameter; a parameter that is missing or empty narrows nothing."
+        },
+        {
+          "id": "cut-api-tags-list",
+          "file": "app/api/tags/route.ts",
+          "hint": "Collect the tags of every recipe into one list without duplicates, sort it alphabetically and return it as a JSON array of strings."
+        },
+        {
+          "id": "cut-list-search-url",
+          "file": "app/RecipeList.tsx",
+          "hint": "Write the text of the search box into the q parameter of the page URL, and take q out of the URL when the box is emptied."
+        },
+        {
+          "id": "cut-list-tag-toggle",
+          "file": "app/RecipeList.tsx",
+          "hint": "Put the clicked tag into the tag parameter of the page URL, and take tag out of the URL when the chip that is already active is the one clicked."
+        }
+      ]
+    },
+    {
+      "n": 3,
+      "title": "One recipe in full",
+      "goal": "Open one recipe at its own route with its ingredients and its steps, and answer 404 for an id the store does not hold.",
+      "teaches": [
+        "dynamic route segments for pages and route handlers",
+        "returning 404 with a JSON body from a route handler",
+        "reading the route id with useParams",
+        "branching on the response status in a client component",
+        "rendering a not-found state"
+      ],
+      "builds": ["ep-recipe-get", "sc-recipe"],
+      "criteria": [
+        {
+          "id": "c-3-1",
+          "check": "GET /api/recipes/lemon-garlic-pasta returns 200 with that recipe, its 7 ingredients and its 4 steps",
+          "target": "ep-recipe-get",
+          "cuts": ["cut-store-find-one", "cut-api-recipe-get"]
+        },
+        {
+          "id": "c-3-2",
+          "check": "GET /api/recipes/not-a-recipe returns 404 with a JSON body holding an error field",
+          "target": "ep-recipe-get",
+          "cuts": ["cut-store-find-one", "cut-api-recipe-get"]
+        },
+        {
+          "id": "c-3-3",
+          "check": "sc-recipe renders one ingredient-row element per ingredient, 7 at /recipes/lemon-garlic-pasta, the olive oil row reading 2 tbsp olive oil and the lemon row reading 1 lemon",
+          "target": "sc-recipe",
+          "cuts": ["cut-recipe-fetch", "cut-recipe-rows"]
+        },
+        {
+          "id": "c-3-4",
+          "check": "sc-recipe renders 4 step elements in stored order at /recipes/lemon-garlic-pasta, the text of the first beginning 1. Boil the spaghetti",
+          "target": "sc-recipe",
+          "cuts": ["cut-recipe-fetch"]
+        },
+        {
+          "id": "c-3-5",
+          "check": "sc-recipe displays the message Recipe not found at the route /recipes/not-a-recipe",
+          "target": "sc-recipe",
+          "cuts": ["cut-recipe-fetch"]
+        }
+      ],
+      "cuts": [
+        {
+          "id": "cut-store-find-one",
+          "file": "lib/store.ts",
+          "hint": "Return the recipe whose id matches the one asked for, or null when the store holds no recipe with that id."
+        },
+        {
+          "id": "cut-api-recipe-get",
+          "file": "app/api/recipes/[id]/route.ts",
+          "hint": "Reply with the recipe as JSON and status 200 when the store finds it, and with status 404 and a JSON body holding an error field when the store finds nothing."
+        },
+        {
+          "id": "cut-recipe-fetch",
+          "file": "app/recipes/[id]/page.tsx",
+          "hint": "Ask the endpoint for the recipe named in the route, put it into state on a 200 reply, and move the page to its not-found state on a 404 reply."
+        },
+        {
+          "id": "cut-recipe-rows",
+          "file": "app/recipes/[id]/RecipeView.tsx",
+          "hint": "Render one ingredient-row element for every entry in rows, its text reading the formatted quantity, then the unit when that ingredient has one, then the item name."
+        }
+      ]
+    },
+    {
+      "n": 4,
+      "title": "Scale the servings",
+      "goal": "Compute every ingredient quantity from the servings number held in React state, so raising the count and lowering it again returns the recipe to the quantities it was written with.",
+      "teaches": [
+        "deriving what is on screen from state instead of from the server",
+        "exact fraction arithmetic with a numerator and a denominator",
+        "reducing a fraction with the greatest common divisor",
+        "clamping a value inside a state setter",
+        "scaling from the stored value every time rather than from the value on screen"
+      ],
+      "builds": [],
+      "extends": ["sc-recipe"],
+      "criteria": [
+        {
+          "id": "c-4-1",
+          "check": "sc-recipe displays 6 in the servings-count element after the plus control is clicked twice at /recipes/lemon-garlic-pasta, which is stored as serves 4",
+          "target": "sc-recipe",
+          "cuts": ["cut-recipe-servings"]
+        },
+        {
+          "id": "c-4-2",
+          "check": "sc-recipe displays an ingredient-row reading 3 tbsp olive oil at 6 servings, where the stored quantity is 2 tbsp at serves 4",
+          "target": "sc-recipe",
+          "cuts": ["cut-recipe-servings", "cut-fraction-scale", "cut-recipe-scale-quantity"]
+        },
+        {
+          "id": "c-4-3",
+          "check": "sc-recipe displays an ingredient-row reading 1/2 tsp chilli flakes at 6 servings, where the stored quantity is 1/3 tsp at serves 4",
+          "target": "sc-recipe",
+          "cuts": ["cut-recipe-servings", "cut-fraction-scale", "cut-recipe-scale-quantity"]
+        },
+        {
+          "id": "c-4-4",
+          "check": "sc-recipe displays an ingredient-row reading 1/2 tsp chilli flakes after the servings count is raised from 4 to 6, then one reading 1/3 tsp chilli flakes again after it is lowered back to 4",
+          "target": "sc-recipe",
+          "cuts": ["cut-recipe-servings", "cut-fraction-scale", "cut-recipe-scale-quantity"]
+        },
+        {
+          "id": "c-4-5",
+          "check": "sc-recipe displays 1 in the servings-count element after the minus control is clicked while the servings count is 1",
+          "target": "sc-recipe",
+          "cuts": ["cut-recipe-servings"]
+        },
+        {
+          "id": "c-4-6",
+          "check": "sc-recipe displays 24 in the servings-count element after the plus control is clicked 21 times at /recipes/lemon-garlic-pasta, which is stored as serves 4",
+          "target": "sc-recipe",
+          "cuts": ["cut-recipe-servings"]
+        }
+      ],
+      "cuts": [
+        {
+          "id": "cut-fraction-scale",
+          "file": "lib/fractions.ts",
+          "hint": "Multiply the quantity by the target servings over the base servings, then divide the numerator and the denominator by their greatest common divisor."
+        },
+        {
+          "id": "cut-recipe-servings",
+          "file": "app/recipes/[id]/RecipeView.tsx",
+          "hint": "Put the requested number into the servings state, holding it at 1 when it would drop below 1 and at 24 when it would climb above 24."
+        },
+        {
+          "id": "cut-recipe-scale-quantity",
+          "file": "app/recipes/[id]/RecipeView.tsx",
+          "hint": "Replace the quantity of the row copy with the stored quantity of that ingredient scaled from the recipe's serves count to the servings count on screen."
+        }
+      ]
+    }
+  ]
+}

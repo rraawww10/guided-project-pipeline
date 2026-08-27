@@ -1,0 +1,49 @@
+.page {
+  max-width: 60rem;
+  margin: 0 auto;
+  padding: 2rem 1.25rem 4rem;
+}
+
+.heading {
+  font-size: 1.75rem;
+  margin: 0 0 1.5rem;
+}
+
+.loading {
+  color: #6b6862;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+  gap: 1rem;
+}
+
+.card {
+  display: block;
+  padding: 1rem;
+  border: 1px solid #e2ded6;
+  border-radius: 0.5rem;
+  background: #fffdf9;
+  text-decoration: none;
+}
+
+.cardPlace {
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.cardDate {
+  color: #6b6862;
+  font-size: 0.9rem;
+}
+
+.cardTotal {
+  margin-top: 0.75rem;
+  font-size: 1.35rem;
+}
+
+.cardPeople {
+  color: #6b6862;
+  font-size: 0.9rem;
+}

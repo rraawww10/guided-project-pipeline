@@ -1,0 +1,50 @@
+[
+  {
+    "id": "anand-bhavan",
+    "place": "Anand Bhavan",
+    "date": "2026-03-14",
+    "totalPaise": 124000,
+    "tipPercent": 10,
+    "people": 4
+  },
+  {
+    "id": "kabab-junction",
+    "place": "Kabab Junction",
+    "date": "2026-02-28",
+    "totalPaise": 87550,
+    "tipPercent": 7,
+    "people": 3
+  },
+  {
+    "id": "the-filter-room",
+    "place": "The Filter Room",
+    "date": "2026-02-09",
+    "totalPaise": 45000,
+    "tipPercent": 5,
+    "people": 2
+  },
+  {
+    "id": "paradise-biryani",
+    "place": "Paradise Biryani",
+    "date": "2026-01-26",
+    "totalPaise": 233375,
+    "tipPercent": 12,
+    "people": 6
+  },
+  {
+    "id": "chai-point-mg",
+    "place": "Chai Point MG Road",
+    "date": "2026-01-05",
+    "totalPaise": 19900,
+    "tipPercent": 15,
+    "people": 2
+  },
+  {
+    "id": "kurry-kulture",
+    "place": "Kurry Kulture",
+    "date": "2025-12-19",
+    "totalPaise": 310000,
+    "tipPercent": 8,
+    "people": 5
+  }
+]

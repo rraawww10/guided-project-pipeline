@@ -1,0 +1,53 @@
+{
+  "c-1-1": {
+    "test": "verify/test_api_bills.py::test_c_1_1_bills_list_returns_200_with_the_six_seed_bills"
+  },
+  "c-1-2": {
+    "test": "verify/test_api_bills.py::test_c_1_2_bills_list_holds_six_whole_bill_objects"
+  },
+  "c-1-3": {
+    "test": "verify/test_ui_list.py::test_c_1_3_list_renders_one_card_per_seed_bill"
+  },
+  "c-1-4": {
+    "test": "verify/test_ui_list.py::test_c_1_4_anand_bhavan_card_links_and_reads_its_fields"
+  },
+  "c-1-5": {
+    "test": "verify/test_ui_list.py::test_c_1_5_cards_are_in_the_order_the_endpoint_returns"
+  },
+  "c-2-1": {
+    "test": "verify/test_api_bills.py::test_c_2_1_bill_get_returns_200_with_the_stored_bill"
+  },
+  "c-2-2": {
+    "test": "verify/test_api_bills.py::test_c_2_2_bill_get_returns_404_with_an_error_body_for_an_unknown_id"
+  },
+  "c-2-3": {
+    "test": "verify/test_ui_bill.py::test_c_2_3_bill_shows_its_stored_fields"
+  },
+  "c-2-4": {
+    "test": "verify/test_ui_bill.py::test_c_2_4_bill_shows_the_tip_and_grand_total"
+  },
+  "c-2-5": {
+    "test": "verify/test_ui_bill.py::test_c_2_5_unknown_bill_shows_not_found_and_the_back_link"
+  },
+  "c-2-6": {
+    "test": "verify/test_ui_bill.py::test_c_2_6_tip_rounds_half_up"
+  },
+  "c-3-1": {
+    "test": "verify/test_ui_split.py::test_c_3_1_stored_split_renders_one_row_per_person"
+  },
+  "c-3-2": {
+    "test": "verify/test_ui_split.py::test_c_3_2_one_fewer_click_shows_three_people_and_three_rows"
+  },
+  "c-3-3": {
+    "test": "verify/test_ui_split.py::test_c_3_3_three_way_split_hands_the_leftover_paise_to_the_first_people"
+  },
+  "c-3-4": {
+    "test": "verify/test_ui_split.py::test_c_3_4_down_then_up_lands_back_on_the_stored_split"
+  },
+  "c-3-5": {
+    "test": "verify/test_ui_split.py::test_c_3_5_lower_clamp_holds_the_count_at_one"
+  },
+  "c-3-6": {
+    "test": "verify/test_ui_split.py::test_c_3_6_upper_clamp_holds_the_count_at_twenty"
+  }
+}

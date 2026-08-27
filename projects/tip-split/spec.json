@@ -1,0 +1,483 @@
+{
+  "slug": "tip-split",
+  "title": "Tip Split",
+  "track": "fullstack",
+  "sessions_planned": 3,
+  "stack": [
+    "next",
+    "react",
+    "typescript"
+  ],
+  "source": null,
+  "notes": {
+    "departs_from_idea": [
+      "idea.md asks for 2 sessions; this spec plans 3. 11 cut points and 17 criteria do not fit two sessions under the house caps of 5 cuts and 6 criteria per session, and session 3 is the idea's stated payoff.",
+      "idea.md scope bullet 1 says the JSON file is read and written through route handlers, while idea.md out-of-scope bullet 1 rules out adding, editing and deleting bills. This spec follows the out-of-scope list: the store is read-only and there is no POST, PUT, PATCH or DELETE handler."
+    ],
+    "data_file": "data/bills.json holds an array of 6 Bill objects in the order listed below, newest date first.",
+    "seed_bills": [
+      {"id": "anand-bhavan", "place": "Anand Bhavan", "date": "2026-03-14", "totalPaise": 124000, "tipPercent": 10, "people": 4},
+      {"id": "kabab-junction", "place": "Kabab Junction", "date": "2026-02-28", "totalPaise": 87550, "tipPercent": 7, "people": 3},
+      {"id": "the-filter-room", "place": "The Filter Room", "date": "2026-02-09", "totalPaise": 45000, "tipPercent": 5, "people": 2},
+      {"id": "paradise-biryani", "place": "Paradise Biryani", "date": "2026-01-26", "totalPaise": 233375, "tipPercent": 12, "people": 6},
+      {"id": "chai-point-mg", "place": "Chai Point MG Road", "date": "2026-01-05", "totalPaise": 19900, "tipPercent": 15, "people": 2},
+      {"id": "kurry-kulture", "place": "Kurry Kulture", "date": "2025-12-19", "totalPaise": 310000, "tipPercent": 8, "people": 5}
+    ],
+    "types": {
+      "Bill": "{ id: string; place: string; date: string; totalPaise: number; tipPercent: number; people: number }",
+      "where": "lib/types.ts"
+    },
+    "money": {
+      "unit": "Every amount is a whole number of paise. No amount is held as a rupee value with a decimal point.",
+      "formatRupees": "SHIPS WRITTEN in lib/money.ts, not a cut point. formatRupees(paise) returns the character rupee sign, then Math.floor(paise / 100), then a full stop, then paise % 100 padded to two digits. 124000 prints as the rupee sign followed by 1240.00. No thousands separators.",
+      "tipPaise": "lib/money.ts. tipPaise(totalPaise, tipPercent) = Math.floor((totalPaise * tipPercent + 50) / 100), which is half-up rounding on whole paise. Body is cut-money-tip.",
+      "grandTotal": "SHIPS WRITTEN in app/bills/[id]/BillView.tsx, outside every cut: const grandTotalPaise = bill.totalPaise + tipPaise(bill.totalPaise, bill.tipPercent)",
+      "splitPaise": "lib/money.ts. splitPaise(amountPaise, people) returns one share per person in person order; each share is Math.floor(amountPaise / people) and the first amountPaise % people people get one extra paisa each, so the shares sum to amountPaise exactly. Body is cut-money-split.",
+      "worked_values": {
+        "anand-bhavan": {"tipPaise": 12400, "grandTotalPaise": 136400, "split4": [34100, 34100, 34100, 34100], "split3": [45467, 45467, 45466], "split1": [136400]},
+        "kabab-junction": {"tipPaise": 6129, "grandTotalPaise": 93679},
+        "the-filter-room": {"tipPaise": 2250, "grandTotalPaise": 47250},
+        "paradise-biryani": {"tipPaise": 28005, "grandTotalPaise": 261380},
+        "chai-point-mg": {"tipPaise": 2985, "grandTotalPaise": 22885},
+        "kurry-kulture": {"tipPaise": 24800, "grandTotalPaise": 334800}
+      },
+      "no_zero_tip": "No seed bill has a tipPercent of 0, because a tip of zero is what the unfilled cut-money-tip block produces."
+    },
+    "store": {
+      "file": "lib/store.ts",
+      "exports": "readAllBills(): Bill[] and findBill(id: string): Bill | null, and no others. Both read data/bills.json on every call. Neither writes.",
+      "how_the_file_is_read": "readAllBills reads the file from disk with node's fs module and builds the path from the process working directory: path.join(process.cwd(), 'data', 'bills.json'). It does not import the JSON, and no other file in the project imports data/bills.json. Reading the file on the server with fs is the lesson session 1 names, and a bundled import would satisfy every criterion while skipping it, so the rule is stated here and repeated in the hint for cut-store-read-all."
+    },
+    "text_assertions": "Every criterion that says an element reads or displays a string means: take that element's text content, collapse each run of whitespace to a single space, strip leading and trailing whitespace, and compare the result to the quoted string for exact equality. A share-row's text is the word Person, one space, the person's position counting from 1, one space, then formatRupees of that share, so the first row of a 4-way split of 136400 paise reads exactly: Person 1, then the rupee sign, then 341.00.",
+    "control_locators": "The stepper's minus and plus controls are button elements whose accessible names are Fewer people and More people; their visible text is a hyphen and a plus sign, and the accessible name comes from an aria-label on each button. The back link on sc-bill is an anchor to / whose visible text, and therefore whose accessible name, is Back to saved bills. A bill-card is itself an anchor with href /bills/<id> and the data-testid on the anchor.",
+    "skeleton_rules": [
+      "A cut is a block inside a function and the code around it compiles while the block is a hint comment. Where a block produces a value the code below reads, the variable is declared above the opening marker and the block assigns to it: cut-list-cards assigns to a ReactNode[] named cards declared above the marker, cut-bill-shares assigns to the shares array declared above its marker.",
+      "No cut ever contains its function's only return. Where a block produces the return value, the value is declared above the opening marker with a typed fallback and the return is the last statement of the function, below the closing marker: return bills after let bills: Bill[] = [] in readAllBills, return bill after let bill: Bill | null = null in findBill, return tip after let tip = 0 in tipPaise, return shares after let shares: number[] = [] in splitPaise. The two route handlers follow the same shape: each declares let body: unknown = { error: 'not implemented' } and let status = 501 above its opening marker, its cut block assigns to body and to status, and return Response.json(body, { status }) is the last statement of the function, below the closing marker. No return sits inside a marker pair anywhere in the project and the finished code has no unreachable statement. 501 belongs to the skeleton alone; the finished project answers only the statuses in the endpoints table.",
+      "Each fallback fails the criteria it should: bills = [] in readAllBills fails c-1-1 and c-1-2; the 501 body fails every endpoint criterion; tip = 0 makes bill-tip-amount read the rupee sign followed by 0.00 and makes bill-grand-total equal bill-total, failing c-2-4 and c-2-6 while leaving c-2-3 green on the stored total; shares = [] renders no share-row and no What each person owes heading, failing every session-3 criterion that counts a row; a setPeopleClamped that does nothing leaves people-count on the stored 4, failing c-3-2, c-3-3, c-3-4, c-3-5 and c-3-6.",
+      "Each cut id appears exactly once in the final code, between its markers."
+    ],
+    "criterion_cuts_convention": "A criterion lists every cut whose block must be filled for its assertion to hold, cuts from earlier sessions included. A cut whose block the criterion renders but does not assert on is not listed: c-3-6 reads only people-count, so it does not list cut-money-split.",
+    "subset_satisfied_criteria": "c-2-2 and c-2-5 both assert the 404 path, and findBill's typed fallback leaves bill null, which is the same answer a real miss gives. Both go green with cut-store-read-all and cut-store-find-one still open. Bill | null admits no other typed fallback. Pair c-2-2 with c-2-1 and c-2-5 with c-2-3 in any per-cut checkpoint; never present either alone. Every other criterion has been checked by hand against each of its cuts opened alone, and none is satisfied while any listed cut is open. c-1-2 pins the count of 6 for this reason, and c-3-4 asserts the intermediate 3 for this reason.",
+    "uncovered_states": "The loading state of both screens carries no criterion on purpose: it is what a skeleton shows while its fetch cut is open, so a criterion asserting it would be green on an empty skeleton. It is covered indirectly, because every criterion that reads a card, a bill field or a share row can only pass once its screen has left loading. Every other element in the two testid tables is read by at least one criterion, and the three non-testid affordances are graded too: the card link by c-1-4, the back link by c-2-5, and the two stepper buttons by every session-3 criterion that clicks them.",
+    "session_2_weight": "Session 2 sits on both caps, six criteria and four cuts, and ships BillView.tsx including a stepper that does not move until session 3. Deliberate Gate 1 call: there is one skeleton for the whole project, so markup cannot be held back per session, only cuts can, and cutting the stepper's JSX would cut something that teaches nothing. The share list was moved instead: its heading and rows are gated on shares.length, so the only thing a session-2 student sees that does not respond is the stepper on the bill's stored count. A fourth session holding ep-bill-get alone would double the departure from idea.md for one endpoint."
+  },
+  "endpoints": [
+    {
+      "id": "ep-bills-list",
+      "method": "GET",
+      "path": "/api/bills",
+      "request": null,
+      "response": "Bill[] - all 6 seed bills, whole Bill objects, in the order data/bills.json stores them",
+      "status": [
+        200
+      ]
+    },
+    {
+      "id": "ep-bill-get",
+      "method": "GET",
+      "path": "/api/bills/[id]",
+      "request": null,
+      "response": "Bill on 200; a JSON body holding an error field on 404",
+      "status": [
+        200,
+        404
+      ]
+    }
+  ],
+  "screens": [
+    {
+      "id": "sc-list",
+      "route": "/",
+      "elements": [
+        "heading reading Saved bills",
+        "loading message reading Loading saved bills, written outside every cut",
+        "grid of bill-card elements, one per bill, in the order the endpoint returns them",
+        "bill-card: an anchor to /bills/<id> carrying the bill-card testid and holding card-place, card-date, card-total and card-people",
+        "card-people reads the word Split, the stored people count, then the word ways"
+      ],
+      "states": [
+        "loading",
+        "loaded"
+      ],
+      "testids": [
+        "bill-card",
+        "card-place",
+        "card-date",
+        "card-total",
+        "card-people"
+      ],
+      "state_shape": "app/page.tsx is a client component holding bills: Bill[] starting at [] and status: 'loading' | 'loaded' starting at 'loading', both declared outside every cut. cut-list-fetch is the only code that moves status, and it moves it to 'loaded' only on a 200 reply. There is no empty state: the store always holds 6 bills and nothing filters the list.",
+      "fetch_owner": "The useEffect call and its empty dependency array [] ship written; cut-list-fetch is the body of that effect. It is the only fetch on this screen.",
+      "files": [
+        "app/page.tsx"
+      ]
+    },
+    {
+      "id": "sc-bill",
+      "route": "/bills/[id]",
+      "elements": [
+        "bill-place heading and bill-date",
+        "bill-total, bill-tip-percent reading the percentage and a percent sign, bill-tip-amount and bill-grand-total",
+        "bill-saved-people reading Split 4 ways when saved for a bill stored as split 4 ways",
+        "people stepper: a button with the accessible name Fewer people, the people-count element, a button with the accessible name More people; both stay clickable at every count because the clamp lives in the state setter, not in a disabled attribute",
+        "heading reading What each person owes, and one share-row per entry of shares, in order; both render only when shares holds at least one entry, and that condition ships written outside every cut",
+        "back link, an anchor to / with the visible text Back to saved bills",
+        "loading message reading Loading bill, written outside every cut",
+        "not-found message reading Bill not found, shown with the back link, written outside every cut"
+      ],
+      "states": [
+        "loading",
+        "loaded",
+        "not-found"
+      ],
+      "testids": [
+        "bill-place",
+        "bill-date",
+        "bill-total",
+        "bill-tip-percent",
+        "bill-tip-amount",
+        "bill-grand-total",
+        "bill-saved-people",
+        "people-count",
+        "share-row"
+      ],
+      "state_shape": "app/bills/[id]/page.tsx holds bill: Bill | null starting at null and status: 'loading' | 'loaded' | 'not-found' starting at 'loading', both outside every cut; cut-bill-fetch is the only code that moves status, and a reply that is neither 200 nor 404 leaves it on 'loading'. app/bills/[id]/BillView.tsx holds people: number starting at bill.people, outside every cut; the minus and plus controls call setPeopleClamped(people - 1) and setPeopleClamped(people + 1), both written outside every cut, and cut-bill-people is the body of setPeopleClamped. BillView mounts only in the loaded state, so bill is never null when the initial people value is read.",
+      "fetch_owner": "The id comes from useParams; the useEffect call and its dependency array [id] ship written; cut-bill-fetch is the body of that effect. It is the only fetch on this screen.",
+      "derived": "BillView computes on every render: grandTotalPaise ships written, then let shares: number[] = [] is declared and cut-bill-shares assigns to it. shares is rebuilt from the fetched bill and the current people on every render, never from what is on screen, so 4 to 3 to 4 lands back on the stored split.",
+      "inert_until_session_3": "sc-bill is built in session 2 and the stepper markup is in the file from session 2. Until cut-bill-people is filled the stepper is inert and people-count stays on the stored count. Until cut-money-split and cut-bill-shares are filled, shares stays [] and neither the What each person owes heading nor any share-row is rendered. No session-2 criterion reads people-count or a share-row.",
+      "files": [
+        "app/bills/[id]/page.tsx",
+        "app/bills/[id]/BillView.tsx"
+      ]
+    }
+  ],
+  "sessions": [
+    {
+      "n": 1,
+      "title": "The saved bills",
+      "goal": "Serve every saved bill from the JSON store through a route handler and render one card per bill on the list screen.",
+      "teaches": [
+        "route handlers in the App Router",
+        "reading a JSON file on the server with node fs",
+        "typing a response with a shared TypeScript type",
+        "fetching into React state with useEffect",
+        "rendering a list with map and keys",
+        "printing an integer paise amount as rupees"
+      ],
+      "builds": [
+        "ep-bills-list",
+        "sc-list"
+      ],
+      "criteria": [
+        {
+          "id": "c-1-1",
+          "check": "GET /api/bills returns 200 with a JSON array of the 6 seed bills",
+          "target": "ep-bills-list",
+          "cuts": [
+            "cut-store-read-all",
+            "cut-api-bills-list"
+          ]
+        },
+        {
+          "id": "c-1-2",
+          "check": "GET /api/bills returns a JSON array of 6 bills, each with an id, a place, a date, a totalPaise integer, a tipPercent integer and a people integer",
+          "target": "ep-bills-list",
+          "cuts": [
+            "cut-store-read-all",
+            "cut-api-bills-list"
+          ],
+          "note": "The count of 6 is part of the assertion. A criterion that only checked the fields of each element returned would be green on the empty array an unfilled cut-store-read-all produces."
+        },
+        {
+          "id": "c-1-3",
+          "check": "sc-list renders one bill-card element per bill, 6 of them for the 6 seed bills",
+          "target": "sc-list",
+          "cuts": [
+            "cut-store-read-all",
+            "cut-api-bills-list",
+            "cut-list-fetch",
+            "cut-list-cards"
+          ]
+        },
+        {
+          "id": "c-1-4",
+          "check": "sc-list renders a bill-card element that is a link to /bills/anand-bhavan, whose card-place element reads Anand Bhavan, whose card-date element reads 2026-03-14, whose card-total element reads ₹1240.00 and whose card-people element reads Split 4 ways",
+          "target": "sc-list",
+          "cuts": [
+            "cut-store-read-all",
+            "cut-api-bills-list",
+            "cut-list-fetch",
+            "cut-list-cards"
+          ]
+        },
+        {
+          "id": "c-1-5",
+          "check": "sc-list renders the 6 bill-card elements in the order the endpoint returns them, the card-place element of the first reading Anand Bhavan and the card-place element of the last reading Kurry Kulture",
+          "target": "sc-list",
+          "cuts": [
+            "cut-store-read-all",
+            "cut-api-bills-list",
+            "cut-list-fetch",
+            "cut-list-cards"
+          ]
+        }
+      ],
+      "cuts": [
+        {
+          "id": "cut-store-read-all",
+          "file": "lib/store.ts",
+          "hint": "Read the bills JSON file from disk with node's fs module, building its path from the process working directory, and put every bill in the file into the bills array declared above, keeping the order the file stores them in."
+        },
+        {
+          "id": "cut-api-bills-list",
+          "file": "app/api/bills/route.ts",
+          "hint": "Put every bill the store holds into the response body, and set the status to 200."
+        },
+        {
+          "id": "cut-list-fetch",
+          "file": "app/page.tsx",
+          "hint": "Ask the bills endpoint for the list, and when the reply is a 200 put the array it answers with into the bills state and move the status to loaded."
+        },
+        {
+          "id": "cut-list-cards",
+          "file": "app/page.tsx",
+          "hint": "Turn the bills array into one bill-card element per bill, in the order of the array, each one a link to that bill's page holding its place in a card-place element, its stored date string in a card-date element, its total formatted as rupees in a card-total element, and the word Split, its stored people count and the word ways in a card-people element; assign that array of card elements to the cards array declared above."
+        }
+      ]
+    },
+    {
+      "n": 2,
+      "title": "One bill, tip included",
+      "goal": "Open one bill at its own route with its total and its tip worked out in whole paise, and answer 404 for an id the store does not hold.",
+      "teaches": [
+        "dynamic route segments for pages and route handlers",
+        "returning 404 with a JSON body from a route handler",
+        "reading the route id with useParams",
+        "branching on the response status in a client component",
+        "rendering a not-found state",
+        "percentage arithmetic on integers with half-up rounding, so money never touches a float"
+      ],
+      "builds": [
+        "ep-bill-get",
+        "sc-bill"
+      ],
+      "criteria": [
+        {
+          "id": "c-2-1",
+          "check": "GET /api/bills/anand-bhavan returns 200 with that bill, its totalPaise reading 124000, its tipPercent reading 10 and its people reading 4",
+          "target": "ep-bill-get",
+          "cuts": [
+            "cut-store-read-all",
+            "cut-store-find-one",
+            "cut-api-bill-get"
+          ]
+        },
+        {
+          "id": "c-2-2",
+          "check": "GET /api/bills/not-a-bill returns 404 with a JSON body holding an error field",
+          "target": "ep-bill-get",
+          "cuts": [
+            "cut-store-read-all",
+            "cut-store-find-one",
+            "cut-api-bill-get"
+          ],
+          "note": "Pair with c-2-1. This goes green with cut-store-find-one still open, because findBill's null fallback and a real miss look the same."
+        },
+        {
+          "id": "c-2-3",
+          "check": "sc-bill displays Anand Bhavan in its bill-place element, 2026-03-14 in its bill-date element, ₹1240.00 in its bill-total element, 10% in its bill-tip-percent element and Split 4 ways when saved in its bill-saved-people element at the route /bills/anand-bhavan",
+          "target": "sc-bill",
+          "cuts": [
+            "cut-store-read-all",
+            "cut-store-find-one",
+            "cut-api-bill-get",
+            "cut-bill-fetch"
+          ]
+        },
+        {
+          "id": "c-2-4",
+          "check": "sc-bill displays ₹124.00 in its bill-tip-amount element and ₹1364.00 in its bill-grand-total element at the route /bills/anand-bhavan, which is stored as 124000 paise with a tip of 10 percent",
+          "target": "sc-bill",
+          "cuts": [
+            "cut-store-read-all",
+            "cut-store-find-one",
+            "cut-api-bill-get",
+            "cut-bill-fetch",
+            "cut-money-tip"
+          ]
+        },
+        {
+          "id": "c-2-5",
+          "check": "sc-bill displays the message Bill not found and a link whose accessible name is Back to saved bills and whose href is / at the route /bills/not-a-bill",
+          "target": "sc-bill",
+          "cuts": [
+            "cut-store-read-all",
+            "cut-store-find-one",
+            "cut-api-bill-get",
+            "cut-bill-fetch"
+          ],
+          "note": "Pair with c-2-3, for the same reason as c-2-2."
+        },
+        {
+          "id": "c-2-6",
+          "check": "sc-bill displays ₹61.29 in its bill-tip-amount element and ₹936.79 in its bill-grand-total element at the route /bills/kabab-junction, which is stored as 87550 paise with a tip of 7 percent, where the exact tip is 6128.5 paise and rounds up",
+          "target": "sc-bill",
+          "cuts": [
+            "cut-store-read-all",
+            "cut-store-find-one",
+            "cut-api-bill-get",
+            "cut-bill-fetch",
+            "cut-money-tip"
+          ],
+          "note": "Catches a tip that truncates instead of rounding half up: truncating gives 6128 paise, a tip of ₹61.28 and a grand total of ₹936.78, both of which this criterion rejects."
+        }
+      ],
+      "cuts": [
+        {
+          "id": "cut-store-find-one",
+          "file": "lib/store.ts",
+          "hint": "Put the bill whose id matches the one asked for into the bill value declared above, leaving it null when the store holds no bill with that id."
+        },
+        {
+          "id": "cut-api-bill-get",
+          "file": "app/api/bills/[id]/route.ts",
+          "hint": "Put the bill into the response body and set the status to 200 when the store finds it; when the store finds nothing, put an object holding an error field into the response body and set the status to 404."
+        },
+        {
+          "id": "cut-bill-fetch",
+          "file": "app/bills/[id]/page.tsx",
+          "hint": "Ask the endpoint for the bill named in the route; on a 200 reply put the bill into state and move the status to loaded, and on a 404 reply move the status to not-found."
+        },
+        {
+          "id": "cut-money-tip",
+          "file": "lib/money.ts",
+          "hint": "Work out the tip as the total times the tip percentage divided by a hundred, rounded half up, and put it into the whole-paise tip value declared above, without turning any value into rupees along the way."
+        }
+      ]
+    },
+    {
+      "n": 3,
+      "title": "Re-split the bill",
+      "goal": "Compute what each person owes from the people count held in React state, so the shares on screen always add back up to the total with tip.",
+      "teaches": [
+        "deriving what is on screen from state instead of from the server",
+        "integer division and remainder as a way to split money without losing a paisa",
+        "handing the leftover paise to the first people in the list",
+        "clamping a value inside a state setter",
+        "recomputing from the stored bill on every render rather than from what is on screen"
+      ],
+      "builds": [],
+      "extends": [
+        "sc-bill"
+      ],
+      "setup": "Every session-3 criterion opens at /bills/anand-bhavan, stored as 124000 paise, a tip of 10 percent and a split 4 ways. Its total with tip is 136400 paise, and every criterion reaches its people count by clicking the stepper from 4.",
+      "criteria": [
+        {
+          "id": "c-3-1",
+          "check": "sc-bill renders one share-row element per person, 4 at the route /bills/anand-bhavan, whose texts are Person 1 ₹341.00, Person 2 ₹341.00, Person 3 ₹341.00 and Person 4 ₹341.00 in that order",
+          "target": "sc-bill",
+          "cuts": [
+            "cut-store-read-all",
+            "cut-store-find-one",
+            "cut-api-bill-get",
+            "cut-bill-fetch",
+            "cut-money-tip",
+            "cut-money-split",
+            "cut-bill-shares"
+          ]
+        },
+        {
+          "id": "c-3-2",
+          "check": "sc-bill displays 3 in its people-count element and renders 3 share-row elements after the Fewer people button is clicked 1 time at the route /bills/anand-bhavan, which is stored as a split 4 ways",
+          "target": "sc-bill",
+          "cuts": [
+            "cut-store-read-all",
+            "cut-store-find-one",
+            "cut-api-bill-get",
+            "cut-bill-fetch",
+            "cut-money-split",
+            "cut-bill-shares",
+            "cut-bill-people"
+          ]
+        },
+        {
+          "id": "c-3-3",
+          "check": "sc-bill renders share-row elements reading Person 1 ₹454.67, Person 2 ₹454.67 and Person 3 ₹454.66 after the Fewer people button is clicked 1 time at the route /bills/anand-bhavan, where 136400 paise across 3 people leaves 2 paise over",
+          "target": "sc-bill",
+          "cuts": [
+            "cut-store-read-all",
+            "cut-store-find-one",
+            "cut-api-bill-get",
+            "cut-bill-fetch",
+            "cut-money-tip",
+            "cut-money-split",
+            "cut-bill-shares",
+            "cut-bill-people"
+          ]
+        },
+        {
+          "id": "c-3-4",
+          "check": "sc-bill displays 3 in its people-count element after the Fewer people button is clicked 1 time at the route /bills/anand-bhavan, and then displays 4 in its people-count element and renders 4 share-row elements whose texts are Person 1 ₹341.00, Person 2 ₹341.00, Person 3 ₹341.00 and Person 4 ₹341.00 after the More people button is clicked 1 time",
+          "target": "sc-bill",
+          "cuts": [
+            "cut-store-read-all",
+            "cut-store-find-one",
+            "cut-api-bill-get",
+            "cut-bill-fetch",
+            "cut-money-tip",
+            "cut-money-split",
+            "cut-bill-shares",
+            "cut-bill-people"
+          ],
+          "note": "The round-trip criterion. It asserts the intermediate 3 as well as the return to 4, because a stepper that never moves renders exactly the four ₹341.00 rows the end state expects and would otherwise satisfy it with cut-bill-people still open."
+        },
+        {
+          "id": "c-3-5",
+          "check": "sc-bill displays 1 in its people-count element and renders 1 share-row element reading Person 1 ₹1364.00 after the Fewer people button is clicked 4 times at the route /bills/anand-bhavan, which is stored as a split 4 ways",
+          "target": "sc-bill",
+          "cuts": [
+            "cut-store-read-all",
+            "cut-store-find-one",
+            "cut-api-bill-get",
+            "cut-bill-fetch",
+            "cut-money-tip",
+            "cut-money-split",
+            "cut-bill-shares",
+            "cut-bill-people"
+          ],
+          "note": "Walks 4 to 3 to 2 to 1 and then asks for 0, so the fourth click is the one the lower clamp answers."
+        },
+        {
+          "id": "c-3-6",
+          "check": "sc-bill displays 20 in its people-count element after the More people button is clicked 17 times at the route /bills/anand-bhavan, which is stored as a split 4 ways",
+          "target": "sc-bill",
+          "cuts": [
+            "cut-store-read-all",
+            "cut-store-find-one",
+            "cut-api-bill-get",
+            "cut-bill-fetch",
+            "cut-bill-people"
+          ],
+          "note": "Walks 4 up to 20 in 16 clicks and then asks for 21, so the seventeenth click is the one the upper clamp answers."
+        }
+      ],
+      "cuts": [
+        {
+          "id": "cut-money-split",
+          "file": "lib/money.ts",
+          "hint": "Fill the shares array declared above with one share per person: give every person the amount divided by the number of people ignoring the remainder, then give one extra paisa each to as many people from the start of the list as there are paise left over."
+        },
+        {
+          "id": "cut-bill-shares",
+          "file": "app/bills/[id]/BillView.tsx",
+          "hint": "Work out what each person owes by splitting the total with tip across the number of people currently held in state, and assign that array of shares to the shares variable declared above."
+        },
+        {
+          "id": "cut-bill-people",
+          "file": "app/bills/[id]/BillView.tsx",
+          "hint": "Put the requested number of people into the people state, holding it at 1 when it would drop below 1 and at 20 when it would climb above 20."
+        }
+      ]
+    }
+  ]
+}

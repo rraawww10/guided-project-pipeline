@@ -1,0 +1,100 @@
+{
+  "slug": "tip-split",
+  "cuts": [
+    {
+      "id": "cut-api-bill-get",
+      "file": "app/api/bills/[id]/route.ts",
+      "line": 17,
+      "lines_removed": 8
+    },
+    {
+      "id": "cut-api-bills-list",
+      "file": "app/api/bills/route.ts",
+      "line": 12,
+      "lines_removed": 3
+    },
+    {
+      "id": "cut-bill-people",
+      "file": "app/bills/[id]/BillView.tsx",
+      "line": 15,
+      "lines_removed": 1
+    },
+    {
+      "id": "cut-bill-shares",
+      "file": "app/bills/[id]/BillView.tsx",
+      "line": 24,
+      "lines_removed": 1
+    },
+    {
+      "id": "cut-bill-fetch",
+      "file": "app/bills/[id]/page.tsx",
+      "line": 18,
+      "lines_removed": 10
+    },
+    {
+      "id": "cut-list-fetch",
+      "file": "app/page.tsx",
+      "line": 17,
+      "lines_removed": 8
+    },
+    {
+      "id": "cut-list-cards",
+      "file": "app/page.tsx",
+      "line": 31,
+      "lines_removed": 21
+    },
+    {
+      "id": "cut-money-tip",
+      "file": "lib/money.ts",
+      "line": 17,
+      "lines_removed": 1
+    },
+    {
+      "id": "cut-money-split",
+      "file": "lib/money.ts",
+      "line": 28,
+      "lines_removed": 5
+    },
+    {
+      "id": "cut-store-read-all",
+      "file": "lib/store.ts",
+      "line": 14,
+      "lines_removed": 3
+    },
+    {
+      "id": "cut-store-find-one",
+      "file": "lib/store.ts",
+      "line": 27,
+      "lines_removed": 1
+    }
+  ],
+  "count": 11,
+  "by_session": {
+    "1": [
+      "cut-api-bills-list",
+      "cut-list-cards",
+      "cut-list-fetch",
+      "cut-store-read-all"
+    ],
+    "2": [
+      "cut-api-bill-get",
+      "cut-bill-fetch",
+      "cut-money-tip",
+      "cut-store-find-one"
+    ],
+    "3": [
+      "cut-bill-people",
+      "cut-bill-shares",
+      "cut-money-split"
+    ]
+  },
+  "typecheck": {
+    "ran": true,
+    "ok": true,
+    "error_count": 0,
+    "errors": [],
+    "missing_return": [],
+    "hint": ""
+  },
+  "ok": true
+}

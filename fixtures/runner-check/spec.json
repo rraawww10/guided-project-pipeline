@@ -1,0 +1,26 @@
+{
+  "slug": "runner-check", "title": "Runner Check", "track": "fullstack",
+  "sessions_planned": 1, "stack": ["next", "react"], "source": null,
+  "endpoints": [{"id": "ep-health", "method": "GET", "path": "/api/health",
+                 "request": null, "response": "{ok,items}", "status": [200]}],
+  "screens": [{"id": "sc-home", "route": "/", "elements": ["item list"],
+               "states": ["loaded"]}],
+  "sessions": [{
+    "n": 1, "title": "Boot and list", "goal": "Serve a health endpoint and render the items",
+    "teaches": ["route handlers"], "builds": ["ep-health", "sc-home"],
+    "criteria": [
+      {"id": "c-1-1", "check": "GET /api/health returns 200 with a JSON body holding ok true",
+       "target": "ep-health", "cuts": ["cut-api-health"]},
+      {"id": "c-1-2", "check": "sc-home renders 3 item rows on first load",
+       "target": "sc-home", "cuts": ["cut-ui-items"]},
+      {"id": "c-1-3", "check": "sc-home displays the heading Runner Check",
+       "target": "sc-home", "cuts": []}
+    ],
+    "cuts": [
+      {"id": "cut-api-health", "file": "app/api/health/route.ts",
+       "hint": "Reply with a JSON body holding ok true and the item count, at status 200"},
+      {"id": "cut-ui-items", "file": "app/page.tsx",
+       "hint": "Render one list item for each entry in the items array"}
+    ]
+  }]
+}

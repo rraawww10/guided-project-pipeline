@@ -1,0 +1,37 @@
+{
+  "ok": true,
+  "target": "app",
+  "seconds": 11.9,
+  "counts": {
+    "pass": 3,
+    "fail": 0,
+    "skip": 0,
+    "missing": 0
+  },
+  "criteria": {
+    "c-1-1": {
+      "status": "pass",
+      "check": "GET /api/health returns 200 with a JSON body holding ok true",
+      "session": 1,
+      "test": "verify/test_api_health.py::test_health_returns_ok",
+      "message": ""
+    },
+    "c-1-2": {
+      "status": "pass",
+      "check": "sc-home renders 3 item rows on first load",
+      "session": 1,
+      "test": "verify/test_ui_home.py::test_renders_three_items",
+      "message": ""
+    },
+    "c-1-3": {
+      "status": "pass",
+      "check": "sc-home displays the heading Runner Check",
+      "session": 1,
+      "test": "verify/test_ui_home.py::test_shows_heading",
+      "message": ""
+    }
+  },
+  "pytest_returncode": 0,
+  "stdout_tail": "...                                                                      [100%]\n3 passed in 1.46s\n",
+  "stderr_tail": ""
+}

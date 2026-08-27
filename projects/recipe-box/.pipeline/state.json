@@ -1,0 +1,48 @@
+{
+  "slug": "recipe-box",
+  "created": "2026-08-26T09:47:38+00:00",
+  "phase": "spec",
+  "retries": {
+    "spec": 0,
+    "code": 0,
+    "pack": 0
+  },
+  "gates": {
+    "gate1": null,
+    "gate2": null,
+    "gate3": null
+  },
+  "steps": [
+    {
+      "step": "lint",
+      "ok": true,
+      "at": "2026-08-26T10:12:45+00:00",
+      "detail": ""
+    },
+    {
+      "step": "revise:round-1",
+      "ok": true,
+      "at": "2026-08-26T10:30:03+00:00",
+      "detail": "spec.md, spec.json, lint.json, ambiguity.md"
+    },
+    {
+      "step": "lint",
+      "ok": true,
+      "at": "2026-08-26T10:40:39+00:00",
+      "detail": ""
+    },
+    {
+      "step": "revise:round-2",
+      "ok": true,
+      "at": "2026-08-26T10:52:29+00:00",
+      "detail": "spec.md, spec.json, lint.json, ambiguity.md"
+    },
+    {
+      "step": "lint",
+      "ok": true,
+      "at": "2026-08-26T11:05:25+00:00",
+      "detail": ""
+    }
+  ],
+  "ticket": null
+}
