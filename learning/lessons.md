@@ -119,6 +119,47 @@ gets a strikethrough and a date.
   deploy check, so read the `install` detail string, not just its `ok` flag,
   until the check itself treats an advisory as a failure.
 
+- **A report on disk is not evidence it reviewed the spec on disk.** 2026-08-27,
+  recipe-box: `revise` deliberately uses `shutil.move` so a rejected round's
+  `ambiguity.md` cannot linger - the comment at `cli.py:239` says so. Someone
+  copied round 2's report back into the project root afterwards. `pipeline next`
+  reads progress off the files present, so it reported "Gate 1" for a round-3
+  spec the Spec Breaker had never read, and the gate reader spent a pass walking
+  four findings that had already been fixed. Nothing ties a report to the spec it
+  reviewed. Until a `breaker` step records a hash of the spec it read, check
+  `ambiguity.md`'s mtime against `spec.md`'s before trusting it.
+
+- **Declare the stopping rule before the pass, not after.** 2026-08-27,
+  recipe-box: the Breaker returned something blocking on all five passes it ever
+  made, so "reject until blocking == 0" would never have terminated. The rule
+  that did terminate: *approve when every remaining finding sits in a column a
+  downstream checker owns.* Round 3 had five findings no checker could see -
+  reject. Round 4 had one, with a two-sentence fix - applied by hand and
+  approved. Write the rule down at the rejection, because deciding it while
+  holding the next report invites moving the line to fit the answer.
+
+- **Nothing locks `spec.md`, and a finished agent can wake up and re-run.**
+  2026-08-27, recipe-box: the round-4 Spec Writer reported a second time, over
+  an hour after it finished, saying it had copied `.pipeline/round-3/spec.md`
+  over the live files and re-derived its fixes. `pipeline/guard.py` locks only
+  `app/`, `verify/`, `pack/` and `skeleton/` subtrees, so the spec is writable at
+  every step. Here the mtimes cleared it - the spec was last written 13 minutes
+  before the Builder ran - but a re-run landing after Gate 1 would have silently
+  replaced the approved spec with a rejected one, and only mtimes would show it.
+
+- **Commit the approved spec before phase 2 starts.** 2026-08-27, recipe-box:
+  `app/` and `verify/` were built against a round-4 spec that existed only in the
+  working tree; `HEAD` still held the round-3 spec that had been rejected. There
+  is no archive-on-approval step - `revise` only archives on rejection - so a
+  single overwrite would have left a green 22/22 build with no readable record of
+  what it was built to do.
+
+- **The unlock step trips the security classifier, and it is a false positive.**
+  2026-08-26 tip-split and 2026-08-27 recipe-box: the workflow's `[unlock]` agent
+  was flagged both times. Both transcripts show exactly one tool call,
+  `python3 -m pipeline unlock <slug>`, and no file writes. Verify from the
+  transcript rather than trusting or dismissing the warning, but expect it.
+
 ## Teaching
 
 <!-- Where students actually got stuck, from live sessions. -->
