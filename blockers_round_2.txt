@@ -535,11 +535,19 @@ R2-18  A CRASH WAS REPORTED TO THE HUMAN AS A VERDICT
        FIX    cmd_mutation now catches, burns a retry, logs the step failed, and
               prints that no conclusion can be drawn about ungraded tasks.
        PHASE  Orchestrator / rule 6
-       RECURRENCE  Fixed for test and mutation. STILL OPEN for cmd_lint,
-              cmd_cut, cmd_leak, cmd_guide_lint, cmd_deploy and cmd_redfirst.
-              This is the second time the same class has been hit in one round,
-              and the second time it was found only because a human read the
-              output and disbelieved it.
+       RECURRENCE  Now closed at all ten call sites. Fixed first for test and
+              mutation, then generalised into _checker() for lint, cut,
+              skeleton-check, deploy, leak and guide-lint. A later audit found
+              TWO MORE that the generalisation had missed - cmd_redfirst, and
+              cmd_handover_checks, which is a convenience wrapper that calls
+              leak_scan and guide_linter DIRECTLY rather than going through the
+              guarded cmd_leak and cmd_guide_lint, so fixing those two left it
+              untouched. Both are guarded now.
+              That miss is the lesson: fixing a class by editing the sites you
+              can remember leaves the ones you cannot. The audit that found them
+              was a grep for the call shape, which is what should have followed
+              the first fix. This was hit three times in one round, and found by
+              a human reading output every time.
        THE GENERAL LESSON  A checker has three outcomes, not two: pass, fail,
               and DID NOT RUN. The pipeline models the first two. Everything
               downstream - the retry cap, the gate rules, the workflow's own

@@ -690,8 +690,9 @@ def cmd_pick(a) -> int:
 def cmd_redfirst(a) -> int:
     """Step 5's checker. Rule 2: a test that passes early proves nothing."""
     st = State(a.slug)
-    rc = redfirst.main([str(st.dir), "--target", a.target]
-                       + (["--static-only"] if a.static_only else []))
+    rc = _checker(st, "redfirst", "spec",
+                  lambda: redfirst.main([str(st.dir), "--target", a.target]
+                                        + (["--static-only"] if a.static_only else [])))
     st.log_step("redfirst", rc == 0)
     return rc
 
@@ -767,10 +768,15 @@ def cmd_handover_checks(a) -> int:
         print(f"{a.slug} is a flow-1 project - the leak scan and guide linter are not "
               f"part of that flow. Run them anyway with --force.")
         return 0
-    rc_leak = leak_scan.main([str(st.dir)] + (["--no-history"] if a.no_history else []))
+    # guarded like cmd_leak and cmd_guide_lint - this convenience wrapper calls the
+    # checkers directly rather than going through them, so it had the R2-18 shape
+    # after both of those were fixed.
+    rc_leak = _checker(st, "leak", "pack",
+                       lambda: leak_scan.main([str(st.dir)]
+                                              + (["--no-history"] if a.no_history else [])))
     st.log_step("leak-scan", rc_leak == 0)
     print()
-    rc_guide = guide_linter.main([str(st.dir)])
+    rc_guide = _checker(st, "guide-lint", "pack", lambda: guide_linter.main([str(st.dir)]))
     st.log_step("guide-lint", rc_guide == 0)
     if rc_leak or rc_guide:
         print("\nhandover checks failed - a leak goes back to the cut markers in app/, "
