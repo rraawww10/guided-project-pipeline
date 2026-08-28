@@ -117,6 +117,30 @@ def _guard(st: State, phase: str) -> None:
         sys.exit(f"blocked: {drift}")
 
 
+def _checker(st: State, step: str, phase: str, fn):
+    """Run a checker script. A crash is a failed checker - never a verdict.
+
+    A checker has three outcomes, not two: pass, fail, and DID NOT RUN. The
+    pipeline modelled the first two, so everything downstream silently mapped
+    the third onto one of them, and which one was arbitrary. An unguarded crash
+    in `test` read as "keep trying" and looped the phase-2 workflow for two
+    hours; an unguarded crash in `mutation` read as "the spec is wrong" and
+    printed an instruction to reject a Gate-1-approved spec that was correct.
+    """
+    try:
+        return fn()
+    except SystemExit:
+        raise
+    except Exception as e:
+        n = st.burn_retry(phase, f"{step} crashed: {type(e).__name__}: {e}")
+        st.log_step(step, False)
+        print(f"{step} crashed: {type(e).__name__}: {e}", file=sys.stderr)
+        print(f"\n{phase} retry {n}/{RETRY_LIMIT} - this is a pipeline fault, not "
+              f"the project's. A checker that did not run supports no conclusion.",
+              file=sys.stderr)
+        raise SystemExit(1)
+
+
 def cmd_new(a) -> int:
     d = project_dir(a.slug)
     if d.exists():
@@ -147,7 +171,7 @@ def cmd_new(a) -> int:
 def cmd_lint(a) -> int:
     st = State(a.slug)
     _guard(st, "spec")
-    rc = spec_linter.main(["", str(st.dir)])
+    rc = _checker(st, "lint", "spec", lambda: spec_linter.main(["", str(st.dir)]))
     if rc != 0:
         report = json.loads((st.dir / "lint.json").read_text())
         first = report["errors"][0] if report["errors"] else {}
@@ -222,13 +246,13 @@ def cmd_cut(a) -> int:
     st = State(a.slug)
     _guard(st, "pack")
     (st.dir / ".pipeline" / "LOCK").unlink(missing_ok=True)
-    rc = cutter.main(["", "cut", str(st.dir)])
+    rc = _checker(st, "cut", "pack", lambda: cutter.main(["", "cut", str(st.dir)]))
     if rc != 0:
         st.log_step("cut", False)
         return rc
     # the skeleton must fail exactly the tests whose cuts were removed
     test_runner.main([str(st.dir), "--target", "skeleton"])   # failures here are expected
-    rc = cutter.main(["", "verify", str(st.dir)])
+    rc = _checker(st, "skeleton-check", "pack", lambda: cutter.main(["", "verify", str(st.dir)]))
     if rc != 0:
         print("\nthe skeleton does not fail the right tests - fix the cut markers in app/, "
               "never the skeleton (rule 4)")
@@ -247,7 +271,9 @@ def cmd_cut(a) -> int:
 def cmd_deploy(a) -> int:
     st = State(a.slug)
     _guard(st, "pack")
-    rc = deploy_check.main([str(st.dir), "--target", a.target, "--hold", str(a.hold)])
+    rc = _checker(st, "deploy", "pack",
+                  lambda: deploy_check.main([str(st.dir), "--target", a.target,
+                                            "--hold", str(a.hold)]))
     st.log_step("deploy", rc == 0)
     return rc
 
@@ -684,7 +710,21 @@ def cmd_mutation(a) -> int:
         argv += ["--only", a.only]
     if a.max:
         argv += ["--max", str(a.max)]
-    rc = mutation.main(argv)
+    # Same rule as cmd_test: a checker that crashes is a failed checker. This one
+    # crashed out of os.symlink on Windows, wrote no mutation.json, burned no
+    # retry - and the phase-2 workflow then reported the missing report as the
+    # finding "the mutation check found student tasks that grade nothing" with
+    # an EMPTY task list, whose printed fix was to reject Gate 1 and revise a
+    # spec that had nothing wrong with it. A crash must never read as a verdict.
+    try:
+        rc = mutation.main(argv)
+    except Exception as e:
+        n = st.burn_retry("code", f"the mutation check crashed: {type(e).__name__}: {e}")
+        st.log_step("mutation", False)
+        print(f"the mutation check crashed: {type(e).__name__}: {e}", file=sys.stderr)
+        print(f"\ncode retry {n}/{RETRY_LIMIT} - this is a pipeline fault, not the "
+              f"spec's; no conclusion can be drawn about ungraded tasks", file=sys.stderr)
+        return 1
     if rc != 0:
         rep = json.loads((st.dir / "mutation.json").read_text())
         n = st.burn_retry("code", "ungraded student tasks: "
@@ -699,7 +739,9 @@ def cmd_mutation(a) -> int:
 def cmd_leak(a) -> int:
     """Step 10's second checker. Rule 6: solutions must not leak."""
     st = State(a.slug)
-    rc = leak_scan.main([str(st.dir)] + (["--no-history"] if a.no_history else []))
+    rc = _checker(st, "leak", "pack",
+                  lambda: leak_scan.main([str(st.dir)]
+                                         + (["--no-history"] if a.no_history else [])))
     st.log_step("leak-scan", rc == 0)
     return rc
 
@@ -707,7 +749,7 @@ def cmd_leak(a) -> int:
 def cmd_guide_lint(a) -> int:
     """Step 11's checker."""
     st = State(a.slug)
-    rc = guide_linter.main([str(st.dir)])
+    rc = _checker(st, "guide-lint", "pack", lambda: guide_linter.main([str(st.dir)]))
     st.log_step("guide-lint", rc == 0)
     return rc
 

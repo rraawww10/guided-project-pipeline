@@ -38,14 +38,14 @@ Round-1 IDs are cited as B-nn. New IDs this round are R2-nn.
 Phase 0 and phase 1 both completed on the FIRST attempt with zero retries
 burned. Every checker that fired, passed. And Gate 1 still rejected.
 
-Nineteen distinct blockers this round. Their distribution is the finding:
+Twenty-one distinct blockers this round. Their distribution is the finding:
 
     6  infrastructure / harness   - hit BEFORE the pipeline could run at all
     2  documentation drift
     1  test-suite integrity
     4  in-run, phase 1
     3  in-run, phase 1 round 2
-    3  in-run, phase 2
+    5  in-run, phase 2
 
 Four of the infrastructure blockers were Windows-specific, and three of those
 made a component silently unrunnable rather than fail loudly.
@@ -53,7 +53,7 @@ made a component silently unrunnable rather than fail loudly.
 The round-1 headline was "the pipeline is blind to everything expensive."
 The round-2 headline is narrower and worse:
 
-    NOTHING THE PIPELINE RUNS ITSELF FOUND ANY OF THE NINETEEN.
+    NOTHING THE PIPELINE RUNS ITSELF FOUND ANY OF THE TWENTY-ONE.
 
 The spec linter passed clean. The idea checker passed clean. The red-first
 check passed clean. The write guard passed its own selftest. Every blocker
@@ -497,6 +497,53 @@ THE BUILD WAS CORRECT THE WHOLE TIME. After R2-14 and R2-15 were fixed,
 in 53.7 seconds on the code the Builder had written before the loop began. Two
 hours and 48 agents were spent on two path bugs in the runner, and the cost was
 paid entirely because of R2-16.
+
+
+R2-17  The mutation check needs a privilege Windows does not grant by default
+       WHAT   mutation.mutate_one links the app's node_modules into each mutant
+              with os.symlink. On Windows that needs
+              SeCreateSymbolicLinkPrivilege - without admin or Developer Mode it
+              raises OSError [WinError 1314], so no mutant could build and
+              `pipeline mutation` died on the first task.
+       FIX    link_dir() tries a symlink, falls back to a junction via
+              _winapi.CreateJunction (no privilege required, and identical for
+              reading node_modules), and copies as a last resort.
+       PHASE  Scripts / mutation
+       RECURRENCE  Fixed. SIXTH Windows-platform blocker this round.
+
+R2-18  A CRASH WAS REPORTED TO THE HUMAN AS A VERDICT
+       WHAT   R2-16 was fixed for cmd_test, and its entry said the class was
+              still open for every other cmd_* that calls a checker directly.
+              cmd_mutation was the next one to run, and it had the identical
+              shape: mutation.main() unguarded, so R2-17's exception escaped
+              before mutation.json was written and before burn_retry.
+       WHY THIS IS WORSE THAN R2-16  R2-16 produced a loop, which wastes money.
+              R2-18 produced a WRONG INSTRUCTION. With no mutation.json on
+              disk, the phase-2 workflow reported:
+                  blocked: "the mutation check found student tasks that grade
+                            nothing"
+                  ungraded_tasks: []
+                  fix: pipeline gate ... 1 reject && pipeline revise ...
+              An empty list of ungraded tasks alongside a claim that ungraded
+              tasks were found. Had that instruction been followed, a correct
+              spec would have been rejected at Gate 1 and sent back through a
+              full round - roughly 35 minutes and 500k tokens - to fix a defect
+              that does not exist. The absence of a report was read as a
+              finding.
+       FIX    cmd_mutation now catches, burns a retry, logs the step failed, and
+              prints that no conclusion can be drawn about ungraded tasks.
+       PHASE  Orchestrator / rule 6
+       RECURRENCE  Fixed for test and mutation. STILL OPEN for cmd_lint,
+              cmd_cut, cmd_leak, cmd_guide_lint, cmd_deploy and cmd_redfirst.
+              This is the second time the same class has been hit in one round,
+              and the second time it was found only because a human read the
+              output and disbelieved it.
+       THE GENERAL LESSON  A checker has three outcomes, not two: pass, fail,
+              and DID NOT RUN. The pipeline models the first two. Everything
+              downstream - the retry cap, the gate rules, the workflow's own
+              summary - silently maps the third onto one of the other two, and
+              which one it picks is arbitrary. R2-16 mapped it to "keep trying";
+              R2-18 mapped it to "the spec is wrong".
 
 
 ================================================================================
