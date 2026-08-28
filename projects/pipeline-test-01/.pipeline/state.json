@@ -6,7 +6,7 @@
   "retries": {
     "idea": 0,
     "spec": 0,
-    "code": 0,
+    "code": 1,
     "pack": 0
   },
   "step_runs": {
@@ -16,7 +16,8 @@
     "lint": 2,
     "breaker": 2,
     "redfirst": 2,
-    "revise:round-1": 1
+    "revise:round-1": 1,
+    "test:app": 2
   },
   "gates": {
     "gate0": {
@@ -110,6 +111,20 @@
       "step": "redfirst",
       "ok": true,
       "at": "2026-08-28T16:49:32+00:00",
+      "detail": "",
+      "run": 2
+    },
+    {
+      "step": "test:app",
+      "ok": false,
+      "at": "2026-08-28T18:55:12+00:00",
+      "detail": "",
+      "run": 1
+    },
+    {
+      "step": "test:app",
+      "ok": true,
+      "at": "2026-08-28T18:57:41+00:00",
       "detail": "",
       "run": 2
     }

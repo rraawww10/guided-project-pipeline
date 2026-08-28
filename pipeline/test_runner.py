@@ -63,13 +63,27 @@ def _bootstrap_pip(py: Path) -> bool:
         os.unlink(tmp.name)
 
 
+def venv_bin(venv: Path, name: str) -> Path:
+    """The path to an executable inside a venv, on this platform.
+
+    Windows puts them in Scripts/ with an .exe suffix; POSIX puts them in bin/.
+    Hardcoding the POSIX layout made `pipeline test` raise WinError 2 out of
+    ensure_venv BEFORE it could log a step, so no retry was burned, no ticket
+    was raised, and the phase-2 workflow looped on the Verifier for two hours
+    with retries showing code=0/15.
+    """
+    if sys.platform == "win32":
+        return venv / "Scripts" / (name + ".exe")
+    return venv / "bin" / name
+
+
 def _make_venv(venv: Path) -> Path:
     """uv if it is here, then the stdlib, then the stdlib without pip."""
     venv.parent.mkdir(parents=True, exist_ok=True)
     if shutil.which("uv"):
         r = subprocess.run(["uv", "venv", str(venv)], capture_output=True, text=True)
         if r.returncode == 0:
-            return venv / "bin" / "python"
+            return venv_bin(venv, "python")
     r = subprocess.run([sys.executable, "-m", "venv", str(venv)],
                        capture_output=True, text=True)
     if r.returncode != 0:
@@ -81,13 +95,13 @@ def _make_venv(venv: Path) -> Path:
                 "could not create a virtualenv for the test runner.\n"
                 f"{r.stderr.strip()}\n"
                 "Fix it once with:  sudo apt install python3-venv")
-    return venv / "bin" / "python"
+    return venv_bin(venv, "python")
 
 
 def ensure_venv(project: Path) -> Path:
     """One venv per project, reused. Keeps the nightly watchdog free of installs."""
     venv = project / ".pipeline" / "venv"
-    py = venv / "bin" / "python"
+    py = venv_bin(venv, "python")
     stamp = venv / ".deps-ok"
     if stamp.exists() and py.exists():
         return py
@@ -108,7 +122,7 @@ def ensure_venv(project: Path) -> Path:
         raise RuntimeError(f"could not install {PYTEST_DEPS}:\n{r.stderr[-1500:]}")
 
     # chromium is ~150MB and only needed once per machine
-    subprocess.run([str(venv / "bin" / "playwright"), "install", "chromium"],
+    subprocess.run([str(venv_bin(venv, "playwright")), "install", "chromium"],
                    capture_output=True, timeout=1800)
     stamp.write_text("ok\n")
     return py
@@ -130,18 +144,29 @@ def wait_for(url: str, timeout: int) -> bool:
     return False
 
 
+def npm() -> str:
+    """The npm executable, resolved.
+
+    On Windows npm is npm.CMD, and CreateProcess cannot launch a bare "npm" -
+    it raises WinError 2. shutil.which honours PATHEXT and returns the full
+    path, which does launch. Same class as the POSIX venv layout above: the
+    pipeline ran only on Linux until it did not.
+    """
+    return shutil.which("npm") or "npm"
+
+
 def boot(target: Path, port: int, log: Path) -> subprocess.Popen:
     env = {**os.environ, "PORT": str(port), "NODE_ENV": "production", "CI": "1"}
     if not (target / "node_modules").exists():
         lock = target / "package-lock.json"
-        run(["npm", "ci" if lock.exists() else "install", "--no-audit", "--no-fund"],
+        run([npm(), "ci" if lock.exists() else "install", "--no-audit", "--no-fund"],
             target, timeout=900)
-    build = run(["npm", "run", "build"], target, timeout=900)
+    build = run([npm(), "run", "build"], target, timeout=900)
     log.write_text(f"$ npm run build\n{build.stdout}\n{build.stderr}\n")
     if build.returncode != 0:
         raise RuntimeError(f"npm run build failed - see {log}")
     handle = log.open("a")
-    return subprocess.Popen(["npm", "run", "start", "--", "--port", str(port)],
+    return subprocess.Popen([npm(), "run", "start", "--", "--port", str(port)],
                             cwd=target, env=env, stdout=handle, stderr=subprocess.STDOUT)
 
 

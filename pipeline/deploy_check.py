@@ -41,6 +41,17 @@ ADVISORY = re.compile(
     re.IGNORECASE)
 
 
+def npm() -> str:
+    """The npm executable, resolved.
+
+    On Windows npm is npm.CMD, and CreateProcess cannot launch a bare "npm" -
+    it raises WinError 2. shutil.which honours PATHEXT and returns the full
+    path, which does launch. Same class as the POSIX venv layout above: the
+    pipeline ran only on Linux until it did not.
+    """
+    return shutil.which("npm") or "npm"
+
+
 def find_advisories(text: str) -> list[str]:
     """The lines npm already printed that name a vulnerability."""
     return sorted({ln.strip()[:300] for ln in text.splitlines() if ADVISORY.search(ln)})
@@ -97,7 +108,7 @@ def main(argv: list[str] | None = None) -> int:
         step("fresh copy", True, str(work))
 
         lock = work / "package-lock.json"
-        r = run(["npm", "ci" if lock.exists() else "install", "--no-audit", "--no-fund"],
+        r = run([npm(), "ci" if lock.exists() else "install", "--no-audit", "--no-fund"],
                 work, timeout=1200)
         install_out = (r.stdout or "") + "\n" + (r.stderr or "")
         advisories = find_advisories(install_out)
@@ -114,7 +125,7 @@ def main(argv: list[str] | None = None) -> int:
         else:
             step("install advisories", True, "none")
 
-        r = run(["npm", "run", "build"], work, timeout=1200)
+        r = run([npm(), "run", "build"], work, timeout=1200)
         if not step("build", r.returncode == 0, r.stderr or r.stdout):
             raise RuntimeError("build failed")
 
@@ -124,7 +135,7 @@ def main(argv: list[str] | None = None) -> int:
         log.mkdir(parents=True, exist_ok=True)
         handle = (log / "deploy-server.log").open("w")
         server = subprocess.Popen(
-            ["npm", "run", "start", "--", "--port", str(port)], cwd=work,
+            [npm(), "run", "start", "--", "--port", str(port)], cwd=work,
             env={**os.environ, "PORT": str(port), "NODE_ENV": "production"},
             stdout=handle, stderr=subprocess.STDOUT)
         up = wait_for(preview, BOOT_TIMEOUT)

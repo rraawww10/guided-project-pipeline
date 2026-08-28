@@ -121,16 +121,28 @@ def board_missing(page: Page) -> Locator:
 
 
 def attr_by_index(page: Page, name: str) -> dict[int, str]:
-    """data-index -> the literal string in `name`, exactly as it is rendered."""
-    return {
-        int(c.get_attribute("data-index") or -1): (c.get_attribute(name) or "")
-        for c in cells(page).all()
-    }
+    """data-index -> the literal string in `name`, exactly as it is rendered.
+
+    Read as one snapshot in a single call rather than one round trip per cell:
+    on a 64-cell board the per-cell form takes 64 sequential reads, and a React
+    re-render landing part way through would mix two states into one answer.
+    """
+    pairs = cells(page).evaluate_all(
+        "(els, name) => els.map((e) => [e.getAttribute('data-index'),"
+        " e.getAttribute(name)])",
+        name,
+    )
+    return {int(index if index is not None else -1): (value or "")
+            for index, value in pairs}
 
 
 def text_by_index(page: Page) -> dict[int, str]:
-    """data-index -> the cell's visible text, whitespace-normalized."""
-    return {
-        int(c.get_attribute("data-index") or -1): normalize(c.text_content())
-        for c in cells(page).all()
-    }
+    """data-index -> the cell's visible text, whitespace-normalized.
+
+    One snapshot in a single call, for the same reason as attr_by_index.
+    """
+    pairs = cells(page).evaluate_all(
+        "(els) => els.map((e) => [e.getAttribute('data-index'), e.textContent])"
+    )
+    return {int(index if index is not None else -1): normalize(text)
+            for index, text in pairs}

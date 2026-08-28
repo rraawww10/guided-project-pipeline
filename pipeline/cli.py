@@ -190,7 +190,20 @@ def cmd_test(a) -> int:
     # workflow used to spawn before every test run - one command-only agent per
     # retry iteration, and the one the security classifier kept flagging.
     (st.dir / ".pipeline" / "LOCK").unlink(missing_ok=True)
-    rc = test_runner.main([str(st.dir), "--target", a.target])
+    # A checker that CRASHES is a failed checker. It used to escape as an
+    # exception, so burn_retry and log_step below never ran: `pipeline test`
+    # died in ensure_venv on Windows with retries still reading code=0/15, and
+    # the phase-2 workflow looped on the Verifier for two hours with nothing to
+    # stop it. Rule 6 has to cover the crash, not just the red run.
+    try:
+        rc = test_runner.main([str(st.dir), "--target", a.target])
+    except Exception as e:
+        n = st.burn_retry("code", f"the test runner crashed: {type(e).__name__}: {e}")
+        st.log_step(f"test:{a.target}", False)
+        print(f"the test runner crashed: {type(e).__name__}: {e}", file=sys.stderr)
+        print(f"\ncode retry {n}/{RETRY_LIMIT} - this is a pipeline fault, not the "
+              f"builder's; fix the runner rather than the app", file=sys.stderr)
+        return 1
     if a.target == "app" and rc != 0:
         res = json.loads((st.dir / "results.json").read_text())
         failed = [c for c, v in res.get("criteria", {}).items() if v["status"] != "pass"]

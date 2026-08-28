@@ -23,7 +23,7 @@ import tempfile
 from pathlib import Path
 
 from . import (cli, code_check, cutter, deploy_check, gate1, guard, guide_linter,
-               leak_scan, mutation, redfirst, spec_linter, watchdog)
+               leak_scan, mutation, redfirst, spec_linter, test_runner, watchdog)
 from .deploy_check import find_advisories
 from .spec_linter import Lint, _scan_placeholder, _scan_vague, lint_spec
 from .state import (GATES_BY_FLOW, PHASES_BY_FLOW, RETRY_LIMIT, STEP_RUN_LIMIT,
@@ -768,12 +768,79 @@ def test_guard(tmp: Path) -> None:
     check("a backslash path is a write target too",
           guard.write_targets(r"rm C:\repo\projects\fixture\verify\t.py"),
           [r"C:\repo\projects\fixture\verify\t.py"])
+    # `pipeline test` hardcoded the POSIX venv layout, so on Windows ensure_venv
+    # raised WinError 2 BEFORE it could log a step: no retry burned, no ticket,
+    # and the phase-2 workflow looped on the Verifier for two hours at code=0/15.
+    # Pin BOTH layouts here regardless of host - the suite only ever runs on one
+    # machine, which is exactly how this class of bug keeps reaching production.
+    was = test_runner.sys.platform
+    try:
+        test_runner.sys.platform = "win32"
+        check("on Windows a venv executable lives in Scripts/ with .exe",
+              test_runner.venv_bin(Path("v"), "python"), Path("v/Scripts/python.exe"))
+        check("and so does playwright",
+              test_runner.venv_bin(Path("v"), "playwright"), Path("v/Scripts/playwright.exe"))
+        test_runner.sys.platform = "linux"
+        check("on POSIX it lives in bin/ with no suffix",
+              test_runner.venv_bin(Path("v"), "python"), Path("v/bin/python"))
+    finally:
+        test_runner.sys.platform = was
+
     check("the MSYS drive form is rewritten to a drive",
           guard.MSYS_PATH.sub(r"\1:/", "/d/repo/projects/fixture/verify/t.py"),
           "d:/repo/projects/fixture/verify/t.py")
 
 
 # ------------------------------------------------------------------ revise ----
+def test_checker_crash_burns_a_retry(tmp: Path) -> None:
+    """A checker that CRASHES is a failed checker.
+
+    `pipeline test` used to let an exception out of test_runner.main, so the
+    burn_retry and log_step after it never ran. On Windows ensure_venv raised
+    WinError 2 every time and retries stayed at code=0/15, so nothing capped the
+    phase-2 workflow: it re-ran the Verifier 14 times over two hours on a build
+    that was in fact correct."""
+    print("a crashing checker still burns a retry")
+    os.environ["GP_ROOT"] = str(tmp)
+    d = tmp / "projects" / "crash"
+    (d / ".pipeline").mkdir(parents=True, exist_ok=True)
+    (d / "spec.json").write_text('{"slug": "crash"}\n')
+    legacy_state(d, "crash")
+    st = State("crash", root=tmp)
+    st.data["phase"] = "code"
+    st.record_gate("gate1", True, "approved")
+    st.save()
+
+    boom = lambda *_a, **_k: (_ for _ in ()).throw(FileNotFoundError("[WinError 2]"))
+    was = cli.test_runner.main
+    cli.test_runner.main = boom
+    try:
+        ns = argparse.Namespace(slug="crash", target="app")
+        with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
+            rc = cli.cmd_test(ns)
+    finally:
+        cli.test_runner.main = was
+
+    after = State("crash", root=tmp)
+    check("the crash is reported as a failure", rc, 1)
+    check("a retry is burned for it", after.data["retries"]["code"], 1)
+    check("and the step is logged failed",
+          [x for x in after.data["steps"] if x["step"] == "test:app"][-1]["ok"], False)
+    # and because it burns, it terminates: the loop that ran for two hours would
+    # now stop at the cap with a ticket naming the real fault
+    cli.test_runner.main = boom
+    try:
+        with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
+            for _ in range(RETRY_LIMIT - 1):
+                cli.cmd_test(argparse.Namespace(slug="crash", target="app"))
+    finally:
+        cli.test_runner.main = was
+    final = State("crash", root=tmp)
+    check("repeated crashes reach the cap", final.exhausted("code"), True)
+    check("and the ticket names the crash, not the builder",
+          "WinError 2" in (final.data["ticket"] or {}).get("last_error", ""), True)
+
+
 def test_revise(tmp: Path) -> None:
     """`revise` archives the rejected round and leaves nothing behind that would
     make `next` still report the spec as waiting at gate 1."""
@@ -1562,7 +1629,8 @@ def main() -> int:
     try:
         for t in (test_linter, test_cutter, test_return_safety, test_skeleton_check,
                   test_gate1, test_spec_freeze, test_breaker_binding, test_state,
-                  test_step_churn, test_guard, test_revise, test_revise_flow2,
+                  test_step_churn, test_guard, test_checker_crash_burns_a_retry,
+                  test_revise, test_revise_flow2,
                   test_deploy_advisories,
                   test_watchdog, test_code_checks, test_runtime_state,
                   test_relative_paths, test_flow2, test_flow2_next,

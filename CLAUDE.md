@@ -48,7 +48,7 @@ pipeline/           # orchestrator + every script (Python)
   code_check.py     # shape checks a criterion can name (e.g. utc-dates)
   guard.py          # PreToolUse hook - write locks and the frozen spec
   watchdog.py       # nightly replay of shipped test suites
-  selftest.py       # 294 deterministic checks on the scripts
+  selftest.py       # 302 deterministic checks on the scripts
   templates/        # CONTRACT.md (spec.json shape), idea_template.md
 .claude/
   agents/           # idea-generator, spec-writer, spec-breaker, test-writer,
@@ -84,7 +84,7 @@ python3 -m pipeline dryrun <slug> --session N --minutes M --by <who>   # step 13
 python3 -m pipeline ship <slug>
 python3 -m pipeline watch                     # nightly watchdog
 python3 -m pipeline feedback <slug> -m ".."   # step 15, re-enters at step 3
-python3 -m pipeline.selftest                  # run 294 deterministic checks
+python3 -m pipeline.selftest                  # run 302 deterministic checks
 ```
 
 Per-step checkers: `ideas`, `lint`, `breaker begin|end`, `gate1-check`,
