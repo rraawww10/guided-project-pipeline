@@ -26,8 +26,20 @@ LOAD_TIMEOUT = 20_000
 
 
 def base_url() -> str:
-    """The running app's URL. Read on call, so collection needs no environment."""
-    return os.environ["BASE_URL"].rstrip("/")
+    """The running app's URL. Read on call, so collection needs no environment.
+
+    The pipeline sets BASE_URL for every run it makes. A bare `pytest` with no
+    app behind it would otherwise raise a KeyError from inside a fixture, which
+    reads as an infrastructure crash rather than the one-line reason it is.
+    """
+    url = os.environ.get("BASE_URL")
+    if not url:
+        raise RuntimeError(
+            "BASE_URL is not set. This suite never starts a server - it talks to "
+            "an app that is already running. Start the app, then point BASE_URL "
+            "at it, or let the pipeline do both: python3 -m pipeline test <slug>"
+        )
+    return url.rstrip("/")
 
 
 # --------------------------------------------------------------------------

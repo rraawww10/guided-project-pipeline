@@ -1,0 +1,173 @@
+{
+  "ok": true,
+  "target": "app",
+  "checked": 7,
+  "of_total": 7,
+  "seconds": 684.8,
+  "ungraded_tasks": [],
+  "inconclusive_tasks": [],
+  "results": [
+    {
+      "task": "cut-flag-toggle",
+      "ok": true,
+      "inconclusive": false,
+      "lines_removed": 8,
+      "graded_by": [
+        "c-3-5"
+      ],
+      "went_red": [
+        "c-3-5"
+      ],
+      "stayed_green": [],
+      "collateral": [],
+      "why": "removing it turns its requirements red"
+    },
+    {
+      "task": "cut-game-status",
+      "ok": true,
+      "inconclusive": false,
+      "lines_removed": 12,
+      "graded_by": [
+        "c-3-2",
+        "c-3-3",
+        "c-3-4",
+        "c-3-6"
+      ],
+      "went_red": [
+        "c-3-2",
+        "c-3-3",
+        "c-3-4",
+        "c-3-6"
+      ],
+      "stayed_green": [],
+      "collateral": [],
+      "why": "removing it turns its requirements red"
+    },
+    {
+      "task": "cut-neighbour-counts",
+      "ok": true,
+      "inconclusive": false,
+      "lines_removed": 23,
+      "graded_by": [
+        "c-1-1",
+        "c-1-2",
+        "c-1-4",
+        "c-1-5",
+        "c-2-1",
+        "c-2-2",
+        "c-2-5",
+        "c-2-6",
+        "c-3-2",
+        "c-3-3",
+        "c-3-4",
+        "c-3-5",
+        "c-3-6"
+      ],
+      "went_red": [
+        "c-1-1",
+        "c-1-2",
+        "c-1-4",
+        "c-1-5",
+        "c-2-1",
+        "c-2-2",
+        "c-2-5",
+        "c-2-6",
+        "c-3-2",
+        "c-3-3",
+        "c-3-4",
+        "c-3-5",
+        "c-3-6"
+      ],
+      "stayed_green": [],
+      "collateral": [],
+      "why": "removing it turns its requirements red"
+    },
+    {
+      "task": "cut-play-click",
+      "ok": true,
+      "inconclusive": false,
+      "lines_removed": 9,
+      "graded_by": [
+        "c-2-5",
+        "c-2-6",
+        "c-3-5",
+        "c-3-6"
+      ],
+      "went_red": [
+        "c-2-5",
+        "c-2-6",
+        "c-3-5",
+        "c-3-6"
+      ],
+      "stayed_green": [],
+      "collateral": [],
+      "why": "removing it turns its requirements red"
+    },
+    {
+      "task": "cut-play-status",
+      "ok": true,
+      "inconclusive": false,
+      "lines_removed": 4,
+      "graded_by": [
+        "c-3-5",
+        "c-3-6"
+      ],
+      "went_red": [
+        "c-3-5",
+        "c-3-6"
+      ],
+      "stayed_green": [],
+      "collateral": [],
+      "why": "removing it turns its requirements red"
+    },
+    {
+      "task": "cut-reveal-from",
+      "ok": true,
+      "inconclusive": false,
+      "lines_removed": 41,
+      "graded_by": [
+        "c-2-1",
+        "c-2-2",
+        "c-2-5",
+        "c-2-6",
+        "c-3-2",
+        "c-3-3",
+        "c-3-4",
+        "c-3-5",
+        "c-3-6"
+      ],
+      "went_red": [
+        "c-2-1",
+        "c-2-2",
+        "c-2-5",
+        "c-2-6",
+        "c-3-2",
+        "c-3-3",
+        "c-3-4",
+        "c-3-5",
+        "c-3-6"
+      ],
+      "stayed_green": [],
+      "collateral": [],
+      "why": "removing it turns its requirements red"
+    },
+    {
+      "task": "cut-solved-cells",
+      "ok": true,
+      "inconclusive": false,
+      "lines_removed": 17,
+      "graded_by": [
+        "c-1-4",
+        "c-1-5"
+      ],
+      "went_red": [
+        "c-1-4",
+        "c-1-5"
+      ],
+      "stayed_green": [],
+      "collateral": [],
+      "why": "removing it turns its requirements red"
+    }
+  ],
+  "rule": "every student task must turn at least one of its requirements red when it alone is removed"
+}

@@ -38,14 +38,14 @@ Round-1 IDs are cited as B-nn. New IDs this round are R2-nn.
 Phase 0 and phase 1 both completed on the FIRST attempt with zero retries
 burned. Every checker that fired, passed. And Gate 1 still rejected.
 
-Twenty-one distinct blockers this round. Their distribution is the finding:
+Twenty-two distinct blockers this round. Their distribution is the finding:
 
     6  infrastructure / harness   - hit BEFORE the pipeline could run at all
     2  documentation drift
     1  test-suite integrity
     4  in-run, phase 1
     3  in-run, phase 1 round 2
-    5  in-run, phase 2
+    6  in-run, phase 2
 
 Four of the infrastructure blockers were Windows-specific, and three of those
 made a component silently unrunnable rather than fail loudly.
@@ -53,7 +53,7 @@ made a component silently unrunnable rather than fail loudly.
 The round-1 headline was "the pipeline is blind to everything expensive."
 The round-2 headline is narrower and worse:
 
-    NOTHING THE PIPELINE RUNS ITSELF FOUND ANY OF THE TWENTY-ONE.
+    NOTHING THE PIPELINE RUNS ITSELF FOUND ANY OF THE TWENTY-TWO.
 
 The spec linter passed clean. The idea checker passed clean. The red-first
 check passed clean. The write guard passed its own selftest. Every blocker
@@ -544,6 +544,50 @@ R2-18  A CRASH WAS REPORTED TO THE HUMAN AS A VERDICT
               summary - silently maps the third onto one of the other two, and
               which one it picks is arbitrary. R2-16 mapped it to "keep trying";
               R2-18 mapped it to "the spec is wrong".
+
+
+R2-19  THE MUTATION CHECK HAS NEVER WORKED, AND IT FAILED GREEN
+       WHAT   test_runner names its log `server-{target}.log`. For --target app
+              that is fine. The mutation check passes targets that are PATHS -
+              .pipeline/mutants/cut-game-status - so the name became
+              `server-.pipeline/mutants/cut-game-status.log`, whose parent
+              directory does not exist. Every mutant run died in boot() with
+              Errno 2 before a single test executed.
+       WHY IT PASSED ANYWAY  mutation.py counts a criterion as red when its
+              status is "fail" OR "missing". A mutant that never ran reports all
+              18 criteria missing, so every criterion the task declared "went
+              red" and every task looked graded. ok: true, ungraded_tasks: [].
+       THE TELL, RECORDED AND IGNORED  The report already carried `collateral` -
+              criteria that went red but were NOT declared by the task. It read
+              17, 14, 5, 14, 16, 9, 16. Removing one student task turned
+              seventeen unrelated criteria red, and the verdict did not look at
+              the field. `ok` was computed as bool(went_red) alone.
+       WHY THIS IS THE WORST ONE  This check exists to prove rule 3 - that the
+              suite can actually go red. requirements_doc.md added it as a
+              headline capability, Gate 2 refuses without it, and it is the only
+              evidence that a student task is graded at all. A false GREEN here
+              is the exact failure it was built to prevent.
+       NOT PLATFORM-SPECIFIC  server-.pipeline/mutants/... fails on Linux too.
+       NEVER EXERCISED BEFORE  All three shipped projects are flow 1, which has
+              no mutation step. pipeline-test-01 is the FIRST project ever to
+              run this check, and its first result was vacuous.
+       FIX    (a) target_slug() sanitises a target path into a filename.
+              (b) A mutant that removes one task must leave the rest of the
+                  suite green. If NO criterion passes, the mutant did not run,
+                  and "everything went red" proves nothing: the task is now
+                  marked inconclusive, and inconclusive FAILS the check rather
+                  than passing it.
+       PROOF OF THE FIX  Same code, same spec, before and after:
+                before   every mutant: 0 pass / 18 missing, collateral 5-17
+                after    cut-flag-toggle 17 pass / 1 fail, collateral 0
+                         cut-game-status 14 pass / 4 fail, collateral 0
+              and across all seven tasks went_red == graded_by EXACTLY, with
+              collateral 0 on every one. 684.8s of real work against 222s of
+              nothing.
+       PHASE  Scripts / mutation + test_runner
+       RECURRENCE  Fixed. The CLASS - a checker that fails green - has no
+              general defence in the pipeline. Every other checker's failure
+              mode should be audited for which way it fails.
 
 
 ================================================================================

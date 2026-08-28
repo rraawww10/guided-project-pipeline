@@ -147,28 +147,42 @@ def run(project: Path, only: list[str] | None = None, max_tasks: int | None = No
                      if crit.get(cid, {}).get("status") in ("fail", "missing"))
         unexpected = sorted(cid for cid, c in crit.items()
                             if cid not in expect and c.get("status") in ("fail", "missing"))
+        # A mutant that removes ONE task should leave the rest of the suite green.
+        # If nothing passes, the mutant did not run, and "every requirement went
+        # red" is not evidence that the task is graded - it is evidence of
+        # nothing. This check reports on rule 3, so a false green is the worst
+        # outcome it has: for the whole life of the mutation check, a target
+        # whose log path could not be created reported all criteria "missing",
+        # counted every one as red, and passed every task vacuously.
+        ran = any(c.get("status") == "pass" for c in crit.values())
         results.append({
             "task": task,
-            "ok": bool(red),
+            "ok": bool(red) and ran,
+            "inconclusive": not ran,
             "lines_removed": removed,
             "graded_by": expect,
             "went_red": red,
             "stayed_green": sorted(set(expect) - set(red)),
             "collateral": unexpected,
-            "why": ("removing it turns its requirements red" if red else
+            "why": ("INCONCLUSIVE: no criterion passed against this mutant, so it "
+                    "never ran - this proves nothing about whether the task is graded"
+                    if not ran else
+                    "removing it turns its requirements red" if red else
                     "NOT GRADED: every requirement that declares this task still "
                     "passes with it removed, so a student can leave it empty"),
         })
         shutil.rmtree(mdir, ignore_errors=True)
 
-    ungraded = [r["task"] for r in results if not r["ok"]]
+    ungraded = [r["task"] for r in results if not r["ok"] and not r.get("inconclusive")]
+    inconclusive = [r["task"] for r in results if r.get("inconclusive")]
     return {
-        "ok": not ungraded and bool(results),
+        "ok": not ungraded and not inconclusive and bool(results),
         "target": target,
         "checked": len(results),
         "of_total": len(hints),
         "seconds": round(time.time() - started, 1),
         "ungraded_tasks": ungraded,
+        "inconclusive_tasks": inconclusive,
         "results": results,
         "rule": ("every student task must turn at least one of its requirements red "
                  "when it alone is removed"),

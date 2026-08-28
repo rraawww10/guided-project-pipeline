@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="4" skipped="0" tests="18" time="30.394" timestamp="2026-08-29T00:53:37.168621+05:30" hostname="HERO"><testcase classname="verify.test_api_boards" name="test_c_1_1_intro_board_answers_its_size_mines_and_twenty_five_counts" time="0.644" /><testcase classname="verify.test_api_boards" name="test_c_1_2_field_board_counts_are_sixty_four_and_read_right_at_the_edges" time="0.359" /><testcase classname="verify.test_api_boards" name="test_c_1_3_unknown_board_answers_404_with_an_error_message" time="0.396" /><testcase classname="verify.test_api_boards" name="test_c_3_1_board_index_lists_the_three_seeded_boards_in_seed_order" time="0.367" /><testcase classname="verify.test_api_replay" name="test_c_2_1_one_click_on_field_index_zero_opens_exactly_fourteen_cells" time="0.402" /><testcase classname="verify.test_api_replay" name="test_c_2_2_intro_opens_a_zero_region_a_number_and_a_mine" time="0.383" /><testcase classname="verify.test_api_replay" name="test_c_2_3_replay_resolves_the_board_first_then_validates_the_body" time="0.359" /><testcase classname="verify.test_api_replay" name="test_c_3_2_corner_is_won_in_one_click_and_still_playing_after_a_number" time="0.351"><failure message="AssertionError: status is 'lost'&#10;assert 'lost' == 'won'&#10;  &#10;  - won&#10;  + lost">api = &lt;httpx.Client object at 0x00000242A0627BD0&gt;
+
+    def test_c_3_2_corner_is_won_in_one_click_and_still_playing_after_a_number(api):
+        """c-3-2: on corner, clicks [0] is 200 with status won and exactly 13
+        revealed reading 0 to 10, 12, 13, and clicks [6] is 200 with status playing
+        and exactly 1 revealed reading 6."""
+        won = replay(api, "corner", {"clicks": [0]})
+        assert won.status_code == 200, f"clicks [0] answered {won.status_code}"
+        won_body = won.json()
+&gt;       assert won_body["status"] == "won", f"status is {won_body['status']!r}"
+E       AssertionError: status is 'lost'
+E       assert 'lost' == 'won'
+E         
+E         - won
+E         + lost
+
+verify\test_api_replay.py:104: AssertionError</failure></testcase><testcase classname="verify.test_api_replay" name="test_c_3_3_a_mine_in_the_list_reads_lost_even_on_the_winning_count" time="0.366"><failure message="AssertionError: intro [0, 20]: 'lost'&#10;assert 'lost' == 'playing'&#10;  &#10;  - playing&#10;  + lost">api = &lt;httpx.Client object at 0x00000242A0674C50&gt;
+
+    def test_c_3_3_a_mine_in_the_list_reads_lost_even_on_the_winning_count(api):
+        """c-3-3: corner [0, 15] is lost with 14 revealed, intro [0, 20] is still
+        playing with 14 revealed, and the 9-click list on intro is lost with exactly
+        21 revealed that holds the mine at 9 - 21 is also the win threshold on intro
+        (25 - 4), so an implementation that tests won before lost answers won there
+        and is red."""
+        lost = replay(api, "corner", {"clicks": [0, 15]})
+        assert lost.status_code == 200, f"corner [0, 15] answered {lost.status_code}"
+        lost_body = lost.json()
+        assert lost_body["status"] == "lost", f"corner [0, 15]: {lost_body['status']!r}"
+        assert len(lost_body["revealed"]) == 14, (
+            f"corner [0, 15]: {len(lost_body['revealed'])} entries, expected 14")
+    
+        playing = replay(api, "intro", {"clicks": [0, 20]})
+        assert playing.status_code == 200, f"intro [0, 20] answered {playing.status_code}"
+        playing_body = playing.json()
+&gt;       assert playing_body["status"] == "playing", (
+            f"intro [0, 20]: {playing_body['status']!r}")
+E       AssertionError: intro [0, 20]: 'lost'
+E       assert 'lost' == 'playing'
+E         
+E         - playing
+E         + lost
+
+verify\test_api_replay.py:134: AssertionError</failure></testcase><testcase classname="verify.test_api_replay" name="test_c_3_4_flags_come_back_sorted_and_deduplicated_without_winning" time="0.340"><failure message="AssertionError: status is 'lost' - flagging every mine does not win&#10;assert 'lost' == 'playing'&#10;  &#10;  - playing&#10;  + lost">api = &lt;httpx.Client object at 0x00000242A0676250&gt;
+
+    def test_c_3_4_flags_come_back_sorted_and_deduplicated_without_winning(api):
+        """c-3-4: corner with clicks [6] and flags [15, 11, 14, 15] is 200 with
+        status playing, exactly 1 revealed reading 6 and exactly 3 flagged reading
+        11, 14, 15 - all three mines flagged and the game is still playing, because
+        the win rule never consults flags."""
+        r = replay(api, "corner", {"clicks": [6], "flags": [15, 11, 14, 15]})
+        assert r.status_code == 200, f"answered {r.status_code}, expected 200"
+    
+        body = r.json()
+&gt;       assert body["status"] == "playing", (
+            f"status is {body['status']!r} - flagging every mine does not win")
+E       AssertionError: status is 'lost' - flagging every mine does not win
+E       assert 'lost' == 'playing'
+E         
+E         - playing
+E         + lost
+
+verify\test_api_replay.py:160: AssertionError</failure></testcase><testcase classname="verify.test_ui_play" name="test_c_2_4_field_opens_face_down_and_an_unknown_board_draws_nothing" time="1.717" /><testcase classname="verify.test_ui_play" name="test_c_2_5_one_click_on_field_index_zero_opens_fourteen_cells_on_screen" time="0.935" /><testcase classname="verify.test_ui_play" name="test_c_2_6_a_second_click_on_an_open_cell_changes_nothing_on_intro" time="0.455" /><testcase classname="verify.test_ui_play" name="test_c_3_5_flag_mode_plants_removes_and_guards_while_mines_left_tracks" time="0.737" /><testcase classname="verify.test_ui_play" name="test_c_3_6_the_status_line_reads_won_then_lost_and_stays_lost" time="20.294"><failure message="AssertionError: Locator expected to have text 'Won'&#10;Actual value: Lost &#10;Call log:&#10;  - Expect &quot;to_have_text&quot; with timeout 20000ms&#10;  - waiting for get_by_test_id(&quot;game-status&quot;)&#10;    43 × locator resolved to &lt;span data-testid=&quot;game-status&quot;&gt;Lost&lt;/span&gt;&#10;       - unexpected value &quot;Lost&quot;&#10;&#10;Aria snapshot:&#10;- text: Lost">page = &lt;Page url='http://127.0.0.1:51284/boards/corner'&gt;
+
+    def test_c_3_6_the_status_line_reads_won_then_lost_and_stays_lost(page):
+        """c-3-6: clicking the cell at data-index 0 on /boards/corner leaves exactly
+        13 cells at data-revealed true and game-status reading Won; clicking the
+        cell at 9 on /boards/intro leaves exactly 1 cell at data-revealed true,
+        shows * in it and game-status reading Lost; and a following click on 3
+        leaves exactly 2 cells at data-revealed true with game-status still Lost -
+        a terminal status locks nothing.
+    
+        Totals, not deltas: see A2 at the top of this file."""
+        open_play(page, "corner")
+        expect(cells(page)).to_have_count(16, timeout=LOAD_TIMEOUT)
+    
+        cell(page, 0).click()
+        expect(revealed_cells(page)).to_have_count(13, timeout=LOAD_TIMEOUT)
+&gt;       expect(game_status(page)).to_have_text("Won", timeout=LOAD_TIMEOUT)
+E       AssertionError: Locator expected to have text 'Won'
+E       Actual value: Lost 
+E       Call log:
+E         - Expect "to_have_text" with timeout 20000ms
+E         - waiting for get_by_test_id("game-status")
+E           43 × locator resolved to &lt;span data-testid="game-status"&gt;Lost&lt;/span&gt;
+E              - unexpected value "Lost"
+E       
+E       Aria snapshot:
+E       - text: Lost
+
+verify\test_ui_play.py:196: AssertionError</failure></testcase><testcase classname="verify.test_ui_solved" name="test_c_1_4_intro_solved_draws_25_cells_with_their_mines_and_counts" time="0.265" /><testcase classname="verify.test_ui_solved" name="test_c_1_5_corner_solved_shows_a_glyph_a_number_and_three_blank_zeros" time="0.240" /><testcase classname="verify.test_ui_solved" name="test_c_1_6_unknown_board_solved_draws_board_not_found_and_no_cells" time="1.466" /></testsuite></testsuites>

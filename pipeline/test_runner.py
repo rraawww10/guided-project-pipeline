@@ -12,6 +12,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import shutil
 import socket
 import subprocess
@@ -144,6 +145,19 @@ def wait_for(url: str, timeout: int) -> bool:
     return False
 
 
+def target_slug(target: str) -> str:
+    """A filename-safe name for a --target, which may be a PATH.
+
+    The mutation check passes targets like ".pipeline/mutants/cut-game-status",
+    and these names were interpolated straight into "server-{target}.log". The
+    separator made a directory that does not exist, so every mutant run died in
+    boot() with Errno 2, reported all criteria "missing", and mutation.py counts
+    "missing" as red - so every task looked graded and the check passed
+    vacuously. It reports on rule 3; a false green here is the worst kind.
+    """
+    return re.sub(r"[^A-Za-z0-9._-]+", "-", target).strip("-") or "target"
+
+
 def npm() -> str:
     """The npm executable, resolved.
 
@@ -247,12 +261,13 @@ def main(argv: list[str] | None = None) -> int:
     base = f"http://127.0.0.1:{port}"
     logs = project / ".pipeline"
     logs.mkdir(parents=True, exist_ok=True)
-    xml = logs / f"junit-{a.target}.xml"
+    slug = target_slug(a.target)
+    xml = logs / f"junit-{slug}.xml"
     server = None
     started = time.time()
 
     try:
-        server = boot(target, port, logs / f"server-{a.target}.log")
+        server = boot(target, port, logs / f"server-{slug}.log")
         if not wait_for(base, BOOT_TIMEOUT):
             raise RuntimeError(f"app did not answer on {base} within {BOOT_TIMEOUT}s")
         proc = subprocess.run(

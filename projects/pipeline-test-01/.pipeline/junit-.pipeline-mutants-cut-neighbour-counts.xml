@@ -1,0 +1,303 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="13" skipped="0" tests="18" time="108.814" timestamp="2026-08-29T00:54:38.935970+05:30" hostname="HERO"><testcase classname="verify.test_api_boards" name="test_c_1_1_intro_board_answers_its_size_mines_and_twenty_five_counts" time="0.464"><failure message="AssertionError: counts has 0 entries, expected 25&#10;assert 0 == 25&#10; +  where 0 = len([])">api = &lt;httpx.Client object at 0x0000016893615010&gt;
+
+    def test_c_1_1_intro_board_answers_its_size_mines_and_twenty_five_counts(api):
+        """c-1-1: GET /api/boards/intro is 200 with width 5, height 5, mines
+        9, 11, 18, 23 and a counts array of exactly 25 numbers in index order."""
+        r = api.get("/api/boards/intro")
+        assert r.status_code == 200, f"GET /api/boards/intro answered {r.status_code}"
+    
+        body = r.json()
+        assert body["width"] == 5
+        assert body["height"] == 5
+        assert body["mines"] == INTRO_MINES
+    
+        counts = body["counts"]
+&gt;       assert len(counts) == 25, f"counts has {len(counts)} entries, expected 25"
+E       AssertionError: counts has 0 entries, expected 25
+E       assert 0 == 25
+E        +  where 0 = len([])
+
+verify\test_api_boards.py:28: AssertionError</failure></testcase><testcase classname="verify.test_api_boards" name="test_c_1_2_field_board_counts_are_sixty_four_and_read_right_at_the_edges" time="0.316"><failure message="AssertionError: counts has 0 entries, expected 64&#10;assert 0 == 64&#10; +  where 0 = len([])">api = &lt;httpx.Client object at 0x00000168938002D0&gt;
+
+    def test_c_1_2_field_board_counts_are_sixty_four_and_read_right_at_the_edges(api):
+        """c-1-2: GET /api/boards/field is 200 with 64 counts whose entries at
+        indices 0, 7, 8, 15, 54, 56, 57 and 63 are 0, 1, 1, 0, 3, 1, 2 and 0 - the
+        four corners, three edge cells and the interior 3, plus index 63, which is
+        itself a mine and still carries a count."""
+        r = api.get("/api/boards/field")
+        assert r.status_code == 200, f"GET /api/boards/field answered {r.status_code}"
+    
+        counts = r.json()["counts"]
+&gt;       assert len(counts) == 64, f"counts has {len(counts)} entries, expected 64"
+E       AssertionError: counts has 0 entries, expected 64
+E       assert 0 == 64
+E        +  where 0 = len([])
+
+verify\test_api_boards.py:41: AssertionError</failure></testcase><testcase classname="verify.test_api_boards" name="test_c_1_3_unknown_board_answers_404_with_an_error_message" time="0.299" /><testcase classname="verify.test_api_boards" name="test_c_3_1_board_index_lists_the_three_seeded_boards_in_seed_order" time="0.295" /><testcase classname="verify.test_api_replay" name="test_c_2_1_one_click_on_field_index_zero_opens_exactly_fourteen_cells" time="0.306"><failure message="AssertionError: 64 entries, expected 14&#10;assert 64 == 14&#10; +  where 64 = len([0, 1, 2, 3, 4, 5, ...])">api = &lt;httpx.Client object at 0x00000168937D56E0&gt;
+
+    def test_c_2_1_one_click_on_field_index_zero_opens_exactly_fourteen_cells(api):
+        """c-2-1: POST /api/boards/field/replay with body {"clicks": [0]} is 200
+        with a revealed array of exactly 14 entries reading 0, 1, 2, 3, 4, 5, 6, 8,
+        9, 10, 11, 12, 13, 14 ascending. A fill that walks out of numbered cells
+        opens 54 here, so the count alone separates the two rules."""
+        r = replay(api, "field", {"clicks": [0]})
+        assert r.status_code == 200, f"answered {r.status_code}, expected 200"
+    
+        revealed = r.json()["revealed"]
+&gt;       assert len(revealed) == 14, f"{len(revealed)} entries, expected 14"
+E       AssertionError: 64 entries, expected 14
+E       assert 64 == 14
+E        +  where 64 = len([0, 1, 2, 3, 4, 5, ...])
+
+verify\test_api_replay.py:34: AssertionError</failure></testcase><testcase classname="verify.test_api_replay" name="test_c_2_2_intro_opens_a_zero_region_a_number_and_a_mine" time="0.292"><failure message="AssertionError: clicks [20]: 25 entries, expected 6&#10;assert 25 == 6&#10; +  where 25 = len([0, 1, 2, 3, 4, 5, ...])">api = &lt;httpx.Client object at 0x000001689382C170&gt;
+
+    def test_c_2_2_intro_opens_a_zero_region_a_number_and_a_mine(api):
+        """c-2-2: on intro, clicks [20] opens exactly 6 cells reading 15, 16, 17,
+        20, 21, 22, clicks [3] opens exactly 1 reading 3, and clicks [9] opens
+        exactly 1 reading 9 - so a fill that always expands and a fill that never
+        expands are both red."""
+        r20 = replay(api, "intro", {"clicks": [20]})
+        assert r20.status_code == 200, f"clicks [20] answered {r20.status_code}"
+        revealed20 = r20.json()["revealed"]
+&gt;       assert len(revealed20) == 6, f"clicks [20]: {len(revealed20)} entries, expected 6"
+E       AssertionError: clicks [20]: 25 entries, expected 6
+E       assert 25 == 6
+E        +  where 25 = len([0, 1, 2, 3, 4, 5, ...])
+
+verify\test_api_replay.py:46: AssertionError</failure></testcase><testcase classname="verify.test_api_replay" name="test_c_2_3_replay_resolves_the_board_first_then_validates_the_body" time="0.335" /><testcase classname="verify.test_api_replay" name="test_c_3_2_corner_is_won_in_one_click_and_still_playing_after_a_number" time="0.303"><failure message="AssertionError: status is 'lost'&#10;assert 'lost' == 'won'&#10;  &#10;  - won&#10;  + lost">api = &lt;httpx.Client object at 0x00000168937B7240&gt;
+
+    def test_c_3_2_corner_is_won_in_one_click_and_still_playing_after_a_number(api):
+        """c-3-2: on corner, clicks [0] is 200 with status won and exactly 13
+        revealed reading 0 to 10, 12, 13, and clicks [6] is 200 with status playing
+        and exactly 1 revealed reading 6."""
+        won = replay(api, "corner", {"clicks": [0]})
+        assert won.status_code == 200, f"clicks [0] answered {won.status_code}"
+        won_body = won.json()
+&gt;       assert won_body["status"] == "won", f"status is {won_body['status']!r}"
+E       AssertionError: status is 'lost'
+E       assert 'lost' == 'won'
+E         
+E         - won
+E         + lost
+
+verify\test_api_replay.py:104: AssertionError</failure></testcase><testcase classname="verify.test_api_replay" name="test_c_3_3_a_mine_in_the_list_reads_lost_even_on_the_winning_count" time="0.305"><failure message="AssertionError: corner [0, 15]: 16 entries, expected 14&#10;assert 16 == 14&#10; +  where 16 = len([0, 1, 2, 3, 4, 5, ...])">api = &lt;httpx.Client object at 0x0000016893842750&gt;
+
+    def test_c_3_3_a_mine_in_the_list_reads_lost_even_on_the_winning_count(api):
+        """c-3-3: corner [0, 15] is lost with 14 revealed, intro [0, 20] is still
+        playing with 14 revealed, and the 9-click list on intro is lost with exactly
+        21 revealed that holds the mine at 9 - 21 is also the win threshold on intro
+        (25 - 4), so an implementation that tests won before lost answers won there
+        and is red."""
+        lost = replay(api, "corner", {"clicks": [0, 15]})
+        assert lost.status_code == 200, f"corner [0, 15] answered {lost.status_code}"
+        lost_body = lost.json()
+        assert lost_body["status"] == "lost", f"corner [0, 15]: {lost_body['status']!r}"
+&gt;       assert len(lost_body["revealed"]) == 14, (
+            f"corner [0, 15]: {len(lost_body['revealed'])} entries, expected 14")
+E       AssertionError: corner [0, 15]: 16 entries, expected 14
+E       assert 16 == 14
+E        +  where 16 = len([0, 1, 2, 3, 4, 5, ...])
+
+verify\test_api_replay.py:128: AssertionError</failure></testcase><testcase classname="verify.test_api_replay" name="test_c_3_4_flags_come_back_sorted_and_deduplicated_without_winning" time="0.302"><failure message="AssertionError: status is 'lost' - flagging every mine does not win&#10;assert 'lost' == 'playing'&#10;  &#10;  - playing&#10;  + lost">api = &lt;httpx.Client object at 0x0000016893843D50&gt;
+
+    def test_c_3_4_flags_come_back_sorted_and_deduplicated_without_winning(api):
+        """c-3-4: corner with clicks [6] and flags [15, 11, 14, 15] is 200 with
+        status playing, exactly 1 revealed reading 6 and exactly 3 flagged reading
+        11, 14, 15 - all three mines flagged and the game is still playing, because
+        the win rule never consults flags."""
+        r = replay(api, "corner", {"clicks": [6], "flags": [15, 11, 14, 15]})
+        assert r.status_code == 200, f"answered {r.status_code}, expected 200"
+    
+        body = r.json()
+&gt;       assert body["status"] == "playing", (
+            f"status is {body['status']!r} - flagging every mine does not win")
+E       AssertionError: status is 'lost' - flagging every mine does not win
+E       assert 'lost' == 'playing'
+E         
+E         - playing
+E         + lost
+
+verify\test_api_replay.py:160: AssertionError</failure></testcase><testcase classname="verify.test_ui_play" name="test_c_2_4_field_opens_face_down_and_an_unknown_board_draws_nothing" time="1.392" /><testcase classname="verify.test_ui_play" name="test_c_2_5_one_click_on_field_index_zero_opens_fourteen_cells_on_screen" time="20.794"><failure message="AssertionError: Locator expected to have count '14'&#10;Actual value: 64 &#10;Call log:&#10;  - Expect &quot;to_have_count&quot; with timeout 20000ms&#10;  - waiting for locator(&quot;[data-testid=\&quot;cell\&quot;][data-revealed=\&quot;true\&quot;]&quot;)&#10;    43 × locator resolved to 64 elements&#10;       - unexpected value &quot;64&quot;">page = &lt;Page url='http://127.0.0.1:51218/boards/field'&gt;
+
+    def test_c_2_5_one_click_on_field_index_zero_opens_fourteen_cells_on_screen(page):
+        """c-2-5: clicking the cell at data-index 0 on /boards/field leaves exactly
+        14 cells at data-revealed true, leaves the cell at 7 at data-revealed false,
+        and shows 1 in the cell at 6 and empty text in the cell at 0. Index 7
+        touches only numbers and a mine, never a zero, so it stays shut - a fill
+        that walks through numbers opens 54 cells here."""
+        open_play(page, "field")
+        expect(cells(page)).to_have_count(64, timeout=LOAD_TIMEOUT)
+    
+        cell(page, 0).click()
+    
+&gt;       expect(revealed_cells(page)).to_have_count(14, timeout=LOAD_TIMEOUT)
+E       AssertionError: Locator expected to have count '14'
+E       Actual value: 64 
+E       Call log:
+E         - Expect "to_have_count" with timeout 20000ms
+E         - waiting for locator("[data-testid=\"cell\"][data-revealed=\"true\"]")
+E           43 × locator resolved to 64 elements
+E              - unexpected value "64"
+
+verify\test_ui_play.py:83: AssertionError</failure></testcase><testcase classname="verify.test_ui_play" name="test_c_2_6_a_second_click_on_an_open_cell_changes_nothing_on_intro" time="20.268"><failure message="AssertionError: Locator expected to have count '1'&#10;Actual value: 25 &#10;Call log:&#10;  - Expect &quot;to_have_count&quot; with timeout 20000ms&#10;  - waiting for locator(&quot;[data-testid=\&quot;cell\&quot;][data-revealed=\&quot;true\&quot;]&quot;)&#10;    43 × locator resolved to 25 elements&#10;       - unexpected value &quot;25&quot;">page = &lt;Page url='http://127.0.0.1:51218/boards/intro'&gt;
+
+    def test_c_2_6_a_second_click_on_an_open_cell_changes_nothing_on_intro(page):
+        """c-2-6: on /boards/intro a click on the cell at data-index 3 leaves
+        exactly 1 cell at data-revealed true, a following click on 20 leaves exactly
+        7, and a second click on 3 still leaves exactly 7 - which is what separates
+        a union from an append.
+    
+        Totals, not deltas: see A2 at the top of this file."""
+        open_play(page, "intro")
+        expect(cells(page)).to_have_count(25, timeout=LOAD_TIMEOUT)
+    
+        cell(page, 3).click()
+&gt;       expect(revealed_cells(page)).to_have_count(1, timeout=LOAD_TIMEOUT)
+E       AssertionError: Locator expected to have count '1'
+E       Actual value: 25 
+E       Call log:
+E         - Expect "to_have_count" with timeout 20000ms
+E         - waiting for locator("[data-testid=\"cell\"][data-revealed=\"true\"]")
+E           43 × locator resolved to 25 elements
+E              - unexpected value "25"
+
+verify\test_ui_play.py:102: AssertionError</failure></testcase><testcase classname="verify.test_ui_play" name="test_c_3_5_flag_mode_plants_removes_and_guards_while_mines_left_tracks" time="20.655"><failure message="AssertionError: Locator expected to have count '1'&#10;Actual value: 16 &#10;Call log:&#10;  - Expect &quot;to_have_count&quot; with timeout 20000ms&#10;  - waiting for locator(&quot;[data-testid=\&quot;cell\&quot;][data-revealed=\&quot;true\&quot;]&quot;)&#10;    43 × locator resolved to 16 elements&#10;       - unexpected value &quot;16&quot;">page = &lt;Page url='http://127.0.0.1:51218/boards/corner'&gt;
+
+    def test_c_3_5_flag_mode_plants_removes_and_guards_while_mines_left_tracks(page):
+        """c-3-5: the whole flag sequence on /boards/corner - toggle on, flag 15
+        (Mines left: 2), flag 14 (1), unflag 15 (2), flag 15, 11 and 0 (-1), toggle
+        off, a reveal click on the flagged cell 0 that opens nothing and moves
+        nothing, a reveal click on 6 that opens exactly 1 cell, then toggle on and a
+        flag click on the open cell 6 that leaves it unflagged and the counter
+        unmoved.
+    
+        corner has 3 mines, so a counter clamped at 0 is red at the fourth flag, and
+        a fallback that starts at -1 is red at the first assertion of Mines left: 2.
+        """
+        open_play(page, "corner")
+        expect(cells(page)).to_have_count(16, timeout=LOAD_TIMEOUT)
+    
+        flag_mode(page).click()
+        expect(flag_mode(page)).to_have_text("Flag mode: on", timeout=LOAD_TIMEOUT)
+    
+        cell(page, 15).click()
+        expect(cell(page, 15)).to_have_attribute(
+            "data-flagged", "true", timeout=LOAD_TIMEOUT
+        )
+        expect(cell(page, 15)).to_have_attribute(
+            "data-revealed", "false", timeout=LOAD_TIMEOUT
+        )
+        expect(cell(page, 15)).to_have_text("F", timeout=LOAD_TIMEOUT)
+        expect(mines_left(page)).to_have_text("Mines left: 2", timeout=LOAD_TIMEOUT)
+    
+        cell(page, 14).click()
+        expect(mines_left(page)).to_have_text("Mines left: 1", timeout=LOAD_TIMEOUT)
+    
+        cell(page, 15).click()
+        expect(cell(page, 15)).to_have_attribute(
+            "data-flagged", "false", timeout=LOAD_TIMEOUT
+        )
+        expect(mines_left(page)).to_have_text("Mines left: 2", timeout=LOAD_TIMEOUT)
+    
+        cell(page, 15).click()
+        cell(page, 11).click()
+        cell(page, 0).click()
+        expect(mines_left(page)).to_have_text("Mines left: -1", timeout=LOAD_TIMEOUT)
+    
+        flag_mode(page).click()
+        expect(flag_mode(page)).to_have_text("Flag mode: off", timeout=LOAD_TIMEOUT)
+    
+        # a flag protects its cell: index 0 is a zero-count cell that would open all
+        # 13 safe cells if the reveal branch were unguarded
+        cell(page, 0).click()
+        expect(revealed_cells(page)).to_have_count(0, timeout=LOAD_TIMEOUT)
+        expect(mines_left(page)).to_have_text("Mines left: -1", timeout=LOAD_TIMEOUT)
+    
+        cell(page, 6).click()
+&gt;       expect(revealed_cells(page)).to_have_count(1, timeout=LOAD_TIMEOUT)
+E       AssertionError: Locator expected to have count '1'
+E       Actual value: 16 
+E       Call log:
+E         - Expect "to_have_count" with timeout 20000ms
+E         - waiting for locator("[data-testid=\"cell\"][data-revealed=\"true\"]")
+E           43 × locator resolved to 16 elements
+E              - unexpected value "16"
+
+verify\test_ui_play.py:170: AssertionError</failure></testcase><testcase classname="verify.test_ui_play" name="test_c_3_6_the_status_line_reads_won_then_lost_and_stays_lost" time="20.254"><failure message="AssertionError: Locator expected to have count '13'&#10;Actual value: 16 &#10;Call log:&#10;  - Expect &quot;to_have_count&quot; with timeout 20000ms&#10;  - waiting for locator(&quot;[data-testid=\&quot;cell\&quot;][data-revealed=\&quot;true\&quot;]&quot;)&#10;    43 × locator resolved to 16 elements&#10;       - unexpected value &quot;16&quot;">page = &lt;Page url='http://127.0.0.1:51218/boards/corner'&gt;
+
+    def test_c_3_6_the_status_line_reads_won_then_lost_and_stays_lost(page):
+        """c-3-6: clicking the cell at data-index 0 on /boards/corner leaves exactly
+        13 cells at data-revealed true and game-status reading Won; clicking the
+        cell at 9 on /boards/intro leaves exactly 1 cell at data-revealed true,
+        shows * in it and game-status reading Lost; and a following click on 3
+        leaves exactly 2 cells at data-revealed true with game-status still Lost -
+        a terminal status locks nothing.
+    
+        Totals, not deltas: see A2 at the top of this file."""
+        open_play(page, "corner")
+        expect(cells(page)).to_have_count(16, timeout=LOAD_TIMEOUT)
+    
+        cell(page, 0).click()
+&gt;       expect(revealed_cells(page)).to_have_count(13, timeout=LOAD_TIMEOUT)
+E       AssertionError: Locator expected to have count '13'
+E       Actual value: 16 
+E       Call log:
+E         - Expect "to_have_count" with timeout 20000ms
+E         - waiting for locator("[data-testid=\"cell\"][data-revealed=\"true\"]")
+E           43 × locator resolved to 16 elements
+E              - unexpected value "16"
+
+verify\test_ui_play.py:195: AssertionError</failure></testcase><testcase classname="verify.test_ui_solved" name="test_c_1_4_intro_solved_draws_25_cells_with_their_mines_and_counts" time="0.253"><failure message="AssertionError: assert {0: '', 3: ''..., 17: '', ...} == {0: '0', 3: '... 17: '3', ...}&#10;  &#10;  Differing items:&#10;  {0: ''} != {0: '0'}&#10;  {3: ''} != {3: '1'}&#10;  {12: ''} != {12: '2'}&#10;  {17: ''} != {17: '3'}&#10;  {24: ''} != {24: '2'}&#10;  Use -v to get more diff">page = &lt;Page url='http://127.0.0.1:51218/boards/intro/solved'&gt;
+
+    def test_c_1_4_intro_solved_draws_25_cells_with_their_mines_and_counts(page):
+        """c-1-4: 25 cell elements, board-grid carrying data-width 5 and data-height
+        5, data-mine the string true on 9, 11, 18 and 23 and the string false on the
+        other 21, and data-count 0, 1, 2, 3 and 2 on 0, 3, 12, 17 and 24."""
+        open_solved(page, "intro")
+        expect(cells(page)).to_have_count(25, timeout=LOAD_TIMEOUT)
+    
+        expect(grid(page)).to_have_attribute("data-width", "5", timeout=LOAD_TIMEOUT)
+        expect(grid(page)).to_have_attribute("data-height", "5", timeout=LOAD_TIMEOUT)
+    
+        mine_attr = attr_by_index(page, "data-mine")
+        expected_mine = {
+            index: ("true" if index in INTRO_MINES else "false") for index in range(25)
+        }
+        assert mine_attr == expected_mine
+    
+        count_attr = attr_by_index(page, "data-count")
+        got = {index: count_attr.get(index) for index in (0, 3, 12, 17, 24)}
+&gt;       assert got == {0: "0", 3: "1", 12: "2", 17: "3", 24: "2"}
+E       AssertionError: assert {0: '', 3: ''..., 17: '', ...} == {0: '0', 3: '... 17: '3', ...}
+E         
+E         Differing items:
+E         {0: ''} != {0: '0'}
+E         {3: ''} != {3: '1'}
+E         {12: ''} != {12: '2'}
+E         {17: ''} != {17: '3'}
+E         {24: ''} != {24: '2'}
+E         Use -v to get more diff
+
+verify\test_ui_solved.py:44: AssertionError</failure></testcase><testcase classname="verify.test_ui_solved" name="test_c_1_5_corner_solved_shows_a_glyph_a_number_and_three_blank_zeros" time="20.219"><failure message="AssertionError: Locator expected to have text '3'&#10;Actual value: undefined &#10;Call log:&#10;  - Expect &quot;to_have_text&quot; with timeout 20000ms&#10;  - waiting for locator(&quot;[data-testid=\&quot;cell\&quot;][data-index=\&quot;10\&quot;]&quot;)&#10;    43 × locator resolved to &lt;div data-index=&quot;10&quot; data-mine=&quot;false&quot; data-testid=&quot;cell&quot; class=&quot;page_cell___0Uiz&quot;&gt;undefined&lt;/div&gt;&#10;       - unexpected value &quot;undefined&quot;&#10;&#10;Aria snapshot:&#10;- text: undefined">page = &lt;Page url='http://127.0.0.1:51218/boards/corner/solved'&gt;
+
+    def test_c_1_5_corner_solved_shows_a_glyph_a_number_and_three_blank_zeros(page):
+        """c-1-5: 16 cell elements, the cell at data-index 10 reads 3, the cell at
+        15 reads *, and the cells at 0, 1 and 4 read empty text while carrying
+        data-count 0 - so a zero is blank on the page but still counted in the
+        attribute."""
+        open_solved(page, "corner")
+        expect(cells(page)).to_have_count(16, timeout=LOAD_TIMEOUT)
+    
+&gt;       expect(cell(page, 10)).to_have_text("3", timeout=LOAD_TIMEOUT)
+E       AssertionError: Locator expected to have text '3'
+E       Actual value: undefined 
+E       Call log:
+E         - Expect "to_have_text" with timeout 20000ms
+E         - waiting for locator("[data-testid=\"cell\"][data-index=\"10\"]")
+E           43 × locator resolved to &lt;div data-index="10" data-mine="false" data-testid="cell" class="page_cell___0Uiz"&gt;undefined&lt;/div&gt;
+E              - unexpected value "undefined"
+E       
+E       Aria snapshot:
+E       - text: undefined
+
+verify\test_ui_solved.py:55: AssertionError</failure></testcase><testcase classname="verify.test_ui_solved" name="test_c_1_6_unknown_board_solved_draws_board_not_found_and_no_cells" time="1.395" /></testsuite></testsuites>

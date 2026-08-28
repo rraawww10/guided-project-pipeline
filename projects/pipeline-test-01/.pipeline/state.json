@@ -17,7 +17,8 @@
     "breaker": 2,
     "redfirst": 2,
     "revise:round-1": 1,
-    "test:app": 2
+    "test:app": 3,
+    "mutation": 2
   },
   "gates": {
     "gate0": {
@@ -125,6 +126,27 @@
       "step": "test:app",
       "ok": true,
       "at": "2026-08-28T18:57:41+00:00",
+      "detail": "",
+      "run": 2
+    },
+    {
+      "step": "test:app",
+      "ok": true,
+      "at": "2026-08-28T19:12:57+00:00",
+      "detail": "",
+      "run": 3
+    },
+    {
+      "step": "mutation",
+      "ok": true,
+      "at": "2026-08-28T19:18:55+00:00",
+      "detail": "",
+      "run": 1
+    },
+    {
+      "step": "mutation",
+      "ok": true,
+      "at": "2026-08-28T19:33:35+00:00",
       "detail": "",
       "run": 2
     }
