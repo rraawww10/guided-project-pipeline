@@ -302,8 +302,21 @@ R2-08  An agent wrote a report outside its lock and could not clean it up
               run a checker whose output path lies outside the subtree it is
               allowed to write.
        PHASE  Orchestrator / lock policy
-       RECURRENCE  CERTAIN. Every flow-2 phase-1 run hits this, because
-              red-first at step 5 always runs while verify/ is locked.
+       FIX    `--no-report` on redfirst: it runs the check, prints the verdict,
+              writes no file and logs no step. The Test Writer's own prompt and
+              skill now say to use it, and say why - the report lands outside
+              the lock you hold and you will not be able to clean it up.
+              NOT fixed by widening the lock. An agent that can write a checker
+              report can write lint.json, which is rule 1 inverted. And not by
+              moving the file into verify/, which would put one checker's report
+              somewhere different from the other eight. The split that was
+              actually wrong is subtler: THE CHECK IS ANYONE'S TO RUN, THE
+              REPORT IS THE ORCHESTRATOR'S TO WRITE. The flag draws that line.
+              The workflow's own redfirst agent still runs without the flag,
+              which is correct - it runs after lock('off') and its report is the
+              authoritative one.
+       RECURRENCE  Fixed. 4 selftest checks: no file with the flag, a verdict
+              still printed, a file without it, and the prompt naming the flag.
 
 
 R2-09  revise is flow-1 shaped: it archives the spec and leaves the tests

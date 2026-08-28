@@ -1384,6 +1384,27 @@ def test_new_checkers(tmp: Path) -> None:
           "trivially true" in found.get("test_three", ""), True)
     check("pytest.raises counts as an assertion", "test_four" in found, False)
 
+    # R2-08: redfirst.json lands at the PROJECT ROOT, and the Test Writer runs at
+    # step 5 locked to verify/. Self-checking therefore wrote a file the agent was
+    # then refused permission to remove, leaving dynamic.ran=false where a reader
+    # at Gate 1 could take it for evidence the dynamic half had passed. The check
+    # is anyone's to run; the report is the orchestrator's to write.
+    report = proj / "redfirst.json"
+    report.unlink(missing_ok=True)
+    with contextlib.redirect_stdout(io.StringIO()):
+        redfirst.main([str(proj), "--static-only", "--no-report"])
+    check("--no-report leaves no report behind", report.exists(), False)
+    with contextlib.redirect_stdout(io.StringIO()) as buf:
+        redfirst.main([str(proj), "--static-only", "--no-report"])
+    check("--no-report still prints the verdict",
+          json.loads(buf.getvalue()).get("ok") is not None, True)
+    with contextlib.redirect_stdout(io.StringIO()):
+        redfirst.main([str(proj), "--static-only"])
+    check("without it the orchestrator still writes one", report.exists(), True)
+    check("and the test-writer is told which one to use",
+          "--no-report" in (ROOT / ".claude" / "agents" / "test-writer.md").read_text(),
+          True)
+
     # --- rule 3: single-task mutants
     proj = make_project(tmp / "mut")
     spec = json.loads((proj / "spec.json").read_text())

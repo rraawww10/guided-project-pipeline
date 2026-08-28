@@ -690,9 +690,12 @@ def cmd_pick(a) -> int:
 def cmd_redfirst(a) -> int:
     """Step 5's checker. Rule 2: a test that passes early proves nothing."""
     st = State(a.slug)
-    rc = _checker(st, "redfirst", "spec",
-                  lambda: redfirst.main([str(st.dir), "--target", a.target]
-                                        + (["--static-only"] if a.static_only else [])))
+    argv = [str(st.dir), "--target", a.target]
+    if a.static_only:
+        argv.append("--static-only")
+    if a.no_report:                      # a self-check records nothing
+        return redfirst.main(argv + ["--no-report"])
+    rc = _checker(st, "redfirst", "spec", lambda: redfirst.main(argv))
     st.log_step("redfirst", rc == 0)
     return rc
 
@@ -944,6 +947,8 @@ def build_parser() -> argparse.ArgumentParser:
     rf = slug_cmd("redfirst", cmd_redfirst)
     rf.add_argument("--target", default="app")
     rf.add_argument("--static-only", action="store_true")
+    rf.add_argument("--no-report", action="store_true",
+                    help="print the result, write no file, log no step - self-check only")
     mu = slug_cmd("mutation", cmd_mutation)
     mu.add_argument("--only", default="")
     mu.add_argument("--max", type=int, default=None)

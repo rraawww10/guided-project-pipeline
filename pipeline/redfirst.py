@@ -124,10 +124,20 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("project")
     ap.add_argument("--target", default="app", choices=["app", "skeleton"])
     ap.add_argument("--static-only", action="store_true")
+    # A locked agent needs to check its own work without recording a verdict.
+    # redfirst.json is written at the PROJECT ROOT, and the Test Writer runs at
+    # step 5 locked to verify/ - so self-checking produced a file it was then
+    # refused permission to clean up, and left dynamic.ran=false sitting where a
+    # reader at Gate 1 could mistake it for evidence that the dynamic half had
+    # passed. The report is the orchestrator's to write; the check is anyone's
+    # to run.
+    ap.add_argument("--no-report", action="store_true",
+                    help="print the result, write no file - for an agent checking itself")
     a = ap.parse_args(argv)
     project = Path(a.project).resolve()
     report = run(project, a.target, a.static_only)
-    (project / "redfirst.json").write_text(json.dumps(report, indent=2) + "\n")
+    if not a.no_report:
+        (project / "redfirst.json").write_text(json.dumps(report, indent=2) + "\n")
     print(json.dumps(report, indent=2))
     return 0 if report["ok"] else 1
 

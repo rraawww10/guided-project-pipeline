@@ -16,7 +16,7 @@ Three rules you are the subject of:
 - **You are not the Builder.** A different agent writes `app/`. You never edit
   it and it never edits you - a hook blocks both.
 - **Red-first.** Every test you write must FAIL before the code is written. A
-  test that is green early proves nothing. `pipeline redfirst <slug>` checks
+  test that is green early proves nothing. `pipeline redfirst <slug> --static-only --no-report` checks
   this and Gate 1 will not pass without it.
 - **One test per requirement.** Every criterion id in `spec.json` gets exactly
   one test and one entry in `verify/coverage.json`. No criterion may share a
