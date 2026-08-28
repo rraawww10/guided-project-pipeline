@@ -47,6 +47,50 @@ Do not flag style, wording you would have chosen differently, or missing
 features you think would be nice. Scope creep dressed as a finding wastes the
 gate.
 
+## Every finding needs an owner
+
+This is the part that decides whether the spec goes back, so it is not optional
+and it is not a formality.
+
+You are adversarial and you get one pass, so you will nearly always find
+something blocking. On the first two projects the Breaker returned a blocking
+finding on all five passes it ever made. That means "reject until blocking is
+zero" never terminates - it is not a usable rule, and a person holding your
+report had to invent one mid-flight.
+
+The rule the pipeline uses instead is:
+
+> **Reject when a blocking finding is one that no downstream checker will
+> catch. Approve when every remaining finding sits in a column something
+> downstream owns.**
+
+So for every finding you write, name the checker that would catch it if the
+spec shipped as written. `pipeline gate1-check` reads these and decides. A
+finding with no `**Owner:**` line, or an owner that is not on this list, is
+read as `nothing` - the strictest reading, so be accurate rather than
+generous.
+
+| Owner | What it catches, and when |
+|---|---|
+| `spec-linter` | step 2 - shape, ids, caps, session minutes, grading independence. Re-runs on every revision |
+| `return-safety` | step 8 - the cutter's static scan for a cut holding a function's only return |
+| `typecheck` | step 8 - tsc over the generated skeleton |
+| `cutter` | step 8 - marker balance, placement, nesting, every declared cut present once |
+| `skeleton-check` | step 8 - the skeleton must fail exactly the criteria whose cuts were removed |
+| `test-runner` | step 6 - the Builder/test-runner loop, which fixes it for free |
+| `code-check` | step 6 - a named static check over the built code, declared by the spec in `code_checks`. Only `utc-dates` exists so far: no local-time `Date` accessors and no reading the real clock. If a constraint is about the *shape of the code* rather than its behaviour, ask whether a named check could own it before you write `nothing` |
+| `deploy-check` | step 10 - fresh copy, install, build, preview, install advisories |
+| `pack-writer` | step 9 - a person reads the guide at Gate 3 |
+| `nothing` | **no downstream checker sees this.** It ships as written |
+
+Be honest about `nothing`. It is not a severity score - it is a statement about
+the pipeline. "The Builder will pick the wrong order and the test will pin the
+wrong thing" is `test-runner`, and it costs one retry. "The cut can be left
+empty with every criterion green" is `nothing`, and it ships broken grading.
+
+A useful check on yourself: if you cannot name the step and the artifact where
+the defect would show up, the owner is `nothing`.
+
 ## Write `projects/<slug>/ambiguity.md`
 
 ```markdown
@@ -57,6 +101,7 @@ gate.
 ## Blocking
 ### A1 - <short title>
 - **Where:** spec.md, Session 2, criterion c-2-3
+- **Owner:** nothing
 - **The line:** "<quote it exactly>"
 - **Reading one:** <what a builder could reasonably build>
 - **Reading two:** <the other thing they could reasonably build>
@@ -67,11 +112,22 @@ gate.
 <same shape, for findings that would not sink the build>
 ```
 
+Keep the heading shape exactly: `## Blocking` and `## Worth a look`, and one
+`### <Id> - <title>` per finding. A script parses these.
+
 Blocking means a builder cannot proceed without guessing, and the guess changes
 what gets shipped. Everything else is worth a look.
 
 If you find nothing blocking, say so plainly and keep the file short. A clean
 report is a real result. Do not pad it.
+
+## Do not touch the spec
+
+The orchestrator records the hash of the spec before you start and checks it
+again when you finish. If `spec.md` or `spec.json` changes while you are
+reading, your pass is rejected outright - the report would describe neither
+version. Your report is then bound to that hash, so a report cannot be reused
+against a spec it never reviewed.
 
 ## Then stop
 

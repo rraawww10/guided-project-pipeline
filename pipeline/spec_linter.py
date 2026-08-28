@@ -10,6 +10,9 @@ import re
 import sys
 from pathlib import Path
 
+from .code_check import CHECKS as CODE_CHECKS
+from .state import spec_hash
+
 # Words that let a spec line mean two things. The Spec Breaker catches subtler
 # cases by reading; these are the ones a regex can own outright.
 VAGUE = [
@@ -37,13 +40,60 @@ TRACKS = {"react", "node", "fullstack", "ai"}
 
 RE_EP = re.compile(r"^ep-[a-z0-9]+(-[a-z0-9]+)*$")
 RE_SC = re.compile(r"^sc-[a-z0-9]+(-[a-z0-9]+)*$")
-RE_CUT = re.compile(r"^cut-[a-z0-9]+(-[a-z0-9]+)*$")
+# Two id vocabularies, both accepted. `cut-<kebab>` is what the shipped projects
+# use; `S03-T01` is requirements_doc.md's student-task id.
+RE_CUT = re.compile(r"^(?:cut-[a-z0-9]+(-[a-z0-9]+)*|S\d{1,3}-T\d{1,3})$")
 RE_SLUG = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")
+
+# A hint is the whole text the student gets. It must point at something
+# concrete: a symbol, a path, a method, a status code, a number. recipe-box
+# round 3 B1 - "cut-recipe-scale-quantity does not name scaleQuantity" - made
+# a second cut bypassable with every criterion green.
+RE_ANCHOR = re.compile(
+    r"`[^`]+`"                                  # `scaleQuantity`
+    r"|\b[a-z]+[A-Z][A-Za-z0-9]*\b"             # camelCase
+    r"|\b[A-Z][a-z0-9]+[A-Z][A-Za-z0-9]*\b"     # PascalCase
+    r"|\b[a-z_]+_[a-z_0-9]+\b"                  # snake_case
+    r"|\b[A-Za-z_][A-Za-z0-9_]*\(\)"            # someCall()
+    r"|/[a-z][\w/\[\]-]*"                       # /api/recipes
+    r"|\b(?:GET|POST|PUT|PATCH|DELETE)\b"       # a method
+    r"|\d"                                      # a status code or a count
+)
+
+# A hint phrased as "return X" tells the Builder to put the return inside the
+# markers. That is the TS2355 shape: the skeleton then has a typed function
+# with no return and does not compile at all - no red test, no build. The
+# authoritative check is static, in the cutter, because no code exists yet at
+# step 2. This is the cheap wording warning that comes first.
+RE_HINT_RETURN = re.compile(r"^\s*(?:and\s+)?returns?\b|\breturn\s+(?:the|a|an|every|it|its)\b",
+                            re.IGNORECASE)
 
 # 40 minutes of live teaching. These caps are the session-fit heuristic that
 # Gate 1 would otherwise have to eyeball.
 MIN_CRITERIA, MAX_CRITERIA = 2, 6
 MAX_CUTS = 5
+
+# --- session minutes -------------------------------------------------------
+# Round 1 shipped two sessions over the 40 minute cap, and both were found at
+# step 9 by the Pack Writer - after the spec, the code, the tests and the
+# skeleton were all built and both gates were passed. Nothing before step 9
+# weighed teaching minutes, so the caps above counted cuts and criteria and
+# missed the setup cost entirely.
+#
+# Calibrated against the two measured overruns:
+#   tip-split  session 1: setup + 4 cuts + 2 builds + 6 concepts -> 45 min
+#   recipe-box session 3:         4 cuts + 2 builds + 5 concepts -> 45 min
+# and against the sessions that fitted (tip-split 3, recipe-box 1 and 4).
+# The estimate is always reported. Over the cap is a warning, because a
+# 43-minute estimate is a judgement call for the person at Gate 1. Over the
+# hard ceiling is an error, because no live session absorbs that.
+BASE_MINUTES = 10.0          # intro, recap, wrap-up
+MINUTES_PER_CUT = 6.0        # live-coding one cut point with explanation
+MINUTES_PER_BUILD = 3.0      # scaffolding a new endpoint or screen
+MINUTES_PER_CONCEPT = 1.5    # one entry in `teaches`
+SETUP_MINUTES = 6.0          # project setup, on the session that carries it
+SESSION_MINUTES_CAP = 40.0
+SESSION_MINUTES_HARD = 50.0
 
 REQUIRED_MD_HEADINGS = ["## Outcome", "## Out of scope", "## Sessions"]
 
@@ -90,6 +140,109 @@ def _scan_placeholder(lint: Lint, text: str, where: str, code: str) -> None:
             lint.err(code, where, f"placeholder: {phrase!r} in {text[:120]!r}")
 
 
+def _check_grading_independence(lint: Lint, cut_signature: dict[str, set[str]]) -> None:
+    """Two cuts graded by exactly the same criteria cannot be told apart.
+
+    This is the one rule that catches both of round 1's worst cut defects, and
+    it caught both of them when it was written:
+
+    * recipe-box round 3 B1 - cut-fraction-scale and cut-recipe-scale-quantity
+      appear in c-4-2, c-4-3 and c-4-4 and nowhere else, so a student who does
+      the scaling in one of them leaves the other empty with every criterion
+      green. A bypassable grading cut, invisible to every downstream checker.
+    * the skeleton-check blind spot - cut-store-find-one and cut-api-recipe-get
+      have the same signature, which is exactly why c-3-2 goes green with
+      find-one still empty. The cutter can only prove the all-open and no-cut
+      cases, so a pair like this is where a proper subset satisfies the test.
+
+    The fix in both cases is one criterion that depends on one cut and not the
+    other, which makes the pair independently gradable and removes the subset
+    case at the same time.
+    """
+    groups: dict[frozenset, list[str]] = {}
+    for cut, crits in cut_signature.items():
+        groups.setdefault(frozenset(crits), []).append(cut)
+    for crits, cuts in sorted(groups.items(), key=lambda kv: sorted(kv[1])):
+        if len(cuts) < 2:
+            continue
+        lint.err("E110", f"cuts {', '.join(sorted(cuts))}",
+                 f"these {len(cuts)} cuts are graded by exactly the same criteria "
+                 f"({', '.join(sorted(crits))}), so no test can tell them apart. One "
+                 f"can be left empty with every criterion green, and a proper subset "
+                 f"of them satisfies the test - which is the one case the skeleton "
+                 f"check cannot see. Add a criterion that depends on one of them and "
+                 f"not the other.")
+
+
+def _setup_session(sessions: list[dict]) -> int | None:
+    """Which session carries the project setup. Session 1 unless one says so."""
+    for s in sessions:
+        if s.get("setup") is True:
+            return s.get("n")
+    return sessions[0].get("n") if sessions else None
+
+
+def session_minutes(s: dict, carries_setup: bool) -> float:
+    return round(
+        BASE_MINUTES
+        + MINUTES_PER_CUT * len(s.get("cuts") or [])
+        + MINUTES_PER_BUILD * len(s.get("builds") or [])
+        + MINUTES_PER_CONCEPT * len(s.get("teaches") or [])
+        + (SETUP_MINUTES if carries_setup else 0.0), 1)
+
+
+def _check_session_load(lint: Lint, sessions: list[dict]) -> None:
+    """Weigh setup cost and teaching minutes, not just counts.
+
+    Round 1 found both overruns at step 9, where the only real fix is a Gate 1
+    rebalance that invalidates the spec, the code, the tests and the skeleton.
+    Both projects shipped the defect instead of paying that. This moves the
+    finding to step 2, where the fix is one Spec Writer pass.
+    """
+    if not sessions:
+        return
+    setup_n = _setup_session(sessions)
+    for s in sessions:
+        n = s.get("n")
+        w = f"session {n}"
+        mins = session_minutes(s, n == setup_n)
+        if mins > SESSION_MINUTES_HARD:
+            lint.err("E111", w,
+                     f"estimated {mins:g} teaching minutes against a "
+                     f"{SESSION_MINUTES_CAP:g} minute cap - over the "
+                     f"{SESSION_MINUTES_HARD:g} minute ceiling no live session absorbs. "
+                     f"{len(s.get('cuts') or [])} cuts, {len(s.get('builds') or [])} builds, "
+                     f"{len(s.get('teaches') or [])} concepts"
+                     + (" plus the project setup" if n == setup_n else "")
+                     + ". Move a cut or a build to another session.")
+        elif mins > SESSION_MINUTES_CAP:
+            lint.warn("W112", w,
+                      f"estimated {mins:g} teaching minutes against a "
+                      f"{SESSION_MINUTES_CAP:g} minute cap. Nothing before step 9 "
+                      f"measures this, so decide it here: "
+                      f"{len(s.get('cuts') or [])} cuts, {len(s.get('builds') or [])} builds, "
+                      f"{len(s.get('teaches') or [])} concepts"
+                      + (" plus the project setup" if n == setup_n else "") + ".")
+
+    # The explicit lesson from tip-split: the session holding the setup must
+    # carry fewer cuts than the others, not the same number. tip-split session 1
+    # carried 4 cuts plus all the setup while session 2 also carried 4, and ran
+    # 45 minutes against the cap.
+    if setup_n is not None and len(sessions) > 1:
+        setup_s = next((s for s in sessions if s.get("n") == setup_n), None)
+        others = [s for s in sessions if s.get("n") != setup_n]
+        if setup_s is not None and others:
+            mine = len(setup_s.get("cuts") or [])
+            most = max(len(s.get("cuts") or []) for s in others)
+            if mine >= most:
+                lint.err("E113", f"session {setup_n}",
+                         f"session {setup_n} carries the project setup and {mine} cuts, "
+                         f"while the heaviest other session carries {most}. The session "
+                         f"holding the setup must carry strictly fewer cuts than the "
+                         f"others - tip-split shipped this shape and ran 45 minutes "
+                         f"against a 40 minute cap. Move a cut out of session {setup_n}.")
+
+
 def lint_spec(project: Path) -> Lint:
     lint = Lint()
     sj, sm = project / "spec.json", project / "spec.md"
@@ -116,6 +269,11 @@ def lint_spec(project: Path) -> Lint:
         lint.err("E012", "track", f"track must be one of {sorted(TRACKS)}")
     if not isinstance(spec.get("stack"), list) or not spec["stack"]:
         lint.err("E013", "stack", "stack must be a non-empty list")
+
+    for name in (spec.get("code_checks") or []):
+        if name not in CODE_CHECKS:
+            lint.err("E120", "code_checks",
+                     f"unknown code check {name!r} - known: {sorted(CODE_CHECKS)}")
 
     endpoints = spec.get("endpoints") or []
     screens = spec.get("screens") or []
@@ -169,6 +327,7 @@ def lint_spec(project: Path) -> Lint:
     cut_ids: set[str] = set()
     cuts_seen_by_session: dict[str, int] = {}
     referenced_cuts: set[str] = set()
+    cut_signature: dict[str, set[str]] = {}
     built: dict[str, int] = {}
 
     for s in sessions:
@@ -179,6 +338,10 @@ def lint_spec(project: Path) -> Lint:
                 lint.err("E042", w, f"missing key {key!r}")
         if lint.errors and any(e["where"] == w for e in lint.errors):
             continue
+
+        if s.get("id") is not None and s["id"] != f"S{n:02d}":
+            lint.err("E043", w,
+                     f"session id must be S{n:02d} to match n={n}, got {s['id']!r}")
 
         _scan_vague(lint, s["goal"], f"{w}.goal", "E050")
         _scan_placeholder(lint, s["goal"], f"{w}.goal", "E051")
@@ -200,6 +363,21 @@ def lint_spec(project: Path) -> Lint:
             if len(hint.split()) < 4:
                 lint.err("E063", cw, f"hint is the only thing the student sees - write a real sentence, got {hint!r}")
             _scan_vague(lint, hint, cw, "E064")
+            # A hint with nothing concrete in it cannot be graded against, and
+            # the student cannot tell which symbol they are meant to write.
+            # Warning, not error: hints are deliberately prose so they do not
+            # hand over the answer, so the person at Gate 1 makes the call.
+            if hint and not RE_ANCHOR.search(hint):
+                lint.warn("W066", cw,
+                          "hint names nothing concrete - no symbol, path, method, "
+                          f"status or count. The student cannot tell what to write: {hint!r}")
+            if RE_HINT_RETURN.search(hint):
+                lint.warn("W067", cw,
+                          "hint is phrased as 'return ...', which puts the return inside "
+                          "the markers. If it is a typed function's only return the "
+                          "skeleton will not compile (TS2355) - no red test, no build at "
+                          "all. Prefer 'put X into <the value declared above>'. The cutter "
+                          "checks the real marker placement at step 8.")
 
         if len(s["cuts"]) > MAX_CUTS:
             lint.err("E065", w, f"{len(s['cuts'])} cut points - more than {MAX_CUTS} will not fit 40 minutes")
@@ -213,8 +391,11 @@ def lint_spec(project: Path) -> Lint:
         for k, c in enumerate(s["criteria"], start=1):
             cid = c.get("id", "")
             cw = f"{w}.criterion {cid}"
-            if cid != f"c-{n}-{k}":
-                lint.err("E071", cw, f"criterion id must be c-{n}-<k> in order, got {cid!r}")
+            # c-3-1 or the doc's S03-AC01 - either, but one shape per session
+            if cid not in (f"c-{n}-{k}", f"S{n:02d}-AC{k:02d}"):
+                lint.err("E071", cw,
+                         f"criterion id must be c-{n}-{k} or S{n:02d}-AC{k:02d} in "
+                         f"order, got {cid!r}")
             if cid in crit_ids:
                 lint.err("E072", cw, f"duplicate criterion id {cid!r}")
             crit_ids.add(cid)
@@ -241,6 +422,7 @@ def lint_spec(project: Path) -> Lint:
 
             for ref in c.get("cuts", []):
                 referenced_cuts.add(ref)
+                cut_signature.setdefault(ref, set()).add(cid)
                 if ref not in cut_ids:
                     lint.err("E078", cw,
                              f"references cut {ref!r} which is not declared in this or an earlier session")
@@ -259,6 +441,9 @@ def lint_spec(project: Path) -> Lint:
                  "that no test asks the student to fill")
     for missing in sorted((ep_ids | sc_ids) - set(built)):
         lint.err("E091", missing, "declared but no session builds it")
+
+    _check_grading_independence(lint, cut_signature)
+    _check_session_load(lint, sessions)
 
     # -- spec.md ----------------------------------------------------------
     if not sm.exists():
@@ -282,6 +467,25 @@ def lint_spec(project: Path) -> Lint:
     return lint
 
 
+def minute_estimates(project: Path) -> list[dict]:
+    """Always reported, pass or fail - before this, nothing told anyone the
+    teaching load of a session until the Pack Writer timed it at step 9."""
+    try:
+        spec = json.loads((project / "spec.json").read_text())
+    except (OSError, json.JSONDecodeError):
+        return []
+    sessions = spec.get("sessions") or []
+    setup_n = _setup_session(sessions)
+    return [{"n": s.get("n"),
+             "minutes": session_minutes(s, s.get("n") == setup_n),
+             "cuts": len(s.get("cuts") or []),
+             "builds": len(s.get("builds") or []),
+             "concepts": len(s.get("teaches") or []),
+             "carries_setup": s.get("n") == setup_n,
+             "over_cap": session_minutes(s, s.get("n") == setup_n) > SESSION_MINUTES_CAP}
+            for s in sessions]
+
+
 def main(argv: list[str]) -> int:
     if len(argv) != 2:
         print("usage: python -m pipeline.spec_linter <project-dir>", file=sys.stderr)
@@ -293,6 +497,8 @@ def main(argv: list[str]) -> int:
         "errors": lint.errors,
         "warnings": lint.warnings,
         "counts": {"errors": len(lint.errors), "warnings": len(lint.warnings)},
+        "session_minutes": minute_estimates(project),
+        "spec_hash": spec_hash(project),
     }
     (project / "lint.json").write_text(json.dumps(report, indent=2) + "\n")
     print(json.dumps(report, indent=2))

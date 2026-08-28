@@ -1,12 +1,13 @@
 export const meta = {
   name: 'gp-phase3-pack',
-  description: 'Guided project phase 3: tested project -> student skeleton, instructor guide and deploy check, ready for Gate 3',
-  whenToUse: 'After Gate 2 is approved. Stops at Gate 3 - a person decides whether an instructor could teach from the guide.',
+  description: 'Guided project HANDOVER phase (steps 10-14): tested project -> student version, instructor guide, leak scan, guide linter and deploy check, ready for the dry run and Gate 3',
+  whenToUse: 'After Gate 2 is approved. Ends by asking for the timed dry run, then Gate 3 - a person decides whether an instructor could teach from the guide.',
   phases: [
     { title: 'Guard', detail: 'refuse to start unless Gate 2 was approved' },
-    { title: 'Cut', detail: 'cutter generates skeleton/ and proves it fails the right tests - script' },
-    { title: 'Pack', detail: 'Pack Writer writes the instructor session guide' },
-    { title: 'Deploy', detail: 'fresh copy, install, build, preview link - script' },
+    { title: 'Cut', detail: 'step 10 - cutter generates the student version and proves it fails the right tests' },
+    { title: 'Pack', detail: 'step 11 - Guide Writer writes the instructor session guide' },
+    { title: 'Deploy', detail: 'step 12 - fresh copy, install, build, preview link - script' },
+    { title: 'Handover', detail: 'leak scan and guide linter - scripts' },
   ],
 }
 
@@ -70,21 +71,10 @@ const runCut = (n) => agent(
   `Do NOT edit any file. You are a command runner.`,
   { label: `cutter:${n}`, phase: 'Cut', effort: 'low', schema: CUT })
 
-phase('Guard')
-const gate = await agent(
-  `Run \`python3 -m pipeline status ${slug}\` from the repo root and return whether gate2 shows ` +
-  `as approved. Do not edit anything.`,
-  { label: 'gate2-check', phase: 'Guard', effort: 'low',
-    schema: { type: 'object', required: ['gate2_approved'],
-              properties: { gate2_approved: { type: 'boolean' }, detail: { type: 'string' } } } })
-
-if (!gate.gate2_approved) {
-  return { slug, gate: 3, ready: false, blocked: 'Gate 2 has not been approved - the project is not packaged yet',
-           fix: `python3 -m pipeline gate ${slug} 2 approve -m "<note>"` }
-}
-
 phase('Cut')
-await lock('off', 'unlock:pre-cut')
+// No gate2-check agent and no pre-cut unlock agent: `pipeline cut` carries the
+// phase guard and clears the lock itself, so it refuses to run unless Gate 2
+// was approved and the spec still hashes to the one Gate 1 approved.
 let cut = await runCut(1)
 let attempt = 0
 
@@ -109,9 +99,11 @@ while (!cut.ok && attempt < RETRY_LIMIT) {
     `Fix the cut markers for guided project "${slug}".\n\n` +
     `${brief}\n\n` +
     `Change marker placement only. Do not change behaviour - every criterion still passes on ` +
-    `app/ and the test suite must stay green. Rule 3: you cannot edit verify/.`,
+    `app/ and the test suite must stay green. Rule 3: you cannot edit verify/.\n\n` +
+    `If the cutter reported that a cut removes its function's only return, the fix is to keep ` +
+    `the return OUTSIDE the markers and cut the assignment that feeds it. The fallback must ` +
+    `not accidentally satisfy the test.`,
     { label: `builder:markers-${attempt}`, phase: 'Cut' })
-  await lock('off', `unlock:${attempt}`)
   cut = await runCut(attempt + 1)
   log(`cut attempt ${attempt + 1}: ${cut.ok ? `clean, ${cut.cut_count} cuts` : `${cut.stage} failed`}`)
 }
@@ -158,11 +150,48 @@ const [pack, deploy] = await parallel([
 ])
 await lock('off', 'unlock:final')
 
+// ---- steps 10 and 11's checkers -------------------------------------------
+// requirements_doc.md rule 6: "Solutions must not appear in comments, README,
+// migrations, seed data, or git history." And step 11's guide linter, because
+// the guide was the one AI output with no script behind it.
+phase('Handover')
+const handover = await agent(
+  `Run exactly this from the repo root and nothing else:\n\n` +
+  `    python3 -m pipeline handover-checks ${slug}\n\n` +
+  `It runs the leak scan over the generated student version and its git history, ` +
+  `then the guide linter over the pack. Then read projects/${slug}/leak-scan.json ` +
+  `and projects/${slug}/guide-lint.json and return both.\n\n` +
+  `Do NOT edit any file. You are a command runner.`,
+  { label: `handover-checks:${slug}`, phase: 'Handover', effort: 'low',
+    schema: {
+      type: 'object',
+      required: ['leak_ok', 'guide_ok'],
+      properties: {
+        leak_ok: { type: 'boolean' },
+        guide_ok: { type: 'boolean' },
+        leaks: { type: 'array', items: {
+          type: 'object',
+          properties: { file: { type: 'string' }, task: { type: 'string' },
+                        leaked: { type: 'string' } } } },
+        guide_errors: { type: 'array', items: {
+          type: 'object',
+          properties: { code: { type: 'string' }, where: { type: 'string' },
+                        message: { type: 'string' } } } },
+      },
+    } })
+
+log(`handover: leak scan ${handover.leak_ok ? 'clean' : 'LEAKED'}, ` +
+    `guide linter ${handover.guide_ok ? 'clean' : 'FAILED'}`)
+
 const overruns = (pack && pack.sessions || []).filter(s => s.overruns || s.minutes > 40)
 
 return {
   slug, gate: 3,
-  ready: !!(pack && deploy && deploy.ok),
+  ready: !!(pack && deploy && deploy.ok && handover.leak_ok && handover.guide_ok),
+  handover: {
+    leak_scan: handover.leak_ok ? 'clean' : handover.leaks || 'leaked',
+    guide_linter: handover.guide_ok ? 'clean' : handover.guide_errors || 'failed',
+  },
   cut_count: cut.cut_count,
   cut_retries: attempt,
   pack: pack ? { files: pack.files, concerns: pack.concerns } : 'pack-writer failed',
@@ -170,8 +199,15 @@ return {
                      failed_steps: deploy.steps.filter(s => !s.ok).map(s => s.step) }
                  : 'deploy check failed',
   sessions_over_40_minutes: overruns.map(s => `session ${s.n}: ${s.minutes} min`),
-  read_next: [`projects/${slug}/pack/`, `projects/${slug}/skeleton-check.json`, `projects/${slug}/deploy.json`],
-  note: 'Gate 3 is one question: could someone teach session 4 from the guide alone, without opening the final code.',
+  read_next: [`projects/${slug}/pack/`, `projects/${slug}/skeleton-check.json`,
+              `projects/${slug}/deploy.json`, `projects/${slug}/leak-scan.json`,
+              `projects/${slug}/guide-lint.json`],
+  note: 'Gate 3 is one question: could someone teach a session from the guide alone, ' +
+        'without opening the final code. Step 13 answers it with evidence rather than ' +
+        'opinion: a person who did not build it teaches one session from the guide, ' +
+        'with a timer.',
+  step_13_dry_run: `python3 -m pipeline dryrun ${slug} --session <n> --minutes <measured> ` +
+    `--by "<who taught it - not whoever built it>" [--could-not-teach] -m "<what happened>"`,
   approve_with: `python3 -m pipeline gate ${slug} 3 approve -m "<note>" && python3 -m pipeline ship ${slug}`,
   reject_with: `python3 -m pipeline gate ${slug} 3 reject -m "<what to fix>"`,
 }

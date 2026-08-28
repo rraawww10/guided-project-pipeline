@@ -1,7 +1,7 @@
 {
   "ok": true,
   "target": "app",
-  "seconds": 11.9,
+  "seconds": 10.2,
   "counts": {
     "pass": 3,
     "fail": 0,
@@ -32,6 +32,6 @@
     }
   },
   "pytest_returncode": 0,
-  "stdout_tail": "...                                                                      [100%]\n3 passed in 1.46s\n",
+  "stdout_tail": "...                                                                      [100%]\n3 passed in 1.56s\n",
   "stderr_tail": ""
 }

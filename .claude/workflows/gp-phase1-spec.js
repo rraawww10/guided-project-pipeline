@@ -1,11 +1,12 @@
 export const meta = {
   name: 'gp-phase1-spec',
-  description: 'Guided project phase 1: one-page idea -> linted, ambiguity-checked spec ready for Gate 1',
-  whenToUse: 'After a person has written projects/<slug>/idea.md. Stops at Gate 1 - a person approves the spec before any code exists.',
+  description: 'Guided project PLAN phase (steps 3-6): idea -> linted, ambiguity-checked spec AND the tests, ready for Gate 1',
+  whenToUse: 'After Gate 0 has picked an idea (flow 2), or after a person has written projects/<slug>/idea.md (flow 1). Stops at Gate 1 - a person approves the plan and the tests before any code exists.',
   phases: [
-    { title: 'Draft', detail: 'Spec Writer turns idea.md into spec.md + spec.json' },
+    { title: 'Draft', detail: 'step 3 - Spec Writer turns idea.md into spec.md + spec.json' },
     { title: 'Lint', detail: 'spec linter - script, deterministic' },
-    { title: 'Break', detail: 'Spec Breaker flags every line that could mean two things' },
+    { title: 'Break', detail: 'step 4 - Spec Breaker flags every line that could mean two things' },
+    { title: 'Tests', detail: 'step 5 - Test Writer writes the suite BEFORE any code, checked red-first' },
   ],
 }
 
@@ -33,6 +34,17 @@ const spawn = async (name, prompt, opts = {}) => {
     return await agent(body, opts)
   }
 }
+
+// Rule 1: the tests are written by a different agent from the builder, and that
+// agent cannot reach the code. The lock is what enforces it - prose in a prompt
+// is not enforcement. In this flow verify/ belongs to the spec phase, so the
+// lock is available before Gate 1.
+const lock = (tree, label) => agent(
+  `Run exactly this from the repo root and nothing else, then return its output:\n\n` +
+  `    python3 -m pipeline ${tree === 'off' ? `unlock ${slug}` : `lock ${slug} ${tree}`}\n\n` +
+  `Do not edit any file.`,
+  { label, phase: 'Tests', effort: 'low',
+    schema: { type: 'object', required: ['done'], properties: { done: { type: 'boolean' }, output: { type: 'string' } } } })
 
 const LINT = {
   type: 'object',
@@ -117,6 +129,97 @@ const ambiguity = await spawn('spec-breaker',
       },
     } })
 
+// Bind the report to the exact spec it reviewed, then apply the stopping rule.
+// `pipeline lint` opened the pass when it went clean, so `end` refuses if the
+// spec moved while the Breaker was reading it. gate1-check is the rule itself:
+// reject when a blocking finding is owned by 'nothing', approve when every
+// finding sits in a column a downstream checker owns. One agent runs both.
+const verdict = await agent(
+  `Run exactly these two commands from the repo root, in order, and nothing else:\n\n` +
+  `    python3 -m pipeline breaker ${slug} end\n` +
+  `    python3 -m pipeline gate1-check ${slug}\n\n` +
+  `The first binds projects/${slug}/ambiguity.md to the spec it reviewed and fails if the spec ` +
+  `changed during the pass. The second applies the Gate 1 stopping rule and writes ` +
+  `projects/${slug}/gate1.json.\n\n` +
+  `Then read projects/${slug}/gate1.json and return it. If the first command failed, say so in ` +
+  `"reasons" and set ok false. Do NOT edit any file. Do NOT fix anything. You are a command runner.`,
+  { label: `gate1-rule:${slug}`, phase: 'Break', effort: 'low',
+    schema: {
+      type: 'object',
+      required: ['ok', 'verdict', 'reasons'],
+      properties: {
+        ok: { type: 'boolean' },
+        verdict: { type: 'string' },
+        reasons: { type: 'array', items: { type: 'string' } },
+        counts: {
+          type: 'object',
+          properties: { blocking: { type: 'integer' }, worth_a_look: { type: 'integer' },
+                        unowned_blocking: { type: 'integer' } },
+        },
+        findings: { type: 'array', items: {
+          type: 'object',
+          properties: { id: { type: 'string' }, title: { type: 'string' },
+                        blocking: { type: 'boolean' }, owner: { type: 'string' },
+                        must_fix_now: { type: 'boolean' } } } },
+      },
+    } })
+
+log(`gate 1 stopping rule: ${verdict.verdict}` +
+    (verdict.counts ? ` (${verdict.counts.blocking} blocking, ` +
+     `${verdict.counts.unowned_blocking} of them owned by nothing)` : ''))
+
+// ---- step 5: the tests, written from the spec BEFORE any code exists ------
+// requirements_doc.md rule 1: "Tests are written before the code, by a different
+// AI." Rule 2, red-first: "Every new test must fail before the code is written.
+// A test that passes early proves nothing."
+phase('Tests')
+await lock('verify', 'lock:verify')
+const tests = await spawn('test-writer',
+  `Write the test suite for guided project "${slug}".\n\n` +
+  `Read projects/${slug}/spec.json, spec.md, ambiguity.md, ` +
+  `projects/${slug}/.pipeline/CONTRACT.md and learning/lessons.md.\n\n` +
+  `There is NO projects/${slug}/app/ and there must not be one when you finish - a ` +
+  `different agent writes the code at step 7 and a hook will block you from it. ` +
+  `Write projects/${slug}/verify/ with exactly one test per criterion in spec.json, ` +
+  `plus verify/coverage.json covering every criterion id.\n\n` +
+  `Use only the selectors the spec pins. If a criterion cannot be tested from the ` +
+  `spec alone, say so in your summary rather than guessing - that is a finding for ` +
+  `the person at Gate 1.`,
+  { label: 'test-writer', phase: 'Tests',
+    schema: {
+      type: 'object',
+      required: ['files', 'criteria_covered'],
+      properties: {
+        files: { type: 'array', items: { type: 'string' } },
+        criteria_covered: { type: 'array', items: { type: 'string' } },
+        untestable_from_the_spec: { type: 'array', items: { type: 'string' } },
+        notes: { type: 'string' },
+      },
+    } })
+await lock('off', 'unlock:verify')
+
+const redfirst = await agent(
+  `Run exactly this from the repo root and nothing else:\n\n` +
+  `    python3 -m pipeline redfirst ${slug} --static-only\n\n` +
+  `It checks that no test in projects/${slug}/verify/ is one that cannot go red - ` +
+  `no assertion at all, or only trivially true ones. Then read ` +
+  `projects/${slug}/redfirst.json and return it.\n\n` +
+  `Do NOT edit any file. Do NOT fix anything. You are a command runner.`,
+  { label: `redfirst:${slug}`, phase: 'Tests', effort: 'low',
+    schema: {
+      type: 'object',
+      required: ['ok'],
+      properties: {
+        ok: { type: 'boolean' },
+        vacuous_tests: { type: 'array', items: {
+          type: 'object',
+          properties: { test: { type: 'string' }, problem: { type: 'string' } } } },
+      },
+    } })
+
+log(`tests: ${(tests.criteria_covered || []).length} criteria covered, ` +
+    `red-first ${redfirst.ok ? 'clean' : `${(redfirst.vacuous_tests || []).length} vacuous`}`)
+
 return {
   slug,
   gate: 1,
@@ -124,7 +227,32 @@ return {
   spec_attempts: attempt,
   lint: 'clean',
   ambiguity,
-  read_next: [`projects/${slug}/spec.md`, `projects/${slug}/ambiguity.md`],
+  tests: {
+    files: tests.files,
+    criteria_covered: (tests.criteria_covered || []).length,
+    untestable_from_the_spec: tests.untestable_from_the_spec || [],
+    notes: tests.notes,
+  },
+  red_first: { ok: redfirst.ok, vacuous_tests: redfirst.vacuous_tests || [] },
+  red_first_limit: 'the static half runs here, because with no code on disk a ' +
+    'dynamic all-red run would pass for the wrong reason. The dynamic proof is ' +
+    'the skeleton check at step 10, which requires every criterion whose task was ' +
+    'removed to fail.',
+  stopping_rule: 'reject when a blocking finding is owned by "nothing"; approve when every ' +
+                 'remaining finding sits in a column a downstream checker owns',
+  gate1_rule: { verdict: verdict.verdict, ok: verdict.ok, counts: verdict.counts,
+                reasons: verdict.reasons },
+  must_fix_now: (verdict.findings || []).filter(f => f.must_fix_now)
+    .map(f => `${f.id} ${f.title}`),
+  read_next: [`projects/${slug}/spec.md`, `projects/${slug}/ambiguity.md`,
+              `projects/${slug}/gate1.json`, `projects/${slug}/verify/`,
+              `projects/${slug}/redfirst.json`],
+  note: verdict.ok
+    ? 'The rule says approve-eligible. Gate 1 now covers the plan AND the tests - read the ' +
+      'suite too, because the rule proves nothing escapes to the shipped project, not that ' +
+      'the tests are worth passing.'
+    : 'The rule says reject. `pipeline gate <slug> 1 approve` will refuse until the findings ' +
+      'owned by "nothing" are fixed and the Spec Breaker has re-read the spec.',
   approve_with: `python3 -m pipeline gate ${slug} 1 approve -m "<note>"`,
-  reject_with: `python3 -m pipeline gate ${slug} 1 reject -m "<what to fix>"`,
+  reject_with: `python3 -m pipeline gate ${slug} 1 reject -m "<what to fix>" && python3 -m pipeline revise ${slug}`,
 }

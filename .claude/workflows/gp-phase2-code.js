@@ -1,6 +1,6 @@
 export const meta = {
   name: 'gp-phase2-code',
-  description: 'Guided project phase 2: approved spec -> working project + test suite, every criterion green, ready for Gate 2',
+  description: 'Guided project CODE phase (steps 7-9): approved plan + tests -> working project, every criterion green and every task proven graded, ready for Gate 2',
   whenToUse: 'After Gate 1 is approved. Stops at Gate 2 - a person reads the pass or fail list instead of testing by hand.',
   phases: [
     { title: 'Guard', detail: 'refuse to start unless Gate 1 was approved' },
@@ -73,20 +73,12 @@ const runTests = (n) => agent(
   `Do NOT edit any file. Do NOT fix anything. You are a command runner.`,
   { label: `test-runner:${n}`, phase: 'Test', effort: 'low', schema: RESULTS })
 
-phase('Guard')
-const gate = await agent(
-  `Run \`python3 -m pipeline status ${slug}\` from the repo root and return whether gate1 shows ` +
-  `as approved. Do not edit anything.`,
-  { label: 'gate1-check', phase: 'Guard', effort: 'low',
-    schema: { type: 'object', required: ['gate1_approved'],
-              properties: { gate1_approved: { type: 'boolean' }, detail: { type: 'string' } } } })
-
-if (!gate.gate1_approved) {
-  return { slug, gate: 2, ready: false, blocked: 'Gate 1 has not been approved - no code may be written yet',
-           fix: `python3 -m pipeline gate ${slug} 1 approve -m "<note>"` }
-}
-
 phase('Build')
+// The gate check used to be its own agent running `pipeline status`. It is not
+// needed: `pipeline lock` carries the phase guard, so the first real command of
+// the phase already refuses to proceed unless Gate 1 was approved AND the spec
+// still hashes to the one that was approved. One less command-only agent, and
+// the check is now fail-closed in the orchestrator rather than in a prompt.
 await lock('app', 'lock:app')
 await spawn('builder',
   `Build guided project "${slug}".\n\n` +
@@ -107,7 +99,10 @@ await spawn('verifier',
   { label: 'verifier', phase: 'Verify' })
 
 phase('Test')
-await lock('off', 'unlock')
+// `pipeline test` clears the lock itself - it has to, since it boots the app.
+// That removes the separate `unlock` agent that used to run before every test
+// run: one command-only agent per retry iteration, and the one the security
+// classifier flagged on both round-1 projects.
 let results = await runTests(1)
 let attempt = 0
 
@@ -140,7 +135,6 @@ while (!results.ok && attempt < RETRY_LIMIT) {
       { label: `builder:retry-${attempt}`, phase: 'Build' })
   }
 
-  await lock('off', `unlock:${attempt}`)
   results = await runTests(attempt + 1)
   log(`test run ${attempt + 1}: ${results.counts.pass} pass, ${results.counts.fail} fail, ${results.counts.missing} missing`)
 }
@@ -151,10 +145,63 @@ if (!results.ok) {
            counts: results.counts, failing: results.failing }
 }
 
+// ---- step 8's second checker ----------------------------------------------
+// requirements_doc.md rule 3: "The verifier is checked by a script. It must
+// cover every requirement, and it must go red when we deliberately break the
+// code. Otherwise a useless test looks green."
+//
+// The break used is the meaningful one: remove exactly one student task and
+// leave the rest written. Every task must turn one of its own requirements red.
+// A task nothing notices is a task that grades nothing. This is also the
+// partial-subset case the skeleton check is blind to - N runs, not 2^N.
+//
+// It costs one boot and build per task, so it is the slowest step in the phase.
+// On a flow-1 project the command steps aside and returns ok.
+const mutationOut = await agent(
+  `Run exactly this from the repo root and nothing else:\n\n` +
+  `    python3 -m pipeline mutation ${slug}\n\n` +
+  `For each student task in turn it removes that one task, leaves every other one ` +
+  `written, boots the app and runs the suite. It takes several minutes per task - ` +
+  `let it finish. Then read projects/${slug}/mutation.json and return it.\n\n` +
+  `Do NOT edit any file. You are a command runner.`,
+  { label: `mutation:${slug}`, phase: 'Test', effort: 'low',
+    schema: {
+      type: 'object',
+      required: ['ok'],
+      properties: {
+        ok: { type: 'boolean' },
+        checked: { type: 'integer' },
+        of_total: { type: 'integer' },
+        ungraded_tasks: { type: 'array', items: { type: 'string' } },
+        seconds: { type: 'number' },
+      },
+    } })
+
+log(`mutation: ${mutationOut.ok ? 'every task is graded' :
+     `UNGRADED ${(mutationOut.ungraded_tasks || []).join(', ')}`}`)
+
+if (!mutationOut.ok) {
+  // An ungraded task is a spec problem, not a code problem: the requirement
+  // list does not notice the task. That re-enters at step 3.
+  return {
+    slug, gate: 2, ready: false, retries_used: attempt, counts: results.counts,
+    blocked: 'the mutation check found student tasks that grade nothing',
+    ungraded_tasks: mutationOut.ungraded_tasks || [],
+    reason: 'a task no requirement notices can be left empty with every criterion ' +
+            'green. This is a SPEC problem - the requirement list is wrong, not the ' +
+            'code - so it re-enters at step 3.',
+    fix: `python3 -m pipeline gate ${slug} 1 reject -m "<add a requirement that ` +
+         `notices each ungraded task>" && python3 -m pipeline revise ${slug}`,
+    read_next: [`projects/${slug}/mutation.json`, `projects/${slug}/results.json`],
+  }
+}
+
 return {
   slug, gate: 2, ready: true, retries_used: attempt, counts: results.counts,
-  read_next: [`projects/${slug}/results.json`],
-  note: 'Gate 2 is every criterion, not a summary. results.json lists each one by id with its check text.',
+  mutation: { ok: mutationOut.ok, checked: mutationOut.checked,
+              of_total: mutationOut.of_total, seconds: mutationOut.seconds },
+  read_next: [`projects/${slug}/results.json`, `projects/${slug}/mutation.json`],
+  note: 'Gate 2 is every criterion, not a summary. results.json lists each one by id with its check text. mutation.json proves each student task turns a requirement red when removed.',
   approve_with: `python3 -m pipeline gate ${slug} 2 approve -m "<note>"`,
   reject_with: `python3 -m pipeline gate ${slug} 2 reject -m "<what to fix>"`,
 }
