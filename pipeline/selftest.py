@@ -22,7 +22,7 @@ import sys
 import tempfile
 from pathlib import Path
 
-from . import (cli, code_check, cutter, deploy_check, gate1, guide_linter,
+from . import (cli, code_check, cutter, deploy_check, gate1, guard, guide_linter,
                leak_scan, mutation, redfirst, spec_linter, watchdog)
 from .deploy_check import find_advisories
 from .spec_linter import Lint, _scan_placeholder, _scan_vague, lint_spec
@@ -726,6 +726,21 @@ def test_guard(tmp: Path) -> None:
     check("flow 2 puts verify/ in the spec phase",
           cli.LOCK_PHASE_BY_FLOW[2]["verify"], "spec")
     check("files outside projects/ are never guarded", hook(w(ROOT / "Flow.md")), False)
+
+    # The shell path pattern once required a forward slash, so on Windows - where
+    # the command carries a drive letter and backslashes - it matched nothing and
+    # rule 3 went unenforced for EVERY Bash call. Pin both separators and Git
+    # Bash's MSYS form here, because the machine running the suite only ever
+    # exercises its own.
+    check("a forward-slash path is a path token",
+          guard.PATH_TOKEN.findall("rm /repo/projects/fixture/verify/t.py"),
+          ["/repo/projects/fixture/verify/t.py"])
+    check("a backslash path is a path token too",
+          guard.PATH_TOKEN.findall(r"rm C:\repo\projects\fixture\verify\t.py"),
+          [r"C:\repo\projects\fixture\verify\t.py"])
+    check("the MSYS drive form is rewritten to a drive",
+          guard.MSYS_PATH.sub(r"\1:/", "/d/repo/projects/fixture/verify/t.py"),
+          "d:/repo/projects/fixture/verify/t.py")
 
 
 # ------------------------------------------------------------------ revise ----

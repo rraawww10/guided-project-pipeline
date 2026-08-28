@@ -35,6 +35,16 @@ SPEC_FILES = ("spec.json", "spec.md")
 REDIRECT = re.compile(r"(>>?|\btee\b|\bcp\b|\bmv\b|\bsed\b\s+-i|\brm\b|\bdd\b|"
                       r"\btruncate\b|\bmkdir\b|\btouch\b|\bpatch\b)")
 
+# A path argument inside such a command: any run of path characters holding a
+# projects/<slug> segment. BOTH separators count - a pattern that matched only
+# "projects/" left rule 3 unenforced for every Bash call on Windows, where the
+# command carries a drive letter and backslashes.
+PATH_TOKEN = re.compile(r"[^\s'\"<>|;&()`]*projects[/\\][^\s'\"<>|;&()`]+")
+
+# Git Bash hands out MSYS paths (/d/repo/projects/...) that Windows resolves
+# against the wrong root, so the walk up to .pipeline/LOCK finds nothing.
+MSYS_PATH = re.compile(r"^/([A-Za-z])/")
+
 
 def frozen_project(path: Path) -> Path | None:
     """Walk up from path to a projects/<slug>/ whose spec is frozen."""
@@ -94,7 +104,9 @@ def check_path(target: Path) -> str | None:
 def check_bash(command: str) -> str | None:
     if not REDIRECT.search(command):
         return None
-    for token in re.findall(r"[\w./~-]*projects/[\w./-]+", command):
+    for token in PATH_TOKEN.findall(command):
+        if sys.platform == "win32":
+            token = MSYS_PATH.sub(r"\1:/", token)
         msg = check_path(Path(token))
         if msg:
             return msg
