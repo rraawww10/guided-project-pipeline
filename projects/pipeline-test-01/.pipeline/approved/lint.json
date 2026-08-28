@@ -1,0 +1,39 @@
+{
+  "ok": true,
+  "errors": [],
+  "warnings": [],
+  "counts": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "session_minutes": [
+    {
+      "n": 1,
+      "minutes": 38.5,
+      "cuts": 2,
+      "builds": 2,
+      "concepts": 3,
+      "carries_setup": true,
+      "over_cap": false
+    },
+    {
+      "n": 2,
+      "minutes": 32.5,
+      "cuts": 2,
+      "builds": 2,
+      "concepts": 3,
+      "carries_setup": false,
+      "over_cap": false
+    },
+    {
+      "n": 3,
+      "minutes": 35.5,
+      "cuts": 3,
+      "builds": 1,
+      "concepts": 3,
+      "carries_setup": false,
+      "over_cap": false
+    }
+  ],
+  "spec_hash": "64074255c3f75e218ae8bc527762ed4e5abdde52ed88117756bdbf23989add01"
+}

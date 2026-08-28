@@ -1,0 +1,120 @@
+{
+  "slug": "pipeline-test-01",
+  "created": "2026-08-28T14:59:17+00:00",
+  "flow": 2,
+  "phase": "code",
+  "retries": {
+    "idea": 0,
+    "spec": 0,
+    "code": 0,
+    "pack": 0
+  },
+  "step_runs": {
+    "stack": 1,
+    "ideas": 2,
+    "pick": 1,
+    "lint": 2,
+    "breaker": 2,
+    "redfirst": 2,
+    "revise:round-1": 1
+  },
+  "gates": {
+    "gate0": {
+      "approved": true,
+      "at": "2026-08-28T15:11:34+00:00",
+      "note": "chosen by the human at Gate 0",
+      "picked": "idea-03.md"
+    },
+    "gate1": {
+      "approved": true,
+      "at": "2026-08-28T16:55:01+00:00",
+      "note": "Round 2: B1 closed by grading, not by deletion - all five previously ungraded rules now have a criterion, across 9 changed criteria. c-3-3's 21-revealed-holding-a-mine case pins the lost/won branch order. A1 owned by skeleton-check, A2 owned by test-runner; no blocking finding is unowned. Tests reviewed alongside the plan.",
+      "spec_hash": "64074255c3f75e218ae8bc527762ed4e5abdde52ed88117756bdbf23989add01",
+      "override": false
+    },
+    "gate2": null,
+    "gate3": null
+  },
+  "steps": [
+    {
+      "step": "stack",
+      "ok": true,
+      "at": "2026-08-28T14:59:17+00:00",
+      "detail": "next, react, typescript",
+      "run": 1
+    },
+    {
+      "step": "ideas",
+      "ok": true,
+      "at": "2026-08-28T15:05:52+00:00",
+      "detail": "5 ideas",
+      "run": 1
+    },
+    {
+      "step": "ideas",
+      "ok": true,
+      "at": "2026-08-28T15:06:16+00:00",
+      "detail": "5 ideas",
+      "run": 2
+    },
+    {
+      "step": "pick",
+      "ok": true,
+      "at": "2026-08-28T15:11:34+00:00",
+      "detail": "idea-03.md",
+      "run": 1
+    },
+    {
+      "step": "lint",
+      "ok": true,
+      "at": "2026-08-28T15:28:09+00:00",
+      "detail": "",
+      "run": 1
+    },
+    {
+      "step": "breaker",
+      "ok": true,
+      "at": "2026-08-28T15:39:26+00:00",
+      "detail": "58a12371e56e",
+      "run": 1
+    },
+    {
+      "step": "redfirst",
+      "ok": true,
+      "at": "2026-08-28T15:48:28+00:00",
+      "detail": "",
+      "run": 1
+    },
+    {
+      "step": "revise:round-1",
+      "ok": true,
+      "at": "2026-08-28T16:13:19+00:00",
+      "detail": "spec.md, spec.json, lint.json, ambiguity.md, gate1.json, redfirst.json, verify",
+      "run": 1
+    },
+    {
+      "step": "lint",
+      "ok": true,
+      "at": "2026-08-28T16:25:53+00:00",
+      "detail": "",
+      "run": 2
+    },
+    {
+      "step": "breaker",
+      "ok": true,
+      "at": "2026-08-28T16:40:00+00:00",
+      "detail": "64074255c3f7",
+      "run": 2
+    },
+    {
+      "step": "redfirst",
+      "ok": true,
+      "at": "2026-08-28T16:49:32+00:00",
+      "detail": "",
+      "run": 2
+    }
+  ],
+  "ticket": null,
+  "dry_run": null,
+  "feedback": []
+}

@@ -1,0 +1,105 @@
+{
+  "ok": true,
+  "verdict": "approve-eligible",
+  "spec_hash": "64074255c3f75e218ae8bc527762ed4e5abdde52ed88117756bdbf23989add01",
+  "findings": [
+    {
+      "id": "A1",
+      "title": "The given face-down grid never says what it iterates, and `c-2-4` must pass on the skeleton",
+      "section": "blocking",
+      "owner": "skeleton-check",
+      "blocking": true,
+      "owner_declared": "skeleton-check",
+      "owner_valid": true,
+      "caught_by": "step 8 - the skeleton must fail exactly the cut criteria",
+      "must_fix_now": false
+    },
+    {
+      "id": "A2",
+      "title": "\"updates data-revealed to true on exactly N cells\" is a running total in some clauses and reads as a delta",
+      "section": "blocking",
+      "owner": "test-runner",
+      "blocking": true,
+      "owner_declared": "test-runner",
+      "owner_valid": true,
+      "caught_by": "step 6 - the Builder/test-runner loop fixes this for free",
+      "must_fix_now": false
+    },
+    {
+      "id": "B1",
+      "title": "Every session is budgeted to exactly 40:00, and session 2 puts 20 of them in one cut",
+      "section": "worth a look",
+      "owner": "pack-writer",
+      "blocking": false,
+      "owner_declared": "pack-writer",
+      "owner_valid": true,
+      "caught_by": "step 9 - a person reads the guide at Gate 3",
+      "must_fix_now": false
+    },
+    {
+      "id": "B2",
+      "title": "Nothing says who writes the `flag-mode` button's own click handler",
+      "section": "worth a look",
+      "owner": "test-runner",
+      "blocking": false,
+      "owner_declared": "test-runner",
+      "owner_valid": true,
+      "caught_by": "step 6 - the Builder/test-runner loop fixes this for free",
+      "must_fix_now": false
+    },
+    {
+      "id": "B3",
+      "title": "`cut-game-status`' hint is the implementation, line for line, for 12 of session 3's 40 minutes",
+      "section": "worth a look",
+      "owner": "pack-writer",
+      "blocking": false,
+      "owner_declared": "pack-writer",
+      "owner_valid": true,
+      "caught_by": "step 9 - a person reads the guide at Gate 3",
+      "must_fix_now": false
+    },
+    {
+      "id": "B4",
+      "title": "\"every cell bordering that region\" never says which adjacency",
+      "section": "worth a look",
+      "owner": "test-runner",
+      "blocking": false,
+      "owner_declared": "test-runner",
+      "owner_valid": true,
+      "caught_by": "step 6 - the Builder/test-runner loop fixes this for free",
+      "must_fix_now": false
+    },
+    {
+      "id": "B5",
+      "title": "The \"no cut in any list is redundant\" claim does not hold for `c-3-4` and `c-3-5`",
+      "section": "worth a look",
+      "owner": "nothing",
+      "blocking": false,
+      "owner_declared": "nothing",
+      "owner_valid": true,
+      "caught_by": "NO downstream checker sees this - it ships as written",
+      "must_fix_now": false
+    },
+    {
+      "id": "B6",
+      "title": "\"eight more in sessions 2 and 3\" is nine",
+      "section": "worth a look",
+      "owner": "nothing",
+      "blocking": false,
+      "owner_declared": "nothing",
+      "owner_valid": true,
+      "caught_by": "NO downstream checker sees this - it ships as written",
+      "must_fix_now": false
+    }
+  ],
+  "counts": {
+    "blocking": 2,
+    "worth_a_look": 6,
+    "unowned_blocking": 0
+  },
+  "reasons": [
+    "2 blocking finding(s), all owned by a downstream checker; 6 worth a look. Nothing here escapes to the shipped project."
+  ],
+  "rule": "reject when any blocking finding is owned by 'nothing'; approve when every remaining finding sits in a column a downstream checker owns",
+  "reviewed_spec_hash": "64074255c3f75e218ae8bc527762ed4e5abdde52ed88117756bdbf23989add01"
+}

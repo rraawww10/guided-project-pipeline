@@ -1,0 +1,2 @@
+64074255c3f75e218ae8bc527762ed4e5abdde52ed88117756bdbf23989add01
+Round 2: B1 closed by grading, not by deletion - all five previously ungraded rules now have a criterion, across 9 changed criteria. c-3-3's 21-revealed-holding-a-mine case pins the lost/won branch order. A1 owned by skeleton-check, A2 owned by test-runner; no blocking finding is unowned. Tests reviewed alongside the plan.

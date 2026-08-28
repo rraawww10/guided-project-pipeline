@@ -1,0 +1,83 @@
+{
+  "ok": false,
+  "verdict": "reject",
+  "spec_hash": "58a12371e56eac62d50f3fa84b47efbe36f3e3ebd26d66d3f7a8167822a5fc36",
+  "findings": [
+    {
+      "id": "B1",
+      "title": "Five behaviours the spec decides explicitly and no criterion grades",
+      "section": "blocking",
+      "owner": "nothing",
+      "blocking": true,
+      "owner_declared": "nothing",
+      "owner_valid": true,
+      "caught_by": "NO downstream checker sees this - it ships as written",
+      "must_fix_now": true
+    },
+    {
+      "id": "B2",
+      "title": "Session 2 has 1.5 minutes of headroom and carries the one heavy cut",
+      "section": "blocking",
+      "owner": "pack-writer",
+      "blocking": true,
+      "owner_declared": "pack-writer",
+      "owner_valid": true,
+      "caught_by": "step 9 - a person reads the guide at Gate 3",
+      "must_fix_now": false
+    },
+    {
+      "id": "W1",
+      "title": "\"A flagged cell can never be open\" is false in both directions",
+      "section": "worth a look",
+      "owner": "nothing",
+      "blocking": false,
+      "owner_declared": "nothing",
+      "owner_valid": true,
+      "caught_by": "NO downstream checker sees this - it ships as written",
+      "must_fix_now": false
+    },
+    {
+      "id": "W2",
+      "title": "`code_checks` is empty while the spec states a code-shape constraint",
+      "section": "worth a look",
+      "owner": "nothing",
+      "blocking": false,
+      "owner_declared": "nothing",
+      "owner_valid": true,
+      "caught_by": "NO downstream checker sees this - it ships as written",
+      "must_fix_now": false
+    },
+    {
+      "id": "W3",
+      "title": "The not-found state does not say which of the play screen's chrome renders",
+      "section": "worth a look",
+      "owner": "test-runner",
+      "blocking": false,
+      "owner_declared": "test-runner",
+      "owner_valid": true,
+      "caught_by": "step 6 - the Builder/test-runner loop fixes this for free",
+      "must_fix_now": false
+    },
+    {
+      "id": "W4",
+      "title": "The rationale paragraph misdescribes the criterion it is defending",
+      "section": "worth a look",
+      "owner": "nothing",
+      "blocking": false,
+      "owner_declared": "nothing",
+      "owner_valid": true,
+      "caught_by": "NO downstream checker sees this - it ships as written",
+      "must_fix_now": false
+    }
+  ],
+  "counts": {
+    "blocking": 2,
+    "worth_a_look": 4,
+    "unowned_blocking": 1
+  },
+  "reasons": [
+    "B1 (Five behaviours the spec decides explicitly and no criterion grades) is blocking and nothing downstream catches it"
+  ],
+  "rule": "reject when any blocking finding is owned by 'nothing'; approve when every remaining finding sits in a column a downstream checker owns",
+  "reviewed_spec_hash": "58a12371e56eac62d50f3fa84b47efbe36f3e3ebd26d66d3f7a8167822a5fc36"
+}

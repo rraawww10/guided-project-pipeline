@@ -1,0 +1,506 @@
+================================================================================
+BLOCKERS - ROUND 2
+Guided project production pipeline (requirements_doc.md: 7 agents, 12 scripts,
+4 gates, flow 2)
+================================================================================
+
+Compiled       2026-08-28
+Scope          Everything that broke, blocked, or had to be worked around while
+               bringing the rebuilt pipeline up on a Windows checkout and
+               driving the first flow-2 project through phase 0 and phase 1.
+Run covered    pipeline-test-01  (created 2026-08-28 14:59, flow 2)
+                 step 0  stack     14:59  next,react,typescript / 3 x 40 min
+                 step 1  ideas     15:05  5 ideas, checker green, 1 attempt
+                 step 2  GATE 0    15:11  human picked idea-03 "Sweeper"
+                 step 3  lint      15:28  clean, 1 attempt
+                 step 4  breaker   15:39  2 blocking, 4 worth a look
+                 step 5  redfirst  15:48  ok, 18 tests, vacuous_tests []
+                 step 6  GATE 1    REJECTED by gate1-check (unowned blocking)
+
+Evidence base  projects/pipeline-test-01/.pipeline/state.json   step timeline
+               projects/pipeline-test-01/{lint,gate1,redfirst,ideas}.json
+               projects/pipeline-test-01/ambiguity.md
+               projects/pipeline-test-01/verify/coverage.json
+               .claude/workflows/*.js                  byte-level inspection
+               git config core.autocrlf, git show HEAD:<path>
+               learning/lessons.md
+               pipeline/guard.py, pipeline/selftest.py
+               blockers_round_1.txt                    for B-nn cross-reference
+
+Every claim below is traceable to one of those. Nothing here is inferred.
+Round-1 IDs are cited as B-nn. New IDs this round are R2-nn.
+
+
+================================================================================
+0. HEADLINE
+================================================================================
+
+Phase 0 and phase 1 both completed on the FIRST attempt with zero retries
+burned. Every checker that fired, passed. And Gate 1 still rejected.
+
+Twelve distinct blockers this round. Their distribution is the finding:
+
+    5  infrastructure / harness   - hit BEFORE the pipeline could run at all
+    2  documentation drift
+    1  test-suite integrity
+    4  in-run, phase 1
+
+Four of the infrastructure blockers were Windows-specific, and three of those
+made a component silently unrunnable rather than fail loudly.
+
+The round-1 headline was "the pipeline is blind to everything expensive."
+The round-2 headline is narrower and worse:
+
+    NOTHING THE PIPELINE RUNS ITSELF FOUND ANY OF THE TWELVE.
+
+The spec linter passed clean. The idea checker passed clean. The red-first
+check passed clean. The write guard passed its own selftest. Every blocker
+below was found by a human reading, by an agent reading adversarially, or by a
+tool outside the pipeline refusing to start.
+
+
+================================================================================
+1. THE ROUND-1 NUMBER, ONE ROUND LATER
+================================================================================
+
+THE SPEC LINTER HAS STILL NEVER REJECTED A SPEC. TWELVE FOR TWELVE.
+
+  projects/habit-tracker/.pipeline/round-1/lint.json    clean -> REJECTED Gate 1
+  projects/habit-tracker/.pipeline/round-2/lint.json    clean -> REJECTED Gate 1
+  projects/habit-tracker/.pipeline/round-3/lint.json    clean -> REJECTED Gate 1
+  projects/habit-tracker/.pipeline/approved/lint.json   clean -> approved
+  projects/habit-tracker/lint.json                      clean -> approved
+  projects/recipe-box/.pipeline/round-1/lint.json       clean -> REJECTED Gate 1
+  projects/recipe-box/.pipeline/round-2/lint.json       clean -> REJECTED Gate 1
+  projects/recipe-box/.pipeline/round-3/lint.json       clean -> REJECTED Gate 1
+  projects/recipe-box/lint.json                         clean -> approved
+  projects/tip-split/.pipeline/round-1/lint.json        clean -> REJECTED Gate 1
+  projects/tip-split/lint.json                          clean -> approved
+  projects/pipeline-test-01/lint.json                   clean -> REJECTED Gate 1
+  ------------------------------------------------------------------------
+  12 linter runs, 12 clean, 0 rejections, across 4 projects and 2 flows.
+  7 of those clean specs were then rejected on blocking findings.
+
+Round 1 recorded this as B-05/B-16 with a 0% catch rate. One project and one
+new flow later the catch rate is unchanged, and "retries: spec=0/15" on
+pipeline-test-01 again means "the checker never fired", not "the spec was good".
+
+WHAT IS NEW THIS ROUND: gate1-check now has a matching record, and it is the
+opposite one.
+
+  projects/habit-tracker/.pipeline/round-1/gate1.json  reject  blocking=3 unowned=1
+  projects/habit-tracker/.pipeline/round-2/gate1.json  reject  blocking=2 unowned=1
+  projects/habit-tracker/.pipeline/round-3/gate1.json  reject  blocking=1 unowned=1
+  projects/habit-tracker/gate1.json                    approve blocking=1 unowned=0
+  projects/pipeline-test-01/gate1.json                 reject  blocking=2 unowned=1
+
+Five runs, and the verdict tracked "unowned" every single time while "blocking"
+moved 3 -> 2 -> 1 -> 1 -> 2 with no relationship to the outcome. The stopping
+rule invented mid-flight in round 1 (B-03) is now code, and the column it reads
+is the only column that has ever decided anything. Round-1 fix F-3 is
+DISCHARGED, and it worked.
+
+So the two halves of Gate 1 have inverted catch rates: the script that runs
+first has never caught anything, and the rule that runs last has decided
+everything.
+
+
+================================================================================
+2. INCIDENT REGISTER
+================================================================================
+Ordered by when it was hit. ID format R2-nn.
+"Recurrence" = likelihood on the NEXT run given the code as it stands today.
+
+--------------------------------------------------------------------------------
+INFRASTRUCTURE - hit before the pipeline could run at all
+--------------------------------------------------------------------------------
+
+R2-01  The write guard refused read-only commands
+       WHAT   check_bash fired on any ">" anywhere in a command - quoted or
+              not - and then path-checked EVERY projects/... token on the line.
+              A grep for the cut marker, naming a frozen spec.json on the same
+              line, was blocked: the quoted marker looked like a redirect.
+       IMPACT Any inspection of a shipped project was refused. It fired twice
+              during the habit-tracker run and was logged in lessons.md as
+              "Not yet fixed" - it then survived a full round as a known,
+              unfixed papercut.
+       ROOT CAUSE  A regex was doing a parser's job. Two defects hid in one
+              pattern: a ">" inside quotes is data, and even for a real
+              redirect only the token AFTER it is written.
+       FIX    Replaced with a quote-aware lexer that splits the line into
+              simple commands and asks each what it WRITES - the operand of
+              ">"/">>", every path argument of rm/mv/tee/sed -i/..., and the
+              destination only for cp/install/rsync.
+       WHAT THE FIX ALSO EXPOSED  Two silent rule-3 HOLES the old pattern had:
+                a) a "<" operand was treated as a write (false positive), and
+                b) a second LINE of a script was invisible. The whole command
+                   was scanned as one string, "cd app" was found as the command
+                   word, and a two-line call that cd'd and then removed a file
+                   under verify/ passed straight through. A builder could have
+                   deleted a test file that way for the entire life of the
+                   guard.
+       PHASE  Scripts / guard
+       RECURRENCE  Fixed, with 9 new selftest checks covering the read/write
+              pairs and the multi-line case. The CLASS - "a pattern used where
+              a parser is required" - is still open elsewhere.
+
+R2-02  Every phase workflow was unrunnable on a Windows checkout
+       WHAT   All four .claude/workflows/*.js were CRLF in the working tree.
+              The Workflow tool refuses a script containing control characters,
+              so gp-phase0-ideas through gp-phase3-pack could not launch at
+              all:
+                "script contains control characters that would be hidden in
+                 the approval dialog"
+       ROOT CAUSE  git config core.autocrlf = true. The committed blobs are
+              LF-clean (verified: git show HEAD:<path> has 0 CR bytes); the
+              checkout rewrites them. Nothing in the repo pinned the ending.
+       IMPACT TOTAL for this platform. Not one of the four documented phase
+              entry points worked on a fresh Windows clone. The pipeline's
+              whole published usage - the gp-phase* commands in README.md - was
+              dead on arrival, and the error names control characters, not line
+              endings, so it does not point at its own cause.
+       FIX    Added .gitattributes pinning ".claude/workflows/*.js text eol=lf",
+              and normalised the working copies.
+       PHASE  Infrastructure / repo hygiene
+       RECURRENCE  Fixed for these four files. HIGH for any NEW workflow or
+              script added later - the .gitattributes rule is a path glob, and
+              nothing checks that a new entry point is covered by it.
+       SAME SHAPE AS  commit c7be9c4 (the guard's path pattern matching nothing
+              on Windows) and B-01/B-02 in round 1. Three rounds, three
+              platform-specific silent failures. This is now a pattern, not a
+              coincidence: THE SELFTEST ONLY EVER EXERCISES THE MACHINE IT RUNS
+              ON, and nothing checks that the repo's own entry points can be
+              invoked at all.
+
+R2-03  Workflow name resolution still injects control characters  [NOT FIXED]
+       WHAT   After R2-02 was fixed and the file verified clean ASCII - every
+              character scanned for Unicode categories Cc/Cf/Co/Cs/Zl/Zp and
+              for codepoints above 126, zero hits, zero CR bytes, byte-identical
+              to the git index blob - invoking the workflow BY NAME still fails
+              the same control-character check. Invoking the SAME FILE by
+              absolute scriptPath launches it successfully.
+       CONCLUSION  The corruption is in the harness's name-resolution or
+              permission-handler path, not in the file.
+       WORKED AROUND  Every phase this round was launched by absolute
+              scriptPath. The documented slash-command form remains broken.
+       PHASE  Harness (outside this repo)
+       RECURRENCE  CERTAIN until fixed upstream. Filed as harness feedback.
+              README.md still documents the form that does not work.
+
+R2-04  CLAUDE.md described a pipeline that no longer exists
+       WHAT   The file every session loads first said "five agents, six
+              scripts, three human gates" and listed 8 of the 15 scripts. The
+              repo has 7 agents, 12+ scripts, 4 gates and two versioned flows.
+              It documented the superseded Flow.md design as current, omitted
+              flow 2 entirely, omitted Gate 0, omitted the frozen-spec
+              mechanism, and gave the selftest count as 45 when it was 277.
+       IMPACT Every agent and every session started from a wrong map. Unlike
+              README.md (B-19), which is at least checked for its own check
+              count, nothing verified CLAUDE.md against anything.
+       FIX    Rewritten against the current architecture: both flows, every
+              script with its step number, all four gates, rules 7 and 8,
+              SPEC_FROZEN/revise, and the cut-marker return trap.
+       PHASE  Documentation
+       RECURRENCE  HIGH. Still nothing asserts CLAUDE.md's accuracy. The
+              selftest pins README's check count and NOT CLAUDE.md's - the one
+              number in it that could have been pinned for free was the one
+              that had drifted by 232.
+
+R2-05  The selftest was asserting on dead code
+       WHAT   Two of the guard's checks tested the PATH_TOKEN regex directly.
+              The R2-01 fix made that regex unreachable, so both checks would
+              have kept passing while testing nothing.
+       WHY IT MATTERED  The comment above them explained they existed to pin
+              the Windows regression from c7be9c4. Had they been left, the
+              regression they guard would have been unprotected AND the suite
+              would have looked greener for it.
+       FIX    Retargeted at write_targets(), the live function, with 7
+              behaviour checks added around them (read vs write, "<" operands,
+              cp source vs destination, the multi-line case).
+       RELATED  The same shape as the round-1 lesson "a fixture that encodes
+              the anti-pattern teaches it" - a test bound to an implementation
+              detail rather than to a behaviour survives the implementation's
+              death.
+       PHASE  Scripts / selftest
+       RECURRENCE  MEDIUM. Nothing detects an assertion on an unreferenced
+              symbol.
+
+--------------------------------------------------------------------------------
+PHASE 0 - IDEAS. Clean.
+--------------------------------------------------------------------------------
+
+No blockers. Five ideas, 572-632 words each against an 80-word floor, no
+placeholder markers, checker green on the first attempt, and the phase stopped
+at Gate 0 without ranking or picking. 3 agents, 94k tokens, 4m43s.
+
+Worth recording because it is the first phase in this repo's history to pass
+with no findings at all.
+
+--------------------------------------------------------------------------------
+PHASE 1 - THE SPEC AND THE TESTS
+--------------------------------------------------------------------------------
+
+R2-06  Gate 1 rejected: five stated rules with no grading surface
+       WHAT   gate1.json verdict=reject, blocking=2, unowned_blocking=1.
+              Finding B1: the spec states five behaviours EXPLICITLY and no
+              criterion exercises any of them. The Spec Breaker demonstrated
+              that the opposite implementation passes 18/18 on all five:
+                1. "lost" before "won" branch order - the SESSION-3 HEADLINE
+                   CUT. No criterion ever puts a mine in revealed at exactly
+                   width*height - mines.length, the only input where the two
+                   orders differ. c-3-3's corner case gives 14 revealed against
+                   a 13-cell win threshold; c-3-6's gives 1 against 21.
+                2. minesLeft may go below 0 - c-3-5 never plants a 4th flag on
+                   a 3-mine board, so a clamp at zero is green.
+                3. An empty clicks array is a valid 200 - never posted.
+                4. 404 beats 400 - c-2-3 posts to no-such-board with a VALID
+                   body, so body-first validation is green.
+                5. flagged dedupe/default - c-3-4's flags are already distinct
+                   and ascending.
+       WHY IT MATTERS  These are not gaps the Builder must guess at. The spec
+              is unambiguous. They are rules with NO GRADING SURFACE, which is
+              worse, because they ship: a student writes the branches backwards
+              and the pipeline reports 18/18.
+       OWNER  nothing -> reject under the stopping rule.
+       COST OF FIX  Low. Extend three existing criteria (c-2-3, c-3-3, c-3-5)
+              rather than add new ones. Two of the five live in c-2-3, which
+              has an empty cuts list, so no cut-dependency rework.
+       SHAPE  This is round 1's "the criterion does not exercise the rule it is
+              defending" recurring shape, now on its third project.
+
+R2-07  Session 2 estimated at 38.5 of 40 minutes while carrying the heavy cut
+       WHAT   Finding B2, blocking, owner pack-writer. cut-reveal-from is a BFS
+              with a queue, a visited set, eight-offset expansion and a fringe
+              rule, charged the same flat 6 minutes as cut-play-click's
+              one-line union.
+       PRECEDENT  lessons.md records this as exactly the case the estimator
+              misses, with THREE CONSECUTIVE prior overruns. The idea file
+              named the same risk before the spec was written.
+       WHY IT DID NOT BLOCK ALONE  Owned by pack-writer and caught at step 9,
+              so it is approve-eligible - the same disposition B-13 got in
+              round 1, where the overrun was found after both gates had passed.
+       RECURRENCE  HIGH, and now four-for-four. The minute estimator has no
+              model of implementation complexity; it charges per cut, not per
+              cut's shape. This is a KNOWN, REPEATING, UNFIXED defect, and the
+              only reason it is not a ship-stopper is that a human reads it.
+
+R2-08  An agent wrote a report outside its lock and could not clean it up
+       WHAT   The Test Writer ran the red-first check in --static-only mode,
+              which writes redfirst.json at the PROJECT ROOT. The agent was
+              locked to verify/. It tried to remove the file, the write guard
+              refused (correctly - rule 3), and it disclosed the leftover in
+              its summary rather than routing around it.
+       STATE LEFT  projects/pipeline-test-01/redfirst.json with
+              dynamic.ran = false. That file is NOT evidence the dynamic half
+              passed, and a reader at Gate 1 could mistake it for one.
+       ASSESSMENT  The guard behaved exactly as designed and the agent behaved
+              well. The defect is in the LOCK GRANULARITY: a step is told to
+              run a checker whose output path lies outside the subtree it is
+              allowed to write.
+       PHASE  Orchestrator / lock policy
+       RECURRENCE  CERTAIN. Every flow-2 phase-1 run hits this, because
+              red-first at step 5 always runs while verify/ is locked.
+
+
+R2-09  revise is flow-1 shaped: it archives the spec and leaves the tests
+       WHAT   cmd_revise moves spec.md, spec.json, lint.json, ambiguity.md and
+              gate1.json into .pipeline/round-N/. It does NOT touch verify/ or
+              redfirst.json. On flow 1 that is correct - the tests are written
+              at step 6, AFTER Gate 1. On flow 2 the tests are written at step
+              5, BEFORE Gate 1, so a rejected round leaves a suite written
+              against the spec that was just archived.
+       THE CONSEQUENCE  Step 5's completion test is
+                (5, (d / "verify").exists() and _ok_json(d / "redfirst.json"))
+              with NO hash binding - unlike step 4, which does compare
+              reviewed_spec_hash against the live spec. So the surviving files
+              mark step 5 DONE for the next round. The Spec Writer rewrites the
+              spec, the Breaker re-runs and rebinds, and then `next` jumps
+              straight from step 4 to Gate 1. THE TESTS ARE NEVER REWRITTEN,
+              and Gate 1 is asked to approve a round-2 spec graded by round-1
+              tests.
+       WHY IT IS WORSE THAN IT SOUNDS  The findings that force a revise are, by
+              the stopping rule, findings no downstream checker owns - which in
+              practice means "a rule with no criterion grading it". The fix is
+              therefore almost always "extend criteria X, Y, Z". Those are
+              exactly the criteria whose tests would be missing. B1's fix
+              extends c-2-3, c-3-3 and c-3-5; the round-1 suite has no tests for
+              any of the added cases. The repair to an ungraded rule would
+              itself have shipped ungraded.
+       HOW FOUND  Read while planning the rerun this round's rejection
+              requires, then confirmed empirically: a flow-2 project rebuilt
+              post-revise reported
+                step 3 complete, step 4 -, step 5 COMPLETE, step 6 -
+              with round-1 tests still on disk against a round-2 spec.
+       FIX    cmd_revise now adds redfirst.json and verify/ to the archive list
+              when st.flow == 2. Flow 1 is untouched, so an approved flow-1
+              suite is never reached for. Pinned by test_revise_flow2 in the
+              selftest (7 checks, including the flow-1 negative case).
+       PHASE  Orchestrator / revise
+       RECURRENCE  Fixed. The CLASS - "a flow-1 assumption surviving into flow
+              2" - is open: the flow split versioned the STEP TABLE, and every
+              script was audited against it, but revise's file list is not
+              derived from the step table and so was never part of that audit.
+              Worth grepping for other flow-1-shaped constants.
+
+
+--------------------------------------------------------------------------------
+PHASE 1, ROUND 2 - after the revise
+--------------------------------------------------------------------------------
+Spec hash 64074255c3f7. lint clean (13-for-13). 8 agents, 530k tokens, 36m22s.
+gate1-check: 2 blocking, 6 worth a look, unowned_blocking = 0 -> APPROVE-ELIGIBLE.
+
+R2-06 IS CLOSED, AND VERIFIABLY SO. All five ungraded rules now have a grading
+surface, across nine changed criteria:
+  1. lost/won branch order  c-3-3 gained a third case: clicks
+     [0,20,4,10,12,13,14,19,9] -> status lost, revealed exactly 21 entries
+     holding 9. That is the one input where the win threshold and a mine
+     coincide - the only input the two branch orders disagree on.
+  2. minesLeft below 0      c-3-5 now walks to "Mines left: -1" and holds there.
+  3. empty clicks array     c-2-3 posts {"clicks": []} -> 200, 0 revealed, 0 flagged.
+  4. 404 before 400         c-2-3 posts to no-such-board with body {"bogus": 1} -> 404.
+  5. flagged dedupe + sort  c-3-4 posts flags [15,11,14,15] -> exactly 3 entries
+     reading 11, 14, 15.
+Not one of the five was closed by deleting the claim; every one was closed by
+grading it. The prose in spec.md still states all five.
+
+R2-09's FIX VALIDATED IN PRODUCTION. All six verify/ modules were rewritten
+against the new spec (test_ui_play.py 6808 -> 9107 bytes, test_api_replay.py
+7219 -> 8231), and the new suite grades the new cases - "bogus" appears in
+test_api_replay.py, "Mines left: -1" three times in test_ui_play.py. Under the
+old revise this phase would have skipped step 5 entirely and shipped the round-1
+suite, which grades none of them.
+
+R2-10  A1 (blocking, owner skeleton-check) - the given face-down grid never says
+       what it iterates
+       The handed-over grid in app/boards/[id]/page.tsx is not told whether to
+       iterate width*height or the fetched counts array. Identical in the
+       finished app. On the skeleton, cut-neighbour-counts is empty, so
+       ep-board-get answers counts: [] and a counts.map grid renders 0 cells.
+       c-2-4 declares "cuts": [] and cutter.expected_skeleton_results requires
+       every cut-free criterion to PASS on the skeleton, so step 10 fails
+       expected:pass / actual:fail.
+       WHY IT IS APPROVE-ELIGIBLE  skeleton-check owns it and catches it at step
+       10, before any student sees it. But note WHERE: two gates downstream of
+       here, after the Builder and the Verifier have both run.
+
+R2-11  A2 (blocking, owner test-runner) - "exactly N cells" is a total in some
+       clauses and reads as a delta
+       "updates data-revealed to true on exactly N cells" is a running total in
+       c-2-6 and c-3-6; the real deltas are 6 and 1. The Test Writer took the
+       total reading (the only one the board data supports: intro click 3 then
+       20 gives 7 total, 6 changed, spec says 7) and recorded it in
+       test_ui_play.py's docstrings.
+       WHY IT IS WORTH WATCHING  If the delta reading was intended, the tests
+       are wrong, and guard.py bars the Builder from verify/ - so the
+       Builder/test-runner loop cannot fix it and burns retries to the 15-cap
+       and a ticket. Rule 3 working as designed converts a one-word ambiguity
+       into a ticket. This is the first case seen where rule 3's cost is
+       visible.
+
+R2-12  redfirst --target skeleton and cutter.verify contradict each other
+       WHAT   redfirst.check_all_red requires EVERY criterion to be red against
+              the skeleton. cutter.expected_skeleton_results requires the five
+              cut-free criteria (c-1-3, c-1-6, c-2-3, c-2-4, c-3-1) to PASS on
+              it. A dynamic red-first run against skeleton/ therefore reports
+              those five as passed_too_early BY DESIGN.
+       ASSESSMENT  Pipeline-level tension, not fixable in verify/. Raised by the
+              Test Writer unprompted. Not yet hit, because step 5 runs
+              --static-only; it becomes live if anyone runs the dynamic half
+              against the skeleton.
+       PHASE  Scripts / redfirst + cutter
+       RECURRENCE  Latent. Will surface the first time the dynamic red-first is
+              pointed at a skeleton.
+
+
+================================================================================
+3. WHAT THE PIPELINE CAUGHT, AND WHAT CAUGHT THE REST
+================================================================================
+
+Caught by a script the pipeline ran:
+    NOTHING.  Twelve checker invocations this round, twelve passes.
+
+Caught by an agent reading adversarially (the Spec Breaker):
+    R2-06, R2-07, and the four "worth a look" findings.   6 of 12.
+
+Caught by a tool outside the pipeline refusing to start:
+    R2-02, R2-03.                                         2 of 12.
+
+Caught by a human reading a file:
+    R2-01 (carried from lessons.md), R2-04, R2-05, R2-09. 4 of 12.
+
+R2-09 is the one that should worry a reader most. It was found only because a
+rerun had to be planned by hand. Had the rerun been launched straight after the
+revise - the obvious next action, and what a workflow would have done - it would
+have produced a spec whose repair was invisible to its own test suite, and Gate
+1 would have had nothing to notice it with.
+
+The Spec Breaker is carrying the entire detection load for spec content, and it
+is a single agent making a single pass with no checker of its own. Round 1
+flagged this as the top structural risk. It is now the ONLY thing standing
+between a clean linter and a shipped defect.
+
+
+================================================================================
+4. FORECAST - MOST LIKELY TO BITE NEXT
+================================================================================
+
+1. R2-08 lock granularity. CERTAIN on the next flow-2 run. Same phase, same
+   step, same file.
+
+2. R2-07 the minute estimator. Four for four. Will recur on any project whose
+   sessions are not uniform in difficulty.
+
+3. R2-03 workflow name resolution. Certain until fixed upstream; every phase
+   must be launched by absolute path, which is not what README documents.
+
+4. Another flow-1-shaped assumption in the R2-09 class. The step table was
+   versioned for the flow split; constants derived by hand were not.
+
+5. A NEW platform-silent-failure in the R2-02 class. Three rounds, three
+   instances, and the structural cause - the selftest only exercises the
+   machine it runs on - is untouched.
+
+6. The linter's 0% catch rate holding at 13-for-13. Nothing in it has changed
+   between rounds.
+
+
+================================================================================
+5. RECOMMENDED FIXES, RANKED BY COST REMOVED PER UNIT OF EFFORT
+================================================================================
+
+F2-1  MOVE redfirst.json INTO verify/, or widen the step-5 lock to include it.
+      Closes R2-08 outright. Smallest fix on the list; it is a path.
+
+F2-2  TEACH THE LINTER THE ONE SHAPE THE BREAKER KEEPS FINDING: a spec sentence
+      stating a rule that no criterion's assertions can distinguish. It will
+      not catch all of R2-06, but the 404-before-400 and empty-array cases are
+      mechanically detectable from spec.json alone - an endpoint rule with no
+      criterion posting the input that separates the two readings. Turns the
+      linter's 0% into something, and takes load off the single-pass Breaker.
+
+F2-3  CHARGE THE MINUTE ESTIMATE BY CUT SHAPE, NOT CUT COUNT. A BFS with a
+      queue and a visited set is not a one-line union. Four consecutive
+      overruns say the flat rate is wrong. Closes R2-07 and B-13.
+
+F2-4  ASSERT CLAUDE.md THE WAY README.md IS ASSERTED. At minimum pin the
+      selftest count and the agent/script/gate counts. Closes R2-04's
+      recurrence; the numbers are already in the repo.
+
+F2-5  ADD A SMOKE CHECK THAT EVERY DOCUMENTED ENTRY POINT CAN BE INVOKED - the
+      four workflow scripts parse and contain no control characters, and every
+      pipeline subcommand named in README exists in the CLI. Closes the R2-02
+      class rather than the instance.
+
+F2-6  GIVE THE SPEC BREAKER A SECOND PASS OR A CHECKER. It is now the only
+      thing catching spec defects and it has neither. Section 3 is the whole
+      argument.
+
+DELIBERATELY NOT RECOMMENDED YET
+      Rewriting the guard's lexer into a full shell parser. The quote-aware
+      lexer handles every form the pipeline actually issues, and the remaining
+      gaps (heredoc bodies, command substitution) fail CLOSED - they block
+      rather than allow. Revisit only if a false positive is actually hit.
+
+================================================================================
+END
+================================================================================

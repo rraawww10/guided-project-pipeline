@@ -1,0 +1,338 @@
+{
+  "slug": "pipeline-test-01",
+  "title": "Sweeper",
+  "track": "fullstack",
+  "sessions_planned": 3,
+  "stack": [
+    "next",
+    "react",
+    "typescript",
+    "css-modules"
+  ],
+  "source": null,
+  "code_checks": [],
+  "endpoints": [
+    {
+      "id": "ep-boards-list",
+      "method": "GET",
+      "path": "/api/boards",
+      "request": null,
+      "response": "BoardSummary[] - one entry per seeded board, in the seed order intro, field, corner, each { id, name, width, height, mineCount }",
+      "status": [
+        200
+      ]
+    },
+    {
+      "id": "ep-board-get",
+      "method": "GET",
+      "path": "/api/boards/[id]",
+      "request": null,
+      "response": "BoardView ({ id, name, width, height, mines, counts }) or { error: string }",
+      "status": [
+        200,
+        404
+      ]
+    },
+    {
+      "id": "ep-board-replay",
+      "method": "POST",
+      "path": "/api/boards/[id]/replay",
+      "request": "{ clicks: number[], flags?: number[] } - clicks is required, flags defaults to the empty array, and every entry of clicks and of flags must be an integer from 0 to width * height - 1. The board id is resolved before the body is read, so an unknown board answers 404 even when the body is malformed",
+      "response": "{ revealed: number[], flagged: number[], status: playing | won | lost } or { error: string }. revealed and flagged are both sorted ascending with duplicates dropped",
+      "status": [
+        200,
+        400,
+        404
+      ]
+    }
+  ],
+  "screens": [
+    {
+      "id": "sc-solved",
+      "route": "/boards/[id]/solved",
+      "elements": [
+        "an element with data-testid board-grid carrying data-width and data-height",
+        "one element with data-testid cell per index, in index order, each carrying data-index, data-count and data-mine set to the string true or the string false",
+        "the visible text of a cell: * on a mine, empty on a non-mine whose count is 0, and the count as decimal digits otherwise",
+        "an element with data-testid board-missing, text Board not found, drawn in place of the grid when GET /api/boards/[id] answers 404"
+      ],
+      "states": [
+        "loaded",
+        "not-found"
+      ]
+    },
+    {
+      "id": "sc-play",
+      "route": "/boards/[id]",
+      "elements": [
+        "an element with data-testid board-grid carrying data-width and data-height",
+        "one element with data-testid cell per index, in index order, each carrying data-index, data-revealed and data-flagged set to the string true or the string false, and each calling onCellClick with its index when clicked",
+        "the visible text of a cell: F when it is flagged and not revealed, empty when it is neither flagged nor revealed, * when it is revealed and a mine, empty when it is revealed with a count of 0, and the count as decimal digits otherwise",
+        "a button with data-testid flag-mode whose text is Flag mode: off or Flag mode: on",
+        "an element with data-testid mines-left whose text is Mines left: followed by the mine count minus the flag count",
+        "an element with data-testid game-status whose text is Playing, Won or Lost",
+        "an element with data-testid board-missing, text Board not found, drawn in place of the grid when GET /api/boards/[id] answers 404",
+        "one GET /api/boards/[id] on mount and no other request; reveal, flag and status are all derived in the browser from that one response"
+      ],
+      "states": [
+        "loaded",
+        "not-found"
+      ]
+    }
+  ],
+  "sessions": [
+    {
+      "n": 1,
+      "setup": true,
+      "title": "Boards and the solved view",
+      "goal": "Seed the three boards, count the mines touching every cell, and draw board intro, board field and board corner face-up at /boards/[id]/solved.",
+      "teaches": [
+        "addressing a fixed grid as a flat array with index = y * width + x",
+        "the eight-offset neighbour scan and its bounds test at the edges and corners",
+        "drawing a grid from a flat array with data-testid hooks a test can read"
+      ],
+      "builds": [
+        "ep-board-get",
+        "sc-solved"
+      ],
+      "criteria": [
+        {
+          "id": "c-1-1",
+          "check": "GET /api/boards/intro returns 200 with width 5, height 5, a mines array reading 9, 11, 18, 23 and a counts array of exactly 25 numbers reading 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 1, 0, 2, 2, 2, 1, 1, 3, 1, 2, 0, 0, 2, 1, 2 in index order",
+          "target": "ep-board-get",
+          "cuts": [
+            "cut-neighbour-counts"
+          ]
+        },
+        {
+          "id": "c-1-2",
+          "check": "GET /api/boards/field returns 200 with a counts array of exactly 64 numbers whose entries at indices 0, 7, 8, 15, 54, 56, 57 and 63 are 0, 1, 1, 0, 3, 1, 2 and 0",
+          "target": "ep-board-get",
+          "cuts": [
+            "cut-neighbour-counts"
+          ]
+        },
+        {
+          "id": "c-1-3",
+          "check": "GET /api/boards/no-such-board returns 404 with a JSON body whose error key holds a non-empty string",
+          "target": "ep-board-get",
+          "cuts": []
+        },
+        {
+          "id": "c-1-4",
+          "check": "screen /boards/intro/solved renders 25 elements with data-testid cell, the cells with data-index 9, 11, 18 and 23 carry data-mine true while the other 21 carry data-mine false, and the cells with data-index 0, 3, 12, 17 and 24 carry data-count 0, 1, 2, 3 and 2",
+          "target": "sc-solved",
+          "cuts": [
+            "cut-neighbour-counts",
+            "cut-solved-cells"
+          ]
+        },
+        {
+          "id": "c-1-5",
+          "check": "screen /boards/corner/solved renders 16 elements with data-testid cell, the cell with data-index 10 displays the text 3, the cell with data-index 15 displays the text *, and the cells with data-index 0, 1 and 4 display empty text and carry data-count 0",
+          "target": "sc-solved",
+          "cuts": [
+            "cut-neighbour-counts",
+            "cut-solved-cells"
+          ]
+        },
+        {
+          "id": "c-1-6",
+          "check": "screen /boards/no-such-board/solved displays an element with data-testid board-missing whose text is exactly Board not found and renders 0 elements with data-testid cell",
+          "target": "sc-solved",
+          "cuts": []
+        }
+      ],
+      "cuts": [
+        {
+          "id": "cut-neighbour-counts",
+          "file": "lib/board.ts",
+          "hint": "Fill `counts` with one number per cell of the board, in index order, where the number at index `y * width + x` is how many of that cell's 8 neighbours appear in `mines`. A cell that is itself a mine still gets its own neighbour count. Skip any neighbour that falls off the edge, so a corner cell weighs 3 neighbours and an edge cell 5, and `counts` ends up exactly `width * height` long."
+        },
+        {
+          "id": "cut-solved-cells",
+          "file": "app/boards/[id]/solved/page.tsx",
+          "hint": "Fill `cells` with one element per index of `board`, in index order, each carrying `data-testid` `cell`, `data-index` set to that index, `data-count` set to that index's entry in `counts`, and `data-mine` set to the string `true` when `board.mines` holds the index and the string `false` when it does not. A mine cell shows the text `*`, a non-mine cell whose count is 0 shows empty text, and every other cell shows its count."
+        }
+      ]
+    },
+    {
+      "n": 2,
+      "title": "Reveal and flood fill",
+      "goal": "Write revealFrom so one click on a zero opens the whole connected region of zeros plus the numbered cells fringing it, and make /boards/[id] play face-down.",
+      "teaches": [
+        "a breadth-first walk over a grid with an explicit queue and a visited set",
+        "the boundary rule that a numbered cell is opened but never walked out of",
+        "merging a returned index set into React state without duplicates"
+      ],
+      "builds": [
+        "ep-board-replay",
+        "sc-play"
+      ],
+      "criteria": [
+        {
+          "id": "c-2-1",
+          "check": "POST /api/boards/field/replay with body {\"clicks\": [0]} returns 200 with a revealed array of exactly 14 entries reading 0, 1, 2, 3, 4, 5, 6, 8, 9, 10, 11, 12, 13, 14 in ascending order",
+          "target": "ep-board-replay",
+          "cuts": [
+            "cut-neighbour-counts",
+            "cut-reveal-from"
+          ]
+        },
+        {
+          "id": "c-2-2",
+          "check": "POST /api/boards/intro/replay returns 200 with a revealed array of exactly 6 entries reading 15, 16, 17, 20, 21, 22 for body {\"clicks\": [20]}, of exactly 1 entry reading 3 for body {\"clicks\": [3]}, and of exactly 1 entry reading 9 for body {\"clicks\": [9]}",
+          "target": "ep-board-replay",
+          "cuts": [
+            "cut-neighbour-counts",
+            "cut-reveal-from"
+          ]
+        },
+        {
+          "id": "c-2-3",
+          "check": "POST /api/boards/no-such-board/replay with body {\"clicks\": [0]} returns 404, POST /api/boards/intro/replay returns 400 for body {}, for body {\"clicks\": \"0\"} and for body {\"clicks\": [25]}, and each of those 4 responses carries a JSON body whose error key holds a non-empty string",
+          "target": "ep-board-replay",
+          "cuts": []
+        },
+        {
+          "id": "c-2-4",
+          "check": "screen /boards/field renders 64 elements with data-testid cell, all 64 carrying data-revealed false and data-flagged false and displaying empty text, and screen /boards/no-such-board displays an element with data-testid board-missing whose text is exactly Board not found and renders 0 elements with data-testid cell",
+          "target": "sc-play",
+          "cuts": [
+            "cut-play-cells"
+          ]
+        },
+        {
+          "id": "c-2-5",
+          "check": "clicking the cell with data-index 0 on screen /boards/field updates data-revealed to true on exactly 14 cells, leaves the cell with data-index 7 at data-revealed false, and displays the text 1 in the cell with data-index 6 and empty text in the cell with data-index 0",
+          "target": "sc-play",
+          "cuts": [
+            "cut-neighbour-counts",
+            "cut-reveal-from",
+            "cut-play-cells",
+            "cut-play-click"
+          ]
+        },
+        {
+          "id": "c-2-6",
+          "check": "clicking the cell with data-index 3 on screen /boards/intro updates data-revealed to true on exactly 1 cell, a following click on the cell with data-index 20 updates data-revealed to true on exactly 7 cells, and a second click on the cell with data-index 3 leaves data-revealed true on exactly 7 cells",
+          "target": "sc-play",
+          "cuts": [
+            "cut-neighbour-counts",
+            "cut-reveal-from",
+            "cut-play-cells",
+            "cut-play-click"
+          ]
+        }
+      ],
+      "cuts": [
+        {
+          "id": "cut-reveal-from",
+          "file": "lib/reveal.ts",
+          "hint": "Fill `opened` with every index that a single click on `index` opens. A mine cell, or a cell whose entry in `counts` is above 0, opens only itself. A cell whose count is 0 opens itself, every zero-count cell reachable from it through the 8 neighbour offsets, and every cell bordering that region - but a cell whose count is above 0 is added and never walked out of, which is the rule that stops the fill at the numbers. Keep a visited set so the walk ends. Traversal order is free: the code below the markers sorts `opened` ascending and drops duplicates."
+        },
+        {
+          "id": "cut-play-cells",
+          "file": "app/boards/[id]/page.tsx",
+          "hint": "Fill `cells` with one element per index of `board`, in index order, each carrying `data-testid` `cell`, `data-index` set to that index, `data-revealed` set to the string `true` when `revealed` holds the index and the string `false` when it does not, `data-flagged` set the same way from `flagged`, and an `onClick` that calls `onCellClick` with that index. A cell that is not revealed shows the text `F` when it is flagged and empty text when it is not. A revealed cell shows `*` when `board.mines` holds its index, empty text when its entry in `counts` is 0, and its count otherwise."
+        },
+        {
+          "id": "cut-play-click",
+          "file": "app/boards/[id]/page.tsx",
+          "hint": "This block is the reveal branch of `onCellClick`, reached when flag mode is off. Set the `revealed` state to a new array holding every index already in `revealed` together with every index in `revealFrom(board, index)`, with no index appearing twice, so a click on an already-open cell changes nothing. Leave the `flagged` state as it was."
+        }
+      ]
+    },
+    {
+      "n": 3,
+      "title": "Flags, status, and replay",
+      "goal": "Add the flag-mode toggle, the mines-left counter and gameStatus, and expose the board index at GET /api/boards so a whole game can be driven through POST /api/boards/[id]/replay.",
+      "teaches": [
+        "expressing the win rule as revealed count equals cells minus mines",
+        "a mode toggle that changes what one click means",
+        "folding an ordered list of clicks into one final state on the server"
+      ],
+      "builds": [
+        "ep-boards-list"
+      ],
+      "criteria": [
+        {
+          "id": "c-3-1",
+          "check": "GET /api/boards returns 200 with a JSON array of exactly 3 entries whose id values are intro, field and corner in that order and whose mineCount values are 4, 10 and 3",
+          "target": "ep-boards-list",
+          "cuts": []
+        },
+        {
+          "id": "c-3-2",
+          "check": "POST /api/boards/corner/replay returns 200 with status won and a revealed array of exactly 13 entries reading 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 13 for body {\"clicks\": [0]}, and returns 200 with status playing and a revealed array of exactly 1 entry reading 6 for body {\"clicks\": [6]}",
+          "target": "ep-board-replay",
+          "cuts": [
+            "cut-neighbour-counts",
+            "cut-reveal-from",
+            "cut-game-status"
+          ]
+        },
+        {
+          "id": "c-3-3",
+          "check": "POST /api/boards/corner/replay with body {\"clicks\": [0, 15]} returns 200 with status lost and a revealed array of exactly 14 entries, and POST /api/boards/intro/replay with body {\"clicks\": [0, 20]} returns 200 with status playing and a revealed array of exactly 14 entries",
+          "target": "ep-board-replay",
+          "cuts": [
+            "cut-neighbour-counts",
+            "cut-reveal-from",
+            "cut-game-status"
+          ]
+        },
+        {
+          "id": "c-3-4",
+          "check": "POST /api/boards/corner/replay with body {\"clicks\": [6], \"flags\": [11, 14, 15]} returns 200 with status playing, a revealed array of exactly 1 entry reading 6 and a flagged array reading 11, 14, 15",
+          "target": "ep-board-replay",
+          "cuts": [
+            "cut-neighbour-counts",
+            "cut-reveal-from",
+            "cut-game-status"
+          ]
+        },
+        {
+          "id": "c-3-5",
+          "check": "on screen /boards/corner, clicking the element with data-testid flag-mode and then the cell with data-index 15 updates that cell to data-flagged true and data-revealed false and updates the data-testid mines-left element to the text Mines left: 2, a following click on the cell with data-index 14 updates mines-left to the text Mines left: 1, and a second click on the cell with data-index 15 updates that cell to data-flagged false and mines-left to the text Mines left: 2",
+          "target": "sc-play",
+          "cuts": [
+            "cut-play-cells",
+            "cut-flag-toggle",
+            "cut-play-status"
+          ]
+        },
+        {
+          "id": "c-3-6",
+          "check": "clicking the cell with data-index 0 on screen /boards/corner updates data-revealed to true on exactly 13 cells and updates the data-testid game-status element to the text Won, and clicking the cell with data-index 9 on screen /boards/intro updates data-revealed to true on exactly 1 cell and updates the data-testid game-status element to the text Lost",
+          "target": "sc-play",
+          "cuts": [
+            "cut-neighbour-counts",
+            "cut-reveal-from",
+            "cut-play-cells",
+            "cut-play-click",
+            "cut-game-status",
+            "cut-play-status"
+          ]
+        }
+      ],
+      "cuts": [
+        {
+          "id": "cut-game-status",
+          "file": "lib/status.ts",
+          "hint": "Set `status` to `lost` when any index in `revealed` is also in `board.mines`. Otherwise set `status` to `won` when the number of distinct indices in `revealed` equals `board.width * board.height` minus the number of entries in `board.mines`, and to `playing` in every other case. Flags are no part of this rule: a board with every mine flagged and 1 cell open is still `playing`."
+        },
+        {
+          "id": "cut-flag-toggle",
+          "file": "app/boards/[id]/page.tsx",
+          "hint": "This block is the flag branch of `onCellClick`, reached when flag mode is on. Set the `flagged` state to a new array holding `flagged` with `index` added when it is absent and dropped when it is already present. Leave the `revealed` state as it was, so a click in flag mode never opens a cell."
+        },
+        {
+          "id": "cut-play-status",
+          "file": "app/boards/[id]/page.tsx",
+          "hint": "Set `minesLeft` to the number of entries in `board.mines` minus the number of entries in `flagged`, which is allowed to go below 0. Set `statusText` from `gameStatus(board, revealed)` to the string `Playing`, `Won` or `Lost`, mapping the three `playing`, `won` and `lost` values one for one."
+        }
+      ]
+    }
+  ]
+}
