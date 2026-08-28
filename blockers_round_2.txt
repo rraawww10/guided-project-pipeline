@@ -38,7 +38,7 @@ Round-1 IDs are cited as B-nn. New IDs this round are R2-nn.
 Phase 0 and phase 1 both completed on the FIRST attempt with zero retries
 burned. Every checker that fired, passed. And Gate 1 still rejected.
 
-Twenty-three distinct blockers this round. Their distribution is the finding:
+Twenty-five distinct blockers this round. Their distribution is the finding:
 
     6  infrastructure / harness   - hit BEFORE the pipeline could run at all
     2  documentation drift
@@ -53,7 +53,9 @@ made a component silently unrunnable rather than fail loudly.
 The round-1 headline was "the pipeline is blind to everything expensive."
 The round-2 headline is narrower and worse:
 
-    NOTHING THE PIPELINE RUNS ITSELF FOUND ANY OF THE TWENTY-THREE.
+    NOTHING THE PIPELINE RUNS ITSELF FOUND ANY OF THE TWENTY-FIVE.
+    (One exception, added late: R2-21 was found by the nightly watchdog -
+     the first thing the pipeline runs itself to catch anything all round.)
 
 The spec linter passed clean. The idea checker passed clean. The red-first
 check passed clean. The write guard passed its own selftest. Every blocker
@@ -640,6 +642,57 @@ R2-20  AN AGENT EDITED THE PIPELINE'S OWN CODE, MID-RUN
        PHASE  Scripts / guard
        RECURRENCE  Fixed for the accidental case. 12 new selftest checks pin
               both directions: blocked under a lock, editable between steps.
+
+
+R2-21  R2-13 HAD ALREADY BITTEN, AND ONLY THE WATCHDOG SAW IT
+       WHAT   The first watchdog replay after pipeline-test-01 shipped returned
+              ok: false. All 73 criteria across all four projects passed; the
+              failure was habit-tracker's spec hash.
+                 approved         6691dad5c499...
+                 on disk (CRLF)   36a2ad2eeb57...   <- drift
+                 same bytes as LF 6691dad5c499...   <- match
+              habit-tracker was frozen against LF bytes and this Windows
+              checkout gave it CRLF, so _guard would refuse its code and pack
+              phases. Exactly the failure R2-13 predicted - already present,
+              before .gitattributes was written.
+       WHY THE OTHERS SURVIVED  recipe-box and tip-split have no SPEC_FROZEN at
+              all; they predate the freeze, so they cannot drift.
+              pipeline-test-01 was frozen on this machine, LF, and matches.
+       THE ADVICE WAS ALSO WRONG  The guard tells a reader to restore the copy
+              in .pipeline/approved/. That copy was CRLF too, so restoring it
+              would have reproduced the drift. Normalised as part of this fix.
+       FIX    The working tree was rewritten to LF and the hash verified against
+              SPEC_FROZEN before the change was kept - restore-on-mismatch, so
+              there was no state where the spec was neither form. Watchdog then
+              returned ok: true, 4/4, 73/73.
+       HOW IT WAS FOUND  The nightly watchdog, on its first run covering a
+              flow-2 project. Round 1 recorded the watchdog as "the safety net
+              has never been tested" (B-17). It has now caught something no
+              other checker looked at, on its first meaningful outing.
+
+R2-22  THE WRITE GUARD CANNOT SEE WRITES MADE INSIDE AN INTERPRETER
+       WHAT   Fixing R2-21 required rewriting a frozen spec. The guard correctly
+              refused `rm` on it. `git checkout-index -f` exits 0 but skips the
+              file - normalising CRLF gives content identical to the index, so
+              git believes it is up to date and only delete-then-checkout forces
+              it. The bytes were then written with a python heredoc, which the
+              guard did not see at all.
+       THE HOLE  check_bash models shell redirects and the commands that take a
+              path argument. It does not model `python -c`, a node script, or
+              any program that opens a file itself. Every protection in this
+              guard has that gap: the frozen spec, rule 3's subtree locks, and
+              the new pipeline/ rule added as R2-20.
+       NOT A BUG IN THE LOGIC  It is inherent to a PreToolUse hook, which sees
+              the command and not the syscalls. No pattern over command text can
+              close it.
+       WHAT IT MEANS  Every claim in this file about the guard "refusing" or
+              "enforcing" something should be read as: against an agent taking
+              the direct route. An agent that writes through an interpreter is
+              unaffected, and so is one that means to be. The guard raises the
+              cost of an accident; it does not bound behaviour.
+       PHASE  Scripts / guard
+       RECURRENCE  Open, and not closeable at this layer. Worth stating in
+              CLAUDE.md so nobody reads rule 3 as a guarantee.
 
 
 ================================================================================

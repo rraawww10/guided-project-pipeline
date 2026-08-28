@@ -8,7 +8,7 @@
     "unknown": [],
     "checks": {}
   },
-  "seconds": 141.3,
+  "seconds": 54.3,
   "counts": {
     "pass": 22,
     "fail": 0,
@@ -172,6 +172,6 @@
     }
   },
   "pytest_returncode": 0,
-  "stdout_tail": "......................                                                   [100%]\n22 passed in 14.21s\n",
+  "stdout_tail": "......................                                                   [100%]\n22 passed in 13.24s\n",
   "stderr_tail": ""
 }

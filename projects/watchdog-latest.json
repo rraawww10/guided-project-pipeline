@@ -1,8 +1,8 @@
 {
-  "at": "2026-08-28T12:37:47+00:00",
+  "at": "2026-08-28T22:02:40+00:00",
   "ok": true,
-  "shipped_total": 3,
-  "checked": 3,
+  "shipped_total": 4,
+  "checked": 4,
   "skipped": [],
   "unknown_slugs": [],
   "broken": [],
@@ -13,6 +13,17 @@
       "broken_criteria": [],
       "counts": {
         "pass": 16,
+        "fail": 0,
+        "skip": 0,
+        "missing": 0
+      }
+    },
+    {
+      "slug": "pipeline-test-01",
+      "ok": true,
+      "broken_criteria": [],
+      "counts": {
+        "pass": 18,
         "fail": 0,
         "skip": 0,
         "missing": 0

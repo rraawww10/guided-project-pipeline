@@ -8,7 +8,7 @@
     "unknown": [],
     "checks": {}
   },
-  "seconds": 11.2,
+  "seconds": 55.1,
   "counts": {
     "pass": 17,
     "fail": 0,
@@ -39,7 +39,7 @@
     },
     "c-1-4": {
       "status": "pass",
-      "check": "sc-list renders a bill-card element that is a link to /bills/anand-bhavan, whose card-place element reads Anand Bhavan, whose card-date element reads 2026-03-14, whose card-total element reads \u20b91240.00 and whose card-people element reads Split 4 ways",
+      "check": "sc-list renders a bill-card element that is a link to /bills/anand-bhavan, whose card-place element reads Anand Bhavan, whose card-date element reads 2026-03-14, whose card-total element reads \u00e2\u201a\u00b91240.00 and whose card-people element reads Split 4 ways",
       "session": 1,
       "test": "verify/test_ui_list.py::test_c_1_4_anand_bhavan_card_links_and_reads_its_fields",
       "message": ""
@@ -67,14 +67,14 @@
     },
     "c-2-3": {
       "status": "pass",
-      "check": "sc-bill displays Anand Bhavan in its bill-place element, 2026-03-14 in its bill-date element, \u20b91240.00 in its bill-total element, 10% in its bill-tip-percent element and Split 4 ways when saved in its bill-saved-people element at the route /bills/anand-bhavan",
+      "check": "sc-bill displays Anand Bhavan in its bill-place element, 2026-03-14 in its bill-date element, \u00e2\u201a\u00b91240.00 in its bill-total element, 10% in its bill-tip-percent element and Split 4 ways when saved in its bill-saved-people element at the route /bills/anand-bhavan",
       "session": 2,
       "test": "verify/test_ui_bill.py::test_c_2_3_bill_shows_its_stored_fields",
       "message": ""
     },
     "c-2-4": {
       "status": "pass",
-      "check": "sc-bill displays \u20b9124.00 in its bill-tip-amount element and \u20b91364.00 in its bill-grand-total element at the route /bills/anand-bhavan, which is stored as 124000 paise with a tip of 10 percent",
+      "check": "sc-bill displays \u00e2\u201a\u00b9124.00 in its bill-tip-amount element and \u00e2\u201a\u00b91364.00 in its bill-grand-total element at the route /bills/anand-bhavan, which is stored as 124000 paise with a tip of 10 percent",
       "session": 2,
       "test": "verify/test_ui_bill.py::test_c_2_4_bill_shows_the_tip_and_grand_total",
       "message": ""
@@ -88,14 +88,14 @@
     },
     "c-2-6": {
       "status": "pass",
-      "check": "sc-bill displays \u20b961.29 in its bill-tip-amount element and \u20b9936.79 in its bill-grand-total element at the route /bills/kabab-junction, which is stored as 87550 paise with a tip of 7 percent, where the exact tip is 6128.5 paise and rounds up",
+      "check": "sc-bill displays \u00e2\u201a\u00b961.29 in its bill-tip-amount element and \u00e2\u201a\u00b9936.79 in its bill-grand-total element at the route /bills/kabab-junction, which is stored as 87550 paise with a tip of 7 percent, where the exact tip is 6128.5 paise and rounds up",
       "session": 2,
       "test": "verify/test_ui_bill.py::test_c_2_6_tip_rounds_half_up",
       "message": ""
     },
     "c-3-1": {
       "status": "pass",
-      "check": "sc-bill renders one share-row element per person, 4 at the route /bills/anand-bhavan, whose texts are Person 1 \u20b9341.00, Person 2 \u20b9341.00, Person 3 \u20b9341.00 and Person 4 \u20b9341.00 in that order",
+      "check": "sc-bill renders one share-row element per person, 4 at the route /bills/anand-bhavan, whose texts are Person 1 \u00e2\u201a\u00b9341.00, Person 2 \u00e2\u201a\u00b9341.00, Person 3 \u00e2\u201a\u00b9341.00 and Person 4 \u00e2\u201a\u00b9341.00 in that order",
       "session": 3,
       "test": "verify/test_ui_split.py::test_c_3_1_stored_split_renders_one_row_per_person",
       "message": ""
@@ -109,21 +109,21 @@
     },
     "c-3-3": {
       "status": "pass",
-      "check": "sc-bill renders share-row elements reading Person 1 \u20b9454.67, Person 2 \u20b9454.67 and Person 3 \u20b9454.66 after the Fewer people button is clicked 1 time at the route /bills/anand-bhavan, where 136400 paise across 3 people leaves 2 paise over",
+      "check": "sc-bill renders share-row elements reading Person 1 \u00e2\u201a\u00b9454.67, Person 2 \u00e2\u201a\u00b9454.67 and Person 3 \u00e2\u201a\u00b9454.66 after the Fewer people button is clicked 1 time at the route /bills/anand-bhavan, where 136400 paise across 3 people leaves 2 paise over",
       "session": 3,
       "test": "verify/test_ui_split.py::test_c_3_3_three_way_split_hands_the_leftover_paise_to_the_first_people",
       "message": ""
     },
     "c-3-4": {
       "status": "pass",
-      "check": "sc-bill displays 3 in its people-count element after the Fewer people button is clicked 1 time at the route /bills/anand-bhavan, and then displays 4 in its people-count element and renders 4 share-row elements whose texts are Person 1 \u20b9341.00, Person 2 \u20b9341.00, Person 3 \u20b9341.00 and Person 4 \u20b9341.00 after the More people button is clicked 1 time",
+      "check": "sc-bill displays 3 in its people-count element after the Fewer people button is clicked 1 time at the route /bills/anand-bhavan, and then displays 4 in its people-count element and renders 4 share-row elements whose texts are Person 1 \u00e2\u201a\u00b9341.00, Person 2 \u00e2\u201a\u00b9341.00, Person 3 \u00e2\u201a\u00b9341.00 and Person 4 \u00e2\u201a\u00b9341.00 after the More people button is clicked 1 time",
       "session": 3,
       "test": "verify/test_ui_split.py::test_c_3_4_down_then_up_lands_back_on_the_stored_split",
       "message": ""
     },
     "c-3-5": {
       "status": "pass",
-      "check": "sc-bill displays 1 in its people-count element and renders 1 share-row element reading Person 1 \u20b91364.00 after the Fewer people button is clicked 4 times at the route /bills/anand-bhavan, which is stored as a split 4 ways",
+      "check": "sc-bill displays 1 in its people-count element and renders 1 share-row element reading Person 1 \u00e2\u201a\u00b91364.00 after the Fewer people button is clicked 4 times at the route /bills/anand-bhavan, which is stored as a split 4 ways",
       "session": 3,
       "test": "verify/test_ui_split.py::test_c_3_5_lower_clamp_holds_the_count_at_one",
       "message": ""
@@ -137,6 +137,6 @@
     }
   },
   "pytest_returncode": 0,
-  "stdout_tail": "\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m                                                        [100%]\u001b[0m\n\u001b[32m\u001b[32m\u001b[1m17 passed\u001b[0m\u001b[32m in 3.19s\u001b[0m\u001b[0m\n",
+  "stdout_tail": ".................                                                        [100%]\n17 passed in 11.04s\n",
   "stderr_tail": ""
 }
