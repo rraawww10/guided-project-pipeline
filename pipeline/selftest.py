@@ -727,6 +727,36 @@ def test_guard(tmp: Path) -> None:
           cli.LOCK_PHASE_BY_FLOW[2]["verify"], "spec")
     check("files outside projects/ are never guarded", hook(w(ROOT / "Flow.md")), False)
 
+    # Rule 5, the half nobody wrote down. check_path only walked up looking for
+    # projects/<slug>/, so the checkers, the orchestrator, the agent prompts and
+    # guard.py itself were all writable by any agent. During the phase-3 run one
+    # hit a crash in cutter.py and patched cutter.py. Keyed to a LOCK, because a
+    # PreToolUse hook cannot authenticate the writer: this stops the accidental
+    # case, not a determined one.
+    real = ROOT / "projects" / "guardlive" / ".pipeline"
+    real.mkdir(parents=True, exist_ok=True)
+    try:
+        check("with no step running, a person may edit the pipeline",
+              hook(w(ROOT / "pipeline" / "cutter.py")), False)
+        (real / "LOCK").write_text("app\n")
+        for rel in ("pipeline/cutter.py", "pipeline/guard.py", "pipeline/cli.py",
+                    ".claude/agents/builder.md", ".claude/workflows/gp-phase2-code.js",
+                    "learning/lessons.md"):
+            check(f"a step in flight cannot edit {rel}", hook(w(ROOT / rel)), True)
+        check("the shell route is closed too",
+              hook(b(f"echo x > {ROOT / 'pipeline' / 'guard.py'}")), True)
+        check("reading the pipeline is still fine",
+              hook(b(f"cat {ROOT / 'pipeline' / 'guard.py'}")), False)
+        check("settings.local.json stays writable - it is the user's, not the pipeline's",
+              hook(w(ROOT / ".claude" / "settings.local.json")), False)
+        check("and an unrelated repo file is untouched",
+              hook(w(ROOT / "README.md")), False)
+    finally:
+        (real / "LOCK").unlink(missing_ok=True)
+        shutil.rmtree(real.parent, ignore_errors=True)
+    check("with the step over, the pipeline is editable again",
+          hook(w(ROOT / "pipeline" / "cutter.py")), False)
+
     # A read is not a write. The bash check used to scan EVERY path token as
     # soon as a ">" appeared anywhere on the line - quoted or not - so simply
     # looking inside a frozen project was refused. It fired twice in a real run.

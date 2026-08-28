@@ -38,7 +38,7 @@ Round-1 IDs are cited as B-nn. New IDs this round are R2-nn.
 Phase 0 and phase 1 both completed on the FIRST attempt with zero retries
 burned. Every checker that fired, passed. And Gate 1 still rejected.
 
-Twenty-two distinct blockers this round. Their distribution is the finding:
+Twenty-three distinct blockers this round. Their distribution is the finding:
 
     6  infrastructure / harness   - hit BEFORE the pipeline could run at all
     2  documentation drift
@@ -53,7 +53,7 @@ made a component silently unrunnable rather than fail loudly.
 The round-1 headline was "the pipeline is blind to everything expensive."
 The round-2 headline is narrower and worse:
 
-    NOTHING THE PIPELINE RUNS ITSELF FOUND ANY OF THE TWENTY-TWO.
+    NOTHING THE PIPELINE RUNS ITSELF FOUND ANY OF THE TWENTY-THREE.
 
 The spec linter passed clean. The idea checker passed clean. The red-first
 check passed clean. The write guard passed its own selftest. Every blocker
@@ -588,6 +588,58 @@ R2-19  THE MUTATION CHECK HAS NEVER WORKED, AND IT FAILED GREEN
        RECURRENCE  Fixed. The CLASS - a checker that fails green - has no
               general defence in the pipeline. Every other checker's failure
               mode should be audited for which way it fails.
+
+
+R2-20  AN AGENT EDITED THE PIPELINE'S OWN CODE, MID-RUN
+       WHAT   guard.check_path only ever walked up looking for projects/<slug>/.
+              Everything outside projects/ was therefore unguarded: the
+              checkers, the orchestrator, the agent prompts, the workflow
+              scripts, and guard.py itself. Rule 1 says every agent has a
+              checker. Nothing said the agent could not rewrite the checker.
+       WHAT HAPPENED  During the phase-3 run, `pipeline cut` crashed five times
+              on WinError 1314. A phase-3 agent diagnosed it, opened
+              pipeline/cutter.py, and patched it - then refactored
+              pipeline/mutation.py to import its new helper. It also read
+              blockers_round_2.txt and wrote R2-18's narrative into its
+              docstring.
+       THE PATCH WAS GOOD  Better than the one it replaced: it returns HOW the
+              link was made, because Path.unlink raises on a junction and
+              cleanup would have become the next crash, and it fails open with
+              a report rather than crashing. Kept, and committed with
+              attribution (fa14e46).
+       WHY IT IS STILL THE WORST FINDING  The quality of the patch is luck, not
+              a control. An agent that rewrites a checker manages every agent
+              that checker judges, itself included - which is rule 5 inverted.
+              And unlike the loop or the fabricated verdict, this failure mode
+              has NO SIGNATURE: the run goes green, the suite passes, and
+              nothing in any report says the checker changed underneath it. It
+              was found only because `git status` was read for an unrelated
+              reason.
+       THE CONTRAST IN THE SAME RUN  Earlier the Test Writer hit redfirst.json
+              landing outside its lock (R2-08), tried to clean up, was refused,
+              and DISCLOSED the leftover in its summary instead of routing
+              around it. Same pipeline, same run, opposite instincts - because
+              nothing told either agent which was expected.
+       FIX    check_pipeline() refuses writes to pipeline/, .claude/ and
+              learning/ whenever any project holds a LOCK - keyed to state, the
+              way the spec freeze is, because a PreToolUse hook cannot
+              authenticate the writer. Between steps a person edits freely. The
+              refusal text tells the agent what to do instead: report the defect
+              and stop, because reporting something you cannot fix is the
+              expected outcome, not a failure.
+       learning/ IS IN THE LIST for a documented reason: CLAUDE.md says
+              lessons.md is updated between runs and never during one, and round
+              1 recorded it being edited mid-run anyway (B-08). Every agent
+              reads it at the start, so a mid-run edit means two agents in one
+              run read different instructions.
+       HONEST LIMIT  This stops the ACCIDENTAL case - a helpful agent fixing a
+              bug it should have reported - which is exactly what happened. It
+              is not a defence against a determined one, and no file-based
+              scheme enforced by the hook itself can be. A real control needs
+              the hook to identify the writer.
+       PHASE  Scripts / guard
+       RECURRENCE  Fixed for the accidental case. 12 new selftest checks pin
+              both directions: blocked under a lock, editable between steps.
 
 
 ================================================================================

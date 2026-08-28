@@ -1,0 +1,21 @@
+.page {
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.title {
+  margin: 0;
+  font-size: 1.4rem;
+}
+
+.links {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.link {
+  color: var(--ink);
+}

@@ -1,0 +1,78 @@
+{
+  "slug": "pipeline-test-01",
+  "cuts": [
+    {
+      "id": "cut-flag-toggle",
+      "file": "app\\boards\\[id]\\page.tsx",
+      "line": 58,
+      "lines_removed": 8
+    },
+    {
+      "id": "cut-play-click",
+      "file": "app\\boards\\[id]\\page.tsx",
+      "line": 69,
+      "lines_removed": 9
+    },
+    {
+      "id": "cut-play-status",
+      "file": "app\\boards\\[id]\\page.tsx",
+      "line": 107,
+      "lines_removed": 4
+    },
+    {
+      "id": "cut-solved-cells",
+      "file": "app\\boards\\[id]\\solved\\page.tsx",
+      "line": 64,
+      "lines_removed": 17
+    },
+    {
+      "id": "cut-neighbour-counts",
+      "file": "lib\\board.ts",
+      "line": 36,
+      "lines_removed": 23
+    },
+    {
+      "id": "cut-reveal-from",
+      "file": "lib\\reveal.ts",
+      "line": 36,
+      "lines_removed": 41
+    },
+    {
+      "id": "cut-game-status",
+      "file": "lib\\status.ts",
+      "line": 21,
+      "lines_removed": 12
+    }
+  ],
+  "count": 7,
+  "by_session": {
+    "1": [
+      "cut-neighbour-counts",
+      "cut-solved-cells"
+    ],
+    "2": [
+      "cut-play-click",
+      "cut-reveal-from"
+    ],
+    "3": [
+      "cut-flag-toggle",
+      "cut-game-status",
+      "cut-play-status"
+    ]
+  },
+  "return_safety": {
+    "ok": true,
+    "checked": 7,
+    "violations": []
+  },
+  "partial_state_risks": [],
+  "typecheck": {
+    "ran": true,
+    "ok": true,
+    "error_count": 0,
+    "errors": [],
+    "missing_return": [],
+    "hint": ""
+  },
+  "ok": true
+}

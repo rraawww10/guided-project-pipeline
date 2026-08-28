@@ -1,0 +1,20 @@
+:root {
+  color-scheme: light;
+  --line: #c8ccd4;
+  --ink: #1b1f26;
+  --shut: #dfe3ea;
+  --open: #f7f8fa;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: #ffffff;
+  color: var(--ink);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}

@@ -17,7 +17,7 @@
       }
     }
   },
-  "seconds": 9.0,
+  "seconds": 140.7,
   "counts": {
     "pass": 16,
     "fail": 0,
@@ -139,6 +139,6 @@
     }
   },
   "pytest_returncode": 0,
-  "stdout_tail": "\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m                                                         [100%]\u001b[0m\n\u001b[32m\u001b[32m\u001b[1m16 passed\u001b[0m\u001b[32m in 1.24s\u001b[0m\u001b[0m\n",
+  "stdout_tail": "................                                                         [100%]\n16 passed in 13.80s\n",
   "stderr_tail": ""
 }

@@ -1,43 +1,31 @@
 {
-  "ok": true,
-  "target": "app",
+  "ok": false,
+  "target": "skeleton",
   "code_checks": {
     "ok": true,
-    "target": "app",
-    "declared": [
-      "utc-dates"
-    ],
-    "unknown": [],
-    "checks": {
-      "utc-dates": {
-        "ok": true,
-        "rule": "date arithmetic gives the same answer in every timezone: no local-time Date accessors, and no reading the real clock",
-        "violations": [],
-        "count": 0
-      }
-    }
+    "checks": {}
   },
-  "seconds": 50.5,
+  "seconds": 230.7,
   "counts": {
-    "pass": 18,
-    "fail": 0,
+    "pass": 5,
+    "fail": 13,
     "skip": 0,
     "missing": 0
   },
   "criteria": {
     "c-1-1": {
-      "status": "pass",
+      "status": "fail",
       "check": "GET /api/boards/intro returns 200 with width 5, height 5, a mines array reading 9, 11, 18, 23 and a counts array of exactly 25 numbers reading 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 1, 0, 2, 2, 2, 1, 1, 3, 1, 2, 0, 0, 2, 1, 2 in index order",
       "session": 1,
       "test": "verify/test_api_boards.py::test_c_1_1_intro_board_answers_its_size_mines_and_twenty_five_counts",
-      "message": ""
+      "message": "AssertionError: counts has 0 entries, expected 25\nassert 0 == 25\n +  where 0 = len([])"
     },
     "c-1-2": {
-      "status": "pass",
+      "status": "fail",
       "check": "GET /api/boards/field returns 200 with a counts array of exactly 64 numbers whose entries at indices 0, 7, 8, 15, 54, 56, 57 and 63 are 0, 1, 1, 0, 3, 1, 2 and 0",
       "session": 1,
       "test": "verify/test_api_boards.py::test_c_1_2_field_board_counts_are_sixty_four_and_read_right_at_the_edges",
-      "message": ""
+      "message": "AssertionError: counts has 0 entries, expected 64\nassert 0 == 64\n +  where 0 = len([])"
     },
     "c-1-3": {
       "status": "pass",
@@ -47,18 +35,18 @@
       "message": ""
     },
     "c-1-4": {
-      "status": "pass",
+      "status": "fail",
       "check": "screen /boards/intro/solved renders 25 elements with data-testid cell, the element with data-testid board-grid carries data-width 5 and data-height 5, the cells with data-index 9, 11, 18 and 23 carry data-mine true while the other 21 carry data-mine false, and the cells with data-index 0, 3, 12, 17 and 24 carry data-count 0, 1, 2, 3 and 2",
       "session": 1,
       "test": "verify/test_ui_solved.py::test_c_1_4_intro_solved_draws_25_cells_with_their_mines_and_counts",
-      "message": ""
+      "message": "AssertionError: Locator expected to have count '25'\nActual value: 0 \nCall log:\n  - Expect \"to_have_count\" with timeout 20000ms\n  - waiting for get_by_test_id(\"cell\")\n    43 \u00d7 locator resolved to 0 elements\n       - unexpected value \"0\""
     },
     "c-1-5": {
-      "status": "pass",
+      "status": "fail",
       "check": "screen /boards/corner/solved renders 16 elements with data-testid cell, the cell with data-index 10 displays the text 3, the cell with data-index 15 displays the text *, and the cells with data-index 0, 1 and 4 display empty text and carry data-count 0",
       "session": 1,
       "test": "verify/test_ui_solved.py::test_c_1_5_corner_solved_shows_a_glyph_a_number_and_three_blank_zeros",
-      "message": ""
+      "message": "AssertionError: Locator expected to have count '16'\nActual value: 0 \nCall log:\n  - Expect \"to_have_count\" with timeout 20000ms\n  - waiting for get_by_test_id(\"cell\")\n    43 \u00d7 locator resolved to 0 elements\n       - unexpected value \"0\""
     },
     "c-1-6": {
       "status": "pass",
@@ -68,18 +56,18 @@
       "message": ""
     },
     "c-2-1": {
-      "status": "pass",
+      "status": "fail",
       "check": "POST /api/boards/field/replay with body {\"clicks\": [0]} returns 200 with a revealed array of exactly 14 entries reading 0, 1, 2, 3, 4, 5, 6, 8, 9, 10, 11, 12, 13, 14 in ascending order",
       "session": 2,
       "test": "verify/test_api_replay.py::test_c_2_1_one_click_on_field_index_zero_opens_exactly_fourteen_cells",
-      "message": ""
+      "message": "AssertionError: 0 entries, expected 14\nassert 0 == 14\n +  where 0 = len([])"
     },
     "c-2-2": {
-      "status": "pass",
+      "status": "fail",
       "check": "POST /api/boards/intro/replay returns 200 with a revealed array of exactly 6 entries reading 15, 16, 17, 20, 21, 22 for body {\"clicks\": [20]}, of exactly 1 entry reading 3 for body {\"clicks\": [3]}, and of exactly 1 entry reading 9 for body {\"clicks\": [9]}",
       "session": 2,
       "test": "verify/test_api_replay.py::test_c_2_2_intro_opens_a_zero_region_a_number_and_a_mine",
-      "message": ""
+      "message": "AssertionError: clicks [20]: 0 entries, expected 6\nassert 0 == 6\n +  where 0 = len([])"
     },
     "c-2-3": {
       "status": "pass",
@@ -96,18 +84,18 @@
       "message": ""
     },
     "c-2-5": {
-      "status": "pass",
+      "status": "fail",
       "check": "clicking the cell with data-index 0 on screen /boards/field updates data-revealed to true on exactly 14 cells, leaves the cell with data-index 7 at data-revealed false, and displays the text 1 in the cell with data-index 6 and empty text in the cell with data-index 0",
       "session": 2,
       "test": "verify/test_ui_play.py::test_c_2_5_one_click_on_field_index_zero_opens_fourteen_cells_on_screen",
-      "message": ""
+      "message": "AssertionError: Locator expected to have count '14'\nActual value: 0 \nCall log:\n  - Expect \"to_have_count\" with timeout 20000ms\n  - waiting for locator(\"[data-testid=\\\"cell\\\"][data-revealed=\\\"true\\\"]\")\n    43 \u00d7 locator resolved to 0 elements\n       - unexpected value \"0\""
     },
     "c-2-6": {
-      "status": "pass",
+      "status": "fail",
       "check": "clicking the cell with data-index 3 on screen /boards/intro updates data-revealed to true on exactly 1 cell, a following click on the cell with data-index 20 updates data-revealed to true on exactly 7 cells, and a second click on the cell with data-index 3 leaves data-revealed true on exactly 7 cells",
       "session": 2,
       "test": "verify/test_ui_play.py::test_c_2_6_a_second_click_on_an_open_cell_changes_nothing_on_intro",
-      "message": ""
+      "message": "AssertionError: Locator expected to have count '1'\nActual value: 0 \nCall log:\n  - Expect \"to_have_count\" with timeout 20000ms\n  - waiting for locator(\"[data-testid=\\\"cell\\\"][data-revealed=\\\"true\\\"]\")\n    43 \u00d7 locator resolved to 0 elements\n       - unexpected value \"0\""
     },
     "c-3-1": {
       "status": "pass",
@@ -117,42 +105,42 @@
       "message": ""
     },
     "c-3-2": {
-      "status": "pass",
+      "status": "fail",
       "check": "POST /api/boards/corner/replay returns 200 with status won and a revealed array of exactly 13 entries reading 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 13 for body {\"clicks\": [0]}, and returns 200 with status playing and a revealed array of exactly 1 entry reading 6 for body {\"clicks\": [6]}",
       "session": 3,
       "test": "verify/test_api_replay.py::test_c_3_2_corner_is_won_in_one_click_and_still_playing_after_a_number",
-      "message": ""
+      "message": "AssertionError: status is 'lost'\nassert 'lost' == 'won'\n  \n  - won\n  + lost"
     },
     "c-3-3": {
-      "status": "pass",
+      "status": "fail",
       "check": "POST /api/boards/corner/replay with body {\"clicks\": [0, 15]} returns 200 with status lost and a revealed array of exactly 14 entries, POST /api/boards/intro/replay with body {\"clicks\": [0, 20]} returns 200 with status playing and a revealed array of exactly 14 entries, and POST /api/boards/intro/replay with body {\"clicks\": [0, 20, 4, 10, 12, 13, 14, 19, 9]} returns 200 with status lost and a revealed array of exactly 21 entries that holds 9",
       "session": 3,
       "test": "verify/test_api_replay.py::test_c_3_3_a_mine_in_the_list_reads_lost_even_on_the_winning_count",
-      "message": ""
+      "message": "AssertionError: corner [0, 15]: 0 entries, expected 14\nassert 0 == 14\n +  where 0 = len([])"
     },
     "c-3-4": {
-      "status": "pass",
+      "status": "fail",
       "check": "POST /api/boards/corner/replay with body {\"clicks\": [6], \"flags\": [15, 11, 14, 15]} returns 200 with status playing, a revealed array of exactly 1 entry reading 6 and a flagged array of exactly 3 entries reading 11, 14, 15",
       "session": 3,
       "test": "verify/test_api_replay.py::test_c_3_4_flags_come_back_sorted_and_deduplicated_without_winning",
-      "message": ""
+      "message": "AssertionError: status is 'lost' - flagging every mine does not win\nassert 'lost' == 'playing'\n  \n  - playing\n  + lost"
     },
     "c-3-5": {
-      "status": "pass",
+      "status": "fail",
       "check": "on screen /boards/corner, clicking the element with data-testid flag-mode updates its text to Flag mode: on, a click on the cell with data-index 15 then updates that cell to data-flagged true and data-revealed false, displays the text F in it and updates the data-testid mines-left element to the text Mines left: 2, a following click on the cell with data-index 14 updates mines-left to the text Mines left: 1, a second click on the cell with data-index 15 updates that cell to data-flagged false and mines-left to the text Mines left: 2, three following clicks on the cells with data-index 15, 11 and 0 update mines-left to the text Mines left: -1, a click on flag-mode then updates its text to Flag mode: off and a following click on the cell with data-index 0 leaves 0 cells at data-revealed true and mines-left at the text Mines left: -1, a following click on the cell with data-index 6 updates data-revealed to true on exactly 1 cell, and a last click on flag-mode followed by a click on the cell with data-index 6 leaves that cell at data-flagged false and mines-left at the text Mines left: -1",
       "session": 3,
       "test": "verify/test_ui_play.py::test_c_3_5_flag_mode_plants_removes_and_guards_while_mines_left_tracks",
-      "message": ""
+      "message": "AssertionError: Locator expected to have attribute 'true'\nActual value: false \nCall log:\n  - Expect \"to_have_attribute\" with timeout 20000ms\n  - waiting for locator(\"[data-testid=\\\"cell\\\"][data-index=\\\"15\\\"]\")\n    43 \u00d7 locator resolved to <button type=\"button\" data-index=\"15\" data-testid=\"cell\" data-flagged=\"false\" data-revealed=\"false\" class=\"page_cell__x_Epa\"></button>\n       - unexpected value \"false\"\n\nAria snapshot:\n- button"
     },
     "c-3-6": {
-      "status": "pass",
+      "status": "fail",
       "check": "clicking the cell with data-index 0 on screen /boards/corner updates data-revealed to true on exactly 13 cells and updates the data-testid game-status element to the text Won, clicking the cell with data-index 9 on screen /boards/intro updates data-revealed to true on exactly 1 cell, displays the text * in that cell and updates the data-testid game-status element to the text Lost, and a following click on the cell with data-index 3 updates data-revealed to true on exactly 2 cells and leaves game-status at the text Lost",
       "session": 3,
       "test": "verify/test_ui_play.py::test_c_3_6_the_status_line_reads_won_then_lost_and_stays_lost",
-      "message": ""
+      "message": "AssertionError: Locator expected to have count '13'\nActual value: 0 \nCall log:\n  - Expect \"to_have_count\" with timeout 20000ms\n  - waiting for locator(\"[data-testid=\\\"cell\\\"][data-revealed=\\\"true\\\"]\")\n    43 \u00d7 locator resolved to 0 elements\n       - unexpected value \"0\""
     }
   },
-  "pytest_returncode": 0,
-  "stdout_tail": "..................                                                       [100%]\n18 passed in 11.00s\n",
+  "pytest_returncode": 1,
+  "stdout_tail": "nd data-count 0, 1, 2, 3 and 2 on 0, 3, 12, 17 and 24.\"\"\"\n        open_solved(page, \"intro\")\n>       expect(cells(page)).to_have_count(25, timeout=LOAD_TIMEOUT)\nE       AssertionError: Locator expected to have count '25'\nE       Actual value: 0 \nE       Call log:\nE         - Expect \"to_have_count\" with timeout 20000ms\nE         - waiting for get_by_test_id(\"cell\")\nE           43 \u00d7 locator resolved to 0 elements\nE              - unexpected value \"0\"\n\nskeleton\\verify\\test_ui_solved.py:31: AssertionError\n____ test_c_1_5_corner_solved_shows_a_glyph_a_number_and_three_blank_zeros ____\n\npage = <Page url='http://127.0.0.1:60078/boards/corner/solved'>\n\n    def test_c_1_5_corner_solved_shows_a_glyph_a_number_and_three_blank_zeros(page):\n        \"\"\"c-1-5: 16 cell elements, the cell at data-index 10 reads 3, the cell at\n        15 reads *, and the cells at 0, 1 and 4 read empty text while carrying\n        data-count 0 - so a zero is blank on the page but still counted in the\n        attribute.\"\"\"\n        open_solved(page, \"corner\")\n>       expect(cells(page)).to_have_count(16, timeout=LOAD_TIMEOUT)\nE       AssertionError: Locator expected to have count '16'\nE       Actual value: 0 \nE       Call log:\nE         - Expect \"to_have_count\" with timeout 20000ms\nE         - waiting for get_by_test_id(\"cell\")\nE           43 \u00d7 locator resolved to 0 elements\nE              - unexpected value \"0\"\n\nskeleton\\verify\\test_ui_solved.py:53: AssertionError\n=========================== short test summary info ===========================\nFAILED skeleton/verify/test_api_boards.py::test_c_1_1_intro_board_answers_its_size_mines_and_twenty_five_counts\nFAILED skeleton/verify/test_api_boards.py::test_c_1_2_field_board_counts_are_sixty_four_and_read_right_at_the_edges\nFAILED skeleton/verify/test_api_replay.py::test_c_2_1_one_click_on_field_index_zero_opens_exactly_fourteen_cells\nFAILED skeleton/verify/test_api_replay.py::test_c_2_2_intro_opens_a_zero_region_a_number_and_a_mine\nFAILED skeleton/verify/test_api_replay.py::test_c_3_2_corner_is_won_in_one_click_and_still_playing_after_a_number\nFAILED skeleton/verify/test_api_replay.py::test_c_3_3_a_mine_in_the_list_reads_lost_even_on_the_winning_count\nFAILED skeleton/verify/test_api_replay.py::test_c_3_4_flags_come_back_sorted_and_deduplicated_without_winning\nFAILED skeleton/verify/test_ui_play.py::test_c_2_5_one_click_on_field_index_zero_opens_fourteen_cells_on_screen\nFAILED skeleton/verify/test_ui_play.py::test_c_2_6_a_second_click_on_an_open_cell_changes_nothing_on_intro\nFAILED skeleton/verify/test_ui_play.py::test_c_3_5_flag_mode_plants_removes_and_guards_while_mines_left_tracks\nFAILED skeleton/verify/test_ui_play.py::test_c_3_6_the_status_line_reads_won_then_lost_and_stays_lost\nFAILED skeleton/verify/test_ui_solved.py::test_c_1_4_intro_solved_draws_25_cells_with_their_mines_and_counts\nFAILED skeleton/verify/test_ui_solved.py::test_c_1_5_corner_solved_shows_a_glyph_a_number_and_three_blank_zeros\n13 failed, 5 passed in 130.41s (0:02:10)\n",
   "stderr_tail": ""
 }

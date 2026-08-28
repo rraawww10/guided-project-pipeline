@@ -15,6 +15,7 @@ ordinary work in this repo is untouched.
 from __future__ import annotations
 
 import json
+import os
 import re
 import sys
 from pathlib import Path
@@ -30,6 +31,29 @@ BLOCK = 2   # exit 2 = deny the tool call and show stderr to the model
 # covers every moment after approval regardless of any subtree lock.
 FROZEN_MARKER = "SPEC_FROZEN"
 SPEC_FILES = ("spec.json", "spec.md")
+
+# The pipeline's own code, while an agent step is in flight.
+#
+# check_path only ever walked up looking for projects/<slug>/, so everything
+# outside projects/ was unguarded - the checkers, the orchestrator, the agent
+# prompts, and guard.py itself. Rule 1 says every agent has a checker; nothing
+# said the agent could not rewrite the checker. During the phase-3 run an agent
+# did exactly that: it hit a crash in cutter.py and patched cutter.py. The fix
+# was good, which is luck, not a control.
+#
+# Keyed to a LOCK the way the spec freeze is keyed to a marker, because a
+# PreToolUse hook cannot authenticate who is writing. Agent steps run under a
+# lock; a person works between them. That makes this a real defence against the
+# accidental case - an agent helpfully fixing a bug it should have reported -
+# and no defence at all against a determined one. Worth having for the first,
+# and worth being honest about for the second.
+#
+# learning/ is here for the same reason and a documented one: CLAUDE.md says
+# lessons.md is updated between runs, never during one, and round 1 recorded it
+# being edited mid-run anyway (B-08). Every agent reads it at the start, so a
+# mid-run edit means two agents in the same run read different instructions.
+PIPELINE_PATHS = ("pipeline", ".claude", "learning")
+PIPELINE_ALLOW = (".claude/settings.local.json",)
 
 # A shell reaches the filesystem two ways: a redirect, or a command that takes
 # the file it changes as an argument. Only those are write targets. A path that
@@ -204,12 +228,61 @@ def locked_tree(path: Path) -> tuple[Path, str] | None:
     return None
 
 
+def repo_root() -> Path:
+    """The checkout this guard belongs to - guard.py lives in <root>/pipeline/."""
+    return Path(__file__).resolve().parent.parent
+
+
+def step_in_flight(root: Path | None = None) -> Path | None:
+    """The first project holding a LOCK, meaning an agent step is running."""
+    roots = [root] if root is not None else [repo_root()]
+    if root is None and os.environ.get("GP_ROOT"):
+        roots.append(Path(os.environ["GP_ROOT"]))
+    for r in roots:
+        for lock in r.glob("projects/*/.pipeline/LOCK"):
+            return lock.parent.parent
+    return None
+
+
+def check_pipeline(target: Path) -> str | None:
+    """Rule 5, the half nobody wrote down: an agent does not edit the pipeline.
+
+    The orchestrator is plain code precisely so that no agent manages another.
+    An agent that rewrites a checker manages every agent that checker judges -
+    including itself.
+    """
+    root = repo_root()
+    try:
+        rel = target.relative_to(root)
+    except ValueError:
+        return None
+    if not rel.parts or rel.parts[0] not in PIPELINE_PATHS:
+        return None
+    if rel.as_posix() in PIPELINE_ALLOW:
+        return None
+    project = step_in_flight()
+    if project is None:                  # no step running: a person is working
+        return None
+    return (f"blocked by the pipeline write guard: {rel.as_posix()} is the pipeline's own "
+            f"code, and an agent step is in flight ({project.name} holds a LOCK).\n"
+            f"Rule 5 - the orchestrator is plain code, and no agent manages another. An "
+            f"agent that rewrites a checker manages every agent that checker judges, "
+            f"itself included.\n"
+            f"If the pipeline is genuinely broken, SAY SO IN YOUR SUMMARY and stop. A "
+            f"person fixes the pipeline between steps. Reporting a defect you cannot fix "
+            f"is the expected outcome, not a failure.")
+
+
 def check_path(target: Path) -> str | None:
     target = target if target.is_absolute() else (Path.cwd() / target)
     try:
         target = target.resolve()
     except OSError:
         return None
+    # the pipeline's own code, while any agent step is running
+    msg = check_pipeline(target)
+    if msg:
+        return msg
     # the frozen spec is refused even with no lock set
     if target.name in SPEC_FILES:
         project = frozen_project(target.parent)

@@ -17,7 +17,7 @@
       }
     }
   },
-  "seconds": 50.5,
+  "seconds": 76.3,
   "counts": {
     "pass": 18,
     "fail": 0,
@@ -153,6 +153,6 @@
     }
   },
   "pytest_returncode": 0,
-  "stdout_tail": "..................                                                       [100%]\n18 passed in 11.00s\n",
+  "stdout_tail": "..................                                                       [100%]\n18 passed in 13.14s\n",
   "stderr_tail": ""
 }

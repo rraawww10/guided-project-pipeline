@@ -2,12 +2,12 @@
   "slug": "pipeline-test-01",
   "created": "2026-08-28T14:59:17+00:00",
   "flow": 2,
-  "phase": "code",
+  "phase": "pack",
   "retries": {
     "idea": 0,
     "spec": 0,
     "code": 1,
-    "pack": 0
+    "pack": 5
   },
   "step_runs": {
     "stack": 1,
@@ -18,7 +18,13 @@
     "redfirst": 2,
     "revise:round-1": 1,
     "test:app": 3,
-    "mutation": 2
+    "mutation": 2,
+    "cut": 6,
+    "deploy": 1,
+    "leak-scan": 1,
+    "guide-lint": 1,
+    "dryrun": 2,
+    "ship": 1
   },
   "gates": {
     "gate0": {
@@ -34,8 +40,16 @@
       "spec_hash": "64074255c3f75e218ae8bc527762ed4e5abdde52ed88117756bdbf23989add01",
       "override": false
     },
-    "gate2": null,
-    "gate3": null
+    "gate2": {
+      "approved": true,
+      "at": "2026-08-28T19:43:34+00:00",
+      "note": "18/18 criteria pass; mutation proves all 7 student tasks graded with zero collateral; utc-dates clean. App checked by hand as well as by the suite. A1 (the face-down grid's iteration source) knowingly carried into step 10, where skeleton-check owns it."
+    },
+    "gate3": {
+      "approved": true,
+      "at": "2026-08-28T21:41:15+00:00",
+      "note": "Dry run: 45 minutes, taught by hero from the guide alone without opening app/, delivered successfully. Session 2 overruns the 40-minute cap by 5, disclosed in the guide with two named trims; trim 1 is a Gate 1 change to cut-reveal-from and is left for a future round. skeleton-check 0 mismatches, leak scan 0 leaks across 46 watched answer lines, guide-lint 0 errors, deploy clean."
+    }
   },
   "steps": [
     {
@@ -149,9 +163,100 @@
       "at": "2026-08-28T19:33:35+00:00",
       "detail": "",
       "run": 2
+    },
+    {
+      "step": "cut",
+      "ok": false,
+      "at": "2026-08-28T19:43:54+00:00",
+      "detail": "",
+      "run": 1
+    },
+    {
+      "step": "cut",
+      "ok": false,
+      "at": "2026-08-28T19:56:03+00:00",
+      "detail": "",
+      "run": 2
+    },
+    {
+      "step": "cut",
+      "ok": false,
+      "at": "2026-08-28T20:08:44+00:00",
+      "detail": "",
+      "run": 3
+    },
+    {
+      "step": "cut",
+      "ok": false,
+      "at": "2026-08-28T20:17:33+00:00",
+      "detail": "",
+      "run": 4
+    },
+    {
+      "step": "cut",
+      "ok": false,
+      "at": "2026-08-28T20:20:11+00:00",
+      "detail": "",
+      "run": 5
+    },
+    {
+      "step": "cut",
+      "ok": true,
+      "at": "2026-08-28T20:29:18+00:00",
+      "detail": "",
+      "run": 6
+    },
+    {
+      "step": "deploy",
+      "ok": true,
+      "at": "2026-08-28T20:31:34+00:00",
+      "detail": "",
+      "run": 1
+    },
+    {
+      "step": "leak-scan",
+      "ok": true,
+      "at": "2026-08-28T20:51:27+00:00",
+      "detail": "",
+      "run": 1
+    },
+    {
+      "step": "guide-lint",
+      "ok": true,
+      "at": "2026-08-28T20:51:30+00:00",
+      "detail": "",
+      "run": 1
+    },
+    {
+      "step": "dryrun",
+      "ok": true,
+      "at": "2026-08-28T21:37:35+00:00",
+      "detail": "session 2, 47 min, Priya",
+      "run": 1
+    },
+    {
+      "step": "dryrun",
+      "ok": true,
+      "at": "2026-08-28T21:39:55+00:00",
+      "detail": "session 2, 45 min, hero",
+      "run": 2
+    },
+    {
+      "step": "ship",
+      "ok": true,
+      "at": "2026-08-28T21:41:15+00:00",
+      "detail": "",
+      "run": 1
     }
   ],
   "ticket": null,
-  "dry_run": null,
+  "dry_run": {
+    "at": "2026-08-28T21:39:55+00:00",
+    "session": 2,
+    "minutes": 45,
+    "by": "hero",
+    "taught_without_the_code": true,
+    "note": "Session delivered successfully from the guide alone. Ran 45 minutes against the guide's own 46-minute estimate and the 40-minute cap."
+  },
   "feedback": []
 }

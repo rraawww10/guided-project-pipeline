@@ -8,7 +8,7 @@
     "unknown": [],
     "checks": {}
   },
-  "seconds": 11.6,
+  "seconds": 141.3,
   "counts": {
     "pass": 22,
     "fail": 0,
@@ -172,6 +172,6 @@
     }
   },
   "pytest_returncode": 0,
-  "stdout_tail": "\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m                                                   [100%]\u001b[0m\n\u001b[32m\u001b[32m\u001b[1m22 passed\u001b[0m\u001b[32m in 3.99s\u001b[0m\u001b[0m\n",
+  "stdout_tail": "......................                                                   [100%]\n22 passed in 14.21s\n",
   "stderr_tail": ""
 }

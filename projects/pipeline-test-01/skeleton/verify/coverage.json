@@ -1,0 +1,56 @@
+{
+  "c-1-1": {
+    "test": "verify/test_api_boards.py::test_c_1_1_intro_board_answers_its_size_mines_and_twenty_five_counts"
+  },
+  "c-1-2": {
+    "test": "verify/test_api_boards.py::test_c_1_2_field_board_counts_are_sixty_four_and_read_right_at_the_edges"
+  },
+  "c-1-3": {
+    "test": "verify/test_api_boards.py::test_c_1_3_unknown_board_answers_404_with_an_error_message"
+  },
+  "c-1-4": {
+    "test": "verify/test_ui_solved.py::test_c_1_4_intro_solved_draws_25_cells_with_their_mines_and_counts"
+  },
+  "c-1-5": {
+    "test": "verify/test_ui_solved.py::test_c_1_5_corner_solved_shows_a_glyph_a_number_and_three_blank_zeros"
+  },
+  "c-1-6": {
+    "test": "verify/test_ui_solved.py::test_c_1_6_unknown_board_solved_draws_board_not_found_and_no_cells"
+  },
+  "c-2-1": {
+    "test": "verify/test_api_replay.py::test_c_2_1_one_click_on_field_index_zero_opens_exactly_fourteen_cells"
+  },
+  "c-2-2": {
+    "test": "verify/test_api_replay.py::test_c_2_2_intro_opens_a_zero_region_a_number_and_a_mine"
+  },
+  "c-2-3": {
+    "test": "verify/test_api_replay.py::test_c_2_3_replay_resolves_the_board_first_then_validates_the_body"
+  },
+  "c-2-4": {
+    "test": "verify/test_ui_play.py::test_c_2_4_field_opens_face_down_and_an_unknown_board_draws_nothing"
+  },
+  "c-2-5": {
+    "test": "verify/test_ui_play.py::test_c_2_5_one_click_on_field_index_zero_opens_fourteen_cells_on_screen"
+  },
+  "c-2-6": {
+    "test": "verify/test_ui_play.py::test_c_2_6_a_second_click_on_an_open_cell_changes_nothing_on_intro"
+  },
+  "c-3-1": {
+    "test": "verify/test_api_boards.py::test_c_3_1_board_index_lists_the_three_seeded_boards_in_seed_order"
+  },
+  "c-3-2": {
+    "test": "verify/test_api_replay.py::test_c_3_2_corner_is_won_in_one_click_and_still_playing_after_a_number"
+  },
+  "c-3-3": {
+    "test": "verify/test_api_replay.py::test_c_3_3_a_mine_in_the_list_reads_lost_even_on_the_winning_count"
+  },
+  "c-3-4": {
+    "test": "verify/test_api_replay.py::test_c_3_4_flags_come_back_sorted_and_deduplicated_without_winning"
+  },
+  "c-3-5": {
+    "test": "verify/test_ui_play.py::test_c_3_5_flag_mode_plants_removes_and_guards_while_mines_left_tracks"
+  },
+  "c-3-6": {
+    "test": "verify/test_ui_play.py::test_c_3_6_the_status_line_reads_won_then_lost_and_stays_lost"
+  }
+}
