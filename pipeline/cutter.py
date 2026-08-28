@@ -291,17 +291,26 @@ def typecheck(project: Path) -> dict:
 
     # the skeleton is generated without node_modules; borrow the app's
     modules = skel / "node_modules"
-    borrowed = False
+    borrowed = ""
     if not modules.exists() and (app / "node_modules").exists():
-        os.symlink(app / "node_modules", modules, target_is_directory=True)
-        borrowed = True
+        try:
+            borrowed = link_dir((app / "node_modules").resolve(), modules)
+        except OSError as e:
+            return {"ran": False, "ok": True, "fail_open": True,
+                    "why": f"could not borrow the app's node_modules: {e} - the "
+                           f"static return-safety scan is the only guard that ran"}
     if not modules.exists():
         return {"ran": False, "ok": True, "fail_open": True,
                 "why": "no node_modules to typecheck against - run the test runner once "
                        "first. The static return-safety scan is the only guard that ran"}
 
-    tsc = app / "node_modules" / ".bin" / "tsc"
-    cmd = [str(tsc)] if tsc.exists() else ["npx", "--no-install", "tsc"]
+    # On Windows the extensionless .bin/tsc is a shell script: running it raises
+    # WinError 193 and the typecheck fails open for a reason that has nothing to
+    # do with the cuts. The .cmd shim next to it is the one Windows can execute.
+    bin_dir = app / "node_modules" / ".bin"
+    names = ["tsc.cmd", "tsc"] if sys.platform == "win32" else ["tsc"]
+    tsc = next((bin_dir / n for n in names if (bin_dir / n).exists()), None)
+    cmd = [str(tsc)] if tsc else ["npx", "--no-install", "tsc"]
     try:
         r = subprocess.run([*cmd, "--noEmit", "-p", "tsconfig.json"],
                            cwd=skel, capture_output=True, text=True, timeout=300)
@@ -313,7 +322,12 @@ def typecheck(project: Path) -> dict:
                        f"the only guard that ran"}
     finally:
         if borrowed:
-            modules.unlink(missing_ok=True)
+            unlink_dir(modules, borrowed)
+        # an incremental tsconfig makes tsc write a .tsbuildinfo even under
+        # --noEmit. SKIP_FILE_GLOBS already swept the skeleton by now, so this
+        # guard would otherwise leave its own droppings behind for the student.
+        for stale in skel.rglob("*.tsbuildinfo"):
+            stale.unlink(missing_ok=True)
 
     errors = [ln for ln in out.splitlines() if ": error TS" in ln]
     # TS2355: a function whose declared type is not void must return a value.
@@ -327,6 +341,49 @@ def typecheck(project: Path) -> dict:
                  "return outside the markers, so the skeleton still compiles with the block "
                  "replaced by its hint comment.") if returns else "",
     }
+
+
+def link_dir(src: Path, dst: Path) -> str:
+    """Point dst at the directory src, as cheaply as this platform allows.
+
+    Returns how it was done: "symlink", "junction" or "copy" - the caller needs
+    that to take it back down again.
+
+    os.symlink needs SeCreateSymbolicLinkPrivilege on Windows - without admin or
+    Developer Mode it raises WinError 1314 - so `pipeline cut` crashed here,
+    wrote no skeleton and no skeleton-check.json, and the phase-2 workflow read
+    the missing report as a verdict on the cut markers. A junction needs no
+    privilege and behaves the same way for reading node_modules. Copying is the
+    last resort: correct, just slow, and node_modules is large.
+    """
+    try:
+        os.symlink(src, dst, target_is_directory=True)
+        return "symlink"
+    except OSError:
+        pass
+    if sys.platform == "win32":
+        try:
+            import _winapi
+            _winapi.CreateJunction(str(src), str(dst))
+            return "junction"
+        except (ImportError, OSError):
+            pass
+    shutil.copytree(src, dst, symlinks=True, dirs_exist_ok=True)
+    return "copy"
+
+
+def unlink_dir(dst: Path, kind: str) -> None:
+    """Undo link_dir. A junction is a directory entry, not a file: Path.unlink
+    raises on it, which would turn cleanup into the next crash."""
+    try:
+        if kind == "symlink":
+            dst.unlink(missing_ok=True)
+        elif kind == "junction":
+            os.rmdir(dst)
+        elif kind == "copy":
+            shutil.rmtree(dst, ignore_errors=True)
+    except OSError:
+        pass
 
 
 # --- static return safety -------------------------------------------------

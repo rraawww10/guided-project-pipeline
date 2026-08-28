@@ -25,14 +25,14 @@ from __future__ import annotations
 
 import argparse
 import json
-import os
 import shutil
 import sys
 import time
 from pathlib import Path
 
 from . import test_runner
-from .cutter import CLOSE, OPEN, SKIP_DIRS, load_hints, todo_line, walk_source
+from .cutter import (CLOSE, OPEN, SKIP_DIRS, link_dir, load_hints, todo_line,
+                     walk_source)
 
 MUTANT_ROOT = Path(".pipeline") / "mutants"
 
@@ -84,30 +84,6 @@ def mutate_one(app: Path, out: Path, task_id: str, hints: dict) -> int:
     if not nm.exists() and (app / "node_modules").exists():
         link_dir((app / "node_modules").resolve(), nm)
     return removed
-
-
-def link_dir(src: Path, dst: Path) -> None:
-    """Point dst at the directory src, as cheaply as this platform allows.
-
-    os.symlink needs SeCreateSymbolicLinkPrivilege on Windows - without admin or
-    Developer Mode it raises WinError 1314 - so every mutant failed to build and
-    `pipeline mutation` crashed before writing a report. A junction needs no
-    privilege and behaves the same way for reading node_modules. Copying is the
-    last resort: correct, just slow, and node_modules is large.
-    """
-    try:
-        os.symlink(src, dst, target_is_directory=True)
-        return
-    except OSError:
-        pass
-    if sys.platform == "win32":
-        try:
-            import _winapi
-            _winapi.CreateJunction(str(src), str(dst))
-            return
-        except (ImportError, OSError):
-            pass
-    shutil.copytree(src, dst, symlinks=True, dirs_exist_ok=True)
 
 
 def graded_by(spec: dict, task_id: str) -> list[str]:
