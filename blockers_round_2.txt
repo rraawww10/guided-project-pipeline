@@ -38,12 +38,13 @@ Round-1 IDs are cited as B-nn. New IDs this round are R2-nn.
 Phase 0 and phase 1 both completed on the FIRST attempt with zero retries
 burned. Every checker that fired, passed. And Gate 1 still rejected.
 
-Twelve distinct blockers this round. Their distribution is the finding:
+Sixteen distinct blockers this round. Their distribution is the finding:
 
-    5  infrastructure / harness   - hit BEFORE the pipeline could run at all
+    6  infrastructure / harness   - hit BEFORE the pipeline could run at all
     2  documentation drift
     1  test-suite integrity
     4  in-run, phase 1
+    3  in-run, phase 1 round 2
 
 Four of the infrastructure blockers were Windows-specific, and three of those
 made a component silently unrunnable rather than fail loudly.
@@ -51,7 +52,7 @@ made a component silently unrunnable rather than fail loudly.
 The round-1 headline was "the pipeline is blind to everything expensive."
 The round-2 headline is narrower and worse:
 
-    NOTHING THE PIPELINE RUNS ITSELF FOUND ANY OF THE TWELVE.
+    NOTHING THE PIPELINE RUNS ITSELF FOUND ANY OF THE SIXTEEN.
 
 The spec linter passed clean. The idea checker passed clean. The red-first
 check passed clean. The write guard passed its own selftest. Every blocker
@@ -410,6 +411,34 @@ R2-12  redfirst --target skeleton and cutter.verify contradict each other
        PHASE  Scripts / redfirst + cutter
        RECURRENCE  Latent. Will surface the first time the dynamic red-first is
               pointed at a skeleton.
+
+
+R2-13  A CRLF checkout invalidates the frozen spec hash and blocks the build
+       WHAT   state.spec_hash() digests spec.md and spec.json BYTE for byte.
+              With core.autocrlf=true a fresh Windows clone rewrites both, so
+              the recomputed hash differs from the one frozen at Gate 1,
+              spec_drift reports the spec as changed, and _guard refuses the
+              code and pack phases. Every approved project would decline to
+              build on a clean checkout of its own repository.
+       PROOF  Same content, LF hash 1c227ad19091, CRLF hash 8c86063f5a48;
+              spec_drift then prints "the spec has changed since Gate 1
+              approved it".
+       HOW FOUND  Not by a checker. By reading git's own "LF will be replaced
+              by CRLF" warnings while committing the approved spec, which is a
+              step CLAUDE.md requires before the code phase. Had the spec been
+              committed silently, this would have surfaced on someone else's
+              machine as an unexplained drift block on a project they had not
+              touched.
+       FIX    .gitattributes now pins the repo to LF (* text=auto eol=lf), with
+              the two byte-sensitive paths called out explicitly.
+       PHASE  Infrastructure / repo hygiene
+       RECURRENCE  Fixed. THIRD instance of the CRLF class this round after
+              R2-02, and the second to make a component refuse to run rather
+              than fail visibly. The structural cause named under R2-02 - the
+              selftest only ever exercises the machine it runs on - remains
+              untouched, and this instance would not have been caught by any
+              amount of testing ON this machine, because the working tree here
+              is already LF. It needs a CLONE to reproduce.
 
 
 ================================================================================
