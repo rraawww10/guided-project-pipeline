@@ -544,8 +544,19 @@ def cmd_revise(a) -> int:
     # a spec waiting at gate 1 - `revise` says "back to step 2" and `next` would
     # answer "step 4". The archive under round-N/ is the record; the Spec Writer
     # reads it there.
+    names = ["spec.md", "spec.json", "lint.json", "ambiguity.md", "gate1.json"]
+    # Flow 2 writes the tests at step 5, BEFORE gate 1, so a rejected round
+    # leaves a suite written against the spec being archived. Step 5 completes
+    # on "verify/ exists and redfirst.json is ok" with no hash binding, so
+    # leaving them behind marks step 5 done for the NEXT round and the tests are
+    # never rewritten - Gate 1 would then approve a round-2 spec graded by
+    # round-1 tests. Worse, the findings that force a revise are usually about
+    # criteria that are not graded, so the very criteria the new spec extends
+    # are the ones whose tests would be missing.
+    if st.flow == 2:
+        names += ["redfirst.json", "verify"]
     moved = []
-    for name in ("spec.md", "spec.json", "lint.json", "ambiguity.md", "gate1.json"):
+    for name in names:
         src = st.dir / name
         if src.exists():
             shutil.move(str(src), str(dest / name))

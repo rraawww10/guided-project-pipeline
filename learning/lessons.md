@@ -289,12 +289,19 @@ gets a strikethrough and a date.
   run at step 6, and moved from `nothing` to a column the Builder loop owns.
   Before writing `nothing`, ask whether the rule is about the *shape* of the code.
 
-- **The write guard blocks read-only commands.** `check_bash` fires on any `>` in
-  a command and then blocks if any `projects/...` token resolves to a frozen
-  spec, so `grep ">>> CUT" ...` alongside a mention of `spec.json` is refused.
-  Harmless, but it will annoy anyone inspecting a frozen project, and it fired
-  twice during this run. The path should only be checked on the write side of a
-  redirect. Not yet fixed.
+- **A pattern is not a parser, and the guard needed a parser.** `check_bash`
+  fired on any `>` anywhere in a command and then blocked if any `projects/...`
+  token resolved to a frozen spec, so `grep ">>> CUT" ...` alongside a mention of
+  `spec.json` was refused - twice in one run. Two separate defects hid in one
+  regex: a `>` inside quotes is data, not a redirect, and even for a real
+  redirect only the token *after* it is written. Fixed by lexing the line
+  quote-aware into simple commands and asking each what it *writes*: the operand
+  of `>`/`>>`, every path argument of `rm`/`mv`/`tee`/`sed -i` and friends, the
+  destination of `cp`. Reading a frozen spec, and copying it out to read, are now
+  allowed; writing or deleting it is still refused. Two side-effects the regex
+  had also missed: a `<` operand is a read, and a second *line* of a script is a
+  second command, so `cd app
+rm ../verify/t.py` used to slip past entirely.
 
 ## Teaching
 

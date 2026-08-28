@@ -727,16 +727,46 @@ def test_guard(tmp: Path) -> None:
           cli.LOCK_PHASE_BY_FLOW[2]["verify"], "spec")
     check("files outside projects/ are never guarded", hook(w(ROOT / "Flow.md")), False)
 
-    # The shell path pattern once required a forward slash, so on Windows - where
-    # the command carries a drive letter and backslashes - it matched nothing and
+    # A read is not a write. The bash check used to scan EVERY path token as
+    # soon as a ">" appeared anywhere on the line - quoted or not - so simply
+    # looking inside a frozen project was refused. It fired twice in a real run.
+    (p / ".pipeline" / guard.FROZEN_MARKER).write_text("abc123def456\n")
+    check("a quoted > is data, not a redirect",
+          hook(b(f'grep ">>> CUT" {p / "app" / "page.tsx"} {p / "spec.json"}')), False)
+    check("reading the frozen spec is allowed",
+          hook(b(f"cat {p / 'spec.json'} | head -40")), False)
+    check("copying it out to read is allowed",
+          hook(b(f"cp {p / 'spec.json'} /tmp/look.json")), False)
+    check("but writing over the frozen spec is still refused",
+          hook(b(f"echo x > {p / 'spec.json'}")), True)
+    check("and so is deleting it",
+          hook(b(f"rm -f {p / 'spec.json'}")), True)
+    (p / ".pipeline" / guard.FROZEN_MARKER).unlink()
+
+    (p / ".pipeline" / "LOCK").write_text("app\n")
+    check("a redirect into a locked tree is a write",
+          hook(b(f"npm run build > {p / 'verify' / 'log.txt'}")), True)
+    check("the same path only read is not",
+          hook(b(f"npm run build < {p / 'verify' / 'log.txt'}")), False)
+    check("cp writes its destination",
+          hook(b(f"cp /tmp/t.py {p / 'verify' / 't.py'}")), True)
+    check("cp only reads its source",
+          hook(b(f"cp {p / 'verify' / 't.py'} /tmp/t.py")), False)
+    # a second line is a second command; scanning the line as one string missed it
+    check("a write on the second line of a script still counts",
+          hook(b(f"cd {p / 'app'}\nrm {p / 'verify' / 't.py'}")), True)
+    (p / ".pipeline" / "LOCK").unlink()
+
+    # The path pattern once required a forward slash, so on Windows - where the
+    # command carries a drive letter and backslashes - it matched nothing and
     # rule 3 went unenforced for EVERY Bash call. Pin both separators and Git
     # Bash's MSYS form here, because the machine running the suite only ever
     # exercises its own.
-    check("a forward-slash path is a path token",
-          guard.PATH_TOKEN.findall("rm /repo/projects/fixture/verify/t.py"),
+    check("a forward-slash path is a write target",
+          guard.write_targets("rm /repo/projects/fixture/verify/t.py"),
           ["/repo/projects/fixture/verify/t.py"])
-    check("a backslash path is a path token too",
-          guard.PATH_TOKEN.findall(r"rm C:\repo\projects\fixture\verify\t.py"),
+    check("a backslash path is a write target too",
+          guard.write_targets(r"rm C:\repo\projects\fixture\verify\t.py"),
           [r"C:\repo\projects\fixture\verify\t.py"])
     check("the MSYS drive form is rewritten to a drive",
           guard.MSYS_PATH.sub(r"\1:/", "/d/repo/projects/fixture/verify/t.py"),
@@ -786,6 +816,65 @@ def test_revise(tmp: Path) -> None:
         cli.cmd_revise(ns)
     check("a second rejection makes round-2", (d / ".pipeline" / "round-2").exists(), True)
     check("round-1 survives it", (r1 / "spec.json").read_text().strip(), '{"slug": "rev"}')
+
+
+def test_revise_flow2(tmp: Path) -> None:
+    """Flow 2 writes the tests at step 5, BEFORE gate 1, so a rejected round
+    leaves a suite written against the spec being archived.
+
+    Step 5 completes on "verify/ exists and redfirst.json is ok" with no hash
+    binding, so leaving them behind marked step 5 done for the NEXT round: the
+    tests were never rewritten and Gate 1 would approve a round-2 spec graded by
+    round-1 tests. The findings that force a revise are usually about criteria
+    nothing grades, so the criteria the new spec extends are exactly the ones
+    whose tests would be missing."""
+    print("revise on flow 2 archives the tests too")
+    os.environ["GP_ROOT"] = str(tmp)
+    d = tmp / "projects" / "rev2"
+    (d / ".pipeline").mkdir(parents=True, exist_ok=True)
+    (d / "idea.md").write_text("# Real idea\n")
+    (d / "spec.md").write_text("# spec\n")
+    (d / "spec.json").write_text('{"slug": "rev2"}\n')
+    (d / "lint.json").write_text('{"ok": true, "error_count": 0, "errors": []}\n')
+    (d / "ambiguity.md").write_text("# ambiguity\n")
+    (d / "verify").mkdir(exist_ok=True)
+    (d / "verify" / "test_c_2_3.py").write_text("def test(): assert 1\n")
+    (d / "redfirst.json").write_text('{"ok": true, "vacuous_tests": []}\n')
+    legacy_state(d, "rev2")
+    st = State("rev2", root=tmp)
+    st.data["flow"] = 2
+    st.data["phase"] = "spec"
+    st.data["retries"] = {ph: 0 for ph in st.phases}
+    st.data["gates"] = {g: None for g in st.gates.values()}
+    st.record_gate("gate1", False, "B1 is owned by nothing")
+    st.save()
+
+    check("before revise, step 5 reads complete",
+          dict(cli._flow2_checks(State("rev2", root=tmp)))[5], True)
+
+    with contextlib.redirect_stdout(io.StringIO()):
+        cli.cmd_revise(argparse.Namespace(slug="rev2"))
+
+    r1 = d / ".pipeline" / "round-1"
+    check("the round-1 tests are archived", (r1 / "verify" / "test_c_2_3.py").exists(), True)
+    check("verify/ is gone from the project", (d / "verify").exists(), False)
+    check("the stale redfirst.json is gone", (d / "redfirst.json").exists(), False)
+    check("so step 5 no longer reads complete",
+          dict(cli._flow2_checks(State("rev2", root=tmp)))[5], False)
+    check("and the round-1 spec is archived beside them",
+          (r1 / "spec.json").exists(), True)
+
+    # flow 1 writes the tests at step 6, AFTER gate 1, so a flow-1 revise must
+    # not reach for a verify/ that belongs to an approved round
+    e = tmp / "projects" / "rev1"
+    (e / ".pipeline").mkdir(parents=True, exist_ok=True)
+    (e / "spec.json").write_text('{"slug": "rev1"}\n')
+    (e / "verify").mkdir(exist_ok=True)
+    (e / "verify" / "test_api.py").write_text("def test(): assert 1\n")
+    legacy_state(e, "rev1")
+    with contextlib.redirect_stdout(io.StringIO()):
+        cli.cmd_revise(argparse.Namespace(slug="rev1"))
+    check("flow 1 leaves verify/ alone", (e / "verify" / "test_api.py").exists(), True)
 
 
 # ------------------------------------------------------------ deploy + watch ---
@@ -1473,7 +1562,8 @@ def main() -> int:
     try:
         for t in (test_linter, test_cutter, test_return_safety, test_skeleton_check,
                   test_gate1, test_spec_freeze, test_breaker_binding, test_state,
-                  test_step_churn, test_guard, test_revise, test_deploy_advisories,
+                  test_step_churn, test_guard, test_revise, test_revise_flow2,
+                  test_deploy_advisories,
                   test_watchdog, test_code_checks, test_runtime_state,
                   test_relative_paths, test_flow2, test_flow2_next,
                   test_new_checkers, test_doc_vocabulary):

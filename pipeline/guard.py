@@ -31,19 +31,160 @@ BLOCK = 2   # exit 2 = deny the tool call and show stderr to the model
 FROZEN_MARKER = "SPEC_FROZEN"
 SPEC_FILES = ("spec.json", "spec.md")
 
-# a write reaching the filesystem through a shell instead of the Write tool
-REDIRECT = re.compile(r"(>>?|\btee\b|\bcp\b|\bmv\b|\bsed\b\s+-i|\brm\b|\bdd\b|"
-                      r"\btruncate\b|\bmkdir\b|\btouch\b|\bpatch\b)")
-
-# A path argument inside such a command: any run of path characters holding a
-# projects/<slug> segment. BOTH separators count - a pattern that matched only
-# "projects/" left rule 3 unenforced for every Bash call on Windows, where the
-# command carries a drive letter and backslashes.
-PATH_TOKEN = re.compile(r"[^\s'\"<>|;&()`]*projects[/\\][^\s'\"<>|;&()`]+")
+# A shell reaches the filesystem two ways: a redirect, or a command that takes
+# the file it changes as an argument. Only those are write targets. A path that
+# merely appears on the line is a read - and the guard used to refuse those,
+# because it scanned EVERY path token as soon as a ">" appeared anywhere on the
+# line, quoted or not, so `grep ">>> CUT" app/x.ts spec.json` was blocked.
+WRITES_EVERY_ARG = {"tee", "rm", "rmdir", "shred", "mv", "truncate",
+                    "mkdir", "touch", "patch", "ln"}
+WRITES_LAST_ARG = {"cp", "install", "rsync"}      # the sources are only read
+# stepped over when looking for the command word
+WRAPPERS = {"sudo", "env", "command", "time", "nohup", "exec", "nice", "xargs",
+            "then", "else", "do", "!", "{", "}", "("}
+ASSIGN = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*=")
+METACHAR = "<>|;&()\n"
+# a backslash before one of these is a shell escape; before anything else it is
+# a Windows separator, and eating it turns C:\repo\projects\.. into C:repoprojects
+ESCAPABLE = " \t'\"\\<>|;&$`"
 
 # Git Bash hands out MSYS paths (/d/repo/projects/...) that Windows resolves
 # against the wrong root, so the walk up to .pipeline/LOCK finds nothing.
 MSYS_PATH = re.compile(r"^/([A-Za-z])/")
+
+
+def _lex(command: str) -> list[tuple[str, str]]:
+    """Tokenise a shell line into ("word"|"write"|"read"|"sep", text).
+
+    Quote-aware, which is the whole point: a ">" inside quotes is data.
+    """
+    out: list[tuple[str, str]] = []
+    buf: list[str] = []
+    quote: str | None = None
+    i, n = 0, len(command)
+
+    def flush() -> str:
+        word = "".join(buf)
+        buf.clear()
+        return word
+
+    while i < n:
+        c = command[i]
+        if quote:
+            if c == quote:
+                quote = None
+            elif c == "\\" and quote == '"' and i + 1 < n and command[i + 1] in ESCAPABLE:
+                buf.append(command[i + 1])
+                i += 2
+                continue
+            else:
+                buf.append(c)
+            i += 1
+            continue
+        if c in "'\"":
+            quote = c
+            i += 1
+            continue
+        if c == "\\" and i + 1 < n:
+            nxt = command[i + 1]
+            buf.append(nxt if nxt in ESCAPABLE else c + nxt)
+            i += 2
+            continue
+        if c in METACHAR:
+            word = flush()
+            if c == ">" and (word.isdigit() or word == "&"):
+                word = ""                     # 2> and &> - an fd, not a path
+            if word:
+                out.append(("word", word))
+            if c == ">":
+                op = ">>" if command[i + 1:i + 2] == ">" else ">"
+                i += len(op)
+                if command[i:i + 1] == "|":   # >| forces the clobber
+                    i += 1
+                out.append(("write", op))
+                continue
+            if c == "<":
+                i += 2 if command[i + 1:i + 2] == "<" else 1
+                out.append(("read", "<"))
+                continue
+            if command[i + 1:i + 2] == c and c in "&|":
+                i += 1
+            i += 1
+            out.append(("sep", c))
+            continue
+        if c.isspace():
+            word = flush()
+            if word:
+                out.append(("word", word))
+            i += 1
+            continue
+        buf.append(c)
+        i += 1
+
+    word = flush()
+    if word:
+        out.append(("word", word))
+    return out
+
+
+def _segment_targets(tokens: list[tuple[str, str]]) -> list[str]:
+    """The paths one simple command writes to."""
+    out: list[str] = []
+    words: list[str] = []
+    i = 0
+    while i < len(tokens):
+        kind, text = tokens[i]
+        operand = (tokens[i + 1][1]
+                   if i + 1 < len(tokens) and tokens[i + 1][0] == "word" else None)
+        if kind == "write":
+            if operand is not None:
+                out.append(operand)
+                i += 2
+                continue
+        elif kind == "read":
+            i += 2 if operand is not None else 1
+            continue
+        else:
+            words.append(text)
+        i += 1
+
+    j = 0
+    while j < len(words) and (words[j] in WRAPPERS or ASSIGN.match(words[j])):
+        j += 1
+    if j >= len(words):
+        return out
+    name = re.split(r"[\\/]", words[j])[-1]
+    args = words[j + 1:]
+    plain = [a for a in args if not a.startswith("-")]
+
+    if name == "sed":
+        if any(a.startswith("-i") or a.startswith("--in-place") for a in args):
+            out.extend(plain[1:])             # the first plain arg is the script
+    elif name == "dd":
+        out.extend(a.split("=", 1)[1] for a in args if a.startswith("of="))
+    elif name in WRITES_EVERY_ARG:
+        out.extend(plain)
+    elif name in WRITES_LAST_ARG:
+        named = [args[k + 1] for k, a in enumerate(args)
+                 if a in ("-t", "--target-directory") and k + 1 < len(args)]
+        named += [a.split("=", 1)[1] for a in args
+                  if a.startswith("--target-directory=")]
+        out.extend(named or plain[-1:])
+    return out
+
+
+def write_targets(command: str) -> list[str]:
+    """Every path `command` would write, and nothing it only reads."""
+    out: list[str] = []
+    segment: list[tuple[str, str]] = []
+    for kind, text in _lex(command):
+        if kind == "sep":
+            out.extend(_segment_targets(segment))
+            segment = []
+        else:
+            segment.append((kind, text))
+    out.extend(_segment_targets(segment))
+    return [t for t in out if t]
 
 
 def frozen_project(path: Path) -> Path | None:
@@ -102,12 +243,14 @@ def check_path(target: Path) -> str | None:
 
 
 def check_bash(command: str) -> str | None:
-    if not REDIRECT.search(command):
-        return None
-    for token in PATH_TOKEN.findall(command):
+    for token in write_targets(command):
         if sys.platform == "win32":
-            token = MSYS_PATH.sub(r"\1:/", token)
-        msg = check_path(Path(token))
+            token = MSYS_PATH.sub(r":/", token)
+        try:
+            target = Path(token)
+        except ValueError:            # a token no filesystem could name
+            continue
+        msg = check_path(target)
         if msg:
             return msg
     return None
