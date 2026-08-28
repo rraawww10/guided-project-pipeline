@@ -1,0 +1,49 @@
+6691dad5c499f8c29a3d597b1cedf070060b554a9b3b1a95c6ade11f6d1e88ad
+GATE 1 APPROVED - round 4. Human decision; the stopping rule was approve-eligible.
+
+RULE: 1 blocking finding, owned by pack-writer; 7 worth a look; 0 blocking
+findings owned by `nothing`. Linter 0 errors / 0 warnings. Sessions 37 / 38.5 /
+35.5 against the 40 cap, setup session at 2 cuts against 3. 16 criteria, 8 cuts,
+all on distinct grading signatures. code_checks: ["utc-dates"] declared.
+
+VERIFIED BY THE ROUND-4 SPEC BREAKER, re-derived rather than trusted: 2026-08-26
+is a Wednesday, 2026-08-30 that week's Sunday, 2026-08-31 the Monday of the
+2026-09-06 week; seed streaks 5/0/0/1; every toggle expectation arithmetics out.
+Critically, it emptied each declared cut of each of the 16 criteria in turn with
+the rest filled: all 38 dependencies are load-bearing and no criterion is
+satisfied by a proper subset. That is the recipe-box c-3-2 blind spot checked
+exhaustively by hand, and it is the strongest evidence any spec here has carried.
+
+ACCEPTED WITH EYES OPEN - three findings owned by `nothing` are being shipped:
+
+  B2 - cut-board-click never mentions the response status, so a student who
+       fills it before cut-api-toggle clicks a cell, takes the 501 fallback body
+       into `habits` state, and the board dies mid-session. The spec spells this
+       out for the other screen and is silent here. WATCH FOR THIS AT GATE 3:
+       the pack must not present cut-board-click before cut-api-toggle.
+  B3 - habit-name on / is declared in spec.md and spec.json and graded by no
+       criterion, while every other board element is pinned. An unlabelled board
+       ships 16/16 green. WATCH FOR THIS AT GATE 3: look at the board.
+  B4 - "app/.gitignore must contain exactly these two lines" would drop
+       *.tsbuildinfo. Made moot in the harness instead: build artifacts are now
+       excluded unconditionally.
+
+  A1 (blocking, pack-writer) - the spec claims APP_DIR names the right directory
+       in all three runs. The pipeline sets it for its own two only; a student
+       running pytest by hand has none. Corrected in CONTRACT.md and the verifier
+       skill/agent to Path(os.environ.get("APP_DIR", os.getcwd())), so the
+       Verifier will write the fallback even though the spec sentence overstates
+       it. The pack must document the student's run.
+
+HARNESS CHANGES THIS SPEC DEPENDS ON, all landed before approval:
+  - test_runner passes APP_DIR alongside BASE_URL
+  - cutter and deploy_check honour app/.gitignore, so the live store does not
+    ship while data/habits.seed.json does
+  - build artifacts (*.tsbuildinfo, .DS_Store) excluded unconditionally
+  - code_check.py runs named static checks at step 6; utc-dates owns the
+    timezone rule that had no checker
+  - selftest 183/183
+
+ROUND HISTORY: findings 12 -> 7 -> 6 -> 8, blocking-and-unowned 1 -> 1 -> 1 -> 0.
+Three of the findings across rounds 3 and 4 were defects in the pipeline or in my
+own briefs, not in the spec.

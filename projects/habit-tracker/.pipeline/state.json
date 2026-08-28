@@ -1,0 +1,169 @@
+{
+  "slug": "habit-tracker",
+  "created": "2026-08-28T09:22:39+00:00",
+  "phase": "pack",
+  "retries": {
+    "spec": 0,
+    "code": 0,
+    "pack": 0
+  },
+  "step_runs": {
+    "lint": 4,
+    "breaker": 4,
+    "revise:round-1": 1,
+    "revise:round-2": 1,
+    "revise:round-3": 1,
+    "test:app": 3,
+    "cut": 2,
+    "deploy": 1,
+    "ship": 1
+  },
+  "gates": {
+    "gate1": {
+      "approved": true,
+      "at": "2026-08-28T11:17:49+00:00",
+      "note": "GATE 1 APPROVED - round 4. Human decision; the stopping rule was approve-eligible.\n\nRULE: 1 blocking finding, owned by pack-writer; 7 worth a look; 0 blocking\nfindings owned by `nothing`. Linter 0 errors / 0 warnings. Sessions 37 / 38.5 /\n35.5 against the 40 cap, setup session at 2 cuts against 3. 16 criteria, 8 cuts,\nall on distinct grading signatures. code_checks: [\"utc-dates\"] declared.\n\nVERIFIED BY THE ROUND-4 SPEC BREAKER, re-derived rather than trusted: 2026-08-26\nis a Wednesday, 2026-08-30 that week's Sunday, 2026-08-31 the Monday of the\n2026-09-06 week; seed streaks 5/0/0/1; every toggle expectation arithmetics out.\nCritically, it emptied each declared cut of each of the 16 criteria in turn with\nthe rest filled: all 38 dependencies are load-bearing and no criterion is\nsatisfied by a proper subset. That is the recipe-box c-3-2 blind spot checked\nexhaustively by hand, and it is the strongest evidence any spec here has carried.\n\nACCEPTED WITH EYES OPEN - three findings owned by `nothing` are being shipped:\n\n  B2 - cut-board-click never mentions the response status, so a student who\n       fills it before cut-api-toggle clicks a cell, takes the 501 fallback body\n       into `habits` state, and the board dies mid-session. The spec spells this\n       out for the other screen and is silent here. WATCH FOR THIS AT GATE 3:\n       the pack must not present cut-board-click before cut-api-toggle.\n  B3 - habit-name on / is declared in spec.md and spec.json and graded by no\n       criterion, while every other board element is pinned. An unlabelled board\n       ships 16/16 green. WATCH FOR THIS AT GATE 3: look at the board.\n  B4 - \"app/.gitignore must contain exactly these two lines\" would drop\n       *.tsbuildinfo. Made moot in the harness instead: build artifacts are now\n       excluded unconditionally.\n\n  A1 (blocking, pack-writer) - the spec claims APP_DIR names the right directory\n       in all three runs. The pipeline sets it for its own two only; a student\n       running pytest by hand has none. Corrected in CONTRACT.md and the verifier\n       skill/agent to Path(os.environ.get(\"APP_DIR\", os.getcwd())), so the\n       Verifier will write the fallback even though the spec sentence overstates\n       it. The pack must document the student's run.\n\nHARNESS CHANGES THIS SPEC DEPENDS ON, all landed before approval:\n  - test_runner passes APP_DIR alongside BASE_URL\n  - cutter and deploy_check honour app/.gitignore, so the live store does not\n    ship while data/habits.seed.json does\n  - build artifacts (*.tsbuildinfo, .DS_Store) excluded unconditionally\n  - code_check.py runs named static checks at step 6; utc-dates owns the\n    timezone rule that had no checker\n  - selftest 183/183\n\nROUND HISTORY: findings 12 -> 7 -> 6 -> 8, blocking-and-unowned 1 -> 1 -> 1 -> 0.\nThree of the findings across rounds 3 and 4 were defects in the pipeline or in my\nown briefs, not in the spec.",
+      "spec_hash": "6691dad5c499f8c29a3d597b1cedf070060b554a9b3b1a95c6ade11f6d1e88ad",
+      "override": false
+    },
+    "gate2": {
+      "approved": true,
+      "at": "2026-08-28T11:41:56+00:00",
+      "note": "GATE 2 APPROVED. 16/16 criteria pass, 0 builder retries, 0 verifier retries.\n\nVERIFIED BEYOND THE COUNT, by hand after the workflow returned:\n\n  - Every one of the 16 criteria has its own named test in coverage.json.\n  - The suite is RE-RUNNABLE: 16/16 on three consecutive runs in the same\n    working copy. Round 2's A3 finding said this spec would pass once and fail\n    on the second run; the reset-every-test rule fixed it. This is what the\n    nightly watchdog depends on.\n  - code_checks [\"utc-dates\"] ran live for the first time: 0 violations. And\n    lib/week.ts:32 reads `(tracked.getUTCDay() + 6) % 7` - the exact Monday-first\n    correction that round 2's A1 said would ship broken without a Sunday\n    fixture, with a comment explaining why. c-1-6 and the static check both did\n    their job.\n  - verify/helpers.py:36 resolves the store as\n    Path(os.environ.get(\"APP_DIR\", os.getcwd())) - the fallback idiom, so the\n    student's own pytest run works with no environment. The round-4 A1\n    correction propagated from CONTRACT.md into the suite.\n  - 8 of 8 cut markers present, balanced, none nested, every declared id found\n    exactly once. scan_return_safety: 0 violations, every return outside its\n    markers.\n  - No spec drift: still 6691dad5c499, the hash frozen at Gate 1.\n  - app/.gitignore is `data/habits.json` + `!data/habits.seed.json`, and only\n    data/habits.seed.json would ship. It does NOT list *.tsbuildinfo, which was\n    round 4's B4 - moot because the harness now excludes build artifacts\n    unconditionally.\n\nTHE TWO ACCEPTED RISKS DID NOT LAND IN THE FINAL CODE:\n  - B3: habit-name IS rendered on the board (app/page.tsx:70, with the testid),\n    though no criterion grades it. The gap is real; the Builder did not fall in.\n  - B2: the click handler DOES guard on response.ok, commented \"on anything but\n    a 200 the board is left exactly as it was\".\n\nCARRIED TO GATE 3 - read these, they are not settled:\n  1. B2 IS STILL LIVE FOR THE STUDENT. That response.ok guard sits INSIDE\n     cut-board-click, so the student writes it, and the hint never mentions\n     status: \"POST { date } ... and set the habits state to the same 4 rows with\n     only the clicked habit replaced\". A student who fills cut-board-click\n     before cut-api-toggle and omits the guard takes the 501 fallback body into\n     `habits` state and the board dies mid-session. THE PACK MUST NOT PRESENT\n     cut-board-click BEFORE cut-api-toggle.\n  2. B3: look at the board in the pack's screenshots or description. An\n     unlabelled board would have shipped 16/16 green.\n  3. A1 (blocking, owned pack-writer): the pack must document the student's own\n     pytest run, since APP_DIR is set only by the pipeline's two runs.\n  4. B7: session 3 declares node `fs` as a concept but no cut opens writeStore.\n     Either the pack teaches it from given code or the concept list is wrong."
+    },
+    "gate3": {
+      "approved": true,
+      "at": "2026-08-28T12:03:06+00:00",
+      "note": "GATE 3 APPROVED, and shipped. Human decision.\n\nSTEP 8: 8 cuts, 0 cutter retries. skeleton-check ok, 16 of 16 checked, 0\nmismatches, partial_state_risks [] and typecheck_fail_open false - tsc really\nran. The skeleton run is 0 pass / 16 fail with every cut open, which is exactly\nwhat it must be.\n\nSTEP 10: deploy clean in 10.7s, all 5 steps ok, no install advisories\n(next 15.5.24), live preview served.\n\nSTEP 9: pack is 5 files / 1743 lines. The Pack Writer verified its own output:\nit extracted every fenced ts/tsx/json block and matched it against app/ and\nskeleton/ with 0 unmatched, so no snippet was retyped from memory, and all 8\nquoted TODO(...) lines match skeleton/ byte for byte.\n\nFIRST PROJECT WITH A MUTABLE FILE STORE, and the runtime-state handling held:\nskeleton/data/ ships habits.seed.json and NOT habits.json.\n\nACCEPTED WITH EYES OPEN - SESSION 3 IS 47 MINUTES AGAINST THE 40 CAP.\nThird consecutive project with an overrun found at step 9. The spec linter\nestimated 35.5, so the E111/W112 minute rule - built precisely to prevent this -\nwas out by 11.5 minutes and did not fire. Cause is identified: the model charges\na flat 6 minutes per cut, and cut-api-toggle is 20 lines with three branches and\nan ordering rule between the 400 and 404 checks. Cut size is not knowable at\nstep 2, because no code exists there.\n\nApproved anyway because the disclosure is materially better than the two\nprevious projects': session-3.md opens with \"the plan below comes to 47 minutes,\n7 over the cap\", names three trims totalling exactly 7 minutes, states that none\nof them touch anything graded, and carries a second fully-written 40-minute\ntable. The instructor is given a rehearsed alternative, not a warning.\n\nFOR THE SPEC OWNER, if this project is ever revised: session 1 correctly carries\nthe setup with only 2 cuts; session 3 is where the third cut should have been\ndropped, or the toggle route split in two.\n\nTWO BEHAVIOURS NO TEST CATCHES, both written into the guide rather than left to\nbe discovered:\n  1. Filling cut-board-click before cut-api-toggle puts the 501 body\n     {\"error\":\"not implemented\"} into `habits` state, the next render calls\n     .days.map on undefined, and the board disappears. This is Gate 1's B2, and\n     the guide now teaches the fill order and the if (response.ok) guard\n     together. It was carried here from the Gate 2 note deliberately.\n  2. A toggleDate written with push/splice passes every criterion, because the\n     caller assigns the result straight back over habit.doneDates so the mutated\n     array is the same array. The guide says so and gives the reason to teach the\n     pure version anyway.\n\nGATE 1 FINDINGS OWNED BY PACK-WRITER, both resolved from the code:\n  A1 - the student's own pytest run needs BASE_URL and must be run from the\n       copy's root; APP_DIR exists only for the pipeline's two runs. Documented\n       in README.md with the venv/chromium setup, the exact command, and both\n       failure modes as separate troubleshooting entries.\n  B7 - session 3 declares node fs but the student writes none of it. Kept as a\n       named 3-minute read-along, stated plainly, and made trim #1.\n\nHARNESS DEFECT FOUND AND FIXED DURING THIS GATE: round 4's B4 was not moot after\nall. I had said unconditional build-artifact exclusion covered it; it does not,\nbecause step 8's own tsc typecheck and skeleton build write artifacts INTO\nskeleton/ after the copy is made. tip-split's tsconfig.tsbuildinfo is git-tracked\nto this day. cutter.sweep_generated now sweeps them once the checks that needed\nthem have passed; the skeleton was regenerated and shipped clean. selftest\n186/186."
+    }
+  },
+  "steps": [
+    {
+      "step": "lint",
+      "ok": true,
+      "at": "2026-08-28T09:28:02+00:00",
+      "detail": "",
+      "run": 1
+    },
+    {
+      "step": "breaker",
+      "ok": true,
+      "at": "2026-08-28T09:36:17+00:00",
+      "detail": "9d925c91ac33",
+      "run": 1
+    },
+    {
+      "step": "revise:round-1",
+      "ok": true,
+      "at": "2026-08-28T10:01:27+00:00",
+      "detail": "spec.md, spec.json, lint.json, ambiguity.md, gate1.json",
+      "run": 1
+    },
+    {
+      "step": "lint",
+      "ok": true,
+      "at": "2026-08-28T10:08:42+00:00",
+      "detail": "",
+      "run": 2
+    },
+    {
+      "step": "breaker",
+      "ok": true,
+      "at": "2026-08-28T10:19:09+00:00",
+      "detail": "122f4efd4de9",
+      "run": 2
+    },
+    {
+      "step": "revise:round-2",
+      "ok": true,
+      "at": "2026-08-28T10:30:56+00:00",
+      "detail": "spec.md, spec.json, lint.json, ambiguity.md, gate1.json",
+      "run": 1
+    },
+    {
+      "step": "lint",
+      "ok": true,
+      "at": "2026-08-28T10:34:11+00:00",
+      "detail": "",
+      "run": 3
+    },
+    {
+      "step": "breaker",
+      "ok": true,
+      "at": "2026-08-28T10:46:10+00:00",
+      "detail": "e4995d349f9e",
+      "run": 3
+    },
+    {
+      "step": "revise:round-3",
+      "ok": true,
+      "at": "2026-08-28T10:57:02+00:00",
+      "detail": "spec.md, spec.json, lint.json, ambiguity.md, gate1.json",
+      "run": 1
+    },
+    {
+      "step": "lint",
+      "ok": true,
+      "at": "2026-08-28T11:03:16+00:00",
+      "detail": "",
+      "run": 4
+    },
+    {
+      "step": "breaker",
+      "ok": true,
+      "at": "2026-08-28T11:13:30+00:00",
+      "detail": "6691dad5c499",
+      "run": 4
+    },
+    {
+      "step": "test:app",
+      "ok": true,
+      "at": "2026-08-28T11:35:18+00:00",
+      "detail": "",
+      "run": 1
+    },
+    {
+      "step": "test:app",
+      "ok": true,
+      "at": "2026-08-28T11:36:45+00:00",
+      "detail": "",
+      "run": 2
+    },
+    {
+      "step": "test:app",
+      "ok": true,
+      "at": "2026-08-28T11:36:54+00:00",
+      "detail": "",
+      "run": 3
+    },
+    {
+      "step": "cut",
+      "ok": true,
+      "at": "2026-08-28T11:44:22+00:00",
+      "detail": "",
+      "run": 1
+    },
+    {
+      "step": "deploy",
+      "ok": true,
+      "at": "2026-08-28T11:45:00+00:00",
+      "detail": "",
+      "run": 1
+    },
+    {
+      "step": "cut",
+      "ok": true,
+      "at": "2026-08-28T12:00:32+00:00",
+      "detail": "",
+      "run": 2
+    },
+    {
+      "step": "ship",
+      "ok": true,
+      "at": "2026-08-28T12:03:06+00:00",
+      "detail": "",
+      "run": 1
+    }
+  ],
+  "ticket": null
+}

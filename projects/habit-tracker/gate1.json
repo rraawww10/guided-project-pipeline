@@ -1,0 +1,105 @@
+{
+  "ok": true,
+  "verdict": "approve-eligible",
+  "spec_hash": "6691dad5c499f8c29a3d597b1cedf070060b554a9b3b1a95c6ade11f6d1e88ad",
+  "findings": [
+    {
+      "id": "A1",
+      "title": "The third of the three runs the harness story rests on has no `APP_DIR`",
+      "section": "blocking",
+      "owner": "pack-writer",
+      "blocking": true,
+      "owner_declared": "pack-writer",
+      "owner_valid": true,
+      "caught_by": "step 9 - a person reads the guide at Gate 3",
+      "must_fix_now": false
+    },
+    {
+      "id": "B1",
+      "title": "`HabitWeek` has no declared home, and the wrong one fails the client build",
+      "section": "worth a look",
+      "owner": "test-runner",
+      "blocking": false,
+      "owner_declared": "test-runner",
+      "owner_valid": true,
+      "caught_by": "step 6 - the Builder/test-runner loop fixes this for free",
+      "must_fix_now": false
+    },
+    {
+      "id": "B2",
+      "title": "`cut-board-click` says what to do with the response body and never mentions its status",
+      "section": "worth a look",
+      "owner": "nothing",
+      "blocking": false,
+      "owner_declared": "nothing",
+      "owner_valid": true,
+      "caught_by": "NO downstream checker sees this - it ships as written",
+      "must_fix_now": false
+    },
+    {
+      "id": "B3",
+      "title": "`habit-name` on `/` is declared in both files and graded in neither",
+      "section": "worth a look",
+      "owner": "nothing",
+      "blocking": false,
+      "owner_declared": "nothing",
+      "owner_valid": true,
+      "caught_by": "NO downstream checker sees this - it ships as written",
+      "must_fix_now": false
+    },
+    {
+      "id": "B4",
+      "title": "\"exactly these two lines\" throws away the entries the other two projects needed",
+      "section": "worth a look",
+      "owner": "nothing",
+      "blocking": false,
+      "owner_declared": "nothing",
+      "owner_valid": true,
+      "caught_by": "NO downstream checker sees this - it ships as written",
+      "must_fix_now": false
+    },
+    {
+      "id": "B5",
+      "title": "What suppresses `habit-name` before the first response: `missing`, or a null habit",
+      "section": "worth a look",
+      "owner": "test-runner",
+      "blocking": false,
+      "owner_declared": "test-runner",
+      "owner_valid": true,
+      "caught_by": "step 6 - the Builder/test-runner loop fixes this for free",
+      "must_fix_now": false
+    },
+    {
+      "id": "B6",
+      "title": "\"Nothing is cached\" is a claim about `readStore`, and the framework caches above it",
+      "section": "worth a look",
+      "owner": "test-runner",
+      "blocking": false,
+      "owner_declared": "test-runner",
+      "owner_valid": true,
+      "caught_by": "step 6 - the Builder/test-runner loop fixes this for free",
+      "must_fix_now": false
+    },
+    {
+      "id": "B7",
+      "title": "Session 3 teaches node `fs` and the student writes no `fs`",
+      "section": "worth a look",
+      "owner": "pack-writer",
+      "blocking": false,
+      "owner_declared": "pack-writer",
+      "owner_valid": true,
+      "caught_by": "step 9 - a person reads the guide at Gate 3",
+      "must_fix_now": false
+    }
+  ],
+  "counts": {
+    "blocking": 1,
+    "worth_a_look": 7,
+    "unowned_blocking": 0
+  },
+  "reasons": [
+    "1 blocking finding(s), all owned by a downstream checker; 7 worth a look. Nothing here escapes to the shipped project."
+  ],
+  "rule": "reject when any blocking finding is owned by 'nothing'; approve when every remaining finding sits in a column a downstream checker owns",
+  "reviewed_spec_hash": "6691dad5c499f8c29a3d597b1cedf070060b554a9b3b1a95c6ade11f6d1e88ad"
+}

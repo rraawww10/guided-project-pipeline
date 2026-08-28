@@ -1,0 +1,61 @@
+.page {
+  max-width: 34rem;
+  margin: 0 auto;
+  padding: 2rem 1.25rem 3rem;
+}
+
+.back {
+  display: inline-block;
+  margin-bottom: 1.5rem;
+  font-size: 0.8rem;
+  color: var(--muted);
+  text-decoration: none;
+}
+
+.habit {
+  padding: 1.25rem;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 0.6rem;
+}
+
+.name {
+  font-size: 1.4rem;
+  margin: 0 0 0.25rem;
+}
+
+.streak {
+  margin: 0 0 1.25rem;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.4rem;
+}
+
+.cell {
+  padding: 0.6rem 0;
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--muted);
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 0.4rem;
+}
+
+.cell[data-done='true'] {
+  color: #1c4532;
+  font-weight: 600;
+  background: var(--done-soft);
+  border-color: var(--done);
+}
+
+.missing {
+  padding: 1.25rem;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 0.6rem;
+}
