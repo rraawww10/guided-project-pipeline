@@ -1,0 +1,25 @@
+:root {
+  --ink: #1f2933;
+  --muted: #6b7785;
+  --line: #d9e0e7;
+  --done: #2f855a;
+  --done-soft: #c6f6d5;
+  --page: #f7f9fb;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--page);
+  color: var(--ink);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+a {
+  color: inherit;
+}

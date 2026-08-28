@@ -160,6 +160,142 @@ gets a strikethrough and a date.
   `python3 -m pipeline unlock <slug>`, and no file writes. Verify from the
   transcript rather than trusting or dismissing the warning, but expect it.
 
+## Building the checkers
+
+<!-- Added 2026-08-28, between runs, from the round-1 blocker report. -->
+
+- **A checker that fails open is not a checker.** 2026-08-28: `cutter.typecheck`
+  returned `ok: True` when there was no tsconfig, no `node_modules` or no `tsc`
+  - which is every fresh clone and every CI box. It was the only guard against
+  the one defect that recurred across consecutive projects. The fix was a static
+  scan that needs no toolchain, with tsc demoted to a second line and a
+  `fail_open: true` flag so "clean" and "did not run" are no longer the same
+  answer. Ask of every checker: what does it say when it cannot run?
+
+- **Put the check where the artifact exists.** The obvious home for a
+  cut-marker rule is the spec linter, and it is the wrong one: at step 2 no code
+  exists, because the Builder places the markers at step 5. The linter can only
+  reject the *wording* that prescribes the bad shape ("return ...", W067); the
+  placement itself belongs to the cutter. A rule aimed at an artifact that does
+  not exist yet is a rule that cannot fire.
+
+- **Look for the rule that closes two defect classes at once.** Bypassable
+  grading cuts (round 3 B1) and the skeleton-check partial-subset blind spot
+  looked like separate problems - one a spec defect, one a known limitation of
+  step 8. They are the same shape: **two cuts graded by exactly the same set of
+  criteria.** One linter rule (E110) rejects both, and it flagged both real
+  instances the first time it ran. When two findings resist a rule each, check
+  whether they are one finding.
+
+- **A stopping rule has to be a property of the finding, not a count.** "Reject
+  until blocking == 0" never terminated because the Breaker always finds
+  something. "Reject when a blocking finding is one no downstream checker owns"
+  terminates, and it is checkable by a script - so it went into `gate1.py` and
+  the Breaker now names an `Owner` per finding. The count was never the signal.
+
+- **A report that says only what it checked is half a report.** The one
+  watchdog run on record said `"checked": 1` with two shipped projects on disk,
+  and nothing flagged the gap. It now reports `shipped_total`, `skipped` and
+  `unknown_slugs`, and isolates each project so one broken venv cannot take the
+  whole nightly run down with it.
+
+- **Count the green runs too.** `burn_retry` only fired on failure, so ten clean
+  lint runs and six clean test runs sat at 0/15 retries. A step that keeps
+  re-running while its checker stays green is a loop, and it needed its own
+  counter (`step_runs`, capped at 30) to be visible at all.
+
+- **A binding is only needed while the decision is open.** Requiring
+  `ambiguity.md` to hash-match the spec fixed the stale-report bug, and then
+  walked both shipped projects back to step 3 because they were approved before
+  the binding existed. Freshness matters before Gate 1; after it, the freeze and
+  the archive are the stronger guarantee. Scope a fail-closed check to the
+  window where it is load-bearing, or it starts rewriting history.
+
+## The habit-tracker run
+
+<!-- Added 2026-08-28 between runs. First project taken through the rebuilt
+     pipeline: 4 Gate 1 rounds, 0 spec-linter retries, 0 builder retries,
+     0 cutter retries, 16/16 criteria. -->
+
+- **The stopping rule terminated, and it approved with a blocking finding still
+  open.** Rounds went 12 -> 7 -> 6 -> 8 findings with blocking-and-unowned
+  1 -> 1 -> 1 -> 0. Round 4 was approved with one blocking finding outstanding
+  because it was owned by `pack-writer`. "Reject until blocking == 0" would still
+  be running. The rule works because it is a property of each finding, not a
+  count, and because a script applies it - `pipeline gate1-check` - so it cannot
+  be bent while holding the report.
+
+- **A minute model with a flat per-cut cost does not catch the overrun it was
+  built for.** 2026-08-28: session 3 came in at 47 minutes against the 40 cap -
+  the third consecutive project to overrun - and the linter had estimated 35.5.
+  The model charges 6 minutes per cut, and `cut-api-toggle` is 20 lines with
+  three branches plus an ordering rule between its 400 and 404 checks. Across
+  the five sessions now measured the model is within ~3 minutes *except* where
+  one cut is much larger than the others, which is precisely the case that
+  overruns. Cut size is not knowable at step 2, because no code exists there, so
+  either the spec has to declare per-cut weight or the estimate needs a proxy for
+  it. Until then the estimate is information, not a check.
+
+- **Excluding a file from a copy does not stop a later step generating it in
+  place.** Round 4's B4 said the shipped skeleton would carry a build artifact. I
+  answered that unconditional exclusion made it moot. It did not: step 8's own
+  `tsc` typecheck and skeleton build write into `skeleton/` *after* the copy is
+  made, and tip-split's `tsconfig.tsbuildinfo` is git-tracked to this day. Fixed
+  with `cutter.sweep_generated`, run once the checks that needed the artifacts
+  have passed. When a checker writes into the artifact it is checking, exclusion
+  at copy time is the wrong layer.
+
+- **The Spec Breaker is a checker on the harness, not just on the spec.** Three
+  of the findings across rounds 3 and 4 were defects in the pipeline or in my own
+  rejection briefs, not in the spec: the test process was given no way to locate
+  the app's own files (`APP_DIR` did not exist), nothing implemented the
+  packaging step a brief had told the Spec Writer to promise, and `CONTRACT.md`
+  claimed `APP_DIR` was set in all three runs when the pipeline sets it in two.
+  It cited `pipeline/test_runner.py:238` to prove one of them. A spec that
+  assumes a capability the harness lacks reads as an ambiguous spec, so check the
+  harness before rejecting the spec.
+
+- **A rejection brief can manufacture the next round's defect.** Round 2's brief
+  told the Spec Writer to write "anything that packages `app/` deletes it first".
+  No such step existed, so round 3 correctly flagged a spec sentence that I had
+  dictated. Write briefs in terms of what the pipeline does, not what it ought
+  to do, and when a fix belongs in the harness, fix the harness.
+
+- **A cut graded against one input cannot be told from a constant.** Round 2:
+  `cut-week-dates` was graded by three criteria that all pinned the same seven
+  literal dates from a single fixed `trackedDay`, and c-1-2 printed those strings
+  verbatim into the session guide - so a 7-element literal was green on all
+  fifteen criteria and the headline cut of session 1 graded nothing. Worse, the
+  reference implementation was unpinned on the case that matters: the obvious
+  `getUTCDate() - getUTCDay() + 1` is right for a Wednesday and a full week wrong
+  for a Sunday. Adding one criterion with a Sunday fixture fixed both, and the
+  Builder then wrote `(getUTCDay() + 6) % 7` unprompted. **E110 catches two cuts
+  indistinguishable from each other; this is one cut indistinguishable from a
+  hardcoded constant.** A pure-function cut needs at least two grading fixtures,
+  one of them an edge case. Not yet a linter rule.
+
+- **A fixture that encodes the anti-pattern teaches it.** The selftest's own
+  `ROUTE_TS` put a route handler's only `return` inside the cut markers - the
+  exact TS2355 shape the lessons above warn about - and its hint read "Return
+  every todo from the store as JSON". The new static scan flagged the fixture on
+  its first run. A checker written against a bad fixture passes by agreeing with
+  it.
+
+- **A constraint nothing can assert is a candidate for a static check, not a
+  Gate 3 eyeball.** "Date arithmetic must give the same answer in every timezone"
+  had no owner: the Verifier cannot change the server's `TZ`, and the suggestion
+  was that a person read `lib/week.ts` at Gate 3. A person reading code at Gate 3
+  is what this pipeline exists to avoid. It became `code_checks: ["utc-dates"]`,
+  run at step 6, and moved from `nothing` to a column the Builder loop owns.
+  Before writing `nothing`, ask whether the rule is about the *shape* of the code.
+
+- **The write guard blocks read-only commands.** `check_bash` fires on any `>` in
+  a command and then blocks if any `projects/...` token resolves to a frozen
+  spec, so `grep ">>> CUT" ...` alongside a mention of `spec.json` is refused.
+  Harmless, but it will annoy anyone inspecting a frozen project, and it fired
+  twice during this run. The path should only be checked on the write side of a
+  redirect. Not yet fixed.
+
 ## Teaching
 
 <!-- Where students actually got stuck, from live sessions. -->

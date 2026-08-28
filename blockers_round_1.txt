@@ -1,0 +1,635 @@
+================================================================================
+BLOCKERS - ROUND 1
+Guided project production pipeline (Flow.md: 5 agents, 6 scripts, 3 gates)
+================================================================================
+
+Compiled       2026-08-28
+Scope          Everything that broke, blocked, or had to be worked around during
+               the first two end-to-end runs, plus the structural bottlenecks
+               those runs exposed and a recurrence forecast for each.
+Runs covered   tip-split  (created 2026-08-26 11:26, shipped 12:32, 17/17 green)
+               recipe-box (created 2026-08-26 09:47, shipped 08-27 09:07, 22/22)
+
+Evidence base  projects/*/.pipeline/state.json        step + gate timeline
+               projects/*/.pipeline/round-*/why.md    every rejection reason
+               projects/*/.pipeline/round-*/lint.json every linter verdict
+               projects/*/{results,deploy,skeleton-check}.json
+               projects/*/.pipeline/*.log
+               learning/lessons.md
+               fixtures/runner-check/                 the TS2355 proof fixture
+               git log (4 commits)
+
+Every claim below is traceable to one of those. Nothing here is inferred.
+
+
+================================================================================
+0. HEADLINE
+================================================================================
+
+Two projects shipped, all six gates approved, 39/39 acceptance criteria green,
+zero tickets raised, zero builder retries, zero verifier retries.
+
+And yet 19 distinct blockers were hit. 17 of the ~19 lived in Phase 1 (the
+spec). Phase 2 (the code) produced no real failures at all.
+
+The pipeline is very good at catching things that are cheap to fix and blind to
+everything that is expensive.
+
+
+================================================================================
+1. THE ONE NUMBER THAT REFRAMES EVERYTHING
+================================================================================
+
+THE SPEC LINTER HAS NEVER REJECTED A SPEC. NOT ONCE.
+
+Every lint.json across all six rounds of both projects reads:
+
+    ok = true, error_count = 0, warning_count = 0, errors = []
+
+  projects/recipe-box/.pipeline/round-1/lint.json    clean  -> REJECTED at Gate 1
+  projects/recipe-box/.pipeline/round-2/lint.json    clean  -> REJECTED at Gate 1
+  projects/recipe-box/.pipeline/round-3/lint.json    clean  -> REJECTED at Gate 1
+  projects/recipe-box/lint.json          (round 4)   clean  -> approved
+  projects/tip-split/.pipeline/round-1/lint.json     clean  -> REJECTED at Gate 1
+  projects/tip-split/lint.json           (round 2)   clean  -> approved
+
+Four of those clean specs were then rejected on 17 BLOCKING findings:
+
+    recipe-box round 1     4 blocking   (A1-A4)
+    recipe-box round 2     4 blocking   (A1-A4)
+    recipe-box round 3     6 blocking   (A1-A4, B1-B2)
+    tip-split  round 1     3 blocking   (B1-B3)
+    ----------------------------------------
+    TOTAL                 17 blocking, every one after a clean linter
+
+Consequences, all three load-bearing:
+
+  1. Rule 1's checker for the Spec Writer has a 0% CATCH RATE to date.
+  2. The Spec Writer <-> linter retry loop HAS NEVER EXECUTED ONCE. The
+     "retries: spec=0/15" on both projects means "the checker never fired",
+     NOT "the spec was good".
+  3. 100% of spec defects were caught by a person reading ~70 KB of documents
+     (spec.md 34-38 KB + spec.json 25-30 KB + ambiguity.md 7-11 KB).
+
+This is the root cause of most of section 5. Every Phase 1 blocker below is a
+symptom of it.
+
+
+================================================================================
+2. INCIDENT REGISTER
+================================================================================
+Ordered by phase. ID format B-nn for cross-reference.
+"Recurrence" = likelihood on the NEXT project run, given the code as it stands
+today (lessons.md entries are prose, not enforcement).
+
+--------------------------------------------------------------------------------
+PHASE 0 - INFRASTRUCTURE. Hit before any project completed.
+--------------------------------------------------------------------------------
+
+B-01  Relative interpreter path combined with cwd=project
+      WHAT   The test runner passed a relative interpreter path while setting
+             cwd=project, so the path resolved against the NEW directory and
+             vanished. Fixed by resolving in all five scripts.
+      WHY IT MATTERED  The nightly watchdog builds paths from Path("."), so
+             every scheduled run would have died this way.
+      WHY IT ESCAPED   The selftest's fixtures use absolute tempdirs, so no
+             relative-path bug can ever fail it. The bug class is
+             STRUCTURALLY INVISIBLE to the selftest.
+      PHASE  Scripts / test runner
+      RECURRENCE  Fixed. The CLASS recurs - the blind spot is still open.
+
+B-02  python -m venv fails on Debian
+      WHAT   Debian splits ensurepip into the python3-venv package, so
+             venv creation failed outright.
+      FIX    ensure_venv() now tries uv, then stdlib venv, then
+             venv --without-pip plus a get-pip bootstrap, and names the apt
+             fix if all three fail.
+      PHASE  Scripts / test runner
+      RECURRENCE  HIGH on any new machine or CI box. Note the last fallback
+             needs NETWORK to fetch get-pip - it will fail closed offline.
+
+--------------------------------------------------------------------------------
+PHASE 1 - THE SPEC. 17 of ~19 blockers live here.
+--------------------------------------------------------------------------------
+Spec CONTENT defects are grouped by recurring shape in section 3.
+The entries below are failures of the MACHINERY around the spec.
+
+B-03  The Gate 1 loop does not terminate
+      WHAT   The Spec Breaker returned blocking findings on ALL FIVE passes it
+             ever made. Round ambiguity reports held 11, 13 and 11 findings.
+             A policy of "reject until blocking == 0" provably never ends.
+      WORKED AROUND  A stopping rule had to be invented mid-flight and was
+             written into round-3/why.md before the next report was read:
+             "approve when every remaining finding sits in a column a
+             downstream checker owns."
+             Round 3 had five findings no checker could see -> reject.
+             Round 4 had one, with a two-sentence fix -> apply by hand, approve.
+             The COUNT was similar both times; only the column mattered.
+      LESSON Declare the stopping rule BEFORE the pass, not after - deciding it
+             while holding the next report invites moving the line to fit the
+             answer.
+      PHASE  Gate 1
+      RECURRENCE  CERTAIN, every project. The rule exists in prose only;
+             nothing forces the Breaker or the gate reader to use it.
+
+B-04  A stale ambiguity report was trusted as current
+      WHAT   `revise` deliberately uses shutil.move so a rejected round's
+             ambiguity.md cannot linger (comment at cli.py:239 says so).
+             Someone copied round 2's report back into the project root
+             afterwards. `pipeline next` reads progress off the files PRESENT,
+             so it reported "Gate 1" for a ROUND-3 SPEC THE SPEC BREAKER HAD
+             NEVER READ.
+      COST   The gate reader spent a full pass walking four findings that had
+             already been fixed.
+      ROOT CAUSE  Nothing ties a report to the spec it reviewed.
+      INTERIM MITIGATION  Check ambiguity.md's mtime against spec.md's before
+             trusting it.
+      PHASE  Gate 1 / step 3
+      RECURRENCE  HIGH. No hash, no binding, no check.
+
+B-05  A finished agent woke up and re-ran, overwriting the spec
+      WHAT   The round-4 Spec Writer reported a SECOND time, over an hour after
+             it had finished, saying it had copied .pipeline/round-3/spec.md
+             over the live files and re-derived its fixes.
+      WHY IT DID NOT CORRUPT THE BUILD  Only the mtimes cleared it - the spec
+             was last written 13 minutes before the Builder ran.
+      ROOT CAUSE  pipeline/guard.py restricts writes only while a LOCK exists,
+             and Phase 1 sets NO LOCK AT ALL. spec.md and spec.json are
+             writable at every step of Phase 1.
+      RISK   A re-run landing after Gate 1 would have silently replaced the
+             approved spec with a rejected one, and only mtimes would show it.
+      PHASE  Phase 1 / step 2
+      RECURRENCE  Unpredictable but non-zero, and COMPLETELY UNGUARDED.
+
+B-06  The approved spec existed only in the working tree
+      WHAT   app/ and verify/ were built against a round-4 spec that existed
+             only in the working tree. HEAD still held the round-3 spec that
+             had been REJECTED.
+      ROOT CAUSE  There is no archive-on-approval step. `revise` archives only
+             on REJECTION.
+      RISK   A single overwrite would have left a green 22/22 build with no
+             readable record of what it was built to do.
+      PHASE  Gate 1 -> Phase 2 boundary
+      RECURRENCE  HIGH until a step commits or archives the spec at approval.
+
+B-07  The spec was edited AFTER the code was built
+      WHAT   recipe-box state.json logs `lint` at 06:33:42 and 06:35:21 -
+             after `test:app` had already finished at 06:18:27.
+      ROOT CAUSE  gp-phase2-code.js calls lock('off') before EVERY test run
+             (line 143 unlocks at the end of each retry iteration), so an
+             unlocked window exists in every single iteration.
+      PHASE  Phase 2
+      RECURRENCE  The window is structural - it opens on every run.
+
+B-08  learning/lessons.md was edited mid-run
+      WHAT   The file was written during recipe-box round 2. The Spec Breaker
+             read it EMPTY at step 3, noticed it change, and re-checked every
+             finding.
+      COST   A full Breaker pass, and it could have gone the other way.
+      RULE   Update lessons.md BETWEEN runs, never during one.
+      PHASE  Step 3 / shared inputs
+      RECURRENCE  CERTAIN whenever two things run concurrently. Nothing
+             enforces it.
+
+--------------------------------------------------------------------------------
+PHASE 2 - THE CODE. The phase that gave almost no trouble.
+--------------------------------------------------------------------------------
+Recorded because it INVERTS Flow.md's central cost assumption.
+
+B-09  Flow.md's cost model is wrong for low-retry runs
+      CLAIM  Flow.md: the Builder is 80-90% of agent cost "because it re-reads
+             the codebase on every retry".
+      MEASURED (tip-split)  Builder 8.3 min of 53 min of workflow wall time
+             = 16%. The SPEC PHASE was 55%, because it ran twice. The Spec
+             Breaker alone cost more than the Builder.
+      WHY    The claim is conditional on retries actually happening. Both runs
+             had ZERO code retries (0 builder, 0 verifier; 22/22 and 17/17
+             green on the first test run).
+      IMPACT Review time and optimisation effort were pointed at the wrong
+             phase.
+      PHASE  Phase 2 / planning
+      RECURRENCE  The Builder becomes the cost centre only once retries start.
+
+B-10  All-green churn is invisible to the retry circuit breaker
+      WHAT   recipe-box logged 6 `test:app` runs (5 of them inside 60 seconds)
+             and 10 `lint` runs, with retries showing spec=0/15, code=0/15.
+      ROOT CAUSE  state.burn_retry() is called ONLY on checker FAILURE
+             (cli.py:79 for lint, cli.py:92 for test). Successful re-runs burn
+             nothing. Separately, the workflow's own `attempt` variable is
+             LOCAL JS STATE and resets to 0 on every re-invocation.
+      RISK   Rule 6 guards against a FAILING loop, not a passing-but-repeating
+             one. A run that thrashes while every checker stays green burns
+             unbounded agent budget without tripping the stop or raising a
+             ticket.
+      PHASE  Phases 1-3 / state.py
+      RECURRENCE  Open. Already observed twice.
+
+B-11  An accepted spec risk that happened not to bite
+      WHAT   tip-split Gate 1 was approved with finding A1 outstanding:
+             spec.md overclaimed that a share row reads "Person 1 R341.00"
+             however the Builder nests it, which is false under Playwright
+             to_have_text. Risk: up to 4 session-3 criteria red.
+      OUTCOME  Never bit - the Builder hand-verified the share-row markup
+             before the Verifier wrote its tests.
+      WHY ACCEPTED  It surfaces at step 6 where the Builder/test-runner loop
+             fixes it for free, unlike round-1 B1 which would have escaped to
+             the cutter at step 8.
+      PHASE  Gate 1 -> Phase 2
+      RECURRENCE  This is the stopping rule (B-03) working as intended.
+             Logged as a correct call, not a defect.
+
+--------------------------------------------------------------------------------
+PHASE 3 - THE PACKAGE. Three blockers, ALL of them known-and-shipped.
+--------------------------------------------------------------------------------
+
+B-12  The skeleton check is blind to partial cut states
+      WHAT   pipeline/cutter.py proves only two things: a criterion whose cuts
+             are ALL open must fail, and a criterion with NO cuts must pass.
+             It says nothing about the partial states a student actually
+             moves through.
+      OBSERVED  recipe-box c-3-2 goes green once cut-api-recipe-get is filled
+             even with cut-store-find-one STILL EMPTY, because findRecipe's
+             `return null` fallback is indistinguishable from a real miss.
+             c-3-5 behaves the same way with cut-store-read-all.
+      WORKED AROUND  Hand-checked, then carried into the pack as a teaching
+             constraint: pair c-3-2/c-3-5 with c-3-1/c-3-3 and never present
+             either alone.
+      PHASE  Step 8 / cutter
+      RECURRENCE  CERTAIN wherever a criterion has more than one cut. Must be
+             hand-checked every time.
+
+B-13  Session overrun found at step 9, after BOTH gates had passed
+      WHAT   Nothing before the Pack Writer measures teaching minutes. The
+             linter caps cuts and criteria per session but weighs neither
+             setup cost nor minutes.
+      OBSERVED  tip-split  session 1: 45 min against a 40 min cap
+                           (4 cuts PLUS the project's entire setup, while
+                            session 3 carried 3 cuts and no setup)
+                recipe-box session 3: 45 min against the 40 min cap
+                           (predicted as W2 in the round-4 ambiguity report,
+                            then surfaced at step 9 exactly as lessons.md said
+                            it would)
+      NEITHER WAS FIXED  The only real fix is a Gate 1 spec rebalance, which
+             invalidates the spec, the code, the tests and the skeleton after
+             both gates are already approved. Both projects shipped with
+             documented reliefs instead:
+             - tip-split: Pack Writer disclosed it with two preconditions
+             - recipe-box: pack/session-3.md documents three reliefs and
+               recommends shipping cut-store-find-one written on the handout
+      THIS IS THE CLASSIC BOTTLENECK SIGNATURE - the pipeline knowingly ships
+      a defect because the repair loop is too long.
+      RULE OF THUMB  The session holding the setup should carry FEWER cuts
+             than the others, not the same number.
+      PHASE  Step 9, root cause at step 2
+      RECURRENCE  CERTAIN. 2 of 2 projects. Nothing has changed.
+
+B-14  deploy_check.py passes `install` over a live CVE
+      WHAT   tip-split: npm install printed
+             "next@15.1.6: This version has a security vulnerability ...
+              CVE-2025-66478"
+             and deploy_check.py recorded the step as ok: true. Gate 3 trusts
+             a green deploy check.
+      recipe-box  Happened to draw next 15.5.24, clean ("added 31 packages").
+             The difference was WHICH VERSION NPM RESOLVED - pure luck.
+      INTERIM MITIGATION  Read the `install` DETAIL STRING, not just its ok
+             flag, until the check treats an advisory as a failure.
+      PHASE  Step 10
+      RECURRENCE  CERTAIN, and the outcome is decided by luck.
+
+--------------------------------------------------------------------------------
+CROSS-CUTTING
+--------------------------------------------------------------------------------
+
+B-15  The [unlock] agent trips the security classifier - false positive, twice
+      WHAT   The workflow's [unlock] agent was flagged on BOTH projects
+             (2026-08-26 tip-split, 2026-08-27 recipe-box). Both transcripts
+             show exactly ONE tool call - `python3 -m pipeline unlock <slug>` -
+             and no file writes.
+      ROOT CAUSE  Architectural. The workflow spawns a WHOLE AGENT whose only
+             job is to run one pipeline command. lock, unlock, test and status
+             are ALL agents (gp-phase2-code.js lines 59-73). That is 5-6
+             agents per phase of which only 2-3 do real work.
+      SECOND-ORDER HARM  It trains the reviewer to dismiss security warnings.
+      HANDLING  Verify from the transcript rather than trusting OR dismissing
+             the warning - but expect it.
+      PHASE  All phases
+      RECURRENCE  CERTAIN, every single run.
+
+B-16  A clean linter is not a clean spec
+      WHAT   recipe-box round 1 passed the linter with 0 errors and 0 warnings
+             and was still rejected at Gate 1 on four blocking findings.
+      WHY    The linter checks SHAPE; only reading catches MEANING.
+      PHASE  Step 2 / step 4
+      RECURRENCE  See section 1. This is the systemic finding.
+
+B-17  The safety net has never been tested
+      WHAT   projects/watchdog-latest.json is dated 2026-08-26T12:32 and shows
+             "checked": 1. The watchdog has run ONCE, over ONE project
+             (tip-split), and NOT AT ALL since recipe-box shipped on 08-27.
+      IMPLICATION  It has never caught anything, so we have no evidence it
+             can. It is also not wired to cron.
+      SECONDARY  node_modules/ and .pipeline/venv/ are gitignored, so a fresh
+             clone or CI box pays the full COLD cost on its first run -
+             measured at 272-319 s per project versus 12 s warm, because
+             boot() runs `npm run build` on every invocation.
+      PHASE  Step 12
+      RECURRENCE  Open now. Highest-value cheap fix.
+
+B-18  Infrastructure scaling - not biting yet
+      MEASURED  1.25 GB and ~20,000 files PER PROJECT
+                  recipe-box  1.4 GB   (app 612 MB, skeleton 573 MB,
+                                        .pipeline/venv 171 MB)
+                  tip-split   1.1 GB
+                node_modules is installed TWICE per project (app + skeleton),
+                at ~518 MB each. .git is only 1.2 MB - the gitignore is doing
+                its job.
+      PROJECTION  2 projects = 2.5 GB. 50 projects ~= 62 GB. The watchdog
+                iterates shipped projects SERIALLY and rebuilds each one.
+      COMPUTE   Genuinely cheap right now: warm test run 12 s, deploy check
+                11 s. The pipeline is nowhere near compute-bound.
+      PHASE  Step 12 / infrastructure
+      RECURRENCE  Will bite around 20+ projects, not before.
+
+B-19  README.md is stale
+      WHAT   README claims "45 checks" on the deterministic core.
+             `python3 -m pipeline.selftest` actually runs 59 and passes.
+      PHASE  Docs
+      RECURRENCE  Ongoing drift.
+
+
+================================================================================
+3. RECURRING SPEC DEFECT SHAPES
+================================================================================
+The 17 blocking Gate 1 findings are NOT 17 unique problems. They are seven
+shapes that keep coming back. Sources: round-*/why.md.
+
+S-a  CUT MARKERS THAT SWALLOW A FUNCTION'S ONLY `return`  (TS2355)
+     recipe-box R1 A1: SIX cuts did this.
+     tip-split  R1 B1: skeleton_rules[1] forced a return inside the markers for
+                BOTH route handlers - the exact same shape, on the very next
+                project, with the lesson already written down.
+     SEVERITY  Worst possible failure mode. The skeleton does not COMPILE.
+               Not one red test - NO BUILD AT ALL, and the student's whole app
+               stops working.
+     FIX PATTERN (proven both ways in fixtures/runner-check):
+               keep the return OUTSIDE the markers, declare a typed fallback
+               above, and cut only the assignment that feeds it.
+
+                 export async function GET(): Promise<Response> {
+                   let body: { ok: boolean } = { ok: false }
+                   let status = 501
+                   // >>> CUT cut-api-health
+                   body = { ok: true }
+                   status = 200
+                   // <<< CUT cut-api-health
+                   return Response.json(body, { status })
+                 }
+
+     ALSO      The fallback must NOT accidentally pass the test. A 501 and
+               ok:false fail the criterion, which is what the skeleton needs.
+               A fallback returning plausible data makes the test green on an
+               empty skeleton.
+     RECURRENCE  NEAR-CERTAIN. It is the natural way to write a handler, and
+               it already recurred across consecutive projects.
+
+S-b  UNOWNED FETCHES / SESSION-BOUNDARY ERRORS
+     recipe-box R1 A2  tags fetch unowned in session 1
+     recipe-box R2 A2  refetch unowned by any session-2 cut
+     RULE  Every fetch needs an owner. A screen built in session 1 whose data
+           comes from an endpoint built in session 2 leaves session 1's
+           skeleton throwing.
+
+S-c  UNPINNED SELECTORS / TEXT THAT IS AMBIGUOUS ON SCREEN
+     recipe-box R1 A3  no selectors pinned for UI criteria
+     recipe-box R1 A4  "baking chip" names THREE elements on the page
+     recipe-box R2 A4  search box controlled vs uncontrolled unstated
+     tip-split  R1 B3  c-1-2 must pin the count of 6
+     WHY SYSTEMIC  With CSS modules the class names are hashed, so any
+           criterion that counts or reads something on screen must pin an
+           exact string or a stable hook (data-testid on the repeated
+           element - it survives styling changes and reads the same in the
+           skeleton). Otherwise the Verifier guesses from the Builder's
+           markup, and the student then rewrites exactly that markup from a
+           hint that never mentions it.
+     ALSO  A number in a criterion must be unambiguous on the page.
+           "renders 2 cards" is fine. "after the baking chip is clicked" is
+           not, when three elements read "baking".
+
+S-d  CUTS THAT WRITE SHARED STATE AND WIPE EACH OTHER
+     recipe-box R2 A1  the hint "write the search text into the q parameter"
+           is fully satisfied by router.replace('/?q=' + text), which WIPES
+           the active tag. And no criterion drove both filters together
+           through the UI.
+     RULES  If a cut writes to shared state, its hint must say what to
+           PRESERVE. And test the COMBINATION, not just each half - testing
+           two filters at the endpoint does not cover the screen that builds
+           the URL.
+
+S-e  BYPASSABLE OR VACUOUS GRADING CUTS  <-- the dangerous class
+     recipe-box R3 A1  hardcoded chips void cut-api-tags-list as a grading cut
+                       for c-2-5/c-2-6
+     recipe-box R3 A3  c-1-2 asserts per-element shape, so it passes VACUOUSLY
+                       over the [] fallback with cut-store-read-all open - an
+                       undocumented third subset case
+     recipe-box R3 B1  cut-recipe-scale-quantity does not name scaleQuantity,
+                       so cut-fraction-scale is BYPASSABLE with c-4-2/3/4 green
+     tip-split  R1 B2  c-3-4 must fail on an inert setter
+     WHY WORST  These ship SILENTLY. No test goes red. The grading is simply
+           wrong, and no downstream checker can see it.
+
+S-f  HINT UNDER-SPECIFICATION
+     recipe-box R3 A2  the cut-api-recipes-list hint names neither "all" nor
+           "shown", though rule 2 puts both in scope. Session 1 goes green on
+           "all" and then FIVE OF SESSION 2's SIX CRITERIA FAIL ON CORRECT
+           STUDENT WORK.
+     KEY LINE from why.md: "this hint is the whole text the student gets."
+     NOTE  Fixing A4 (session rebalance) also DISSOLVED A2 - findings are not
+           independent, so fix the structural one first.
+
+S-g  SESSION IMBALANCE
+     recipe-box R3 A4  session 1 carried lib/types, the 8-recipe seed, the
+           store, fractions, page and RecipeList PLUS 4 cuts, against session
+           4's 3 cuts and no setup - "the tip-split lesson verbatim, caught
+           only at step 9".
+     See B-13. Detected at step 9, root cause at step 2.
+
+
+================================================================================
+4. BOTTLENECKS
+================================================================================
+
+THE HEADLINE COMPARISON
+
+                              tip-split                recipe-box
+                              (gates auto-approved)    (real gate reads)
+  End-to-end wall clock       66 min                   23 h 20 min
+  Spec rounds                 2                        4  (5 Breaker passes)
+  Phase 1 (idea -> Gate 1)    31 min                   20 h 01 min
+  Phase 2 (Gate 1 -> Gate 2)  19 min                   1 h 10 min
+  Phase 3 (Gate 2 -> ship)    16 min                   2 h 09 min
+
+  A 20x difference, almost entirely the human at the gates.
+
+
+BN-1  GATE 1 AND THE SPEC LOOP  -  dominant bottleneck today
+      recipe-box spent 20 of its 23 hours in Phase 1. Strip the single
+      17 h 55 m overnight wait (11:05 on 08-26 -> 05:00 on 08-27) and Phase 1
+      STILL cost ~2 h 06 m of active time - more than Phases 2 and 3 combined.
+      Structural, not bad luck, because of B-03 + B-16 + section 1: the Breaker
+      never returns clean, and the cheap checker absorbs none of the load.
+      Each rejected round costs a full Spec Writer + linter + Breaker cycle
+      PLUS a human pass over ~70 KB.
+
+BN-2  HUMAN READ BANDWIDTH AT 3 BLOCKING GATES  -  the throughput ceiling
+      Three gates per project, all serialized, all blocking BY DESIGN ("a
+      workflow cannot block on a person", so each phase ends at its gate and
+      stops). Measured human gate time on recipe-box, from the timestamps:
+
+        Gate 1 rejection 1   lint 10:12:45 -> revise 10:30:03   17 min
+        Gate 1 rejection 2   lint 10:40:39 -> revise 10:52:29   12 min
+        Gate 1 rejection 3   lint 11:05:25 -> revise 05:22:35   22 min + overnight
+        Gate 3 read          deploy 07:25:06 -> gate3 09:07:45  1 h 42 min
+        ---------------------------------------------------------------
+        TOTAL                                          ~2 h 33 min, 4 sittings
+
+      Read load per project: ~70 KB of spec + ambiguity, plus 912 lines of pack
+      (recipe-box) or 1,406 (tip-split).
+      THROUGHPUT = reader-hours / ~2.5 h per project. It does NOT amortize.
+      Machine work gets cheaper per project; gate reading does not. The depth
+      is real - recipe-box's Gate 1 note is ~1,800 characters of dense
+      reasoning about a single finding's blast radius.
+
+BN-3  THE APPROVED SPEC IS UNPROTECTED  -  a REWORK bottleneck
+      B-05 + B-06 + B-07 together. guard.py restricts writes only while a LOCK
+      exists; Phase 1 sets none, and Phase 2 unlocks before every test run.
+      Cost when it fires is not delay but INVALIDATION - a late spec change
+      voids the code, the tests, the skeleton, and the gates already passed.
+
+BN-4  DEFECTS THAT SURFACE AT STEP 9, WHERE THE FIX INVALIDATES EVERYTHING
+      B-13. Both projects overran; neither was fixed. The repair loop is
+      longer than the team's willingness to pay, so the pipeline ships known
+      defects. Will recur on every project until something before step 4
+      weighs setup cost and minutes.
+
+BN-5  CHECKER BLIND SPOTS THAT CONVERT DIRECTLY INTO GATE TIME
+      Every place a script says "ok" while a human must check by hand feeds
+      BN-2:  B-12 (partial cut states), B-14 (CVE), B-04 (report/spec binding),
+      and section 1 (the linter as a whole).
+
+BN-6  THE CIRCUIT BREAKER DOES NOT COUNT GREEN CHURN
+      B-10. Rule 6 protects against a failing loop, not a thrashing green one.
+
+BN-7  AGENT OVERHEAD PER PHASE
+      B-15. 5-6 agents per phase, of which 2-3 do real work; the rest exist to
+      run a single shell command. Adds latency, cost, and a guaranteed
+      false-positive security warning on every run.
+
+BN-8  INFRASTRUCTURE
+      B-18. Not biting yet. Will bite around 20+ projects.
+
+
+================================================================================
+5. WHERE THE PROBLEMS CONCENTRATE
+================================================================================
+
+  Phase              Blockers      Human cost              Automated catch rate
+  ---------------------------------------------------------------------------
+  Phase 1 (spec)     17 of ~19     ~2 h 30 m, 4 rounds     0%
+  Phase 2 (code)     0 real        ~0 (auto-verified)      100% (22/22, 17/17)
+  Phase 3 (pack)     3, ALL        1 h 42 m Gate 3 read    partial - 2 of 3
+                     known-and-                            blind spots shipped
+                     shipped
+
+The pattern is unambiguous:
+
+  Phase 2 has a REAL checker (boot the app, run the suite, pass/fail is not an
+  opinion) and produced ZERO escapes across both projects.
+
+  Phase 1 has a checker that HAS NEVER FIRED and produced EVERY blocker.
+
+  Phase 3's checkers pass over their own KNOWN blind spots.
+
+Conclusion: the difference between the phases is not the difficulty of the work.
+It is whether the checker can actually see the defect class it is supposed to
+catch.
+
+
+================================================================================
+6. FORECAST - MOST LIKELY TO BITE ON THE NEXT RUN
+================================================================================
+
+  1  S-a  A TS2355 cut marker
+           Already recurred once across CONSECUTIVE projects with the lesson
+           written down. Worst failure mode (no build at all).
+           Likelihood: NEAR-CERTAIN
+
+  2  S-e  A bypassable or vacuous grading cut
+           Four instances in four rounds. No checker can see them. Ships
+           silently with every test green.
+           Likelihood: HIGH
+
+  3  B-13 A session overrun found at step 9
+           2 of 2 projects. Nothing has changed.
+           Likelihood: CERTAIN
+
+  4  B-15 The [unlock] false-positive security warning
+           Likelihood: CERTAIN, every run
+
+  5  B-14 A CVE advisory passed as green by deploy_check
+           Decided by which version npm resolves.
+           Likelihood: CERTAIN when the advisory exists
+
+  6  B-03 A non-terminating Gate 1 loop needing an ad-hoc judgement call
+           Likelihood: CERTAIN
+
+All of the top three are PHASE 1 defects, and all three are MECHANICALLY
+CHECKABLE.
+
+
+================================================================================
+7. RECOMMENDED FIXES, RANKED BY COST REMOVED PER UNIT OF EFFORT
+================================================================================
+
+F-1  THREE NEW SPEC LINTER RULES.  spec_linter.py is 303 lines and checks
+     shape only. Add:
+       (a) marker position - reject any cut that spans a function's sole
+           `return`                                        kills S-a
+       (b) hint-names-the-symbol - reject a cut hint that does not name the
+           identifier it is grading                        kills S-e, S-f
+       (c) minutes and setup weight per session            kills B-13, S-g
+     This moves the three most likely blockers from a 2.5-hour human read to a
+     one-second script, AND finally gives the spec retry loop something to do.
+     Highest value by a wide margin.
+
+F-2  LOCK THE SPEC AFTER GATE 1, AND ARCHIVE ON APPROVAL.
+     Closes B-05, B-06, B-07 / BN-3 - the one failure mode whose cost is total
+     rework. Cheap.
+
+F-3  MAKE THE BREAKER CLASSIFY EACH FINDING BY WHICH DOWNSTREAM CHECKER OWNS
+     IT.  The stopping rule from B-03 already exists in prose and is what
+     actually terminated recipe-box. Putting the column in the report turns a
+     20-minute judgement read into a scan. Biggest single lever on BN-1+BN-2.
+
+F-4  RECORD A SPEC HASH IN ambiguity.md, and have `pipeline next` refuse a
+     stale report.  Closes B-04.
+
+F-5  RUN THE WATCHDOG AND WIRE IT TO CRON.  Closes B-17. The safety net has
+     never been exercised; recipe-box is not covered at all.
+
+F-6  FAIL deploy_check ON AN INSTALL ADVISORY (B-14), and BURN A RETRY ON
+     GREEN RE-RUNS PAST A THRESHOLD (B-10).
+
+F-7  COLLAPSE THE COMMAND-RUNNER AGENTS (lock/unlock/test/status) into direct
+     script calls.  Closes B-15, cuts agents per phase from 5-6 to 2-3.
+
+F-8  ADD A RELATIVE-PATH CASE TO THE SELFTEST so the B-01 class stops being
+     structurally invisible.  Update the README's stale check count (B-19).
+
+DELIBERATELY NOT RECOMMENDED YET
+     Shared node_modules / disk optimisation (B-18). 12-second warm runs mean
+     the pipeline is nowhere near compute-bound. Not worth the complexity until
+     the project count is well into double digits.
+
+================================================================================
+END
+================================================================================

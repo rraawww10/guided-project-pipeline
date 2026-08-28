@@ -1,5 +1,8 @@
 {
   "ok": true,
   "checked": 3,
-  "mismatches": []
+  "mismatches": [],
+  "partial_state_risks": [],
+  "blind_spot": "",
+  "typecheck_fail_open": false
 }

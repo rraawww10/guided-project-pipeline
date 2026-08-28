@@ -1,0 +1,85 @@
+{
+  "slug": "habit-tracker",
+  "cuts": [
+    {
+      "id": "cut-api-habit-get",
+      "file": "app/api/habits/[id]/route.ts",
+      "line": 24,
+      "lines_removed": 10
+    },
+    {
+      "id": "cut-api-toggle",
+      "file": "app/api/habits/[id]/toggle/route.ts",
+      "line": 29,
+      "lines_removed": 20
+    },
+    {
+      "id": "cut-habit-page",
+      "file": "app/habits/[id]/page.tsx",
+      "line": 44,
+      "lines_removed": 16
+    },
+    {
+      "id": "cut-board-click",
+      "file": "app/page.tsx",
+      "line": 40,
+      "lines_removed": 14
+    },
+    {
+      "id": "cut-store-find-habit",
+      "file": "lib/store.ts",
+      "line": 69,
+      "lines_removed": 1
+    },
+    {
+      "id": "cut-streak-count",
+      "file": "lib/streak.ts",
+      "line": 28,
+      "lines_removed": 8
+    },
+    {
+      "id": "cut-toggle-dates",
+      "file": "lib/toggle.ts",
+      "line": 12,
+      "lines_removed": 3
+    },
+    {
+      "id": "cut-week-dates",
+      "file": "lib/week.ts",
+      "line": 29,
+      "lines_removed": 12
+    }
+  ],
+  "count": 8,
+  "by_session": {
+    "1": [
+      "cut-streak-count",
+      "cut-week-dates"
+    ],
+    "2": [
+      "cut-api-habit-get",
+      "cut-habit-page",
+      "cut-store-find-habit"
+    ],
+    "3": [
+      "cut-api-toggle",
+      "cut-board-click",
+      "cut-toggle-dates"
+    ]
+  },
+  "return_safety": {
+    "ok": true,
+    "checked": 8,
+    "violations": []
+  },
+  "partial_state_risks": [],
+  "typecheck": {
+    "ran": true,
+    "ok": true,
+    "error_count": 0,
+    "errors": [],
+    "missing_return": [],
+    "hint": ""
+  },
+  "ok": true
+}

@@ -27,6 +27,23 @@ broken code is worse than no test.
 
 - pytest, with `playwright.sync_api` for screens and `httpx` for endpoints.
 - The app is already running. Read its base URL from `os.environ["BASE_URL"]`.
+- **`os.environ["APP_DIR"]` is the directory the running app was started
+  from** - `app/` on the real run, `skeleton/` on the skeleton run. Use it for
+  anything on disk the app owns: a JSON file store, a seed file, an upload
+  directory. Never build a relative path to those from the test file's own
+  location: the same suite runs with three different working directories
+  (project root for `app/`, project root for `skeleton/`, and the skeleton
+  itself for a student running pytest by hand), so no relative path is
+  correct for all three. **The pipeline sets `APP_DIR` for its own two runs
+  only** - a student running pytest by hand has none, so never index it. Write
+  `Path(os.environ.get("APP_DIR", os.getcwd()))`: the pipeline's runs use the
+  variable, and the student's run falls back to the directory they are standing
+  in, which is the app. Indexing it with `[]` fails in exactly the run nothing
+  in the pipeline exercises.
+- If the app writes to a file, **every test resets it**, not just the tests in
+  the session that introduced the writes. A suite that passes once and fails
+  on the second run in the same working copy is a broken suite - the nightly
+  watchdog replays it forever.
   Never start a server, never pick a port, never call `npm`.
 - One file per area: `test_api_<thing>.py`, `test_ui_<screen>.py`.
 

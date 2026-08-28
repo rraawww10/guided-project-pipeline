@@ -21,6 +21,12 @@
       "cut-ui-items"
     ]
   },
+  "return_safety": {
+    "ok": true,
+    "checked": 2,
+    "violations": []
+  },
+  "partial_state_risks": [],
   "typecheck": {
     "ran": true,
     "ok": true,

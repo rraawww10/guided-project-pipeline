@@ -1,0 +1,333 @@
+{
+  "slug": "habit-tracker",
+  "title": "Habit Tracker",
+  "track": "fullstack",
+  "sessions_planned": 3,
+  "stack": [
+    "next",
+    "react",
+    "typescript",
+    "css-modules"
+  ],
+  "source": null,
+  "code_checks": [
+    "utc-dates"
+  ],
+  "endpoints": [
+    {
+      "id": "ep-habits-list",
+      "method": "GET",
+      "path": "/api/habits",
+      "request": null,
+      "response": "HabitWeek[]",
+      "status": [
+        200
+      ]
+    },
+    {
+      "id": "ep-habit-get",
+      "method": "GET",
+      "path": "/api/habits/[id]",
+      "request": null,
+      "response": "HabitWeek or { error: string }",
+      "status": [
+        200,
+        404
+      ]
+    },
+    {
+      "id": "ep-habit-toggle",
+      "method": "POST",
+      "path": "/api/habits/[id]/toggle",
+      "request": "{ date: string } - date must be one of the 7 strings weekDates(store.trackedDay) derived from the store the request just read, which with the seed is 2026-08-24 to 2026-08-30; the route must not hard-code those 7 strings, and anything outside that set is a 400",
+      "response": "HabitWeek or { error: string }",
+      "status": [
+        200,
+        400,
+        404
+      ]
+    }
+  ],
+  "screens": [
+    {
+      "id": "sc-board",
+      "route": "/",
+      "elements": [
+        "one element with data-testid habit-row per habit, carrying data-habit-id set to the habit id",
+        "an element with data-testid habit-name inside each row",
+        "an element with data-testid habit-streak inside each row, text Streak: <n>",
+        "seven elements with data-testid day-cell inside each row, carrying data-date and data-done set to the string true or the string false",
+        "one GET /api/habits on mount and no second one; a cell click sends POST /api/habits/<id>/toggle and the row is rebuilt from that response"
+      ],
+      "states": [
+        "loaded"
+      ]
+    },
+    {
+      "id": "sc-habit",
+      "route": "/habits/[id]",
+      "elements": [
+        "an element with data-testid habit-name",
+        "an element with data-testid habit-streak, text Streak: <n>",
+        "seven elements with data-testid day-cell carrying data-date and data-done set to the string true or the string false",
+        "an element with data-testid habit-missing, text Habit not found, shown in place of the name, the streak and the cells when GET /api/habits/[id] answers 404"
+      ],
+      "states": [
+        "loaded",
+        "not-found"
+      ]
+    }
+  ],
+  "sessions": [
+    {
+      "n": 1,
+      "setup": true,
+      "title": "The week board",
+      "goal": "Build the JSON file store, derive the fixed tracked week from the seed, and render the board so GET /api/habits and screen / show 4 habit rows with 7 day cells and a streak each.",
+      "teaches": [
+        "deriving a fixed Monday-to-Sunday week from one date string",
+        "a pure streak function over a list of date strings"
+      ],
+      "builds": [
+        "ep-habits-list",
+        "sc-board"
+      ],
+      "criteria": [
+        {
+          "id": "c-1-1",
+          "check": "GET /api/habits returns 200 with a JSON array of 4 habits, each carrying id, name, streak and a days array of exactly 7 entries",
+          "target": "ep-habits-list",
+          "cuts": [
+            "cut-week-dates"
+          ]
+        },
+        {
+          "id": "c-1-2",
+          "check": "GET /api/habits returns every habit's days[].date as the strings 2026-08-24, 2026-08-25, 2026-08-26, 2026-08-27, 2026-08-28, 2026-08-29, 2026-08-30 in that Monday-to-Sunday order",
+          "target": "ep-habits-list",
+          "cuts": [
+            "cut-week-dates"
+          ]
+        },
+        {
+          "id": "c-1-3",
+          "check": "GET /api/habits returns streak 5 for id drink-water, 0 for id read-pages, 0 for id meditate and 1 for id stretch",
+          "target": "ep-habits-list",
+          "cuts": [
+            "cut-streak-count"
+          ]
+        },
+        {
+          "id": "c-1-4",
+          "check": "screen / renders 4 elements with data-testid habit-row, and the row with data-habit-id drink-water contains a data-testid habit-streak element whose text is exactly Streak: 5",
+          "target": "sc-board",
+          "cuts": [
+            "cut-streak-count"
+          ]
+        },
+        {
+          "id": "c-1-5",
+          "check": "screen / renders 7 elements with data-testid day-cell inside the habit-row with data-habit-id drink-water, and data-done is the string true on data-date 2026-08-24, 2026-08-25 and 2026-08-26 and the string false on the other 4 cells",
+          "target": "sc-board",
+          "cuts": [
+            "cut-week-dates"
+          ]
+        },
+        {
+          "id": "c-1-6",
+          "check": "with $APP_DIR/data/habits.json written so trackedDay is 2026-08-30, a Sunday, GET /api/habits returns every habit's days[].date as 2026-08-24, 2026-08-25, 2026-08-26, 2026-08-27, 2026-08-28, 2026-08-29, 2026-08-30 in that order; and with $APP_DIR/data/habits.json written so trackedDay is 2026-09-06, GET /api/habits returns every habit's days[].date as 2026-08-31, 2026-09-01, 2026-09-02, 2026-09-03, 2026-09-04, 2026-09-05, 2026-09-06 in that order",
+          "target": "ep-habits-list",
+          "cuts": [
+            "cut-week-dates"
+          ]
+        }
+      ],
+      "cuts": [
+        {
+          "id": "cut-week-dates",
+          "file": "lib/week.ts",
+          "hint": "Fill `dates` with the 7 `YYYY-MM-DD` strings for Monday through Sunday of the week that contains `trackedDay`, oldest first. Step back from `trackedDay` to that week's Monday and forward from there, and use the UTC accessors (`getUTCDay`, `setUTCDate`) or plain string arithmetic so the 7 strings do not change with the machine's timezone. Read no clock: the same `trackedDay` always gives the same 7 strings."
+        },
+        {
+          "id": "cut-streak-count",
+          "file": "lib/streak.ts",
+          "hint": "Walk day by day backwards from `trackedDay` while each date is present in `doneDates`, and put the number of unbroken done days ending on `trackedDay` into `count`. Step with the UTC accessors or plain string arithmetic so the answer does not change with the machine's timezone, and leave `count` at 0 when `trackedDay` itself is absent from `doneDates`."
+        }
+      ]
+    },
+    {
+      "n": 2,
+      "title": "One habit's page",
+      "goal": "Add the single-habit endpoint with its 404 branch and the /habits/[id] screen that shows one habit's 7 day cells, its streak, and its not-found message.",
+      "teaches": [
+        "dynamic route segments with [id] in the App Router",
+        "a 404 branch in a route handler",
+        "mapping a days array into cells with data attributes"
+      ],
+      "builds": [
+        "ep-habit-get",
+        "sc-habit"
+      ],
+      "criteria": [
+        {
+          "id": "c-2-1",
+          "check": "GET /api/habits/drink-water returns 200 with name Drink water, a days array of exactly 7 entries and streak 5",
+          "target": "ep-habit-get",
+          "cuts": [
+            "cut-week-dates",
+            "cut-streak-count",
+            "cut-store-find-habit",
+            "cut-api-habit-get"
+          ]
+        },
+        {
+          "id": "c-2-2",
+          "check": "GET /api/habits/no-such-habit returns 404 with a JSON body whose error key holds a non-empty string",
+          "target": "ep-habit-get",
+          "cuts": [
+            "cut-api-habit-get"
+          ]
+        },
+        {
+          "id": "c-2-3",
+          "check": "screen /habits/read-pages renders 7 elements with data-testid day-cell, with data-done the string true on data-date 2026-08-24 and 2026-08-25 and the string false on the other 5 cells",
+          "target": "sc-habit",
+          "cuts": [
+            "cut-week-dates",
+            "cut-store-find-habit",
+            "cut-api-habit-get",
+            "cut-habit-page"
+          ]
+        },
+        {
+          "id": "c-2-4",
+          "check": "screen /habits/stretch displays a data-testid habit-name element whose text is exactly Stretch and a data-testid habit-streak element whose text is exactly Streak: 1",
+          "target": "sc-habit",
+          "cuts": [
+            "cut-streak-count",
+            "cut-store-find-habit",
+            "cut-api-habit-get",
+            "cut-habit-page"
+          ]
+        },
+        {
+          "id": "c-2-5",
+          "check": "screen /habits/no-such-habit displays an element with data-testid habit-missing whose text is exactly Habit not found, renders 0 elements with data-testid day-cell, and renders no habit-name element and no habit-streak element",
+          "target": "sc-habit",
+          "cuts": [
+            "cut-api-habit-get",
+            "cut-habit-page"
+          ]
+        }
+      ],
+      "cuts": [
+        {
+          "id": "cut-store-find-habit",
+          "file": "lib/store.ts",
+          "hint": "Inside `findHabit`, assign to `found` the one habit in `store.habits` whose `id` equals the `habitId` argument, and leave `found` as `null` when no habit in `store.habits` matches."
+        },
+        {
+          "id": "cut-api-habit-get",
+          "file": "app/api/habits/[id]/route.ts",
+          "hint": "Read the store with `readStore()` into `store` and look the habit up with `findHabit(store, habitId)`. When that gives a habit, set `body` to `habitWeek(habit, store.trackedDay)` and `status` to 200. When it gives `null`, set `body` to an object with an `error` key and `status` to 404."
+        },
+        {
+          "id": "cut-habit-page",
+          "file": "app/habits/[id]/page.tsx",
+          "hint": "When the `/api/habits/[id]` response status is 404, set `missing` to `true`. Otherwise map `habit.days` into one `day-cell` element per entry, each with `data-date` set to that entry's date string and `data-done` set to the string `\"true\"` on a done entry and the string `\"false\"` on every other entry, and set `streakText` to `Streak: ` joined with `habit.streak`. Keep the `habit-name` element and the `habit-missing` element already in the file: when `missing` is `true` the page draws `habit-missing` and no `habit-name`, no `habit-streak` and no `day-cell`. Only a 404 sets `missing`; any other non-200 status leaves the page in its pre-response state, and nothing grades that."
+        }
+      ]
+    },
+    {
+      "n": 3,
+      "title": "Toggle a day",
+      "goal": "Add POST /api/habits/[id]/toggle with its 400 and 404 branches, so a click on a day cell flips that day in data/habits.json and replaces that habit's row on screen / from the POST response body.",
+      "teaches": [
+        "a POST route handler that reads and validates a JSON body",
+        "writing the store back to disk with node fs",
+        "replacing one item inside React array state"
+      ],
+      "builds": [
+        "ep-habit-toggle"
+      ],
+      "criteria": [
+        {
+          "id": "c-3-1",
+          "check": "POST /api/habits/stretch/toggle with body {\"date\": \"2026-08-25\"} returns 200 with streak 2 and the days entry for 2026-08-25 marked done",
+          "target": "ep-habit-toggle",
+          "cuts": [
+            "cut-week-dates",
+            "cut-streak-count",
+            "cut-store-find-habit",
+            "cut-toggle-dates",
+            "cut-api-toggle"
+          ]
+        },
+        {
+          "id": "c-3-2",
+          "check": "POST /api/habits/drink-water/toggle with body {\"date\": \"2026-08-26\"} returns 200 with streak 0, and a following GET /api/habits/drink-water persists streak 0 and 2 days marked done in the week",
+          "target": "ep-habit-toggle",
+          "cuts": [
+            "cut-week-dates",
+            "cut-streak-count",
+            "cut-store-find-habit",
+            "cut-api-habit-get",
+            "cut-toggle-dates",
+            "cut-api-toggle"
+          ]
+        },
+        {
+          "id": "c-3-3",
+          "check": "POST /api/habits/read-pages/toggle twice with body {\"date\": \"2026-08-26\"} returns 200 both times, streak 3 on the first response and streak 0 with 2 days marked done on the second",
+          "target": "ep-habit-toggle",
+          "cuts": [
+            "cut-week-dates",
+            "cut-streak-count",
+            "cut-store-find-habit",
+            "cut-toggle-dates",
+            "cut-api-toggle"
+          ]
+        },
+        {
+          "id": "c-3-4",
+          "check": "POST /api/habits/no-such-habit/toggle with body {\"date\": \"2026-08-26\"} returns 404; POST /api/habits/stretch/toggle returns 400 for body {}, for body {\"date\": \"not-a-date\"} and for body {\"date\": \"2026-08-31\"}; each of those 4 responses carries a JSON body whose error key holds a non-empty string; and after one GET /api/habits has materialised $APP_DIR/data/habits.json from the seed, that file is byte-for-byte identical before and after the 4 requests",
+          "target": "ep-habit-toggle",
+          "cuts": [
+            "cut-week-dates",
+            "cut-api-toggle"
+          ]
+        },
+        {
+          "id": "c-3-5",
+          "check": "clicking the day-cell with data-date 2026-08-26 in the habit-row with data-habit-id meditate on screen / updates that cell's data-done to the string true and that row's habit-streak text to Streak: 1, leaves the drink-water row's habit-streak text at Streak: 5, and the browser issues exactly 1 GET request whose path is /api/habits from opening screen / to the end of that click",
+          "target": "sc-board",
+          "cuts": [
+            "cut-week-dates",
+            "cut-streak-count",
+            "cut-store-find-habit",
+            "cut-toggle-dates",
+            "cut-api-toggle",
+            "cut-board-click"
+          ]
+        }
+      ],
+      "cuts": [
+        {
+          "id": "cut-toggle-dates",
+          "file": "lib/toggle.ts",
+          "hint": "Inside `toggleDate`, assign to `next` a new array holding `dates` with every occurrence of `date` dropped when `dates` already contains it, and `dates` with `date` added when it does not. Every other string in `dates` stays in `next`, and `dates` itself is left unmutated."
+        },
+        {
+          "id": "cut-api-toggle",
+          "file": "app/api/habits/[id]/toggle/route.ts",
+          "hint": "Read `date` from the parsed JSON body and read the store with `readStore()` into `store`. When `date` is not one of the 7 strings from `weekDates(store.trackedDay)`, set `status` to 400 and `body` to an object with an `error` key, and write nothing to disk. Otherwise call `findHabit(store, habitId)`: on `null` set `status` to 404 and `body` to an object with an `error` key, and write nothing to disk; on a habit set that habit's `doneDates` to `toggleDate(habit.doneDates, date)`, persist the whole `store` with `writeStore(store)`, then set `body` to `habitWeek(habit, store.trackedDay)` and `status` to 200."
+        },
+        {
+          "id": "cut-board-click",
+          "file": "app/page.tsx",
+          "hint": "Inside `onCellClick`, POST `{ date }` to `/api/habits/` plus the clicked habit id plus `/toggle`, and set the `habits` state to the same 4 rows in the same order with only the clicked habit replaced by the `HabitWeek` in the response body. Do not fetch `/api/habits` a second time."
+        }
+      ]
+    }
+  ]
+}

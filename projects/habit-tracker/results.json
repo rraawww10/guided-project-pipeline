@@ -1,0 +1,144 @@
+{
+  "ok": true,
+  "target": "app",
+  "code_checks": {
+    "ok": true,
+    "target": "app",
+    "declared": [
+      "utc-dates"
+    ],
+    "unknown": [],
+    "checks": {
+      "utc-dates": {
+        "ok": true,
+        "rule": "date arithmetic gives the same answer in every timezone: no local-time Date accessors, and no reading the real clock",
+        "violations": [],
+        "count": 0
+      }
+    }
+  },
+  "seconds": 9.1,
+  "counts": {
+    "pass": 16,
+    "fail": 0,
+    "skip": 0,
+    "missing": 0
+  },
+  "criteria": {
+    "c-1-1": {
+      "status": "pass",
+      "check": "GET /api/habits returns 200 with a JSON array of 4 habits, each carrying id, name, streak and a days array of exactly 7 entries",
+      "session": 1,
+      "test": "verify/test_api_habits.py::test_c_1_1_habits_list_returns_four_habits_with_seven_days_each",
+      "message": ""
+    },
+    "c-1-2": {
+      "status": "pass",
+      "check": "GET /api/habits returns every habit's days[].date as the strings 2026-08-24, 2026-08-25, 2026-08-26, 2026-08-27, 2026-08-28, 2026-08-29, 2026-08-30 in that Monday-to-Sunday order",
+      "session": 1,
+      "test": "verify/test_api_habits.py::test_c_1_2_habits_list_days_are_the_tracked_week_monday_first",
+      "message": ""
+    },
+    "c-1-3": {
+      "status": "pass",
+      "check": "GET /api/habits returns streak 5 for id drink-water, 0 for id read-pages, 0 for id meditate and 1 for id stretch",
+      "session": 1,
+      "test": "verify/test_api_habits.py::test_c_1_3_habits_list_streaks_are_five_zero_zero_and_one",
+      "message": ""
+    },
+    "c-1-4": {
+      "status": "pass",
+      "check": "screen / renders 4 elements with data-testid habit-row, and the row with data-habit-id drink-water contains a data-testid habit-streak element whose text is exactly Streak: 5",
+      "session": 1,
+      "test": "verify/test_ui_board.py::test_c_1_4_board_renders_four_rows_and_drink_waters_streak_reads_five",
+      "message": ""
+    },
+    "c-1-5": {
+      "status": "pass",
+      "check": "screen / renders 7 elements with data-testid day-cell inside the habit-row with data-habit-id drink-water, and data-done is the string true on data-date 2026-08-24, 2026-08-25 and 2026-08-26 and the string false on the other 4 cells",
+      "session": 1,
+      "test": "verify/test_ui_board.py::test_c_1_5_drink_waters_row_holds_seven_cells_with_three_done",
+      "message": ""
+    },
+    "c-1-6": {
+      "status": "pass",
+      "check": "with $APP_DIR/data/habits.json written so trackedDay is 2026-08-30, a Sunday, GET /api/habits returns every habit's days[].date as 2026-08-24, 2026-08-25, 2026-08-26, 2026-08-27, 2026-08-28, 2026-08-29, 2026-08-30 in that order; and with $APP_DIR/data/habits.json written so trackedDay is 2026-09-06, GET /api/habits returns every habit's days[].date as 2026-08-31, 2026-09-01, 2026-09-02, 2026-09-03, 2026-09-04, 2026-09-05, 2026-09-06 in that order",
+      "session": 1,
+      "test": "verify/test_api_habits.py::test_c_1_6_habits_list_week_follows_the_stored_tracked_day",
+      "message": ""
+    },
+    "c-2-1": {
+      "status": "pass",
+      "check": "GET /api/habits/drink-water returns 200 with name Drink water, a days array of exactly 7 entries and streak 5",
+      "session": 2,
+      "test": "verify/test_api_habit.py::test_c_2_1_habit_get_returns_drink_waters_week_and_streak",
+      "message": ""
+    },
+    "c-2-2": {
+      "status": "pass",
+      "check": "GET /api/habits/no-such-habit returns 404 with a JSON body whose error key holds a non-empty string",
+      "session": 2,
+      "test": "verify/test_api_habit.py::test_c_2_2_habit_get_returns_404_with_an_error_for_an_unknown_id",
+      "message": ""
+    },
+    "c-2-3": {
+      "status": "pass",
+      "check": "screen /habits/read-pages renders 7 elements with data-testid day-cell, with data-done the string true on data-date 2026-08-24 and 2026-08-25 and the string false on the other 5 cells",
+      "session": 2,
+      "test": "verify/test_ui_habit.py::test_c_2_3_read_pages_page_shows_seven_cells_with_two_done",
+      "message": ""
+    },
+    "c-2-4": {
+      "status": "pass",
+      "check": "screen /habits/stretch displays a data-testid habit-name element whose text is exactly Stretch and a data-testid habit-streak element whose text is exactly Streak: 1",
+      "session": 2,
+      "test": "verify/test_ui_habit.py::test_c_2_4_stretch_page_shows_its_name_and_streak_one",
+      "message": ""
+    },
+    "c-2-5": {
+      "status": "pass",
+      "check": "screen /habits/no-such-habit displays an element with data-testid habit-missing whose text is exactly Habit not found, renders 0 elements with data-testid day-cell, and renders no habit-name element and no habit-streak element",
+      "session": 2,
+      "test": "verify/test_ui_habit.py::test_c_2_5_unknown_id_shows_habit_not_found_and_nothing_else",
+      "message": ""
+    },
+    "c-3-1": {
+      "status": "pass",
+      "check": "POST /api/habits/stretch/toggle with body {\"date\": \"2026-08-25\"} returns 200 with streak 2 and the days entry for 2026-08-25 marked done",
+      "session": 3,
+      "test": "verify/test_api_toggle.py::test_c_3_1_toggling_stretch_on_the_25th_returns_streak_two",
+      "message": ""
+    },
+    "c-3-2": {
+      "status": "pass",
+      "check": "POST /api/habits/drink-water/toggle with body {\"date\": \"2026-08-26\"} returns 200 with streak 0, and a following GET /api/habits/drink-water persists streak 0 and 2 days marked done in the week",
+      "session": 3,
+      "test": "verify/test_api_toggle.py::test_c_3_2_toggling_drink_water_off_breaks_the_streak_and_persists",
+      "message": ""
+    },
+    "c-3-3": {
+      "status": "pass",
+      "check": "POST /api/habits/read-pages/toggle twice with body {\"date\": \"2026-08-26\"} returns 200 both times, streak 3 on the first response and streak 0 with 2 days marked done on the second",
+      "session": 3,
+      "test": "verify/test_api_toggle.py::test_c_3_3_toggling_read_pages_twice_lands_back_on_two_done_days",
+      "message": ""
+    },
+    "c-3-4": {
+      "status": "pass",
+      "check": "POST /api/habits/no-such-habit/toggle with body {\"date\": \"2026-08-26\"} returns 404; POST /api/habits/stretch/toggle returns 400 for body {}, for body {\"date\": \"not-a-date\"} and for body {\"date\": \"2026-08-31\"}; each of those 4 responses carries a JSON body whose error key holds a non-empty string; and after one GET /api/habits has materialised $APP_DIR/data/habits.json from the seed, that file is byte-for-byte identical before and after the 4 requests",
+      "session": 3,
+      "test": "verify/test_api_toggle.py::test_c_3_4_the_error_branches_answer_404_or_400_and_write_nothing",
+      "message": ""
+    },
+    "c-3-5": {
+      "status": "pass",
+      "check": "clicking the day-cell with data-date 2026-08-26 in the habit-row with data-habit-id meditate on screen / updates that cell's data-done to the string true and that row's habit-streak text to Streak: 1, leaves the drink-water row's habit-streak text at Streak: 5, and the browser issues exactly 1 GET request whose path is /api/habits from opening screen / to the end of that click",
+      "session": 3,
+      "test": "verify/test_ui_board.py::test_c_3_5_clicking_a_cell_updates_only_that_row_without_a_second_list_fetch",
+      "message": ""
+    }
+  },
+  "pytest_returncode": 0,
+  "stdout_tail": "\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m                                                         [100%]\u001b[0m\n\u001b[32m\u001b[32m\u001b[1m16 passed\u001b[0m\u001b[32m in 1.27s\u001b[0m\u001b[0m\n",
+  "stderr_tail": ""
+}

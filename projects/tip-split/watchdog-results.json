@@ -1,7 +1,14 @@
 {
   "ok": true,
   "target": "app",
-  "seconds": 11.0,
+  "code_checks": {
+    "ok": true,
+    "target": "app",
+    "declared": [],
+    "unknown": [],
+    "checks": {}
+  },
+  "seconds": 11.2,
   "counts": {
     "pass": 17,
     "fail": 0,
@@ -130,6 +137,6 @@
     }
   },
   "pytest_returncode": 0,
-  "stdout_tail": ".................                                                        [100%]\n17 passed in 3.16s\n",
+  "stdout_tail": "\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m                                                        [100%]\u001b[0m\n\u001b[32m\u001b[32m\u001b[1m17 passed\u001b[0m\u001b[32m in 3.19s\u001b[0m\u001b[0m\n",
   "stderr_tail": ""
 }

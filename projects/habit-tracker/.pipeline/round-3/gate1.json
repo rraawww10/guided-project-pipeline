@@ -1,0 +1,83 @@
+{
+  "ok": false,
+  "verdict": "reject",
+  "spec_hash": "e4995d349f9e927583bb2771ffbde27be75e861a9ab109f36ba5f18416f8cc3b",
+  "findings": [
+    {
+      "id": "A1",
+      "title": "Every test must \"delete data/habits.json resolved from the target\", and nothing tells a test which target it is",
+      "section": "blocking",
+      "owner": "nothing",
+      "blocking": true,
+      "owner_declared": "nothing",
+      "owner_valid": true,
+      "caught_by": "NO downstream checker sees this - it ships as written",
+      "must_fix_now": true
+    },
+    {
+      "id": "B1",
+      "title": "\"Only the cuts declared in a session are opened in that session's skeleton\" - there is one skeleton and all eight cuts are open in it",
+      "section": "worth a look",
+      "owner": "pack-writer",
+      "blocking": false,
+      "owner_declared": "pack-writer",
+      "owner_valid": true,
+      "caught_by": "step 9 - a person reads the guide at Gate 3",
+      "must_fix_now": false
+    },
+    {
+      "id": "B2",
+      "title": "\"data/habits.json is absent from every shipped copy\" names a step that does not exist",
+      "section": "worth a look",
+      "owner": "nothing",
+      "blocking": false,
+      "owner_declared": "nothing",
+      "owner_valid": true,
+      "caught_by": "NO downstream checker sees this - it ships as written",
+      "must_fix_now": false
+    },
+    {
+      "id": "B3",
+      "title": "Nothing verifies the one constraint the idea called make-or-break: UTC-only date arithmetic",
+      "section": "worth a look",
+      "owner": "nothing",
+      "blocking": false,
+      "owner_declared": "nothing",
+      "owner_valid": true,
+      "caught_by": "NO downstream checker sees this - it ships as written",
+      "must_fix_now": false
+    },
+    {
+      "id": "B4",
+      "title": "The toggle's accepted date set is hard-coded in one place and derived in another",
+      "section": "worth a look",
+      "owner": "nothing",
+      "blocking": false,
+      "owner_declared": "nothing",
+      "owner_valid": true,
+      "caught_by": "NO downstream checker sees this - it ships as written",
+      "must_fix_now": false
+    },
+    {
+      "id": "B5",
+      "title": "Session-3 criteria under-declare their dependency on session-2 cuts",
+      "section": "worth a look",
+      "owner": "nothing",
+      "blocking": false,
+      "owner_declared": "nothing",
+      "owner_valid": true,
+      "caught_by": "NO downstream checker sees this - it ships as written",
+      "must_fix_now": false
+    }
+  ],
+  "counts": {
+    "blocking": 1,
+    "worth_a_look": 5,
+    "unowned_blocking": 1
+  },
+  "reasons": [
+    "A1 (Every test must \"delete data/habits.json resolved from the target\", an) is blocking and nothing downstream catches it"
+  ],
+  "rule": "reject when any blocking finding is owned by 'nothing'; approve when every remaining finding sits in a column a downstream checker owns",
+  "reviewed_spec_hash": "e4995d349f9e927583bb2771ffbde27be75e861a9ab109f36ba5f18416f8cc3b"
+}

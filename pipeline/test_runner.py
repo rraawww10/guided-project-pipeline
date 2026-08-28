@@ -22,6 +22,8 @@ import urllib.request
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
+from . import code_check
+
 BOOT_TIMEOUT = 180        # seconds to wait for the dev server to answer
 TEST_TIMEOUT = 900        # seconds for the whole pytest run
 PYTEST_DEPS = ["pytest", "playwright", "httpx"]
@@ -189,7 +191,10 @@ def map_to_criteria(spec: dict, coverage: dict, by_node: dict) -> dict[str, dict
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("project")
-    ap.add_argument("--target", default="app", choices=["app", "skeleton"])
+    # app | skeleton | any path under the project (the mutation check points
+    # this at .pipeline/mutants/<task-id>). Kept permissive rather than a
+    # choices= list so a new target needs no change here.
+    ap.add_argument("--target", default="app")
     ap.add_argument("--out", default=None)
     a = ap.parse_args(argv)
 
@@ -197,7 +202,9 @@ def main(argv: list[str] | None = None) -> int:
     # interpreter or test path would then resolve against the wrong directory
     project = Path(a.project).resolve()
     target = project / a.target
-    out_path = project / (a.out or ("results.json" if a.target == "app" else "skeleton-results.json"))
+    default_out = {"app": "results.json", "skeleton": "skeleton-results.json"}.get(
+        a.target, f"results-{Path(a.target).name}.json")
+    out_path = project / (a.out or default_out)
     spec = json.loads((project / "spec.json").read_text())
 
     verify_dir = target / "verify" if (target / "verify").exists() else project / "verify"
@@ -226,7 +233,15 @@ def main(argv: list[str] | None = None) -> int:
         proc = subprocess.run(
             [str(py), "-m", "pytest", str(verify_dir), "-q", f"--junit-xml={xml}"],
             cwd=project, capture_output=True, text=True, timeout=TEST_TIMEOUT,
-            env={**os.environ, "BASE_URL": base, "PYTHONDONTWRITEBYTECODE": "1"})
+            # APP_DIR is the target actually under test - app/ or skeleton/.
+            # Without it a test cannot find the running app's own files: the
+            # suite runs with cwd=project from project/verify for app/, with
+            # cwd=project from skeleton/verify for skeleton/, and with cwd=
+            # skeleton for a student running it by hand. No relative path works
+            # for all three, so a project with a file store had no way to reset
+            # it - which is what habit-tracker's Gate 1 round 3 found.
+            env={**os.environ, "BASE_URL": base, "APP_DIR": str(target),
+                 "PYTHONDONTWRITEBYTECODE": "1"})
         stdout, stderr, rc = proc.stdout, proc.stderr, proc.returncode
     except Exception as e:
         stdout, stderr, rc = "", str(e), 99
@@ -243,9 +258,18 @@ def main(argv: list[str] | None = None) -> int:
     counts = {k: sum(1 for v in criteria.values() if v["status"] == k)
               for k in ("pass", "fail", "skip", "missing")}
 
+    # Named static checks the spec declares. They run against app/ only: a
+    # skeleton has the code cut out of it, so it would pass them trivially.
+    # A failure here fails the step, so it lands in the Builder/test-runner loop
+    # instead of in the "nothing catches it" column at Gate 1.
+    code = code_check.run(project, a.target) if a.target == "app" else {"ok": True,
+                                                                        "checks": {}}
+
     report = {
-        "ok": rc == 0 and counts["fail"] == 0 and counts["missing"] == 0,
+        "ok": (rc == 0 and counts["fail"] == 0 and counts["missing"] == 0
+               and code.get("ok", True)),
         "target": a.target,
+        "code_checks": code,
         "seconds": round(time.time() - started, 1),
         "counts": counts,
         "criteria": criteria,
@@ -255,6 +279,15 @@ def main(argv: list[str] | None = None) -> int:
     }
     out_path.write_text(json.dumps(report, indent=2) + "\n")
     print(json.dumps({k: report[k] for k in ("ok", "target", "counts", "seconds")}, indent=2))
+    for name, res in (code.get("checks") or {}).items():
+        if not res["ok"]:
+            print(f"\ncode check '{name}' failed - {res['count']} violation(s):",
+                  file=sys.stderr)
+            for v in res["violations"][:10]:
+                print(f"  {v['file']}:{v['line']}  {v['found']}  -> {v['fix']}",
+                      file=sys.stderr)
+    for name in (code.get("unknown") or []):
+        print(f"\nspec declares an unknown code check: {name!r}", file=sys.stderr)
     return 0 if report["ok"] else 1
 
 

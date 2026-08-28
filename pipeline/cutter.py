@@ -15,13 +15,83 @@ import re
 import shutil
 import subprocess
 import sys
+from fnmatch import fnmatch
 from pathlib import Path
 
-OPEN = re.compile(r"^(?P<indent>\s*)(?P<lead>\S.*?)>>>\s*CUT\s+(?P<id>cut-[a-z0-9-]+)\s*(?P<trail>.*?)$")
-CLOSE = re.compile(r"^\s*\S.*?<<<\s*CUT\s+(?P<id>cut-[a-z0-9-]+)\s*.*?$")
+# Two marker vocabularies, both supported. The first is what the three shipped
+# projects use; the second is the form in requirements_doc.md:
+#
+#   // >>> CUT cut-api-todos-list          ... // <<< CUT cut-api-todos-list
+#   # >>> STUDENT S03-T01 START            ... # <<< STUDENT S03-T01 END
+#         #     goal: <one line>
+#
+# The doc's optional `goal:` line sits inside the block and is removed with it;
+# the TODO the student reads comes from the task's hint in spec.json, which is
+# the wording a person approved at Gate 1.
+TASK_ID = r"(?:cut-[a-z0-9][a-z0-9-]*|S\d{1,3}-T\d{1,3})"
+OPEN = re.compile(
+    r"^(?P<indent>\s*)(?P<lead>\S.*?)>>>\s*(?:CUT|STUDENT)\s+(?P<id>" + TASK_ID +
+    r")(?:\s+START)?\s*(?P<trail>.*?)$")
+CLOSE = re.compile(
+    r"^\s*\S.*?<<<\s*(?:CUT|STUDENT)\s+(?P<id>" + TASK_ID + r")(?:\s+END)?\s*.*?$")
+# cheap "is there anything to cut here" test, either vocabulary
+MARKER_HINT = re.compile(r">>>\s*(?:CUT|STUDENT)\s")
 
 SKIP_DIRS = {"node_modules", ".next", ".git", "dist", "build", ".turbo",
              "coverage", "__pycache__", ".venv", ".pipeline"}
+# Generated files that must never reach a student, whatever the project's
+# .gitignore happens to say. Both shipped skeletons carry a stale
+# tsconfig.tsbuildinfo purely because those projects listed it themselves.
+SKIP_FILE_GLOBS = ("*.tsbuildinfo", ".DS_Store")
+
+
+def gitignore_matcher(root: Path):
+    """Honour the project's own `.gitignore` when copying it.
+
+    `data/` is not in SKIP_DIRS and must not be, because a seed file the student
+    needs lives there. But a project with a *mutable* file store has a live copy
+    that must not ship: step 6's tests leave it mutated, and it was being copied
+    straight into the skeleton and into the step-10 fresh copy. A student's first
+    `npm run dev` then shows the state some test left behind.
+
+    The project already declares which of the two is which - the live store is
+    gitignored and the seed is tracked - so that declaration is what this reads.
+    Only the pattern forms a generated project actually uses: a path, a basename
+    glob, a trailing-slash directory, and `!` to un-ignore. Last match wins, as
+    git does. No `.gitignore`, no exclusions - so this changes nothing for a
+    project that does not use one.
+    """
+    rules: list[tuple[bool, str, bool]] = []
+    gi = root / ".gitignore"
+    if gi.exists():
+        for raw in gi.read_text().splitlines():
+            line = raw.strip()
+            if not line or line.startswith("#"):
+                continue
+            neg = line.startswith("!")
+            if neg:
+                line = line[1:].strip()
+            dir_only = line.endswith("/")
+            rules.append((neg, line.strip("/"), dir_only))
+
+    def ignored(rel: Path) -> bool:
+        if not rules:
+            return False
+        posix = rel.as_posix()
+        parts = rel.parts
+        hit = False
+        for neg, pat, dir_only in rules:
+            if "/" in pat:
+                matched = fnmatch(posix, pat) or posix.startswith(pat + "/")
+            elif dir_only:
+                matched = pat in parts[:-1]
+            else:
+                matched = any(fnmatch(part, pat) for part in parts)
+            if matched:
+                hit = not neg
+        return hit
+
+    return ignored
 
 # comment style per extension, so the TODO we leave behind actually compiles
 LINE_COMMENT = {
@@ -58,9 +128,14 @@ def load_hints(spec: dict) -> dict[str, dict]:
     return hints
 
 
-def walk_source(root: Path):
+def walk_source(root: Path, respect_gitignore: bool = True):
+    ignored = gitignore_matcher(root) if respect_gitignore else (lambda rel: False)
     for p in sorted(root.rglob("*")):
         if p.is_dir() or any(part in SKIP_DIRS for part in p.parts):
+            continue
+        if any(fnmatch(p.name, g) for g in SKIP_FILE_GLOBS):
+            continue
+        if ignored(p.relative_to(root)):
             continue
         yield p
 
@@ -121,6 +196,18 @@ def cut(project: Path) -> dict:
     if not app.exists():
         raise CutError(f"{app} does not exist - nothing to cut")
 
+    # Needs no toolchain, so unlike typecheck() it cannot fail open.
+    unsafe = scan_return_safety(app, hints)
+    if unsafe:
+        raise CutError(
+            f"{len(unsafe)} cut(s) remove their function's only return - the skeleton "
+            f"would not compile and the student's app would not build at all:\n  "
+            + "\n  ".join(f"{u['cut']} at {u['file']}:{u['line']} "
+                           f"(function lines {u['function_lines'][0]}-{u['function_lines'][1]}"
+                           f"{', typed return' if u['declared_return_type'] else ''})"
+                           for u in unsafe)
+            + "\n\n" + RETURN_FIX)
+
     if skel.exists():
         shutil.rmtree(skel)
     skel.mkdir(parents=True)
@@ -135,7 +222,7 @@ def cut(project: Path) -> dict:
         except UnicodeDecodeError:
             shutil.copy2(src, dst)
             continue
-        if ">>> CUT" not in text and "<<< CUT" not in text:
+        if not MARKER_HINT.search(text):
             shutil.copy2(src, dst)
             continue
         new_text, applied = cut_file(rel, text, hints)
@@ -169,8 +256,13 @@ def cut(project: Path) -> dict:
             for n in sorted({h["session"] for h in hints.values()})
         },
     }
+    out["return_safety"] = {"ok": True, "checked": len(hints), "violations": []}
+    out["partial_state_risks"] = partial_state_risks(spec)
     tc = typecheck(project)
     out["typecheck"] = tc
+    # The static scan above already raised on the TS2355 shape, so a typecheck
+    # that could not run no longer means the check passed. It is recorded as
+    # fail_open so Gate 3 can see the difference between "clean" and "not run".
     out["ok"] = tc["ok"]
     (skel / ".cut-manifest.json").write_text(json.dumps(out, indent=2) + "\n")
     if not tc["ok"]:
@@ -193,7 +285,9 @@ def typecheck(project: Path) -> dict:
     skel, app = project / "skeleton", project / "app"
     tsconfig = skel / "tsconfig.json"
     if not tsconfig.exists():
-        return {"ran": False, "ok": True, "why": "no tsconfig.json in the skeleton"}
+        return {"ran": False, "ok": True, "fail_open": True,
+                "why": "no tsconfig.json in the skeleton - the static return-safety "
+                       "scan is the only guard that ran"}
 
     # the skeleton is generated without node_modules; borrow the app's
     modules = skel / "node_modules"
@@ -202,8 +296,9 @@ def typecheck(project: Path) -> dict:
         os.symlink(app / "node_modules", modules, target_is_directory=True)
         borrowed = True
     if not modules.exists():
-        return {"ran": False, "ok": True,
-                "why": "no node_modules to typecheck against - run the test runner once first"}
+        return {"ran": False, "ok": True, "fail_open": True,
+                "why": "no node_modules to typecheck against - run the test runner once "
+                       "first. The static return-safety scan is the only guard that ran"}
 
     tsc = app / "node_modules" / ".bin" / "tsc"
     cmd = [str(tsc)] if tsc.exists() else ["npx", "--no-install", "tsc"]
@@ -213,7 +308,9 @@ def typecheck(project: Path) -> dict:
         out = (r.stdout + r.stderr).strip()
         rc = r.returncode
     except (OSError, subprocess.TimeoutExpired) as e:
-        return {"ran": False, "ok": True, "why": f"could not run tsc: {e}"}
+        return {"ran": False, "ok": True, "fail_open": True,
+                "why": f"could not run tsc: {e} - the static return-safety scan is "
+                       f"the only guard that ran"}
     finally:
         if borrowed:
             modules.unlink(missing_ok=True)
@@ -230,6 +327,183 @@ def typecheck(project: Path) -> dict:
                  "return outside the markers, so the skeleton still compiles with the block "
                  "replaced by its hint comment.") if returns else "",
     }
+
+
+# --- static return safety -------------------------------------------------
+# The one defect that recurred across consecutive projects. recipe-box round 1
+# had six cuts that removed their function's only return; tip-split round 1 then
+# did it again in both route handlers with the lesson already written down. The
+# skeleton does not compile - not one red test, no build at all, and the
+# student's whole app stops working.
+#
+# typecheck() below catches it with tsc, but it FAILS OPEN: no tsconfig, no
+# node_modules or no tsc and it returns ok=True. On a fresh clone that is every
+# project. This check needs no toolchain, so it is the one that always runs.
+
+FUNC_HEADER = re.compile(
+    r"(?:^|\s)(?:export\s+)?(?:default\s+)?(?:async\s+)?function\s+\w*\s*\("
+    r"|(?:const|let|var)\s+\w+\s*(?::[^=]+)?=\s*(?:async\s*)?\("
+    r"|(?:const|let|var)\s+\w+\s*(?::[^=]+)?=\s*(?:async\s*)?\w+\s*=>"
+)
+RETURN_STMT = re.compile(r"(?:^|[{};]|\)\s*)\s*return\b")
+RETURN_TYPE = re.compile(r"\)\s*:\s*[^{;=]+\s*(?:\{|=>)")
+CODE_EXT = {".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs"}
+
+
+def _strip_noise(line: str) -> str:
+    """Good enough for brace counting: drop line comments and string bodies."""
+    line = re.sub(r"//.*$", "", line)
+    line = re.sub(r"'[^']*'|\"[^\"]*\"|`[^`]*`", '""', line)
+    return line
+
+
+def _cut_spans(text: str) -> list[tuple[str, int, int]]:
+    """(cut id, open line index, close line index) - 0-based, inclusive."""
+    spans, open_id, open_at = [], None, 0
+    for i, line in enumerate(text.splitlines()):
+        mo, mc = OPEN.match(line), CLOSE.match(line)
+        if mo and not mc:
+            open_id, open_at = mo["id"], i
+        elif mc and open_id is not None:
+            spans.append((open_id, open_at, i))
+            open_id = None
+    return spans
+
+
+def _enclosing_function(lines: list[str], at: int) -> tuple[int, int, bool] | None:
+    """Innermost function body containing line `at`. (start, end, typed)."""
+    best = None
+    for i in range(at, -1, -1):
+        if not FUNC_HEADER.search(_strip_noise(lines[i])):
+            continue
+        # find the body's opening brace, then its match
+        depth, start, j = 0, None, i
+        while j < len(lines):
+            for ch in _strip_noise(lines[j]):
+                if ch == "{":
+                    depth += 1
+                    if start is None:
+                        start = j
+                elif ch == "}":
+                    depth -= 1
+                    if start is not None and depth == 0:
+                        if start <= at <= j:
+                            typed = bool(RETURN_TYPE.search(
+                                " ".join(_strip_noise(x) for x in lines[i:start + 1])))
+                            return (start, j, typed)
+                        best = best or None
+                        j = len(lines)
+                        break
+            else:
+                j += 1
+                continue
+            break
+    return best
+
+
+def scan_return_safety(root: Path, hints: dict[str, dict]) -> list[dict]:
+    """Every cut whose block holds its function's only return statement."""
+    found: list[dict] = []
+    for src_path in walk_source(root, respect_gitignore=False):
+        if src_path.suffix not in CODE_EXT:
+            continue
+        try:
+            text = src_path.read_text()
+        except (UnicodeDecodeError, OSError):
+            continue
+        if not MARKER_HINT.search(text):
+            continue
+        lines = text.splitlines()
+        for cut_id, a, b in _cut_spans(text):
+            inside = [i for i in range(a + 1, b)
+                      if RETURN_STMT.search(_strip_noise(lines[i]))]
+            if not inside:
+                continue
+            fn = _enclosing_function(lines, a)
+            if fn is None:
+                continue                      # cannot tell - stay quiet
+            start, end, typed = fn
+            outside = [i for i in range(start, end + 1)
+                       if (i < a or i > b) and RETURN_STMT.search(_strip_noise(lines[i]))]
+            if outside:
+                continue
+            found.append({
+                "cut": cut_id,
+                "file": str(src_path),
+                "line": a + 1,
+                "function_lines": [start + 1, end + 1],
+                "declared_return_type": typed,
+                "returns_inside_cut": [i + 1 for i in inside],
+            })
+    return found
+
+
+RETURN_FIX = (
+    "Keep the return OUTSIDE the markers and cut the assignment that feeds it:\n\n"
+    "  export async function GET(): Promise<Response> {\n"
+    "    let body: { ok: boolean } = { ok: false }\n"
+    "    let status = 501\n"
+    "    // >>> CUT cut-api-health\n"
+    "    body = { ok: true }\n"
+    "    status = 200\n"
+    "    // <<< CUT cut-api-health\n"
+    "    return Response.json(body, { status })\n"
+    "  }\n\n"
+    "The fallback must not accidentally pass the test - a 501 and ok:false fail the\n"
+    "criterion, which is what the skeleton needs. Proven both ways in\n"
+    "fixtures/runner-check."
+)
+
+
+def partial_state_risks(spec: dict) -> list[dict]:
+    """Where a proper subset of a criterion's cuts may satisfy it.
+
+    The skeleton check proves two things only: a criterion with all its cuts
+    open must fail, and a criterion with no cuts must pass. It says nothing
+    about the states a student actually moves through. Two cuts graded by
+    exactly the same criteria are precisely that blind spot - recipe-box c-3-2
+    goes green with cut-store-find-one still empty.
+
+    The spec linter now rejects this shape at step 2 (E110), so this is the
+    belt-and-braces report for a spec that predates the rule.
+    """
+    sig: dict[str, set[str]] = {}
+    for s in spec.get("sessions", []):
+        for c in s.get("criteria", []):
+            for cut in c.get("cuts", []):
+                sig.setdefault(cut, set()).add(c["id"])
+    groups: dict[frozenset, list[str]] = {}
+    for cut, crits in sig.items():
+        groups.setdefault(frozenset(crits), []).append(cut)
+    return [{"cuts": sorted(v), "graded_only_by": sorted(k)}
+            for k, v in sorted(groups.items(), key=lambda kv: sorted(kv[1]))
+            if len(v) > 1]
+
+
+def sweep_generated(project: Path) -> list[str]:
+    """Delete build artifacts the pipeline's own checks wrote into skeleton/.
+
+    Excluding these from the copy is not enough: step 8 typechecks the skeleton
+    with `tsc` and boots it with `npm run build`, and both write into it after
+    the copy is made. habit-tracker's Gate 1 round 4 B4 flagged the shipped
+    artifact; I answered that unconditional exclusion made it moot, and it did
+    not - tip-split's tsconfig.tsbuildinfo is git-tracked to this day. The
+    skeleton is the student's starting point, so it is swept once the checks
+    that needed it are done.
+    """
+    skel = project / "skeleton"
+    removed = []
+    if not skel.exists():
+        return removed
+    for path in sorted(skel.rglob("*")):
+        if not path.is_file():
+            continue
+        if any(part in SKIP_DIRS for part in path.relative_to(skel).parts):
+            continue          # inside node_modules/.next - not ours to touch
+        if any(fnmatch(path.name, g) for g in SKIP_FILE_GLOBS):
+            path.unlink()
+            removed.append(path.relative_to(skel).as_posix())
+    return removed
 
 
 def expected_skeleton_results(spec: dict) -> dict[str, str]:
@@ -258,7 +532,27 @@ def verify(project: Path) -> dict:
         if got != want:
             wrong.append({"criterion": cid, "expected": want, "actual": got})
 
-    report = {"ok": not wrong, "checked": len(expect), "mismatches": wrong}
+    risks = partial_state_risks(spec)
+    manifest = project / "skeleton" / ".cut-manifest.json"
+    fail_open = False
+    if manifest.exists():
+        tc = json.loads(manifest.read_text()).get("typecheck") or {}
+        fail_open = bool(tc.get("fail_open"))
+
+    report = {
+        "ok": not wrong,
+        "checked": len(expect),
+        "mismatches": wrong,
+        # Known blind spot, made visible instead of left in a lesson file: the
+        # check above only ever sees the fully-open skeleton.
+        "partial_state_risks": risks,
+        "blind_spot": (
+            "this check proves only that a criterion fails with ALL its cuts open and "
+            "passes with none. Cuts listed in partial_state_risks share a grading "
+            "signature, so a proper subset of them satisfies their criteria - check "
+            "those by hand, or fix the spec (linter E110)." if risks else ""),
+        "typecheck_fail_open": fail_open,
+    }
     (project / "skeleton-check.json").write_text(json.dumps(report, indent=2) + "\n")
     return report
 

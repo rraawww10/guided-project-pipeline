@@ -1,9 +1,34 @@
 {
-  "at": "2026-08-26T12:32:52+00:00",
+  "at": "2026-08-28T12:37:47+00:00",
   "ok": true,
-  "checked": 1,
+  "shipped_total": 3,
+  "checked": 3,
+  "skipped": [],
+  "unknown_slugs": [],
   "broken": [],
   "runs": [
+    {
+      "slug": "habit-tracker",
+      "ok": true,
+      "broken_criteria": [],
+      "counts": {
+        "pass": 16,
+        "fail": 0,
+        "skip": 0,
+        "missing": 0
+      }
+    },
+    {
+      "slug": "recipe-box",
+      "ok": true,
+      "broken_criteria": [],
+      "counts": {
+        "pass": 22,
+        "fail": 0,
+        "skip": 0,
+        "missing": 0
+      }
+    },
     {
       "slug": "tip-split",
       "ok": true,

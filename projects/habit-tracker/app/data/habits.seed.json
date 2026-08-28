@@ -1,0 +1,25 @@
+{
+  "trackedDay": "2026-08-26",
+  "habits": [
+    {
+      "id": "drink-water",
+      "name": "Drink water",
+      "doneDates": ["2026-08-22", "2026-08-23", "2026-08-24", "2026-08-25", "2026-08-26"]
+    },
+    {
+      "id": "read-pages",
+      "name": "Read 10 pages",
+      "doneDates": ["2026-08-24", "2026-08-25"]
+    },
+    {
+      "id": "meditate",
+      "name": "Meditate",
+      "doneDates": []
+    },
+    {
+      "id": "stretch",
+      "name": "Stretch",
+      "doneDates": ["2026-08-26"]
+    }
+  ]
+}

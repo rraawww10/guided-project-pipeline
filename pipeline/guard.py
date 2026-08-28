@@ -22,9 +22,26 @@ from pathlib import Path
 ALWAYS_OK = (".pipeline",)
 BLOCK = 2   # exit 2 = deny the tool call and show stderr to the model
 
+# The spec, once Gate 1 has approved it. A LOCK only exists during an agent
+# step, and Phase 1 sets none at all, so between steps the spec was writable by
+# anything - including a finished Spec Writer that woke up an hour later and
+# copied a rejected round back over the live files. This marker is written by
+# `pipeline gate <slug> 1 approve` and removed by `pipeline revise`, so it
+# covers every moment after approval regardless of any subtree lock.
+FROZEN_MARKER = "SPEC_FROZEN"
+SPEC_FILES = ("spec.json", "spec.md")
+
 # a write reaching the filesystem through a shell instead of the Write tool
 REDIRECT = re.compile(r"(>>?|\btee\b|\bcp\b|\bmv\b|\bsed\b\s+-i|\brm\b|\bdd\b|"
                       r"\btruncate\b|\bmkdir\b|\btouch\b|\bpatch\b)")
+
+
+def frozen_project(path: Path) -> Path | None:
+    """Walk up from path to a projects/<slug>/ whose spec is frozen."""
+    for parent in [path, *path.parents]:
+        if parent.parent.name == "projects" and (parent / ".pipeline" / FROZEN_MARKER).exists():
+            return parent
+    return None
 
 
 def locked_tree(path: Path) -> tuple[Path, str] | None:
@@ -42,6 +59,19 @@ def check_path(target: Path) -> str | None:
         target = target.resolve()
     except OSError:
         return None
+    # the frozen spec is refused even with no lock set
+    if target.name in SPEC_FILES:
+        project = frozen_project(target.parent)
+        if project is not None:
+            h = (project / ".pipeline" / FROZEN_MARKER).read_text().strip()[:12]
+            return (f"blocked by the pipeline write guard: {project.name}/{target.name} was "
+                    f"approved at Gate 1 (spec {h}) and is frozen.\n"
+                    f"app/, verify/ and skeleton/ were built against it, so editing it now "
+                    f"silently breaks the link between the spec and the code.\n"
+                    f"If the spec is genuinely wrong, say so in your summary. Reopening it "
+                    f"is a person's decision: `python -m pipeline revise {project.name}` "
+                    f"archives this round and sends the spec back through Gate 1.")
+
     found = locked_tree(target.parent)
     if not found:
         return None
