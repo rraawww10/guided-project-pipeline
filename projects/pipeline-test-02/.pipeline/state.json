@@ -2,7 +2,7 @@
   "slug": "pipeline-test-02",
   "created": "2026-08-28T22:26:58+00:00",
   "flow": 2,
-  "phase": "code",
+  "phase": "pack",
   "retries": {
     "idea": 0,
     "spec": 0,
@@ -17,7 +17,9 @@
     "breaker": 3,
     "redfirst": 3,
     "revise:round-1": 1,
-    "revise:round-2": 1
+    "revise:round-2": 1,
+    "test:app": 1,
+    "mutation": 1
   },
   "gates": {
     "gate0": {
@@ -33,7 +35,11 @@
       "spec_hash": "729cfc0b1ba57cf0048672d8d428efe2c3ea3a30e4980614eadcce54a320d999",
       "override": false
     },
-    "gate2": null,
+    "gate2": {
+      "approved": true,
+      "at": "2026-08-29T07:20:51+00:00",
+      "note": "GATE 2 APPROVED. Human decision. Read as every criterion, not as a summary.\n\nRESULTS: 11 pass, 0 fail, 0 skip, 0 missing. pytest rc 0, 11 passed in 8.37s. Session 1 c-1-1..c-1-5 and session 2 c-2-1..c-2-6 all green. Built first time - code retries 0/15, no builder/test-runner loop. code_checks declared none, so none run.\n\nMUTATION: 5 of 5 tasks checked, 0 ungraded, 0 inconclusive. For every cut the set that went red equals the set that grades it, with stayed_green empty in all five:\n  cut-runs-of      18 lines -> c-1-1 c-1-2 c-1-3 c-1-4 c-2-1 c-2-2 c-2-3\n  cut-line-status  18 lines -> c-2-1 c-2-2 c-2-3 c-2-6\n  cut-transpose    11 lines -> c-1-2 c-1-4 c-2-1 c-2-3 c-2-6\n  cut-cell-cycle   13 lines -> c-2-5 c-2-6\n  cut-board-solved  8 lines -> c-2-1 c-2-6\nNo student task is ungraded and none is graded by a criterion that does not name it.\n\nRULE 3 SHOWN, NOT ASSERTED: git reports verify/ byte-identical to the Gate 1 commit 8499e26 - the suite that graded this code is the one approved before any code existed. spec-status drift null, still frozen at 729cfc0b1ba5, so the Builder edited neither the tests nor the spec.\n\nTHE TWO GATE 1 WATCH ITEMS, CHECKED BY HAND RATHER THAN BY TEST:\n  W4 CLEAR - lib/puzzles.ts puzzleFor returns an object literal with exactly id,\n       title, size, rowClues, colClues. No spread, and the Puzzle type admits\n       nothing else. solutionRows is separate and server-side only; the solution\n       never enters the response. The spec's stricter 'no other key' prose holds\n       even though c-1-1 grades only 'no solution key'.\n  W1 RESOLVED THE SAFE WAY - Board.tsx documents the reading taken ('a clue keeps\n       the status it is already showing until a response is applied') and\n       sendCheck enforces it with a sequence guard: setResult fires only when\n       seq === sent.current, so a stale answer is dropped and nothing repaints in\n       the gap between a click and its response. No blink. This also implements\n       W2's ungraded out-of-order discard rule.\n\nMarker placement, which was round 2's blocker, is as the round-3 spec pinned it: handleCellClick keeps 'let updated = grid' above the marker and setGrid / sendCheck below it.\n\nSTILL OPEN FOR GATE 3: W5 - session 2 budgeted to exactly 40 with no slack while carrying the largest cut. Do NOT fix by moving a cut into session 1 (E113); name a drop candidate inside session 2. W3 - board-loading and the text of puzzle-title remain declared and ungraded."
+    },
     "gate3": null
   },
   "steps": [
@@ -141,6 +147,20 @@
       "at": "2026-08-29T06:40:03+00:00",
       "detail": "",
       "run": 3
+    },
+    {
+      "step": "test:app",
+      "ok": true,
+      "at": "2026-08-29T07:12:47+00:00",
+      "detail": "",
+      "run": 1
+    },
+    {
+      "step": "mutation",
+      "ok": true,
+      "at": "2026-08-29T07:18:21+00:00",
+      "detail": "",
+      "run": 1
     }
   ],
   "ticket": null,

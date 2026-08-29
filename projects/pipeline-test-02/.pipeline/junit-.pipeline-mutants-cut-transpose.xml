@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="5" skipped="0" tests="11" time="47.602" timestamp="2026-08-29T12:47:33.068245+05:30" hostname="HERO"><testcase classname="verify.test_api_check" name="test_c_2_1_boat_solution_is_solved_and_a_moved_cell_violates_column_zero" time="0.852"><failure message="AssertionError: cols are []&#10;assert [] == ['satisfied',..., 'satisfied']&#10;  &#10;  Right contains 5 more items, first extra item: 'satisfied'&#10;  Use -v to get more diff">api = &lt;httpx.Client object at 0x00000246A64F92B0&gt;
+
+    def test_c_2_1_boat_solution_is_solved_and_a_moved_cell_violates_column_zero(api):
+        """c-2-1: POST /api/puzzles/boat/check with the boat solution as the grid -
+        the five rows ..#.., .###., #####, .#.#. and .#.#., reading # as filled and
+        . as empty - returns 200 with solved true, 5 entries in rows, 5 entries in
+        cols and each of those 10 entries equal to satisfied; then the same grid
+        with row 0 set to filled, empty, empty, empty, empty returns 200 with all 5
+        entries of rows equal to satisfied, cols[0] violated, cols[2] open and
+        solved false.
+    
+        The second request is the one that separates a boardSolved reading both axes
+        from one that reads the rows and stops: every row still matches its clue,
+        while column 0 now holds two blocks against a clue of [1].
+        """
+        solved = _result(check(api, "boat", solution_grid("boat")))
+        assert solved["rows"] == ["satisfied"] * 5, f"rows are {solved['rows']}"
+&gt;       assert solved["cols"] == ["satisfied"] * 5, f"cols are {solved['cols']}"
+E       AssertionError: cols are []
+E       assert [] == ['satisfied',..., 'satisfied']
+E         
+E         Right contains 5 more items, first extra item: 'satisfied'
+E         Use -v to get more diff
+
+verify\test_api_check.py:41: AssertionError</failure></testcase><testcase classname="verify.test_api_check" name="test_c_2_2_check_answers_satisfied_open_and_violated_and_reads_crossed" time="0.345" /><testcase classname="verify.test_api_check" name="test_c_2_3_house_row_three_filled_grades_both_axes_of_an_eight_by_eight" time="0.329"><failure message="AssertionError: cols are []&#10;assert 0 == 8&#10; +  where 0 = len([])">api = &lt;httpx.Client object at 0x00000246A6523C50&gt;
+
+    def test_c_2_3_house_row_three_filled_grades_both_axes_of_an_eight_by_eight(api):
+        """c-2-3: POST /api/puzzles/house/check with every cell of row 3 filled and
+        every other cell empty returns 200 with 8 entries in rows, 8 entries in
+        cols, rows[3] satisfied, rows[0] open, cols[0] satisfied and cols[3] open.
+    
+        The 8 by 8 board and the column axis of the check in one request: cols[0]
+        reads [1] against the house clue [1], while cols[3] reads [1] against [4,2]
+        and still has empty cells, so it is open rather than violated.
+        """
+        grid = empty_grid(8)
+        grid[3] = [FILLED] * 8
+        body = _result(check(api, "house", grid))
+    
+        assert len(body["rows"]) == 8, f"rows are {body['rows']}"
+&gt;       assert len(body["cols"]) == 8, f"cols are {body['cols']}"
+E       AssertionError: cols are []
+E       assert 0 == 8
+E        +  where 0 = len([])
+
+verify\test_api_check.py:99: AssertionError</failure></testcase><testcase classname="verify.test_api_check" name="test_c_2_4_unknown_id_is_404_and_a_bad_grid_is_400_with_only_an_error_key" time="0.311" /><testcase classname="verify.test_api_puzzles" name="test_c_1_1_puzzles_list_is_boat_blanks_house_with_the_boat_row_clues" time="0.324" /><testcase classname="verify.test_api_puzzles" name="test_c_1_2_puzzles_list_col_clues_are_transposed_for_boat_and_house" time="0.308"><failure message="AssertionError: boat colClues are [], expected [[1], [4], [3], [4], [1]]&#10;assert [] == [[1], [4], [3], [4], [1]]&#10;  &#10;  Right contains 5 more items, first extra item: [1]&#10;  Use -v to get more diff">api = &lt;httpx.Client object at 0x00000246A65B3530&gt;
+
+    def test_c_1_2_puzzles_list_col_clues_are_transposed_for_boat_and_house(api):
+        """c-1-2: the boat entry has colClues [[1],[4],[3],[4],[1]] and the house
+        entry has size 8 and colClues [[1],[6],[3],[4,2],[4,2],[3],[6],[1]].
+    
+        Both boards have colClues that differ from their rowClues, so a transpose
+        that hands the rows back unchanged fails here, and the cut-transpose
+        fallback - `out` empty, so colClues serves as [] - fails here too.
+        """
+        by_id = {p.get("id"): p for p in _puzzles(api)}
+        assert sorted(by_id) == sorted(SEED_ORDER), f"ids are {sorted(by_id)}"
+    
+        boat, house = by_id["boat"], by_id["house"]
+&gt;       assert boat["colClues"] == COL_CLUES["boat"], (
+            f"boat colClues are {boat['colClues']}, expected {COL_CLUES['boat']}"
+        )
+E       AssertionError: boat colClues are [], expected [[1], [4], [3], [4], [1]]
+E       assert [] == [[1], [4], [3], [4], [1]]
+E         
+E         Right contains 5 more items, first extra item: [1]
+E         Use -v to get more diff
+
+verify\test_api_puzzles.py:75: AssertionError</failure></testcase><testcase classname="verify.test_api_puzzles" name="test_c_1_3_puzzles_list_blanks_row_clues_cover_the_empty_full_and_last_cell_runs" time="0.310" /><testcase classname="verify.test_ui_board" name="test_c_1_4_blanks_board_draws_25_empty_cells_and_two_open_clue_strips" time="21.755"><failure message="AssertionError: Locator expected to have count '5'&#10;Actual value: 0 &#10;Call log:&#10;  - Expect &quot;to_have_count&quot; with timeout 20000ms&#10;  - waiting for locator(&quot;[data-testid^=\&quot;col-clue-\&quot;]&quot;)&#10;    43 × locator resolved to 0 elements&#10;       - unexpected value &quot;0&quot;">page = &lt;Page url='http://127.0.0.1:50232/puzzles/blanks'&gt;
+
+    def test_c_1_4_blanks_board_draws_25_empty_cells_and_two_open_clue_strips(page):
+        """c-1-4: /puzzles/blanks renders 25 elements with data-testid cell-0-0
+        through cell-4-4 each carrying data-state empty, renders exactly 5 row-clue
+        elements and exactly 5 col-clue elements, renders row-clue-0 with text 0,
+        row-clue-1 with text 5 and col-clue-2 with text 1 2, gives each of
+        row-clue-0 through row-clue-4 data-status open, and renders no solved-banner
+        element.
+    
+        The two counts are what make an absent strip fail rather than pass
+        vacuously: with cut-transpose open colClues serves as [], so the board draws
+        no col-clue element at all and "exactly 5" goes red.
+        """
+        open_puzzle(page, "blanks")
+        expect(all_cells(page)).to_have_count(25, timeout=LOAD_TIMEOUT)
+    
+        expected_cells = {
+            f"cell-{r}-{c}": "empty" for r in range(5) for c in range(5)
+        }
+        assert attr_map(all_cells(page), "data-state") == expected_cells
+    
+        expect(all_row_clues(page)).to_have_count(5, timeout=LOAD_TIMEOUT)
+&gt;       expect(all_col_clues(page)).to_have_count(5, timeout=LOAD_TIMEOUT)
+E       AssertionError: Locator expected to have count '5'
+E       Actual value: 0 
+E       Call log:
+E         - Expect "to_have_count" with timeout 20000ms
+E         - waiting for locator("[data-testid^=\"col-clue-\"]")
+E           43 × locator resolved to 0 elements
+E              - unexpected value "0"
+
+verify\test_ui_board.py:52: AssertionError</failure></testcase><testcase classname="verify.test_ui_board" name="test_c_1_5_unknown_puzzle_id_shows_puzzle_not_found_and_no_board" time="0.222" /><testcase classname="verify.test_ui_clicks" name="test_c_2_5_clicking_one_cell_cycles_empty_filled_crossed_empty" time="0.349" /><testcase classname="verify.test_ui_clicks" name="test_c_2_6_clicking_the_blanks_solution_satisfies_every_clue_and_solves" time="22.074"><failure message="AssertionError: Locator expected to have count '5'&#10;Actual value: 0 &#10;Call log:&#10;  - Expect &quot;to_have_count&quot; with timeout 20000ms&#10;  - waiting for locator(&quot;[data-testid^=\&quot;col-clue-\&quot;]&quot;)&#10;    43 × locator resolved to 0 elements&#10;       - unexpected value &quot;0&quot;">page = &lt;Page url='http://127.0.0.1:50232/puzzles/blanks'&gt;
+
+    def test_c_2_6_clicking_the_blanks_solution_satisfies_every_clue_and_solves(page):
+        """c-2-6: on /puzzles/blanks, one click on each of the 13 cells filled in
+        the blanks solution - the 5 cells of row 1, columns 0 and 4 of row 2,
+        columns 1, 2 and 3 of row 3, and columns 0, 2 and 4 of row 4, leaving row 0
+        untouched - renders exactly 5 row-clue elements, row-clue-0 through
+        row-clue-4, and exactly 5 col-clue elements, col-clue-0 through col-clue-4,
+        each of those 10 elements carrying data-status satisfied, and renders a
+        solved-banner element with text Solved.
+    
+        Two readings this handles rather than picks:
+    
+        * ambiguity.md W1 leaves the in-flight window - what a strip shows between a
+          click and its response - open. Nothing here observes that window: each
+          click waits for its own check response before the next click is sent, so
+          the board is never mid-flight when it is read, and the final assertions
+          are retrying waits on the settled state either way.
+        * reading a strip as "whatever col-clue elements happen to be there" passes
+          vacuously when colClues is [], which is exactly what an open cut-transpose
+          serves. The criterion says exactly 5 and names col-clue-0 through
+          col-clue-4, so the count is asserted first and each element is then looked
+          up by its own testid - absence fails instead of being skipped.
+        """
+        open_puzzle(page, "blanks")
+        expect(all_cells(page)).to_have_count(25, timeout=LOAD_TIMEOUT)
+    
+        for r, c in BLANKS_FILLED:
+            with page.expect_response(
+                lambda response: is_check_response(response, "blanks"),
+                timeout=CHECK_TIMEOUT,
+            ):
+                cell(page, r, c).click()
+    
+        expect(all_row_clues(page)).to_have_count(5, timeout=CHECK_TIMEOUT)
+&gt;       expect(all_col_clues(page)).to_have_count(5, timeout=CHECK_TIMEOUT)
+E       AssertionError: Locator expected to have count '5'
+E       Actual value: 0 
+E       Call log:
+E         - Expect "to_have_count" with timeout 20000ms
+E         - waiting for locator("[data-testid^=\"col-clue-\"]")
+E           43 × locator resolved to 0 elements
+E              - unexpected value "0"
+
+verify\test_ui_clicks.py:84: AssertionError</failure></testcase></testsuite></testsuites>

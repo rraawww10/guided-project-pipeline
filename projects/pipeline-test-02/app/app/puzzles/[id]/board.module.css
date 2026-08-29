@@ -1,0 +1,104 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 2rem 1rem 3rem;
+}
+
+.title {
+  margin: 0;
+  font-size: 1.6rem;
+  letter-spacing: 0.04em;
+}
+
+.loading,
+.missing {
+  margin: 0;
+  font-size: 1.1rem;
+  color: #5c574c;
+}
+
+.board {
+  display: flex;
+  flex-direction: column;
+}
+
+.colStrip,
+.line {
+  display: flex;
+  flex-direction: row;
+}
+
+.lower {
+  display: flex;
+  flex-direction: row;
+}
+
+.rowStrip {
+  display: flex;
+  flex-direction: column;
+}
+
+.grid {
+  display: flex;
+  flex-direction: column;
+  border: 2px solid var(--ink);
+}
+
+.corner,
+.clue {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.4rem;
+  height: 2.4rem;
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
+  color: #5c574c;
+}
+
+.rowStrip .clue {
+  justify-content: flex-end;
+  padding-right: 0.4rem;
+}
+
+.clue[data-status='satisfied'] {
+  color: var(--satisfied);
+  font-weight: 700;
+}
+
+.clue[data-status='violated'] {
+  color: var(--violated);
+  font-weight: 700;
+}
+
+.cell {
+  width: 2.4rem;
+  height: 2.4rem;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--line);
+  background: #fffdf8;
+  cursor: pointer;
+}
+
+.cell[data-state='filled'] {
+  background: var(--ink);
+}
+
+.cell[data-state='crossed'] {
+  background:
+    linear-gradient(to top right, transparent 46%, var(--line) 46%, var(--line) 54%, transparent 54%),
+    linear-gradient(to bottom right, transparent 46%, var(--line) 46%, var(--line) 54%, transparent 54%);
+}
+
+.banner {
+  margin: 0;
+  padding: 0.5rem 1.2rem;
+  border-radius: 999px;
+  background: var(--satisfied);
+  color: #fff;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}

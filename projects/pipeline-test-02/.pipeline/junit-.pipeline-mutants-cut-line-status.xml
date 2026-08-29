@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="4" skipped="0" tests="11" time="27.149" timestamp="2026-08-29T12:45:51.719529+05:30" hostname="HERO"><testcase classname="verify.test_api_check" name="test_c_2_1_boat_solution_is_solved_and_a_moved_cell_violates_column_zero" time="0.514"><failure message="AssertionError: rows are ['open', 'open', 'open', 'open', 'open']&#10;assert ['open', 'ope...open', 'open'] == ['satisfied',..., 'satisfied']&#10;  &#10;  At index 0 diff: 'open' != 'satisfied'&#10;  Use -v to get more diff">api = &lt;httpx.Client object at 0x0000025978C892B0&gt;
+
+    def test_c_2_1_boat_solution_is_solved_and_a_moved_cell_violates_column_zero(api):
+        """c-2-1: POST /api/puzzles/boat/check with the boat solution as the grid -
+        the five rows ..#.., .###., #####, .#.#. and .#.#., reading # as filled and
+        . as empty - returns 200 with solved true, 5 entries in rows, 5 entries in
+        cols and each of those 10 entries equal to satisfied; then the same grid
+        with row 0 set to filled, empty, empty, empty, empty returns 200 with all 5
+        entries of rows equal to satisfied, cols[0] violated, cols[2] open and
+        solved false.
+    
+        The second request is the one that separates a boardSolved reading both axes
+        from one that reads the rows and stops: every row still matches its clue,
+        while column 0 now holds two blocks against a clue of [1].
+        """
+        solved = _result(check(api, "boat", solution_grid("boat")))
+&gt;       assert solved["rows"] == ["satisfied"] * 5, f"rows are {solved['rows']}"
+E       AssertionError: rows are ['open', 'open', 'open', 'open', 'open']
+E       assert ['open', 'ope...open', 'open'] == ['satisfied',..., 'satisfied']
+E         
+E         At index 0 diff: 'open' != 'satisfied'
+E         Use -v to get more diff
+
+verify\test_api_check.py:40: AssertionError</failure></testcase><testcase classname="verify.test_api_check" name="test_c_2_2_check_answers_satisfied_open_and_violated_and_reads_crossed" time="0.324"><failure message="AssertionError: rows[0] is 'open'&#10;assert 'open' == 'satisfied'&#10;  &#10;  - satisfied&#10;  + open">api = &lt;httpx.Client object at 0x0000025978D27C50&gt;
+
+    def test_c_2_2_check_answers_satisfied_open_and_violated_and_reads_crossed(api):
+        """c-2-2: blanks with every cell empty returns 200 with rows[0] satisfied,
+        rows[1] open and solved false; boat with row 0 set to filled, empty, filled,
+        empty, empty and every other cell empty returns 200 with rows[0] violated
+        and rows[1] open; boat with row 1 set to filled, filled, crossed, crossed,
+        crossed and row 3 set to filled, crossed, filled, empty, empty and every
+        other cell empty returns 200 with rows[1] violated and rows[3] satisfied.
+    
+        All three answers, plus both halves of crossed: a crossed cell breaks a
+        block, so row 3 reads [1,1] and is satisfied, and a crossed cell counts as
+        decided, so row 1 with nothing empty left in it is violated rather than open.
+        """
+        blank = _result(check(api, "blanks", empty_grid(5)))
+&gt;       assert blank["rows"][0] == "satisfied", f"rows[0] is {blank['rows'][0]!r}"
+E       AssertionError: rows[0] is 'open'
+E       assert 'open' == 'satisfied'
+E         
+E         - satisfied
+E         + open
+
+verify\test_api_check.py:67: AssertionError</failure></testcase><testcase classname="verify.test_api_check" name="test_c_2_3_house_row_three_filled_grades_both_axes_of_an_eight_by_eight" time="0.304"><failure message="AssertionError: rows[3] is 'open'&#10;assert 'open' == 'satisfied'&#10;  &#10;  - satisfied&#10;  + open">api = &lt;httpx.Client object at 0x0000025978E32850&gt;
+
+    def test_c_2_3_house_row_three_filled_grades_both_axes_of_an_eight_by_eight(api):
+        """c-2-3: POST /api/puzzles/house/check with every cell of row 3 filled and
+        every other cell empty returns 200 with 8 entries in rows, 8 entries in
+        cols, rows[3] satisfied, rows[0] open, cols[0] satisfied and cols[3] open.
+    
+        The 8 by 8 board and the column axis of the check in one request: cols[0]
+        reads [1] against the house clue [1], while cols[3] reads [1] against [4,2]
+        and still has empty cells, so it is open rather than violated.
+        """
+        grid = empty_grid(8)
+        grid[3] = [FILLED] * 8
+        body = _result(check(api, "house", grid))
+    
+        assert len(body["rows"]) == 8, f"rows are {body['rows']}"
+        assert len(body["cols"]) == 8, f"cols are {body['cols']}"
+&gt;       assert body["rows"][3] == "satisfied", f"rows[3] is {body['rows'][3]!r}"
+E       AssertionError: rows[3] is 'open'
+E       assert 'open' == 'satisfied'
+E         
+E         - satisfied
+E         + open
+
+verify\test_api_check.py:100: AssertionError</failure></testcase><testcase classname="verify.test_api_check" name="test_c_2_4_unknown_id_is_404_and_a_bad_grid_is_400_with_only_an_error_key" time="0.450" /><testcase classname="verify.test_api_puzzles" name="test_c_1_1_puzzles_list_is_boat_blanks_house_with_the_boat_row_clues" time="0.355" /><testcase classname="verify.test_api_puzzles" name="test_c_1_2_puzzles_list_col_clues_are_transposed_for_boat_and_house" time="0.333" /><testcase classname="verify.test_api_puzzles" name="test_c_1_3_puzzles_list_blanks_row_clues_cover_the_empty_full_and_last_cell_runs" time="0.301" /><testcase classname="verify.test_ui_board" name="test_c_1_4_blanks_board_draws_25_empty_cells_and_two_open_clue_strips" time="1.477" /><testcase classname="verify.test_ui_board" name="test_c_1_5_unknown_puzzle_id_shows_puzzle_not_found_and_no_board" time="0.295" /><testcase classname="verify.test_ui_clicks" name="test_c_2_5_clicking_one_cell_cycles_empty_filled_crossed_empty" time="0.503" /><testcase classname="verify.test_ui_clicks" name="test_c_2_6_clicking_the_blanks_solution_satisfies_every_clue_and_solves" time="22.030"><failure message="AssertionError: Locator expected to have attribute 'satisfied'&#10;Actual value: open &#10;Call log:&#10;  - Expect &quot;to_have_attribute&quot; with timeout 20000ms&#10;  - waiting for get_by_test_id(&quot;row-clue-0&quot;)&#10;    43 × locator resolved to &lt;div data-status=&quot;open&quot; data-testid=&quot;row-clue-0&quot; class=&quot;board_clue__gc5Cz&quot;&gt;0&lt;/div&gt;&#10;       - unexpected value &quot;open&quot;&#10;&#10;Aria snapshot:&#10;- text: &quot;0&quot;">page = &lt;Page url='http://127.0.0.1:61596/puzzles/blanks'&gt;
+
+    def test_c_2_6_clicking_the_blanks_solution_satisfies_every_clue_and_solves(page):
+        """c-2-6: on /puzzles/blanks, one click on each of the 13 cells filled in
+        the blanks solution - the 5 cells of row 1, columns 0 and 4 of row 2,
+        columns 1, 2 and 3 of row 3, and columns 0, 2 and 4 of row 4, leaving row 0
+        untouched - renders exactly 5 row-clue elements, row-clue-0 through
+        row-clue-4, and exactly 5 col-clue elements, col-clue-0 through col-clue-4,
+        each of those 10 elements carrying data-status satisfied, and renders a
+        solved-banner element with text Solved.
+    
+        Two readings this handles rather than picks:
+    
+        * ambiguity.md W1 leaves the in-flight window - what a strip shows between a
+          click and its response - open. Nothing here observes that window: each
+          click waits for its own check response before the next click is sent, so
+          the board is never mid-flight when it is read, and the final assertions
+          are retrying waits on the settled state either way.
+        * reading a strip as "whatever col-clue elements happen to be there" passes
+          vacuously when colClues is [], which is exactly what an open cut-transpose
+          serves. The criterion says exactly 5 and names col-clue-0 through
+          col-clue-4, so the count is asserted first and each element is then looked
+          up by its own testid - absence fails instead of being skipped.
+        """
+        open_puzzle(page, "blanks")
+        expect(all_cells(page)).to_have_count(25, timeout=LOAD_TIMEOUT)
+    
+        for r, c in BLANKS_FILLED:
+            with page.expect_response(
+                lambda response: is_check_response(response, "blanks"),
+                timeout=CHECK_TIMEOUT,
+            ):
+                cell(page, r, c).click()
+    
+        expect(all_row_clues(page)).to_have_count(5, timeout=CHECK_TIMEOUT)
+        expect(all_col_clues(page)).to_have_count(5, timeout=CHECK_TIMEOUT)
+    
+        for i in range(5):
+&gt;           expect(row_clue(page, i)).to_have_attribute(
+                "data-status", "satisfied", timeout=CHECK_TIMEOUT
+            )
+E           AssertionError: Locator expected to have attribute 'satisfied'
+E           Actual value: open 
+E           Call log:
+E             - Expect "to_have_attribute" with timeout 20000ms
+E             - waiting for get_by_test_id("row-clue-0")
+E               43 × locator resolved to &lt;div data-status="open" data-testid="row-clue-0" class="board_clue__gc5Cz"&gt;0&lt;/div&gt;
+E                  - unexpected value "open"
+E           
+E           Aria snapshot:
+E           - text: "0"
+
+verify\test_ui_clicks.py:87: AssertionError</failure></testcase></testsuite></testsuites>

@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="11" time="46.723" timestamp="2026-08-29T12:44:37.232528+05:30" hostname="HERO"><testcase classname="verify.test_api_check" name="test_c_2_1_boat_solution_is_solved_and_a_moved_cell_violates_column_zero" time="0.401" /><testcase classname="verify.test_api_check" name="test_c_2_2_check_answers_satisfied_open_and_violated_and_reads_crossed" time="0.324" /><testcase classname="verify.test_api_check" name="test_c_2_3_house_row_three_filled_grades_both_axes_of_an_eight_by_eight" time="0.315" /><testcase classname="verify.test_api_check" name="test_c_2_4_unknown_id_is_404_and_a_bad_grid_is_400_with_only_an_error_key" time="0.310" /><testcase classname="verify.test_api_puzzles" name="test_c_1_1_puzzles_list_is_boat_blanks_house_with_the_boat_row_clues" time="0.304" /><testcase classname="verify.test_api_puzzles" name="test_c_1_2_puzzles_list_col_clues_are_transposed_for_boat_and_house" time="0.300" /><testcase classname="verify.test_api_puzzles" name="test_c_1_3_puzzles_list_blanks_row_clues_cover_the_empty_full_and_last_cell_runs" time="0.334" /><testcase classname="verify.test_ui_board" name="test_c_1_4_blanks_board_draws_25_empty_cells_and_two_open_clue_strips" time="1.488" /><testcase classname="verify.test_ui_board" name="test_c_1_5_unknown_puzzle_id_shows_puzzle_not_found_and_no_board" time="0.270" /><testcase classname="verify.test_ui_clicks" name="test_c_2_5_clicking_one_cell_cycles_empty_filled_crossed_empty" time="20.446"><failure message="AssertionError: Locator expected to have attribute 'filled'&#10;Actual value: empty &#10;Call log:&#10;  - Expect &quot;to_have_attribute&quot; with timeout 20000ms&#10;  - waiting for get_by_test_id(&quot;cell-0-2&quot;)&#10;    43 × locator resolved to &lt;button type=&quot;button&quot; data-state=&quot;empty&quot; data-testid=&quot;cell-0-2&quot; class=&quot;board_cell__Fq3bw&quot; aria-label=&quot;row 1, column 3&quot;&gt;&lt;/button&gt;&#10;       - unexpected value &quot;empty&quot;&#10;&#10;Aria snapshot:&#10;- button &quot;row 1, column 3&quot;">page = &lt;Page url='http://127.0.0.1:58573/puzzles/boat'&gt;
+
+    def test_c_2_5_clicking_one_cell_cycles_empty_filled_crossed_empty(page):
+        """c-2-5: on /puzzles/boat a first click on cell-0-2 updates its data-state
+        to filled, a second click updates it to crossed and a third click updates it
+        to empty, while cell-0-0 stays at data-state empty across all three clicks.
+    
+        filled and crossed are what go red against the cut-cell-cycle fallback,
+        where `updated` starts as `grid` and a click changes nothing.
+        """
+        open_puzzle(page, "boat")
+        expect(all_cells(page)).to_have_count(25, timeout=LOAD_TIMEOUT)
+    
+        target = cell(page, 0, 2)
+        neighbour = cell(page, 0, 0)
+        expect(target).to_have_attribute("data-state", "empty", timeout=LOAD_TIMEOUT)
+    
+        for step in ("filled", "crossed", "empty"):
+            target.click()
+&gt;           expect(target).to_have_attribute("data-state", step, timeout=LOAD_TIMEOUT)
+E           AssertionError: Locator expected to have attribute 'filled'
+E           Actual value: empty 
+E           Call log:
+E             - Expect "to_have_attribute" with timeout 20000ms
+E             - waiting for get_by_test_id("cell-0-2")
+E               43 × locator resolved to &lt;button type="button" data-state="empty" data-testid="cell-0-2" class="board_cell__Fq3bw" aria-label="row 1, column 3"&gt;&lt;/button&gt;
+E                  - unexpected value "empty"
+E           
+E           Aria snapshot:
+E           - button "row 1, column 3"
+
+verify\test_ui_clicks.py:44: AssertionError</failure></testcase><testcase classname="verify.test_ui_clicks" name="test_c_2_6_clicking_the_blanks_solution_satisfies_every_clue_and_solves" time="21.976"><failure message="AssertionError: Locator expected to have attribute 'satisfied'&#10;Actual value: open &#10;Call log:&#10;  - Expect &quot;to_have_attribute&quot; with timeout 20000ms&#10;  - waiting for get_by_test_id(&quot;col-clue-0&quot;)&#10;    43 × locator resolved to &lt;div data-status=&quot;open&quot; data-testid=&quot;col-clue-0&quot; class=&quot;board_clue__gc5Cz&quot;&gt;2 1&lt;/div&gt;&#10;       - unexpected value &quot;open&quot;&#10;&#10;Aria snapshot:&#10;- text: 2 1">page = &lt;Page url='http://127.0.0.1:58573/puzzles/blanks'&gt;
+
+    def test_c_2_6_clicking_the_blanks_solution_satisfies_every_clue_and_solves(page):
+        """c-2-6: on /puzzles/blanks, one click on each of the 13 cells filled in
+        the blanks solution - the 5 cells of row 1, columns 0 and 4 of row 2,
+        columns 1, 2 and 3 of row 3, and columns 0, 2 and 4 of row 4, leaving row 0
+        untouched - renders exactly 5 row-clue elements, row-clue-0 through
+        row-clue-4, and exactly 5 col-clue elements, col-clue-0 through col-clue-4,
+        each of those 10 elements carrying data-status satisfied, and renders a
+        solved-banner element with text Solved.
+    
+        Two readings this handles rather than picks:
+    
+        * ambiguity.md W1 leaves the in-flight window - what a strip shows between a
+          click and its response - open. Nothing here observes that window: each
+          click waits for its own check response before the next click is sent, so
+          the board is never mid-flight when it is read, and the final assertions
+          are retrying waits on the settled state either way.
+        * reading a strip as "whatever col-clue elements happen to be there" passes
+          vacuously when colClues is [], which is exactly what an open cut-transpose
+          serves. The criterion says exactly 5 and names col-clue-0 through
+          col-clue-4, so the count is asserted first and each element is then looked
+          up by its own testid - absence fails instead of being skipped.
+        """
+        open_puzzle(page, "blanks")
+        expect(all_cells(page)).to_have_count(25, timeout=LOAD_TIMEOUT)
+    
+        for r, c in BLANKS_FILLED:
+            with page.expect_response(
+                lambda response: is_check_response(response, "blanks"),
+                timeout=CHECK_TIMEOUT,
+            ):
+                cell(page, r, c).click()
+    
+        expect(all_row_clues(page)).to_have_count(5, timeout=CHECK_TIMEOUT)
+        expect(all_col_clues(page)).to_have_count(5, timeout=CHECK_TIMEOUT)
+    
+        for i in range(5):
+            expect(row_clue(page, i)).to_have_attribute(
+                "data-status", "satisfied", timeout=CHECK_TIMEOUT
+            )
+&gt;           expect(col_clue(page, i)).to_have_attribute(
+                "data-status", "satisfied", timeout=CHECK_TIMEOUT
+            )
+E           AssertionError: Locator expected to have attribute 'satisfied'
+E           Actual value: open 
+E           Call log:
+E             - Expect "to_have_attribute" with timeout 20000ms
+E             - waiting for get_by_test_id("col-clue-0")
+E               43 × locator resolved to &lt;div data-status="open" data-testid="col-clue-0" class="board_clue__gc5Cz"&gt;2 1&lt;/div&gt;
+E                  - unexpected value "open"
+E           
+E           Aria snapshot:
+E           - text: 2 1
+
+verify\test_ui_clicks.py:90: AssertionError</failure></testcase></testsuite></testsuites>
