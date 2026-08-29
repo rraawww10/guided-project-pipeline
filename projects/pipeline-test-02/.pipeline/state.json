@@ -18,12 +18,15 @@
     "redfirst": 3,
     "revise:round-1": 1,
     "revise:round-2": 1,
-    "test:app": 1,
+    "test:app": 2,
     "mutation": 1,
     "cut": 1,
     "deploy": 1,
     "guide-lint": 3,
-    "leak-scan": 1
+    "leak-scan": 1,
+    "dryrun": 1,
+    "ship": 1,
+    "test:skeleton": 1
   },
   "gates": {
     "gate0": {
@@ -44,7 +47,11 @@
       "at": "2026-08-29T07:20:51+00:00",
       "note": "GATE 2 APPROVED. Human decision. Read as every criterion, not as a summary.\n\nRESULTS: 11 pass, 0 fail, 0 skip, 0 missing. pytest rc 0, 11 passed in 8.37s. Session 1 c-1-1..c-1-5 and session 2 c-2-1..c-2-6 all green. Built first time - code retries 0/15, no builder/test-runner loop. code_checks declared none, so none run.\n\nMUTATION: 5 of 5 tasks checked, 0 ungraded, 0 inconclusive. For every cut the set that went red equals the set that grades it, with stayed_green empty in all five:\n  cut-runs-of      18 lines -> c-1-1 c-1-2 c-1-3 c-1-4 c-2-1 c-2-2 c-2-3\n  cut-line-status  18 lines -> c-2-1 c-2-2 c-2-3 c-2-6\n  cut-transpose    11 lines -> c-1-2 c-1-4 c-2-1 c-2-3 c-2-6\n  cut-cell-cycle   13 lines -> c-2-5 c-2-6\n  cut-board-solved  8 lines -> c-2-1 c-2-6\nNo student task is ungraded and none is graded by a criterion that does not name it.\n\nRULE 3 SHOWN, NOT ASSERTED: git reports verify/ byte-identical to the Gate 1 commit 8499e26 - the suite that graded this code is the one approved before any code existed. spec-status drift null, still frozen at 729cfc0b1ba5, so the Builder edited neither the tests nor the spec.\n\nTHE TWO GATE 1 WATCH ITEMS, CHECKED BY HAND RATHER THAN BY TEST:\n  W4 CLEAR - lib/puzzles.ts puzzleFor returns an object literal with exactly id,\n       title, size, rowClues, colClues. No spread, and the Puzzle type admits\n       nothing else. solutionRows is separate and server-side only; the solution\n       never enters the response. The spec's stricter 'no other key' prose holds\n       even though c-1-1 grades only 'no solution key'.\n  W1 RESOLVED THE SAFE WAY - Board.tsx documents the reading taken ('a clue keeps\n       the status it is already showing until a response is applied') and\n       sendCheck enforces it with a sequence guard: setResult fires only when\n       seq === sent.current, so a stale answer is dropped and nothing repaints in\n       the gap between a click and its response. No blink. This also implements\n       W2's ungraded out-of-order discard rule.\n\nMarker placement, which was round 2's blocker, is as the round-3 spec pinned it: handleCellClick keeps 'let updated = grid' above the marker and setGrid / sendCheck below it.\n\nSTILL OPEN FOR GATE 3: W5 - session 2 budgeted to exactly 40 with no slack while carrying the largest cut. Do NOT fix by moving a cut into session 1 (E113); name a drop candidate inside session 2. W3 - board-loading and the text of puzzle-title remain declared and ungraded."
     },
-    "gate3": null
+    "gate3": {
+      "approved": true,
+      "at": "2026-08-29T07:50:05+00:00",
+      "note": "GATE 3 APPROVED. Human decision, made with the timing overrun in front of it.\n\nTHE GATE'S QUESTION IS ANSWERED YES: the step 13 dry run on 2026-08-29 recorded taught_without_the_code true - Priya, who did not build it, taught session 2 from the guide alone without opening app/, and students implemented the project. That is what Gate 3 asks and it is answered with evidence rather than opinion.\n\nHANDOVER CHECKS ALL GREEN: leak scan clean - 28 answer lines watched across 5 tasks, 0 leaks in the student tree and 0 in its history. skeleton-check 11 checked, 0 mismatches, 0 partial-state risks, typecheck_fail_open false. guide-lint 0 errors / 0 warnings over 4 files, session 2 disclosed true. deploy ok - fresh copy, install 58 packages, next build compiled in 18.3s, 0 advisories. Cut ran first pass, 5 cuts, 0 retries. Checked by hand: every return in lib/nonogram.ts sits below its cut so the skeleton compiles, and SEEDS survives in skeleton/lib/puzzles.ts because the server derives from it while no derivation ships.\n\nACCEPTED WITH EYES OPEN - THE TIMING. stack.json budgets 40 minutes a session. The pack-writer's honest estimate for session 2 was 48 and disclosed it at the top of session-2.md. Priya measured 50. That is 25 percent over budget and 2 past an estimate already flagged as uncomfortable. It is not known from the dry-run note whether the two marked levers (pre-write the four lineStatus const lines at minute 12; walk cut-board-solved rather than type it at minute 25) were pulled - if they were not, session 2 may still land near 40 when they are; if they were, the 40-minute plan table does not hold and cut-line-status needs splitting.\n\nSHIPPING ANYWAY IS THE DECISION: teachability is the bar Gate 3 sets, and it was cleared. An instructor running session 2 should expect 50 minutes, not 40, and should be told so before they schedule it.\n\nTHIS IS THE FOURTH CONSECUTIVE PROJECT TO OVERRUN ON THE SAME SHAPE - one cut much larger than its siblings, most recently habit-tracker's cut-api-toggle at 6 estimated against roughly 20 measured. learning/lessons.md should record that a spec-linter minute budget is not evidence and that the pattern now has four data points; the fix belongs upstream in the spec, capping a single cut's share of a session, not in the pack. Update it between runs, never during one.\n\nSTILL UNGRADED AND SHIPPING: W1 (what a clue strip shows between a click and its response - the shipped sequence counter in sendCheck resolves it safely but no criterion observes it), W2 (the out-of-order discard rule), W3 (board-loading and the text of puzzle-title). All non-blocking, all recorded at Gate 1."
+    }
   },
   "steps": [
     {
@@ -207,9 +214,44 @@
       "at": "2026-08-29T07:37:39+00:00",
       "detail": "",
       "run": 3
+    },
+    {
+      "step": "dryrun",
+      "ok": true,
+      "at": "2026-08-29T07:48:59+00:00",
+      "detail": "session 2, 50 min, Priya",
+      "run": 1
+    },
+    {
+      "step": "ship",
+      "ok": true,
+      "at": "2026-08-29T07:50:06+00:00",
+      "detail": "",
+      "run": 1
+    },
+    {
+      "step": "test:app",
+      "ok": true,
+      "at": "2026-08-29T08:00:19+00:00",
+      "detail": "",
+      "run": 2
+    },
+    {
+      "step": "test:skeleton",
+      "ok": false,
+      "at": "2026-08-29T08:02:14+00:00",
+      "detail": "",
+      "run": 1
     }
   ],
   "ticket": null,
-  "dry_run": null,
+  "dry_run": {
+    "at": "2026-08-29T07:48:59+00:00",
+    "session": 2,
+    "minutes": 50,
+    "by": "Priya",
+    "taught_without_the_code": true,
+    "note": "Students were able to implement the project"
+  },
   "feedback": []
 }
