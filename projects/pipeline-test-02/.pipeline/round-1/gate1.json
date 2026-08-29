@@ -1,0 +1,95 @@
+{
+  "ok": false,
+  "verdict": "reject",
+  "spec_hash": "fbf42e89e9ce228a68e3435f653520ead92c83cadaf575a815c9695d180a3261",
+  "findings": [
+    {
+      "id": "B1",
+      "title": "`boardSolved` passes every criterion while ignoring the columns",
+      "section": "blocking",
+      "owner": "nothing",
+      "blocking": true,
+      "owner_declared": "nothing",
+      "owner_valid": true,
+      "caught_by": "NO downstream checker sees this - it ships as written",
+      "must_fix_now": true
+    },
+    {
+      "id": "B2",
+      "title": "The clue strips are specified by count, but their data can be shorter",
+      "section": "blocking",
+      "owner": "nothing",
+      "blocking": true,
+      "owner_declared": "nothing",
+      "owner_valid": true,
+      "caught_by": "NO downstream checker sees this - it ships as written",
+      "must_fix_now": true
+    },
+    {
+      "id": "B3",
+      "title": "\"the value from the last check response\" does not say which response wins",
+      "section": "blocking",
+      "owner": "test-runner",
+      "blocking": true,
+      "owner_declared": "test-runner",
+      "owner_valid": true,
+      "caught_by": "step 6 - the Builder/test-runner loop fixes this for free",
+      "must_fix_now": false
+    },
+    {
+      "id": "W1",
+      "title": "`crossed` \"grades exactly like `empty`\" contradicts the closed rule",
+      "section": "worth a look",
+      "owner": "nothing",
+      "blocking": false,
+      "owner_declared": "nothing",
+      "owner_valid": true,
+      "caught_by": "NO downstream checker sees this - it ships as written",
+      "must_fix_now": false
+    },
+    {
+      "id": "W2",
+      "title": "spec.json's `sc-puzzle` entry drops two facts spec.md states",
+      "section": "worth a look",
+      "owner": "test-runner",
+      "blocking": false,
+      "owner_declared": "test-runner",
+      "owner_valid": true,
+      "caught_by": "step 6 - the Builder/test-runner loop fixes this for free",
+      "must_fix_now": false
+    },
+    {
+      "id": "W3",
+      "title": "Session 2's three cuts are not three equal cuts",
+      "section": "worth a look",
+      "owner": "pack-writer",
+      "blocking": false,
+      "owner_declared": "pack-writer",
+      "owner_valid": true,
+      "caught_by": "step 9 - a person reads the guide at Gate 3",
+      "must_fix_now": false
+    },
+    {
+      "id": "W4",
+      "title": "The `/` redirect exists only in spec.md",
+      "section": "worth a look",
+      "owner": "deploy-check",
+      "blocking": false,
+      "owner_declared": "deploy-check",
+      "owner_valid": true,
+      "caught_by": "step 10 - fresh copy, install, build, preview",
+      "must_fix_now": false
+    }
+  ],
+  "counts": {
+    "blocking": 3,
+    "worth_a_look": 4,
+    "unowned_blocking": 2
+  },
+  "reasons": [
+    "B1 (`boardSolved` passes every criterion while ignoring the columns) is blocking and nothing downstream catches it",
+    "B2 (The clue strips are specified by count, but their data can be shorter) is blocking and nothing downstream catches it"
+  ],
+  "rule": "reject when any blocking finding is owned by 'nothing'; approve when every remaining finding sits in a column a downstream checker owns",
+  "reviewed_spec_hash": "fbf42e89e9ce228a68e3435f653520ead92c83cadaf575a815c9695d180a3261"
+}

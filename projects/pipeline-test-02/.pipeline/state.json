@@ -1,0 +1,149 @@
+{
+  "slug": "pipeline-test-02",
+  "created": "2026-08-28T22:26:58+00:00",
+  "flow": 2,
+  "phase": "code",
+  "retries": {
+    "idea": 0,
+    "spec": 0,
+    "code": 0,
+    "pack": 0
+  },
+  "step_runs": {
+    "stack": 1,
+    "ideas": 2,
+    "pick": 1,
+    "lint": 3,
+    "breaker": 3,
+    "redfirst": 3,
+    "revise:round-1": 1,
+    "revise:round-2": 1
+  },
+  "gates": {
+    "gate0": {
+      "approved": true,
+      "at": "2026-08-28T22:36:06+00:00",
+      "note": "chosen by the human at Gate 0",
+      "picked": "idea-03.md"
+    },
+    "gate1": {
+      "approved": true,
+      "at": "2026-08-29T06:47:40+00:00",
+      "note": "GATE 1 APPROVED - round 3. Human decision; the stopping rule was approve-eligible on its own (no --override).\n\nRULE: 0 blocking findings, 7 worth a look, 0 blocking owned by 'nothing'. Linter 0 errors / 0 warnings. Sessions 40.0 / 37.0 against the cap, session 1 carries setup at 2 cuts against session 2's 3, E110 and E113 both pass. 11 criteria, 11 distinct tests, no test shared between two criteria. 5 cuts. gate1-check re-run independently of the workflow that produced it; spec-status, lint.json, ambiguity-meta.json and gate1.json all bound to spec hash 729cfc0b1ba5 with no drift.\n\nWHAT ROUND 2'S REJECTION ASKED FOR IS DONE, AND WIDER: B1 was the unpinned cut-cell-cycle marker boundary. spec.md:188-200 now fixes where the closing marker goes for ALL FIVE cuts, not just that one, and records why it had to be pinned - invisible to cutter (balance and placement, not contents), to return-safety (no return), and to test-runner (only ever sees app/). Restated at :301 and :513. Round 2's W1, the closed rule not being total for clue = [], is also closed: :146 makes it total explicitly and :348-353 handles the degenerate line where clue and runsOf are both [].\n\nACCEPTED WITH EYES OPEN - four findings owned by 'nothing' ship as written:\n\n  W4 - spec.md requires ep-puzzles-list entries to have 'no other key' but c-1-1\n       grades only 'no solution key'. A Builder that spreads extra fields onto the\n       derived puzzle passes and hands the browser the answer, defeating the\n       property the derived-not-stored design exists to protect. WATCH AT GATE 2:\n       read the puzzles-list response shape by hand, do not trust the green test.\n  W1 - the clue-strip status rule is silent on the window between a click and its\n       response. 'Keep the old value' and 'reset to open and repaint' both ship;\n       the second makes every green line blink on every later click. Cosmetic, but\n       it lands in the session-2 payoff. WATCH AT GATE 2 in the browser.\n  W2 - the 'What nothing checks' section lists one constraint and reads as\n       exhaustive; the out-of-order discard rule belongs in it and is missing.\n  W3 - board-loading and the text of puzzle-title are declared and never graded.\n\n  W5 (pack-writer) - session 2 budgeted to exactly 40 with no slack while carrying\n       the largest cut. Do NOT fix by moving a cut into session 1: that gives\n       session 1 three cuts plus setup against session 2's two, which is E113. Name\n       a drop candidate inside session 2 instead. For Gate 3.\n  W6 (test-runner), W7 (deploy-check) - owned downstream, no action here.\n\nThe suite was read as part of this gate, not just the plan: 11 tests, one per criterion, each recording which ambiguity reading it took in its docstring. Red-first ran static-only - correct with no app/ on disk, since a dynamic all-red run would pass for the wrong reason. The dynamic proof is the step-10 skeleton check.",
+      "spec_hash": "729cfc0b1ba57cf0048672d8d428efe2c3ea3a30e4980614eadcce54a320d999",
+      "override": false
+    },
+    "gate2": null,
+    "gate3": null
+  },
+  "steps": [
+    {
+      "step": "stack",
+      "ok": true,
+      "at": "2026-08-28T22:26:59+00:00",
+      "detail": "next, react, typescript",
+      "run": 1
+    },
+    {
+      "step": "ideas",
+      "ok": true,
+      "at": "2026-08-28T22:32:53+00:00",
+      "detail": "5 ideas",
+      "run": 1
+    },
+    {
+      "step": "ideas",
+      "ok": true,
+      "at": "2026-08-28T22:33:20+00:00",
+      "detail": "5 ideas",
+      "run": 2
+    },
+    {
+      "step": "pick",
+      "ok": true,
+      "at": "2026-08-28T22:36:06+00:00",
+      "detail": "idea-03.md",
+      "run": 1
+    },
+    {
+      "step": "lint",
+      "ok": true,
+      "at": "2026-08-28T22:47:57+00:00",
+      "detail": "",
+      "run": 1
+    },
+    {
+      "step": "breaker",
+      "ok": true,
+      "at": "2026-08-28T22:57:30+00:00",
+      "detail": "fbf42e89e9ce",
+      "run": 1
+    },
+    {
+      "step": "redfirst",
+      "ok": true,
+      "at": "2026-08-28T23:08:35+00:00",
+      "detail": "",
+      "run": 1
+    },
+    {
+      "step": "revise:round-1",
+      "ok": true,
+      "at": "2026-08-28T23:12:58+00:00",
+      "detail": "spec.md, spec.json, lint.json, ambiguity.md, gate1.json, redfirst.json, verify",
+      "run": 1
+    },
+    {
+      "step": "lint",
+      "ok": true,
+      "at": "2026-08-28T23:21:29+00:00",
+      "detail": "",
+      "run": 2
+    },
+    {
+      "step": "breaker",
+      "ok": true,
+      "at": "2026-08-28T23:33:02+00:00",
+      "detail": "c5b3a58798c3",
+      "run": 2
+    },
+    {
+      "step": "redfirst",
+      "ok": true,
+      "at": "2026-08-28T23:42:52+00:00",
+      "detail": "",
+      "run": 2
+    },
+    {
+      "step": "revise:round-2",
+      "ok": true,
+      "at": "2026-08-29T06:12:35+00:00",
+      "detail": "spec.md, spec.json, lint.json, ambiguity.md, gate1.json, redfirst.json, verify",
+      "run": 1
+    },
+    {
+      "step": "lint",
+      "ok": true,
+      "at": "2026-08-29T06:19:09+00:00",
+      "detail": "",
+      "run": 3
+    },
+    {
+      "step": "breaker",
+      "ok": true,
+      "at": "2026-08-29T06:31:00+00:00",
+      "detail": "729cfc0b1ba5",
+      "run": 3
+    },
+    {
+      "step": "redfirst",
+      "ok": true,
+      "at": "2026-08-29T06:40:03+00:00",
+      "detail": "",
+      "run": 3
+    }
+  ],
+  "ticket": null,
+  "dry_run": null,
+  "feedback": []
+}

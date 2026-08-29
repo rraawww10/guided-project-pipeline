@@ -1,0 +1,172 @@
+{
+  "slug": "pipeline-test-02",
+  "title": "Clue",
+  "track": "fullstack",
+  "sessions_planned": 2,
+  "stack": ["next", "react", "typescript", "css-modules"],
+  "source": null,
+  "code_checks": [],
+  "endpoints": [
+    {
+      "id": "ep-puzzles-list",
+      "method": "GET",
+      "path": "/api/puzzles",
+      "request": null,
+      "response": "Puzzle[] - three entries, each with id, title, size, rowClues and colClues, and no solution key",
+      "status": [200]
+    },
+    {
+      "id": "ep-puzzle-check",
+      "method": "POST",
+      "path": "/api/puzzles/[id]/check",
+      "request": "{ grid: Cell[][] } - grid must be an array of exactly size arrays of exactly size entries, and every entry must be one of the strings empty, filled or crossed",
+      "response": "CheckResult or { error: string }",
+      "status": [200, 400, 404]
+    }
+  ],
+  "screens": [
+    {
+      "id": "sc-puzzle",
+      "route": "/puzzles/[id]",
+      "elements": [
+        "one element with data-testid board-loading and text Loading, drawn until the GET /api/puzzles response arrives and never after it",
+        "one element with data-testid puzzle-missing and text Puzzle not found, drawn in place of the title, the grid and both clue strips when no puzzle in the response has the route id",
+        "one element with data-testid puzzle-title carrying the puzzle title",
+        "size times size button elements with data-testid cell-<r>-<c>, r and c counted from 0, each carrying data-state set to the string empty, filled or crossed",
+        "one element with data-testid row-clue-<r> per entry of the puzzle rowClues array, indexed from 0, down the left - in the finished app that is size of them; text is that clue numbers joined by one space; a rowClues array with fewer entries than size renders no element for the entries it does not have and must not throw",
+        "one element with data-testid col-clue-<c> per entry of the puzzle colClues array, indexed from 0, across the top - in the finished app that is size of them; text is that clue numbers joined by one space; a colClues array with fewer entries than size renders no element for the entries it does not have and must not throw",
+        "every row-clue and col-clue element carries data-status set to the string satisfied, open or violated, and open on every strip before the first click; the value shown is the one from the response to the most recent click, and a response arriving after a later click has already been sent is discarded",
+        "one element with data-testid solved-banner and text Solved, drawn only while the response to the most recent click carried solved true",
+        "one GET /api/puzzles on mount and no second one; every cell click sends one POST /api/puzzles/<id>/check carrying the grid the click produced, and no other event sends one",
+        "in app/puzzles/[id]/Board.tsx the click handler computes the updated grid inside the cut-cell-cycle markers, while the setGrid call and the POST /api/puzzles/<id>/check both sit below the closing marker - so filling that one cut makes a click both cycle the cell and send a check",
+        "route / is a server-component redirect to /puzzles/boat; it is not a graded screen, it carries no data-testid, and no criterion reads it"
+      ],
+      "states": ["loading", "loaded", "not-found"]
+    }
+  ],
+  "sessions": [
+    {
+      "n": 1,
+      "title": "Setup, the boards, and the clues",
+      "goal": "Serve three seeded puzzles whose row and column clues are derived from their solutions, and draw one of them as an empty playable grid with a clue strip down the top and down the left.",
+      "teaches": [
+        "run-length encoding a line of cells",
+        "transposing a grid so row logic grades columns",
+        "deriving fixtures from the answer instead of storing them",
+        "pinning every rendered element to a data-testid a test can read"
+      ],
+      "builds": ["ep-puzzles-list", "sc-puzzle"],
+      "criteria": [
+        {
+          "id": "c-1-1",
+          "check": "GET /api/puzzles returns 200 with a JSON array of 3 puzzles whose ids in order are boat, blanks and house; the boat entry has size 5, title Boat and rowClues [[1],[3],[5],[1,1],[1,1]], and no entry carries a solution key",
+          "target": "ep-puzzles-list",
+          "cuts": ["cut-runs-of"]
+        },
+        {
+          "id": "c-1-2",
+          "check": "GET /api/puzzles returns the boat entry with colClues [[1],[4],[3],[4],[1]] and the house entry with size 8 and colClues [[1],[6],[3],[4,2],[4,2],[3],[6],[1]]",
+          "target": "ep-puzzles-list",
+          "cuts": ["cut-runs-of", "cut-transpose"]
+        },
+        {
+          "id": "c-1-3",
+          "check": "GET /api/puzzles returns the blanks entry with rowClues [[0],[5],[1,1],[3],[1,1,1]], so the empty row reads [0], the full row reads [5], and the run that ends at the last cell of row 4 is counted",
+          "target": "ep-puzzles-list",
+          "cuts": ["cut-runs-of"]
+        },
+        {
+          "id": "c-1-4",
+          "check": "/puzzles/blanks renders 25 elements with data-testid cell-0-0 through cell-4-4 each carrying data-state empty, renders exactly 5 row-clue elements and exactly 5 col-clue elements, renders row-clue-0 with text 0, row-clue-1 with text 5 and col-clue-2 with text 1 2, gives each of row-clue-0 through row-clue-4 data-status open, and renders no solved-banner element",
+          "target": "sc-puzzle",
+          "cuts": ["cut-runs-of", "cut-transpose"]
+        },
+        {
+          "id": "c-1-5",
+          "check": "/puzzles/nope renders an element with data-testid puzzle-missing and text Puzzle not found, and renders no element with data-testid cell-0-0 and no element with data-testid puzzle-title",
+          "target": "sc-puzzle",
+          "cuts": []
+        }
+      ],
+      "cuts": [
+        {
+          "id": "cut-runs-of",
+          "file": "lib/nonogram.ts",
+          "hint": "Fill `runs` with the length of each block of consecutive `filled` cells in `cells`, in the order the blocks appear, counting a block that ends at the last cell. A `crossed` cell and an `empty` cell both break a block. When `cells` holds no `filled` cell at all, `runs` must be the one-entry list `[0]`, which is the clue an empty line carries."
+        },
+        {
+          "id": "cut-transpose",
+          "file": "lib/nonogram.ts",
+          "hint": "Set `out` so that `out[c][r]` holds `grid[r][c]`: one entry per column of `grid`, each as long as `grid` has rows. Every row of `grid` has the same length, and `grid` itself is left unchanged."
+        }
+      ]
+    },
+    {
+      "n": 2,
+      "title": "Filling, checking, and solved",
+      "goal": "Cycle a cell through three states on click, grade every row and every column against its clue with one rule, and declare the board solved when all of them are satisfied.",
+      "teaches": [
+        "a three-valued cell state that a boolean cannot hold",
+        "a total status rule with a closed list of violations",
+        "grading two overlapping axes with one pure function",
+        "posting the whole grid and rendering the per-line answer"
+      ],
+      "builds": ["ep-puzzle-check"],
+      "criteria": [
+        {
+          "id": "c-2-1",
+          "check": "POST /api/puzzles/boat/check with the boat solution as the grid - the five rows ..#.., .###., #####, .#.#. and .#.#., reading # as filled and . as empty - returns 200 with solved true, 5 entries in rows, 5 entries in cols, and each of those 10 entries equal to satisfied; then POST /api/puzzles/boat/check with the same grid except row 0 set to filled, empty, empty, empty, empty returns 200 with all 5 entries of rows equal to satisfied, cols[0] violated, cols[2] open and solved false",
+          "target": "ep-puzzle-check",
+          "cuts": ["cut-runs-of", "cut-transpose", "cut-line-status", "cut-board-solved"]
+        },
+        {
+          "id": "c-2-2",
+          "check": "POST /api/puzzles/blanks/check with every cell empty returns 200 with rows[0] satisfied, rows[1] open and solved false; POST /api/puzzles/boat/check with row 0 set to filled, empty, filled, empty, empty and every other cell empty returns 200 with rows[0] violated and rows[1] open; POST /api/puzzles/boat/check with row 1 set to filled, filled, crossed, crossed, crossed and row 3 set to filled, crossed, filled, empty, empty and every other cell empty returns 200 with rows[1] violated and rows[3] satisfied",
+          "target": "ep-puzzle-check",
+          "cuts": ["cut-runs-of", "cut-line-status"]
+        },
+        {
+          "id": "c-2-3",
+          "check": "POST /api/puzzles/house/check with every cell of row 3 filled and every other cell empty returns 200 with 8 entries in rows, 8 entries in cols, rows[3] satisfied, rows[0] open, cols[0] satisfied and cols[3] open",
+          "target": "ep-puzzle-check",
+          "cuts": ["cut-runs-of", "cut-transpose", "cut-line-status"]
+        },
+        {
+          "id": "c-2-4",
+          "check": "POST /api/puzzles/nope/check with a 5 by 5 grid of empty cells returns 404, POST /api/puzzles/house/check with a grid of 7 rows returns 400, and POST /api/puzzles/boat/check with the cell at row 0 column 0 set to the string maybe returns 400, each with a JSON body whose only key is error",
+          "target": "ep-puzzle-check",
+          "cuts": []
+        },
+        {
+          "id": "c-2-5",
+          "check": "On /puzzles/boat a first click on cell-0-2 updates its data-state to filled, a second click updates it to crossed and a third click updates it to empty, while cell-0-0 stays at data-state empty across all three clicks",
+          "target": "sc-puzzle",
+          "cuts": ["cut-cell-cycle"]
+        },
+        {
+          "id": "c-2-6",
+          "check": "On /puzzles/blanks, one click on each of the 13 cells filled in the blanks solution - the 5 cells of row 1, columns 0 and 4 of row 2, columns 1, 2 and 3 of row 3, and columns 0, 2 and 4 of row 4, leaving row 0 untouched - renders exactly 5 row-clue elements, row-clue-0 through row-clue-4, and exactly 5 col-clue elements, col-clue-0 through col-clue-4, each of those 10 elements carrying data-status satisfied, and renders a solved-banner element with text Solved",
+          "target": "sc-puzzle",
+          "cuts": ["cut-cell-cycle", "cut-transpose", "cut-line-status", "cut-board-solved"]
+        }
+      ],
+      "cuts": [
+        {
+          "id": "cut-line-status",
+          "file": "lib/nonogram.ts",
+          "hint": "Set `status` to `satisfied` when `runsOf(cells)` holds the same numbers in the same order as `clue`. Otherwise set it to `violated` when any one of these three holds: `cells` has more blocks of consecutive `filled` cells than `clue` has numbers, or one of those blocks is longer than the largest number in `clue`, or no cell in `cells` is still `empty` while `runsOf(cells)` and `clue` differ. A `crossed` cell is not `empty`, so it does not hold that third condition off. A `[0]` clue, and a clue carrying no numbers at all, each count as no blocks and a largest of 0. In every other case leave `status` at `open`."
+        },
+        {
+          "id": "cut-board-solved",
+          "file": "lib/nonogram.ts",
+          "hint": "Set `solved` to true only when `lineStatus` answers `satisfied` for every row of `grid` against the matching entry of `rowClues` and for every column of `grid` against the matching entry of `colClues`. Reach the columns through `transpose`, and leave `solved` false when even one line on either axis is not satisfied - a grid whose every row is satisfied is still not solved while any column is not."
+        },
+        {
+          "id": "cut-cell-cycle",
+          "file": "app/puzzles/[id]/Board.tsx",
+          "hint": "Set `updated` to a fresh copy of `grid` in which only the cell at row `r` and column `c` moves one step along `empty` then `filled` then `crossed` then back to `empty`. Every other cell keeps the state it had, and `grid` itself is not mutated. The `setGrid` call and the POST to /api/puzzles/<id>/check sit below the closing marker and are already written, so this assignment is the whole task."
+        }
+      ]
+    }
+  ]
+}

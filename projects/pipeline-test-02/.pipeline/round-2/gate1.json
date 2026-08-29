@@ -1,0 +1,83 @@
+{
+  "ok": false,
+  "verdict": "reject",
+  "spec_hash": "c5b3a58798c3eec66c804e6cc40420c46f44949f7b517d1cf60902e534226188",
+  "findings": [
+    {
+      "id": "B1",
+      "title": "Whether the check request survives an open `cut-cell-cycle` is not pinned",
+      "section": "blocking",
+      "owner": "nothing",
+      "blocking": true,
+      "owner_declared": "nothing",
+      "owner_valid": true,
+      "caught_by": "NO downstream checker sees this - it ships as written",
+      "must_fix_now": true
+    },
+    {
+      "id": "W1",
+      "title": "The \"closed\" status rule is not total for `clue = []`, which the spec's own skeleton produces",
+      "section": "worth a look",
+      "owner": "nothing",
+      "blocking": false,
+      "owner_declared": "nothing",
+      "owner_valid": true,
+      "caught_by": "NO downstream checker sees this - it ships as written",
+      "must_fix_now": false
+    },
+    {
+      "id": "W2",
+      "title": "Session 2's own minute budget leaves nothing for intro, recap or scaffolding the endpoint",
+      "section": "worth a look",
+      "owner": "pack-writer",
+      "blocking": false,
+      "owner_declared": "pack-writer",
+      "owner_valid": true,
+      "caught_by": "step 9 - a person reads the guide at Gate 3",
+      "must_fix_now": false
+    },
+    {
+      "id": "W3",
+      "title": "\"Three boards on screen\" contradicts \"there is no screen that lists the three puzzles\"",
+      "section": "worth a look",
+      "owner": "pack-writer",
+      "blocking": false,
+      "owner_declared": "pack-writer",
+      "owner_valid": true,
+      "caught_by": "step 9 - a person reads the guide at Gate 3",
+      "must_fix_now": false
+    },
+    {
+      "id": "W4",
+      "title": "`spec.json` is not self-contained for `c-2-1` and `c-2-6`",
+      "section": "worth a look",
+      "owner": "test-runner",
+      "blocking": false,
+      "owner_declared": "test-runner",
+      "owner_valid": true,
+      "caught_by": "step 6 - the Builder/test-runner loop fixes this for free",
+      "must_fix_now": false
+    },
+    {
+      "id": "W5",
+      "title": "`c-2-6`'s dependency on `cut-transpose` rests on an assertion the criterion does not require",
+      "section": "worth a look",
+      "owner": "nothing",
+      "blocking": false,
+      "owner_declared": "nothing",
+      "owner_valid": true,
+      "caught_by": "NO downstream checker sees this - it ships as written",
+      "must_fix_now": false
+    }
+  ],
+  "counts": {
+    "blocking": 1,
+    "worth_a_look": 5,
+    "unowned_blocking": 1
+  },
+  "reasons": [
+    "B1 (Whether the check request survives an open `cut-cell-cycle` is not pin) is blocking and nothing downstream catches it"
+  ],
+  "rule": "reject when any blocking finding is owned by 'nothing'; approve when every remaining finding sits in a column a downstream checker owns",
+  "reviewed_spec_hash": "c5b3a58798c3eec66c804e6cc40420c46f44949f7b517d1cf60902e534226188"
+}

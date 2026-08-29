@@ -1,0 +1,30 @@
+{
+  "ok": true,
+  "errors": [],
+  "warnings": [],
+  "counts": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "session_minutes": [
+    {
+      "n": 1,
+      "minutes": 40.0,
+      "cuts": 2,
+      "builds": 2,
+      "concepts": 4,
+      "carries_setup": true,
+      "over_cap": false
+    },
+    {
+      "n": 2,
+      "minutes": 37.0,
+      "cuts": 3,
+      "builds": 1,
+      "concepts": 4,
+      "carries_setup": false,
+      "over_cap": false
+    }
+  ],
+  "spec_hash": "c5b3a58798c3eec66c804e6cc40420c46f44949f7b517d1cf60902e534226188"
+}

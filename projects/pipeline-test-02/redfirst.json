@@ -1,0 +1,9 @@
+{
+  "ok": true,
+  "target": "app",
+  "vacuous_tests": [],
+  "dynamic": {
+    "ran": false,
+    "why": "--static-only: the dynamic half needs a target whose marked blocks are unwritten"
+  }
+}

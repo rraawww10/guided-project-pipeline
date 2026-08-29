@@ -1,0 +1,35 @@
+{
+  "c-1-1": {
+    "test": "verify/test_api_puzzles.py::test_c_1_1_puzzles_list_is_boat_blanks_house_with_the_boat_row_clues"
+  },
+  "c-1-2": {
+    "test": "verify/test_api_puzzles.py::test_c_1_2_puzzles_list_col_clues_are_transposed_for_boat_and_house"
+  },
+  "c-1-3": {
+    "test": "verify/test_api_puzzles.py::test_c_1_3_puzzles_list_blanks_row_clues_cover_the_empty_full_and_last_cell_runs"
+  },
+  "c-1-4": {
+    "test": "verify/test_ui_board.py::test_c_1_4_blanks_board_draws_25_empty_cells_and_open_clue_strips"
+  },
+  "c-1-5": {
+    "test": "verify/test_ui_board.py::test_c_1_5_unknown_puzzle_id_shows_puzzle_not_found_and_no_board"
+  },
+  "c-2-1": {
+    "test": "verify/test_api_check.py::test_c_2_1_boat_solution_is_solved_and_a_moved_cell_violates_only_a_column"
+  },
+  "c-2-2": {
+    "test": "verify/test_api_check.py::test_c_2_2_check_answers_satisfied_open_and_violated_and_reads_crossed"
+  },
+  "c-2-3": {
+    "test": "verify/test_api_check.py::test_c_2_3_house_row_three_filled_grades_both_axes_of_an_eight_by_eight"
+  },
+  "c-2-4": {
+    "test": "verify/test_api_check.py::test_c_2_4_unknown_id_is_404_and_a_bad_grid_is_400_with_only_an_error_key"
+  },
+  "c-2-5": {
+    "test": "verify/test_ui_clicks.py::test_c_2_5_clicking_one_cell_cycles_empty_filled_crossed_empty"
+  },
+  "c-2-6": {
+    "test": "verify/test_ui_clicks.py::test_c_2_6_clicking_the_blanks_solution_solves_the_board"
+  }
+}
