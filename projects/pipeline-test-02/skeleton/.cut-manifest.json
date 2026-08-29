@@ -1,0 +1,62 @@
+{
+  "slug": "pipeline-test-02",
+  "cuts": [
+    {
+      "id": "cut-cell-cycle",
+      "file": "app\\puzzles\\[id]\\Board.tsx",
+      "line": 83,
+      "lines_removed": 13
+    },
+    {
+      "id": "cut-runs-of",
+      "file": "lib\\nonogram.ts",
+      "line": 29,
+      "lines_removed": 18
+    },
+    {
+      "id": "cut-transpose",
+      "file": "lib\\nonogram.ts",
+      "line": 60,
+      "lines_removed": 11
+    },
+    {
+      "id": "cut-line-status",
+      "file": "lib\\nonogram.ts",
+      "line": 85,
+      "lines_removed": 18
+    },
+    {
+      "id": "cut-board-solved",
+      "file": "lib\\nonogram.ts",
+      "line": 121,
+      "lines_removed": 8
+    }
+  ],
+  "count": 5,
+  "by_session": {
+    "1": [
+      "cut-runs-of",
+      "cut-transpose"
+    ],
+    "2": [
+      "cut-board-solved",
+      "cut-cell-cycle",
+      "cut-line-status"
+    ]
+  },
+  "return_safety": {
+    "ok": true,
+    "checked": 5,
+    "violations": []
+  },
+  "partial_state_risks": [],
+  "typecheck": {
+    "ran": true,
+    "ok": true,
+    "error_count": 0,
+    "errors": [],
+    "missing_return": [],
+    "hint": ""
+  },
+  "ok": true
+}

@@ -19,7 +19,11 @@
     "revise:round-1": 1,
     "revise:round-2": 1,
     "test:app": 1,
-    "mutation": 1
+    "mutation": 1,
+    "cut": 1,
+    "deploy": 1,
+    "guide-lint": 3,
+    "leak-scan": 1
   },
   "gates": {
     "gate0": {
@@ -161,6 +165,48 @@
       "at": "2026-08-29T07:18:21+00:00",
       "detail": "",
       "run": 1
+    },
+    {
+      "step": "cut",
+      "ok": true,
+      "at": "2026-08-29T07:26:05+00:00",
+      "detail": "",
+      "run": 1
+    },
+    {
+      "step": "deploy",
+      "ok": true,
+      "at": "2026-08-29T07:28:06+00:00",
+      "detail": "",
+      "run": 1
+    },
+    {
+      "step": "guide-lint",
+      "ok": true,
+      "at": "2026-08-29T07:36:02+00:00",
+      "detail": "",
+      "run": 1
+    },
+    {
+      "step": "guide-lint",
+      "ok": true,
+      "at": "2026-08-29T07:36:38+00:00",
+      "detail": "",
+      "run": 2
+    },
+    {
+      "step": "leak-scan",
+      "ok": true,
+      "at": "2026-08-29T07:37:36+00:00",
+      "detail": "",
+      "run": 1
+    },
+    {
+      "step": "guide-lint",
+      "ok": true,
+      "at": "2026-08-29T07:37:39+00:00",
+      "detail": "",
+      "run": 3
     }
   ],
   "ticket": null,

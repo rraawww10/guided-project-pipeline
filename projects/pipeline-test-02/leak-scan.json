@@ -1,0 +1,10 @@
+{
+  "ok": true,
+  "solution": "app",
+  "student": "skeleton",
+  "tasks_with_answers": 5,
+  "answer_lines_watched": 28,
+  "leaks": [],
+  "history_leaks": [],
+  "rule": "no line unique to a task's answer may appear anywhere in the student tree, or in its git history"
+}

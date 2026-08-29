@@ -1,0 +1,97 @@
+{
+  "ok": false,
+  "target": "skeleton",
+  "code_checks": {
+    "ok": true,
+    "checks": {}
+  },
+  "seconds": 235.7,
+  "counts": {
+    "pass": 2,
+    "fail": 9,
+    "skip": 0,
+    "missing": 0
+  },
+  "criteria": {
+    "c-1-1": {
+      "status": "fail",
+      "check": "GET /api/puzzles returns 200 with a JSON array of 3 puzzles whose ids in order are boat, blanks and house; the boat entry has size 5, title Boat and rowClues [[1],[3],[5],[1,1],[1,1]], and no entry carries a solution key",
+      "session": 1,
+      "test": "verify/test_api_puzzles.py::test_c_1_1_puzzles_list_is_boat_blanks_house_with_the_boat_row_clues",
+      "message": "AssertionError: boat rowClues are [[], [], [], [], []], expected [[1], [3], [5], [1, 1], [1, 1]]\nassert [[], [], [], [], []] == [[1], [3], [5...1, 1], [1, 1]]\n  \n  At index 0 diff: [] != [1]\n  Use -v to get more diff"
+    },
+    "c-1-2": {
+      "status": "fail",
+      "check": "GET /api/puzzles returns the boat entry with colClues [[1],[4],[3],[4],[1]] and the house entry with size 8 and colClues [[1],[6],[3],[4,2],[4,2],[3],[6],[1]]",
+      "session": 1,
+      "test": "verify/test_api_puzzles.py::test_c_1_2_puzzles_list_col_clues_are_transposed_for_boat_and_house",
+      "message": "AssertionError: boat colClues are [], expected [[1], [4], [3], [4], [1]]\nassert [] == [[1], [4], [3], [4], [1]]\n  \n  Right contains 5 more items, first extra item: [1]\n  Use -v to get more diff"
+    },
+    "c-1-3": {
+      "status": "fail",
+      "check": "GET /api/puzzles returns the blanks entry with rowClues [[0],[5],[1,1],[3],[1,1,1]], so the empty row reads [0], the full row reads [5], and the run that ends at the last cell of row 4 is counted",
+      "session": 1,
+      "test": "verify/test_api_puzzles.py::test_c_1_3_puzzles_list_blanks_row_clues_cover_the_empty_full_and_last_cell_runs",
+      "message": "AssertionError: blanks rowClues are [[], [], [], [], []], expected [[0], [5], [1, 1], [3], [1, 1, 1]]\nassert [[], [], [], [], []] == [[0], [5], [1...3], [1, 1, 1]]\n  \n  At index 0 diff: [] != [0]\n  Use -v to get more diff"
+    },
+    "c-1-4": {
+      "status": "fail",
+      "check": "/puzzles/blanks renders 25 elements with data-testid cell-0-0 through cell-4-4 each carrying data-state empty, renders exactly 5 row-clue elements and exactly 5 col-clue elements, renders row-clue-0 with text 0, row-clue-1 with text 5 and col-clue-2 with text 1 2, gives each of row-clue-0 through row-clue-4 data-status open, and renders no solved-banner element",
+      "session": 1,
+      "test": "verify/test_ui_board.py::test_c_1_4_blanks_board_draws_25_empty_cells_and_two_open_clue_strips",
+      "message": "AssertionError: Locator expected to have count '5'\nActual value: 0 \nCall log:\n  - Expect \"to_have_count\" with timeout 20000ms\n  - waiting for locator(\"[data-testid^=\\\"col-clue-\\\"]\")\n    43 \u00d7 locator resolved to 0 elements\n       - unexpected value \"0\""
+    },
+    "c-1-5": {
+      "status": "pass",
+      "check": "/puzzles/nope renders an element with data-testid puzzle-missing and text Puzzle not found, and renders no element with data-testid cell-0-0 and no element with data-testid puzzle-title",
+      "session": 1,
+      "test": "verify/test_ui_board.py::test_c_1_5_unknown_puzzle_id_shows_puzzle_not_found_and_no_board",
+      "message": ""
+    },
+    "c-2-1": {
+      "status": "fail",
+      "check": "POST /api/puzzles/boat/check with the boat solution as the grid - the five rows ..#.., .###., #####, .#.#. and .#.#., reading # as filled and . as empty - returns 200 with solved true, 5 entries in rows, 5 entries in cols, and each of those 10 entries equal to satisfied; then POST /api/puzzles/boat/check with the same grid except row 0 set to filled, empty, empty, empty, empty returns 200 with all 5 entries of rows equal to satisfied, cols[0] violated, cols[2] open and solved false",
+      "session": 2,
+      "test": "verify/test_api_check.py::test_c_2_1_boat_solution_is_solved_and_a_moved_cell_violates_column_zero",
+      "message": "AssertionError: rows are ['open', 'open', 'open', 'open', 'open']\nassert ['open', 'ope...open', 'open'] == ['satisfied',..., 'satisfied']\n  \n  At index 0 diff: 'open' != 'satisfied'\n  Use -v to get more diff"
+    },
+    "c-2-2": {
+      "status": "fail",
+      "check": "POST /api/puzzles/blanks/check with every cell empty returns 200 with rows[0] satisfied, rows[1] open and solved false; POST /api/puzzles/boat/check with row 0 set to filled, empty, filled, empty, empty and every other cell empty returns 200 with rows[0] violated and rows[1] open; POST /api/puzzles/boat/check with row 1 set to filled, filled, crossed, crossed, crossed and row 3 set to filled, crossed, filled, empty, empty and every other cell empty returns 200 with rows[1] violated and rows[3] satisfied",
+      "session": 2,
+      "test": "verify/test_api_check.py::test_c_2_2_check_answers_satisfied_open_and_violated_and_reads_crossed",
+      "message": "AssertionError: rows[0] is 'open'\nassert 'open' == 'satisfied'\n  \n  - satisfied\n  + open"
+    },
+    "c-2-3": {
+      "status": "fail",
+      "check": "POST /api/puzzles/house/check with every cell of row 3 filled and every other cell empty returns 200 with 8 entries in rows, 8 entries in cols, rows[3] satisfied, rows[0] open, cols[0] satisfied and cols[3] open",
+      "session": 2,
+      "test": "verify/test_api_check.py::test_c_2_3_house_row_three_filled_grades_both_axes_of_an_eight_by_eight",
+      "message": "AssertionError: cols are []\nassert 0 == 8\n +  where 0 = len([])"
+    },
+    "c-2-4": {
+      "status": "pass",
+      "check": "POST /api/puzzles/nope/check with a 5 by 5 grid of empty cells returns 404, POST /api/puzzles/house/check with a grid of 7 rows returns 400, and POST /api/puzzles/boat/check with the cell at row 0 column 0 set to the string maybe returns 400, each with a JSON body whose only key is error",
+      "session": 2,
+      "test": "verify/test_api_check.py::test_c_2_4_unknown_id_is_404_and_a_bad_grid_is_400_with_only_an_error_key",
+      "message": ""
+    },
+    "c-2-5": {
+      "status": "fail",
+      "check": "On /puzzles/boat a first click on cell-0-2 updates its data-state to filled, a second click updates it to crossed and a third click updates it to empty, while cell-0-0 stays at data-state empty across all three clicks",
+      "session": 2,
+      "test": "verify/test_ui_clicks.py::test_c_2_5_clicking_one_cell_cycles_empty_filled_crossed_empty",
+      "message": "AssertionError: Locator expected to have attribute 'filled'\nActual value: empty \nCall log:\n  - Expect \"to_have_attribute\" with timeout 20000ms\n  - waiting for get_by_test_id(\"cell-0-2\")\n    43 \u00d7 locator resolved to <button type=\"button\" data-state=\"empty\" data-testid=\"cell-0-2\" class=\"board_cell__Fq3bw\" aria-label=\"row 1, column 3\"></button>\n       - unexpected value \"empty\"\n\nAria snapshot:\n- button \"row 1, column 3\""
+    },
+    "c-2-6": {
+      "status": "fail",
+      "check": "On /puzzles/blanks, one click on each of the 13 cells filled in the blanks solution - the 5 cells of row 1, columns 0 and 4 of row 2, columns 1, 2 and 3 of row 3, and columns 0, 2 and 4 of row 4, leaving row 0 untouched - renders exactly 5 row-clue elements, row-clue-0 through row-clue-4, and exactly 5 col-clue elements, col-clue-0 through col-clue-4, each of those 10 elements carrying data-status satisfied, and renders a solved-banner element with text Solved",
+      "session": 2,
+      "test": "verify/test_ui_clicks.py::test_c_2_6_clicking_the_blanks_solution_satisfies_every_clue_and_solves",
+      "message": "AssertionError: Locator expected to have count '5'\nActual value: 0 \nCall log:\n  - Expect \"to_have_count\" with timeout 20000ms\n  - waiting for locator(\"[data-testid^=\\\"col-clue-\\\"]\")\n    43 \u00d7 locator resolved to 0 elements\n       - unexpected value \"0\""
+    }
+  },
+  "pytest_returncode": 1,
+  "stdout_tail": "of those 10 elements carrying data-status satisfied, and renders a\n        solved-banner element with text Solved.\n    \n        Two readings this handles rather than picks:\n    \n        * ambiguity.md W1 leaves the in-flight window - what a strip shows between a\n          click and its response - open. Nothing here observes that window: each\n          click waits for its own check response before the next click is sent, so\n          the board is never mid-flight when it is read, and the final assertions\n          are retrying waits on the settled state either way.\n        * reading a strip as \"whatever col-clue elements happen to be there\" passes\n          vacuously when colClues is [], which is exactly what an open cut-transpose\n          serves. The criterion says exactly 5 and names col-clue-0 through\n          col-clue-4, so the count is asserted first and each element is then looked\n          up by its own testid - absence fails instead of being skipped.\n        \"\"\"\n        open_puzzle(page, \"blanks\")\n        expect(all_cells(page)).to_have_count(25, timeout=LOAD_TIMEOUT)\n    \n        for r, c in BLANKS_FILLED:\n            with page.expect_response(\n                lambda response: is_check_response(response, \"blanks\"),\n                timeout=CHECK_TIMEOUT,\n            ):\n                cell(page, r, c).click()\n    \n        expect(all_row_clues(page)).to_have_count(5, timeout=CHECK_TIMEOUT)\n>       expect(all_col_clues(page)).to_have_count(5, timeout=CHECK_TIMEOUT)\nE       AssertionError: Locator expected to have count '5'\nE       Actual value: 0 \nE       Call log:\nE         - Expect \"to_have_count\" with timeout 20000ms\nE         - waiting for locator(\"[data-testid^=\\\"col-clue-\\\"]\")\nE           43 \u00d7 locator resolved to 0 elements\nE              - unexpected value \"0\"\n\nskeleton\\verify\\test_ui_clicks.py:84: AssertionError\n=========================== short test summary info ===========================\nFAILED skeleton/verify/test_api_check.py::test_c_2_1_boat_solution_is_solved_and_a_moved_cell_violates_column_zero\nFAILED skeleton/verify/test_api_check.py::test_c_2_2_check_answers_satisfied_open_and_violated_and_reads_crossed\nFAILED skeleton/verify/test_api_check.py::test_c_2_3_house_row_three_filled_grades_both_axes_of_an_eight_by_eight\nFAILED skeleton/verify/test_api_puzzles.py::test_c_1_1_puzzles_list_is_boat_blanks_house_with_the_boat_row_clues\nFAILED skeleton/verify/test_api_puzzles.py::test_c_1_2_puzzles_list_col_clues_are_transposed_for_boat_and_house\nFAILED skeleton/verify/test_api_puzzles.py::test_c_1_3_puzzles_list_blanks_row_clues_cover_the_empty_full_and_last_cell_runs\nFAILED skeleton/verify/test_ui_board.py::test_c_1_4_blanks_board_draws_25_empty_cells_and_two_open_clue_strips\nFAILED skeleton/verify/test_ui_clicks.py::test_c_2_5_clicking_one_cell_cycles_empty_filled_crossed_empty\nFAILED skeleton/verify/test_ui_clicks.py::test_c_2_6_clicking_the_blanks_solution_satisfies_every_clue_and_solves\n9 failed, 2 passed in 72.51s (0:01:12)\n",
+  "stderr_tail": ""
+}

@@ -1,0 +1,35 @@
+{
+  "ok": true,
+  "target": "app",
+  "preview": "http://127.0.0.1:57093",
+  "advisories": [],
+  "advisories_allowed": false,
+  "seconds": 90.2,
+  "steps": [
+    {
+      "step": "fresh copy",
+      "ok": true,
+      "detail": "C:\\Users\\Hp\\AppData\\Local\\Temp\\gp-deploy-pipeline-test-02-ql86lgxk\\app"
+    },
+    {
+      "step": "install",
+      "ok": true,
+      "detail": "\nadded 58 packages in 24s\n"
+    },
+    {
+      "step": "install advisories",
+      "ok": true,
+      "detail": "none"
+    },
+    {
+      "step": "build",
+      "ok": true,
+      "detail": "\n> pipeline-test-02@0.0.0 build\n> next build\n\n   \u00e2\u2013\u00b2 Next.js 15.5.24\n\n   Creating an optimized production build ...\n \u00e2\u0153\u201c Compiled successfully in 18.3s\n   Linting and checking validity of types ...\n   Collecting page data ...\n   Generating static pages (0/4) ...\n   Generating static pages (1/4) \n   Generating static pages (2/4) \n   Generating static pages (3/4) \n \u00e2\u0153\u201c Generating static pages (4/4)\n   Finalizing page optimization ...\n   Collecting build traces ...\n\nRoute (app)                                 Size  First Load JS\n\u00e2\u201d\u0152 \u00e2\u2014\u2039 /                                      131 B         103 kB\n\u00e2\u201d\u0153 \u00e2\u2014\u2039 /_not-found                            993 B         104 kB\n\u00e2\u201d\u0153 \u00c6\u2019 /api/puzzles                           131 B         103 kB\n\u00e2\u201d\u0153 \u00c6\u2019 /api/puzzles/[id]/check                131 B         103 kB\n\u00e2\u201d\u201d \u00c6\u2019 /puzzles/[id]                        1.28 kB         104 kB\n+ First Load JS shared by all             103 kB\n  \u00e2\u201d\u0153 chunks/493-6570002f12f3ee90.js       46.4 kB\n  \u00e2\u201d\u0153 chunks/4bd1b696-c023c6e3521b1417.js  54.2 kB\n  \u00e2\u201d\u201d other shared chunks (total)             2 kB\n\n\n\u00e2\u2014\u2039  (Static)   prerendered as static content\n\u00c6\u2019  (Dynamic)  server-rendered on demand\n\n"
+    },
+    {
+      "step": "preview",
+      "ok": true,
+      "detail": "http://127.0.0.1:57093"
+    }
+  ]
+}
