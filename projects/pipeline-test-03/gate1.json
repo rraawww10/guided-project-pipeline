@@ -1,0 +1,94 @@
+{
+  "ok": true,
+  "verdict": "approve-eligible",
+  "spec_hash": "46b5465b4952bcbca15cafd4bfef8fc2a47f724050efd86de63983af1da48aec",
+  "findings": [
+    {
+      "id": "B1",
+      "title": "`notFound()` throws, so the page cannot also render `account-missing`",
+      "section": "blocking",
+      "owner": "test-runner",
+      "blocking": true,
+      "owner_declared": "test-runner",
+      "owner_valid": true,
+      "caught_by": "step 6 - the Builder/test-runner loop fixes this for free",
+      "must_fix_now": false
+    },
+    {
+      "id": "B2",
+      "title": "the `parseLine` fallback makes `reason === null` a dead comparison once the cut is removed",
+      "section": "blocking",
+      "owner": "typecheck",
+      "blocking": true,
+      "owner_declared": "typecheck",
+      "owner_valid": true,
+      "caught_by": "step 8 - tsc over the generated skeleton",
+      "must_fix_now": false
+    },
+    {
+      "id": "W1",
+      "title": "`new Date(\"2026-02-30\")` is not invalid, so line 20 discriminates nothing",
+      "section": "worth a look",
+      "owner": "pack-writer",
+      "blocking": false,
+      "owner_declared": "pack-writer",
+      "owner_valid": true,
+      "caught_by": "step 9 - a person reads the guide at Gate 3",
+      "must_fix_now": false
+    },
+    {
+      "id": "W2",
+      "title": "\"a float multiply fails on line 8\" is only true for a truncating one",
+      "section": "worth a look",
+      "owner": "nothing",
+      "blocking": false,
+      "owner_declared": "nothing",
+      "owner_valid": true,
+      "caught_by": "NO downstream checker sees this - it ships as written",
+      "must_fix_now": false
+    },
+    {
+      "id": "W3",
+      "title": "c-2-4's dependency on `cut-account-totals` rests on an unobservable choice",
+      "section": "worth a look",
+      "owner": "nothing",
+      "blocking": false,
+      "owner_declared": "nothing",
+      "owner_valid": true,
+      "caught_by": "NO downstream checker sees this - it ships as written",
+      "must_fix_now": false
+    },
+    {
+      "id": "W4",
+      "title": "five specified elements that no criterion reads, and two whose text is never stated",
+      "section": "worth a look",
+      "owner": "nothing",
+      "blocking": false,
+      "owner_declared": "nothing",
+      "owner_valid": true,
+      "caught_by": "NO downstream checker sees this - it ships as written",
+      "must_fix_now": false
+    },
+    {
+      "id": "W5",
+      "title": "the named drop candidates are about a minute each, against a 13-minute error bar",
+      "section": "worth a look",
+      "owner": "pack-writer",
+      "blocking": false,
+      "owner_declared": "pack-writer",
+      "owner_valid": true,
+      "caught_by": "step 9 - a person reads the guide at Gate 3",
+      "must_fix_now": false
+    }
+  ],
+  "counts": {
+    "blocking": 2,
+    "worth_a_look": 5,
+    "unowned_blocking": 0
+  },
+  "reasons": [
+    "2 blocking finding(s), all owned by a downstream checker; 5 worth a look. Nothing here escapes to the shipped project."
+  ],
+  "rule": "reject when any blocking finding is owned by 'nothing'; approve when every remaining finding sits in a column a downstream checker owns",
+  "reviewed_spec_hash": "46b5465b4952bcbca15cafd4bfef8fc2a47f724050efd86de63983af1da48aec"
+}

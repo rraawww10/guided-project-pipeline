@@ -1,0 +1,63 @@
+{
+  "ok": true,
+  "errors": [],
+  "warnings": [],
+  "counts": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "session_minutes": [
+    {
+      "n": 1,
+      "minutes": 38.5,
+      "cuts": 2,
+      "builds": 2,
+      "concepts": 3,
+      "carries_setup": true,
+      "over_cap": false,
+      "weighted": true,
+      "cut_minutes": [
+        {
+          "id": "cut-parse-line",
+          "minutes": 6.0,
+          "hint_words": 54
+        },
+        {
+          "id": "cut-amount-paise",
+          "minutes": 6.0,
+          "hint_words": 51
+        }
+      ],
+      "largest_cut_share": 0.5
+    },
+    {
+      "n": 2,
+      "minutes": 38.5,
+      "cuts": 3,
+      "builds": 2,
+      "concepts": 3,
+      "carries_setup": false,
+      "over_cap": false,
+      "weighted": true,
+      "cut_minutes": [
+        {
+          "id": "cut-running-balance",
+          "minutes": 6.0,
+          "hint_words": 52
+        },
+        {
+          "id": "cut-account-totals",
+          "minutes": 6.0,
+          "hint_words": 46
+        },
+        {
+          "id": "cut-account-rows",
+          "minutes": 6.0,
+          "hint_words": 46
+        }
+      ],
+      "largest_cut_share": 0.33
+    }
+  ],
+  "spec_hash": "06f8d5c7c353eda66ca4bc825cc307e119a05fa3745c2e971a8eb6928e00816a"
+}

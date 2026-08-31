@@ -1,0 +1,61 @@
+46b5465b4952bcbca15cafd4bfef8fc2a47f724050efd86de63983af1da48aec
+GATE 1 APPROVED - round 2. Human decision; the stopping rule was approve-eligible on its own (no --override).
+
+RULE: 2 blocking, 0 of them owned by 'nothing', 5 worth a look. Linter 0 errors / 0 warnings. 9 criteria, 9 distinct tests, no test shared between two criteria, red-first static clean with no report written. ambiguity.md, lint.json and breaker-begin.json all bound to spec hash 46b5465b4952 with no drift; breaker end confirmed the spec did not move during the pass.
+
+ROUND 1'S TWO BLOCKERS ARE CLOSED, AND CHECKED RATHER THAN ASSERTED. The Breaker re-derived the cut-to-criterion join in both directions: every criterion fails when any one declared cut is emptied alone, no proper subset of a criterion's cuts satisfies it, no two cuts carry the same criterion set, and every cut has more than one grading fixture. A1 (cut-amount-paise bypassable with all nine criteria green) and A2 (account-total's undeclared dependency) are both gone. The arithmetic was recomputed independently for the second time - 30 lines, 3 skipped, 21 accepted, 6 rejected, four account totals, both running columns, all five c-1-3 paise values - with no disagreement.
+
+BOTH REMAINING BLOCKERS SIT IN A DOWNSTREAM CHECKER'S COLUMN:
+
+  B1 (owner: test-runner) - notFound() throws, so the page cannot also render
+     account-missing; the element has to live in a not-found.tsx boundary the
+     spec never names. No shipped project in this repo has done a real HTTP 404
+     on a page route, so there is no house pattern to copy. c-2-4 pins both the
+     404 status and the element, so a Builder who gets this wrong produces a red
+     test at step 6 rather than a silent defect. Accepted on that basis.
+
+  B2 (owner: typecheck) - with cut-parse-line removed, nothing assigns to
+     'reason' between its BAD_FIELDS initialiser and the 'reason === null'
+     guard, so TS narrows it to string and the comparison is dead (TS2367).
+     This is the TS2355 failure mode arriving through a comparison instead of a
+     missing return.
+
+     WATCH AT STEP 10, DO NOT ASSUME THIS IS OWNED. The Breaker's own note is
+     that typecheck is the fail-open second-line check. A fail-open owner passes
+     when it cannot run, which is the one way a blocking finding in an owned
+     column still reaches the skeleton. Read typecheck_fail_open in
+     skeleton-check.json and require it false. pipeline-test-02 recorded false;
+     anything else means B2 was never actually checked.
+
+ACCEPTED WITH EYES OPEN - THE TIMING, WHICH IS THE ONE THING NEITHER ROUND FIXED:
+
+  Both sessions estimate 38.5 against the 40 cap. The linter is silent because
+  every cut sits under the 55-word nominal and is priced at the flat 6.0
+  minutes. The Spec Breaker independently reached the same worry in both rounds
+  and put it plainly: the model was 12.5 and 13 minutes low on the only two
+  flow-2 sessions that have ever been timed (32.5 estimated / 45 measured, and
+  37 estimated / 50 measured), and the drop candidates available inside these
+  sessions are worth about a minute each against that error bar.
+
+  Shipping anyway is the decision, because the alternative is to reject a spec
+  the rule approves on a model I already know to be uncalibrated in this range.
+  But the estimate is NOT evidence the sessions fit. Nothing before step 13
+  measures teaching minutes, and step 13 is the test.
+
+  PREDICTION ON RECORD, for the dry run to settle: if session 2 runs near 50 on
+  a 38.5 estimate, the weighted model is wrong in a way hint length cannot fix,
+  and the weight has to move to a quantity the writer does not author.
+
+ON HINT LENGTH: this round's brief told the writer explicitly not to tune hint
+length to the nominal. Across five cuts the lengths moved by one word in total
+(54->53, the rest unchanged). That argues the lengths are honest rather than
+managed - but the same brief also said keep what was not faulted, so the two
+explanations are not separable here. Not treated as settled either way.
+
+FIVE WORTH A LOOK, ALL RECORDED AND NONE BLOCKING: W1 new Date('2026-02-30')
+rolls to 2 March so that pair discriminates nothing; W2 'never through a float'
+is ungraded because Math.round(parseFloat*100) returns all five pinned values;
+W3 c-2-4's dependency on cut-account-totals is unobservable since a rows-sum
+gives the same number - c-2-5's account-list-total-food is the only observable
+read; W4 five specified elements no criterion reads; W5 the drop candidates
+above.

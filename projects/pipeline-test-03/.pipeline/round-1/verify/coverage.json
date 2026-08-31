@@ -1,0 +1,29 @@
+{
+  "c-1-1": {
+    "test": "verify/test_api_ledger.py::test_c_1_1_ledger_splits_the_seed_into_21_entries_and_6_diagnostics"
+  },
+  "c-1-2": {
+    "test": "verify/test_api_ledger.py::test_c_1_2_diagnostics_are_the_six_broken_lines_with_their_one_reason"
+  },
+  "c-1-3": {
+    "test": "verify/test_api_ledger.py::test_c_1_3_amounts_become_whole_paise_without_a_float"
+  },
+  "c-1-4": {
+    "test": "verify/test_ui_ledger.py::test_c_1_4_ledger_page_draws_21_rows_above_6_numbered_complaints"
+  },
+  "c-2-1": {
+    "test": "verify/test_api_accounts.py::test_c_2_1_accounts_are_four_totals_in_ascending_account_order"
+  },
+  "c-2-2": {
+    "test": "verify/test_api_accounts.py::test_c_2_2_a_rejected_line_contributes_no_account_and_no_paise"
+  },
+  "c-2-3": {
+    "test": "verify/test_ui_account.py::test_c_2_3_rent_page_walks_three_rows_down_to_the_account_total"
+  },
+  "c-2-4": {
+    "test": "verify/test_ui_account.py::test_c_2_4_an_account_no_accepted_entry_names_is_a_404"
+  },
+  "c-2-5": {
+    "test": "verify/test_ui_account.py::test_c_2_5_salary_page_scans_an_all_positive_account_beside_the_sidebar"
+  }
+}

@@ -1,0 +1,113 @@
+{
+  "slug": "pipeline-test-03",
+  "created": "2026-08-31T19:48:41+00:00",
+  "flow": 2,
+  "phase": "code",
+  "retries": {
+    "idea": 0,
+    "spec": 0,
+    "code": 0,
+    "pack": 0
+  },
+  "step_runs": {
+    "stack": 1,
+    "ideas": 1,
+    "pick": 1,
+    "lint": 2,
+    "breaker": 2,
+    "redfirst": 2,
+    "revise:round-1": 1
+  },
+  "gates": {
+    "gate0": {
+      "approved": true,
+      "at": "2026-08-31T19:58:17+00:00",
+      "note": "GATE 0: idea-01 Ledger. Human decision. The reason given on the pick line ('event log fold, state never stored') described idea-02 Dispatch; the human confirmed Ledger was intended, so no rationale is recorded beyond the choice itself.\n\nCARRY TO GATE 1 - the idea's own two stated risks:\n  1. Session 2 is thin if it is only a sum. The running-balance column and the\n     file-order rule are what make it worth 40 minutes and must be graded\n     separately from the per-account total.\n  2. The parser grammar sprawls. The accepted line shape and the closed list of\n     rejection reasons must be stated up front with each reason's exact string,\n     or the Verifier grades wording the Builder invented.\n  3. Paise conversion needs a fixture with a .05 on it.",
+      "picked": "idea-01.md"
+    },
+    "gate1": {
+      "approved": true,
+      "at": "2026-08-31T22:08:20+00:00",
+      "note": "GATE 1 APPROVED - round 2. Human decision; the stopping rule was approve-eligible on its own (no --override).\n\nRULE: 2 blocking, 0 of them owned by 'nothing', 5 worth a look. Linter 0 errors / 0 warnings. 9 criteria, 9 distinct tests, no test shared between two criteria, red-first static clean with no report written. ambiguity.md, lint.json and breaker-begin.json all bound to spec hash 46b5465b4952 with no drift; breaker end confirmed the spec did not move during the pass.\n\nROUND 1'S TWO BLOCKERS ARE CLOSED, AND CHECKED RATHER THAN ASSERTED. The Breaker re-derived the cut-to-criterion join in both directions: every criterion fails when any one declared cut is emptied alone, no proper subset of a criterion's cuts satisfies it, no two cuts carry the same criterion set, and every cut has more than one grading fixture. A1 (cut-amount-paise bypassable with all nine criteria green) and A2 (account-total's undeclared dependency) are both gone. The arithmetic was recomputed independently for the second time - 30 lines, 3 skipped, 21 accepted, 6 rejected, four account totals, both running columns, all five c-1-3 paise values - with no disagreement.\n\nBOTH REMAINING BLOCKERS SIT IN A DOWNSTREAM CHECKER'S COLUMN:\n\n  B1 (owner: test-runner) - notFound() throws, so the page cannot also render\n     account-missing; the element has to live in a not-found.tsx boundary the\n     spec never names. No shipped project in this repo has done a real HTTP 404\n     on a page route, so there is no house pattern to copy. c-2-4 pins both the\n     404 status and the element, so a Builder who gets this wrong produces a red\n     test at step 6 rather than a silent defect. Accepted on that basis.\n\n  B2 (owner: typecheck) - with cut-parse-line removed, nothing assigns to\n     'reason' between its BAD_FIELDS initialiser and the 'reason === null'\n     guard, so TS narrows it to string and the comparison is dead (TS2367).\n     This is the TS2355 failure mode arriving through a comparison instead of a\n     missing return.\n\n     WATCH AT STEP 10, DO NOT ASSUME THIS IS OWNED. The Breaker's own note is\n     that typecheck is the fail-open second-line check. A fail-open owner passes\n     when it cannot run, which is the one way a blocking finding in an owned\n     column still reaches the skeleton. Read typecheck_fail_open in\n     skeleton-check.json and require it false. pipeline-test-02 recorded false;\n     anything else means B2 was never actually checked.\n\nACCEPTED WITH EYES OPEN - THE TIMING, WHICH IS THE ONE THING NEITHER ROUND FIXED:\n\n  Both sessions estimate 38.5 against the 40 cap. The linter is silent because\n  every cut sits under the 55-word nominal and is priced at the flat 6.0\n  minutes. The Spec Breaker independently reached the same worry in both rounds\n  and put it plainly: the model was 12.5 and 13 minutes low on the only two\n  flow-2 sessions that have ever been timed (32.5 estimated / 45 measured, and\n  37 estimated / 50 measured), and the drop candidates available inside these\n  sessions are worth about a minute each against that error bar.\n\n  Shipping anyway is the decision, because the alternative is to reject a spec\n  the rule approves on a model I already know to be uncalibrated in this range.\n  But the estimate is NOT evidence the sessions fit. Nothing before step 13\n  measures teaching minutes, and step 13 is the test.\n\n  PREDICTION ON RECORD, for the dry run to settle: if session 2 runs near 50 on\n  a 38.5 estimate, the weighted model is wrong in a way hint length cannot fix,\n  and the weight has to move to a quantity the writer does not author.\n\nON HINT LENGTH: this round's brief told the writer explicitly not to tune hint\nlength to the nominal. Across five cuts the lengths moved by one word in total\n(54->53, the rest unchanged). That argues the lengths are honest rather than\nmanaged - but the same brief also said keep what was not faulted, so the two\nexplanations are not separable here. Not treated as settled either way.\n\nFIVE WORTH A LOOK, ALL RECORDED AND NONE BLOCKING: W1 new Date('2026-02-30')\nrolls to 2 March so that pair discriminates nothing; W2 'never through a float'\nis ungraded because Math.round(parseFloat*100) returns all five pinned values;\nW3 c-2-4's dependency on cut-account-totals is unobservable since a rows-sum\ngives the same number - c-2-5's account-list-total-food is the only observable\nread; W4 five specified elements no criterion reads; W5 the drop candidates\nabove.",
+      "spec_hash": "46b5465b4952bcbca15cafd4bfef8fc2a47f724050efd86de63983af1da48aec",
+      "override": false
+    },
+    "gate2": null,
+    "gate3": null
+  },
+  "steps": [
+    {
+      "step": "stack",
+      "ok": true,
+      "at": "2026-08-31T19:48:41+00:00",
+      "detail": "next, react, typescript",
+      "run": 1
+    },
+    {
+      "step": "ideas",
+      "ok": true,
+      "at": "2026-08-31T19:53:24+00:00",
+      "detail": "5 ideas",
+      "run": 1
+    },
+    {
+      "step": "pick",
+      "ok": true,
+      "at": "2026-08-31T19:58:17+00:00",
+      "detail": "idea-01.md",
+      "run": 1
+    },
+    {
+      "step": "lint",
+      "ok": true,
+      "at": "2026-08-31T21:12:09+00:00",
+      "detail": "",
+      "run": 1
+    },
+    {
+      "step": "breaker",
+      "ok": true,
+      "at": "2026-08-31T21:21:00+00:00",
+      "detail": "06f8d5c7c353",
+      "run": 1
+    },
+    {
+      "step": "redfirst",
+      "ok": true,
+      "at": "2026-08-31T21:28:48+00:00",
+      "detail": "",
+      "run": 1
+    },
+    {
+      "step": "revise:round-1",
+      "ok": true,
+      "at": "2026-08-31T21:32:22+00:00",
+      "detail": "spec.md, spec.json, lint.json, ambiguity.md, gate1.json, redfirst.json, verify",
+      "run": 1
+    },
+    {
+      "step": "lint",
+      "ok": true,
+      "at": "2026-08-31T21:43:18+00:00",
+      "detail": "",
+      "run": 2
+    },
+    {
+      "step": "breaker",
+      "ok": true,
+      "at": "2026-08-31T21:56:21+00:00",
+      "detail": "46b5465b4952",
+      "run": 2
+    },
+    {
+      "step": "redfirst",
+      "ok": true,
+      "at": "2026-08-31T22:03:46+00:00",
+      "detail": "",
+      "run": 2
+    }
+  ],
+  "ticket": null,
+  "dry_run": null,
+  "feedback": []
+}

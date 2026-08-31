@@ -1,0 +1,169 @@
+{
+  "slug": "pipeline-test-03",
+  "title": "Ledger",
+  "track": "fullstack",
+  "sessions_planned": 2,
+  "stack": ["next", "react", "typescript"],
+  "source": null,
+  "code_checks": ["utc-dates"],
+  "endpoints": [
+    {
+      "id": "ep-ledger",
+      "method": "GET",
+      "path": "/api/ledger",
+      "request": null,
+      "response": "Ledger - { entries: Entry[], diagnostics: Diagnostic[] }, entries in ascending lineNo order and diagnostics in ascending lineNo order",
+      "status": [200]
+    },
+    {
+      "id": "ep-accounts",
+      "method": "GET",
+      "path": "/api/accounts",
+      "request": null,
+      "response": "AccountTotal[] - one object per distinct account named by an accepted entry, each { account: string, paise: number }, sorted by account ascending",
+      "status": [200]
+    }
+  ],
+  "screens": [
+    {
+      "id": "sc-ledger",
+      "route": "/",
+      "elements": [
+        "one element with data-testid ledger-loading and text Loading, drawn until the GET /api/ledger response arrives and never after it",
+        "one element with data-testid entry-count whose text is the number of accepted entries written as a decimal string",
+        "one element with data-testid entry-row-<lineNo> per accepted entry, in ascending lineNo order, each containing one element with data-testid entry-date-<lineNo>, one with entry-account-<lineNo>, one with entry-desc-<lineNo> and one with entry-amount-<lineNo>",
+        "entry-date-<lineNo> carries the entry date string unchanged, entry-account-<lineNo> the account, entry-desc-<lineNo> the description, and entry-amount-<lineNo> the text formatPaise gives for that entry paise, so -25005 reads -250.05",
+        "one element with data-testid reject-count whose text is the number of diagnostics written as a decimal string",
+        "one element with data-testid reject-row-<lineNo> per diagnostic, in ascending lineNo order, whose text is the string line <lineNo>: <reason> - for example line 17: expected 4 fields, found 3",
+        "the page sends one GET /api/ledger on mount, no second one, and no other request; it renders no element with data-testid entry-row-1, entry-row-2 or entry-row-3, because lines 1 to 3 of the seed file are skipped before parsing"
+      ],
+      "states": ["loading", "loaded"]
+    },
+    {
+      "id": "sc-account",
+      "route": "/accounts/[name]",
+      "elements": [
+        "the page is a server component that reads data/ledger.txt through parseLedger; it makes no fetch, so it has no loading state",
+        "when no accepted entry names the route account the page answers HTTP 404 and renders one element with data-testid account-missing and text Account not found, and renders no element with data-testid account-title and none with data-testid account-total",
+        "one element with data-testid account-title whose text is the route account name",
+        "one element with data-testid account-total whose text is formatPaise of that account paise from accountTotals",
+        "one element with data-testid account-row-<name> per object accountTotals gives, in that order, each containing an anchor with data-testid account-link-<name>, text <name> and href /accounts/<name>, and one element with data-testid account-list-total-<name> whose text is formatPaise of that object paise",
+        "one element with data-testid account-entry-<lineNo> per entry accountRows gives for the route account, in ascending lineNo order, each containing one element with data-testid account-entry-date-<lineNo>, one with account-entry-desc-<lineNo>, one with account-entry-amount-<lineNo> and one with account-entry-running-<lineNo>",
+        "account-entry-amount-<lineNo> carries formatPaise of that entry paise, and account-entry-running-<lineNo> carries formatPaise of the runningBalance number at the same position"
+      ],
+      "states": ["loaded", "not-found"]
+    }
+  ],
+  "sessions": [
+    {
+      "n": 1,
+      "setup": true,
+      "title": "Setup, the file, and the parse",
+      "goal": "Turn a 30-line hand-written ledger file into 21 typed entries and 6 numbered diagnostics, and draw both on one page.",
+      "teaches": [
+        "a discriminated union as a return type instead of a thrown error",
+        "rupee text to integer paise without a float",
+        "validating a date by its shape rather than by Date"
+      ],
+      "builds": ["ep-ledger", "sc-ledger"],
+      "criteria": [
+        {
+          "id": "c-1-1",
+          "check": "GET /api/ledger returns 200 with entries holding 21 objects and diagnostics holding 6 objects, with entries[0] equal to lineNo 4, date 2026-01-01, account salary, description january pay and paise 4500000, and entries[20] equal to lineNo 30, date 2026-01-27, account food, description lunch and paise -18000",
+          "target": "ep-ledger",
+          "cuts": ["cut-parse-line", "cut-amount-paise"]
+        },
+        {
+          "id": "c-1-2",
+          "check": "GET /api/ledger returns diagnostics whose lineNo values in order are 9, 13, 17, 22, 25 and 28, whose reason values in the same order are date must be YYYY-MM-DD, account must not be empty, expected 4 fields, found 3, date must be YYYY-MM-DD, amount must be a rupee amount like -250.00 and amount must be a rupee amount like -250.00, and returns an entry whose lineNo is 20 and whose date is 2026-02-30",
+          "target": "ep-ledger",
+          "cuts": ["cut-parse-line"]
+        },
+        {
+          "id": "c-1-3",
+          "check": "GET /api/ledger returns the entry with lineNo 8 with paise -25005, the entry with lineNo 6 with paise -245075, the entry with lineNo 19 with paise -110550, the entry with lineNo 10 with paise -12050 and the entry with lineNo 16 with paise 1200000",
+          "target": "ep-ledger",
+          "cuts": ["cut-parse-line", "cut-amount-paise"]
+        },
+        {
+          "id": "c-1-4",
+          "check": "/ renders an element with data-testid entry-count and text 21, renders 21 elements with data-testid entry-row-<lineNo> whose lineNo values in document order are 4, 5, 6, 7, 8, 10, 11, 12, 14, 15, 16, 18, 19, 20, 21, 23, 24, 26, 27, 29 and 30, renders entry-account-4 with text salary and entry-amount-4 with text 45000.00, renders an element with data-testid reject-count and text 6, and renders reject-row-17 with text line 17: expected 4 fields, found 3",
+          "target": "sc-ledger",
+          "cuts": ["cut-parse-line", "cut-amount-paise"]
+        }
+      ],
+      "cuts": [
+        {
+          "id": "cut-amount-paise",
+          "file": "lib/ledger.ts",
+          "hint": "Set `paise` to the whole number of paise in `text` when `text` is an optional `-`, one or more digits, a dot, then exactly two digits: multiply the rupee digits by 100, add the paise digits as integers, never through a float, and apply the sign. Leave `paise` at `null` otherwise."
+        },
+        {
+          "id": "cut-parse-line",
+          "file": "lib/ledger.ts",
+          "hint": "Set `reason` to `BAD_FIELDS(fields.length)` unless `fields` has exactly 4 entries; then to `BAD_DATE` unless `fields[0]` is four digits, `-`, a month 01 to 12, `-` and a day 01 to 31; then to `NO_ACCOUNT` for an empty `fields[1]`; then to `BAD_AMOUNT` when `amountToPaise(fields[3])` gives `null`. Otherwise set `paise` from it and `reason` to `null`."
+        }
+      ]
+    },
+    {
+      "n": 2,
+      "title": "Accounts and running balances",
+      "goal": "Fold the accepted entries into one total per account, and walk a single account down the page with a running balance that lands on that total.",
+      "teaches": [
+        "folding a list of entries into a total per key",
+        "a scan that emits a total after every row",
+        "an unknown account as a 404 rather than an empty page"
+      ],
+      "builds": ["ep-accounts", "sc-account"],
+      "criteria": [
+        {
+          "id": "c-2-1",
+          "check": "GET /api/accounts returns 200 with a JSON array of 4 objects whose account values in order are food, rent, salary and travel, and whose paise values in the same order are -542555, -3720000, 6200000 and -455550",
+          "target": "ep-accounts",
+          "cuts": ["cut-parse-line", "cut-amount-paise", "cut-account-totals"]
+        },
+        {
+          "id": "c-2-2",
+          "check": "GET /api/accounts returns no object whose account is utilities, no object whose account is the empty string, and a rent object whose paise is -3720000, which is the sum of lines 5, 11 and 20 with the rejected line 28 left out",
+          "target": "ep-accounts",
+          "cuts": ["cut-parse-line", "cut-account-totals"]
+        },
+        {
+          "id": "c-2-3",
+          "check": "/accounts/rent responds 200 and renders account-title with text rent, account-total with text -37200.00, exactly 3 elements with data-testid account-entry-<lineNo> whose lineNo values in document order are 5, 11 and 20, and account-entry-running-5, account-entry-running-11 and account-entry-running-20 with texts -18000.00, -19200.00 and -37200.00",
+          "target": "sc-account",
+          "cuts": ["cut-parse-line", "cut-amount-paise", "cut-account-rows", "cut-running-balance"]
+        },
+        {
+          "id": "c-2-4",
+          "check": "/accounts/nope responds 404 and renders an element with data-testid account-missing and text Account not found, /accounts/utilities responds 404, /accounts/Rent responds 404, and /accounts/salary responds 200 and renders account-title with text salary",
+          "target": "sc-account",
+          "cuts": ["cut-parse-line", "cut-account-rows"]
+        },
+        {
+          "id": "c-2-5",
+          "check": "/accounts/salary renders account-entry-running-4, account-entry-running-16 and account-entry-running-23 with texts 45000.00, 57000.00 and 62000.00, renders account-total with text 62000.00, renders exactly 4 elements with data-testid account-link-<name> whose names in document order are food, rent, salary and travel, and renders account-list-total-food with text -5425.55",
+          "target": "sc-account",
+          "cuts": ["cut-parse-line", "cut-amount-paise", "cut-account-rows", "cut-running-balance", "cut-account-totals"]
+        }
+      ],
+      "cuts": [
+        {
+          "id": "cut-account-totals",
+          "file": "lib/accounts.ts",
+          "hint": "Fill `totals` with one object per distinct `account` in `entries`, its `paise` the sum of that account paise values, sorted by `account` ascending as plain string order. An account named on no accepted entry never appears, and an account whose values cancel to 0 still appears."
+        },
+        {
+          "id": "cut-account-rows",
+          "file": "lib/accounts.ts",
+          "hint": "Fill `rows` with every object in `entries` whose account equals `name`, keeping them in ascending `lineNo` order, which is the order they sit in the file. Match the names exactly, so `Rent` does not match `rent`, and leave `rows` empty when no entry names that account."
+        },
+        {
+          "id": "cut-running-balance",
+          "file": "lib/accounts.ts",
+          "hint": "Fill `running` with one number per object in `rows`, in the same order: each one the sum of that object `paise` and of every earlier object `paise`. The first number is the first object own `paise`, the last equals the account total from `accountTotals`, and an empty `rows` gives an empty `running`."
+        }
+      ]
+    }
+  ]
+}

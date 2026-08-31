@@ -1,0 +1,117 @@
+{
+  "ok": false,
+  "verdict": "reject",
+  "spec_hash": "06f8d5c7c353eda66ca4bc825cc307e119a05fa3745c2e971a8eb6928e00816a",
+  "findings": [
+    {
+      "id": "A1",
+      "title": "`cut-amount-paise` can be left empty with every criterion green",
+      "section": "blocking",
+      "owner": "nothing",
+      "blocking": true,
+      "owner_declared": "nothing",
+      "owner_valid": true,
+      "caught_by": "NO downstream checker sees this - it ships as written",
+      "must_fix_now": true
+    },
+    {
+      "id": "A2",
+      "title": "`account-total` comes from `accountTotals`, but c-2-3 and c-2-4 do not declare `cut-account-totals`",
+      "section": "blocking",
+      "owner": "nothing",
+      "blocking": true,
+      "owner_declared": "nothing",
+      "owner_valid": true,
+      "caught_by": "NO downstream checker sees this - it ships as written",
+      "must_fix_now": true
+    },
+    {
+      "id": "W1",
+      "title": "the `loading` state and `ledger-loading` are graded by no criterion",
+      "section": "worth a look",
+      "owner": "nothing",
+      "blocking": false,
+      "owner_declared": "nothing",
+      "owner_valid": true,
+      "caught_by": "NO downstream checker sees this - it ships as written",
+      "must_fix_now": false
+    },
+    {
+      "id": "W2",
+      "title": "the `href` on `account-link-<name>` is the app's only navigation and nothing grades it",
+      "section": "worth a look",
+      "owner": "nothing",
+      "blocking": false,
+      "owner_declared": "nothing",
+      "owner_valid": true,
+      "caught_by": "NO downstream checker sees this - it ships as written",
+      "must_fix_now": false
+    },
+    {
+      "id": "W3",
+      "title": "\"exactly 3 elements with `data-testid` `account-entry-<lineNo>`\" has two counts",
+      "section": "worth a look",
+      "owner": "test-runner",
+      "blocking": false,
+      "owner_declared": "test-runner",
+      "owner_valid": true,
+      "caught_by": "step 6 - the Builder/test-runner loop fixes this for free",
+      "must_fix_now": false
+    },
+    {
+      "id": "W4",
+      "title": "the exact bytes of `data/ledger.txt` are not pinned",
+      "section": "worth a look",
+      "owner": "test-runner",
+      "blocking": false,
+      "owner_declared": "test-runner",
+      "owner_valid": true,
+      "caught_by": "step 6 - the Builder/test-runner loop fixes this for free",
+      "must_fix_now": false
+    },
+    {
+      "id": "W5",
+      "title": "the idea makes `parseLedger` a student task; the spec ships it written",
+      "section": "worth a look",
+      "owner": "spec-linter",
+      "blocking": false,
+      "owner_declared": "spec-linter",
+      "owner_valid": true,
+      "caught_by": "step 2 - the linter re-runs on every revision",
+      "must_fix_now": false
+    },
+    {
+      "id": "W6",
+      "title": "c-1-2, c-2-2 and c-2-4 omit `cut-amount-paise` although none can pass while it is empty",
+      "section": "worth a look",
+      "owner": "nothing",
+      "blocking": false,
+      "owner_declared": "nothing",
+      "owner_valid": true,
+      "caught_by": "NO downstream checker sees this - it ships as written",
+      "must_fix_now": false
+    },
+    {
+      "id": "W7",
+      "title": "both sessions estimate 38.5 minutes against a 40 cap, with no headroom",
+      "section": "worth a look",
+      "owner": "pack-writer",
+      "blocking": false,
+      "owner_declared": "pack-writer",
+      "owner_valid": true,
+      "caught_by": "step 9 - a person reads the guide at Gate 3",
+      "must_fix_now": false
+    }
+  ],
+  "counts": {
+    "blocking": 2,
+    "worth_a_look": 7,
+    "unowned_blocking": 2
+  },
+  "reasons": [
+    "A1 (`cut-amount-paise` can be left empty with every criterion green) is blocking and nothing downstream catches it",
+    "A2 (`account-total` comes from `accountTotals`, but c-2-3 and c-2-4 do not) is blocking and nothing downstream catches it"
+  ],
+  "rule": "reject when any blocking finding is owned by 'nothing'; approve when every remaining finding sits in a column a downstream checker owns",
+  "reviewed_spec_hash": "06f8d5c7c353eda66ca4bc825cc307e119a05fa3745c2e971a8eb6928e00816a"
+}
