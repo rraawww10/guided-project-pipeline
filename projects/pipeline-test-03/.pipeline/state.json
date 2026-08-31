@@ -2,7 +2,7 @@
   "slug": "pipeline-test-03",
   "created": "2026-08-31T19:48:41+00:00",
   "flow": 2,
-  "phase": "code",
+  "phase": "pack",
   "retries": {
     "idea": 0,
     "spec": 0,
@@ -18,7 +18,11 @@
     "redfirst": 2,
     "revise:round-1": 1,
     "test:app": 2,
-    "mutation": 3
+    "mutation": 3,
+    "cut": 1,
+    "deploy": 2,
+    "leak-scan": 1,
+    "guide-lint": 1
   },
   "gates": {
     "gate0": {
@@ -34,7 +38,11 @@
       "spec_hash": "46b5465b4952bcbca15cafd4bfef8fc2a47f724050efd86de63983af1da48aec",
       "override": false
     },
-    "gate2": null,
+    "gate2": {
+      "approved": true,
+      "at": "2026-08-31T23:02:07+00:00",
+      "note": "GATE 2 APPROVED. Human decision, pre-authorised after B8 was fixed. Read as every criterion, not as a summary.\n\nRESULTS: 9 pass, 0 fail, 0 skip, 0 missing, pytest rc 0. Session 1 c-1-1..c-1-4 and session 2 c-2-1..c-2-5 all green. Built first pass - no builder/test-runner loop.\n\nMUTATION: 5 of 5 tasks checked, 0 ungraded, 0 inconclusive, stayed_green empty for every cut. For every cut the set that went red equals the set that grades it:\n  cut-parse-line        9 lines -> all 9 criteria\n  cut-account-totals    7 lines -> c-2-1 c-2-2 c-2-3 c-2-4 c-2-5\n  cut-amount-paise      5 lines -> 8 criteria\n  cut-running-balance   5 lines -> c-2-3 c-2-5\n  cut-account-rows      4 lines -> c-2-3 c-2-4 c-2-5\n\nTHE MUTATION RESULT REQUIRED A CHECKER FIX, AND THAT IS PART OF THIS GATE'S RECORD. cut-parse-line first came back INCONCLUSIVE and stopped the phase. It is declared by all nine criteria, so its expected set IS the suite and no criterion could stay green to prove the harness was alive - the per-mutant test, whether any criterion passed, can never be true for that shape. The junit showed tests=9 failures=9 errors=0, so the suite plainly ran. mutation.py now takes the harness-alive control from the run instead of the mutant, requiring both that another mutant produced a pass and that this mutant reported real per-test outcomes. Committed at 8aad102 with 8 selftest checks including both historical false-green shapes.\n\nGATE 1's B1 DID NOT MATERIALISE: the Builder handled notFound() correctly and c-2-4 is green on both the 404 status and the account-missing element. The finding was real and the Builder simply got it right.\n\nRULE 3, STATED PRECISELY RATHER THAN CLAIMED: spec-status reports drift null, still frozen at 46b5465b4952, so the Builder edited neither the spec nor - per the LOCK discipline - the tests. But verify/ is NOT byte-identical to the Gate 1 commit 076a6fa, and that is worth recording rather than glossing:\n\n  verify/helpers.py text_of() gained an explicit timeout=LOAD_TIMEOUT on\n  text_content(), plus a docstring. Made at step 8 by the Verifier, which owns\n  verify/ in flow 2 and held the lock for it. No assertion was weakened and no\n  expected value changed; a missing element now fails on the suite's own 20s\n  budget instead of Playwright's hidden 30s default, which is strictly better\n  for the skeleton check at step 10 where missing elements are the norm.\n\n  Noting the difference from pipeline-test-02, whose Gate 2 could say verify/\n  was byte-identical to its Gate 1 commit. Flow 2 lets the Verifier touch verify/\n  at step 8, so 'byte-identical' is not a property this gate can assume; what it\n  can check is that every change is the Verifier's and weakens nothing. Checked\n  by reading the diff, which is nine lines.\n\nTWO PIPELINE FAULTS BURNED CODE RETRIES 2/15, NEITHER ABOUT THIS PROJECT: the mutation inconclusive above, and a PermissionError from 12 orphaned node servers left by an earlier run (test_runner terminated npm and orphaned its next child). Both fixed at 8aad102; the server leak was verified fixed by measurement - a boot on the leaking path now leaves 0 processes where it left 2. _checker labelled both correctly as pipeline faults supporting no conclusion, which is the hardening working.\n\nSTILL OPEN FOR GATE 3:\n  - B2 typecheck_fail_open MUST read false in skeleton-check.json. typecheck is\n    the fail-open second-line check, and a fail-open owner passes when it cannot\n    run. If it reads true, B2 was never actually checked and the TS2367 dead\n    comparison reaches the skeleton.\n  - TIMING. Both sessions estimate 38.5 against the 40 cap on a model that ran\n    12.5 and 13 minutes low on the only two timed flow-2 sessions. The Spec\n    Breaker raised it independently in both Gate 1 rounds. The step 13 dry run is\n    the test, and the prediction on record is that near-50 means the weight has\n    to move off hint length to a quantity the spec writer does not author."
+    },
     "gate3": null
   },
   "steps": [
@@ -140,6 +148,41 @@
       "step": "test:app",
       "ok": true,
       "at": "2026-08-31T22:58:46+00:00",
+      "detail": "",
+      "run": 2
+    },
+    {
+      "step": "cut",
+      "ok": true,
+      "at": "2026-08-31T23:05:32+00:00",
+      "detail": "",
+      "run": 1
+    },
+    {
+      "step": "deploy",
+      "ok": true,
+      "at": "2026-08-31T23:07:31+00:00",
+      "detail": "",
+      "run": 1
+    },
+    {
+      "step": "leak-scan",
+      "ok": true,
+      "at": "2026-08-31T23:16:34+00:00",
+      "detail": "",
+      "run": 1
+    },
+    {
+      "step": "guide-lint",
+      "ok": true,
+      "at": "2026-08-31T23:16:36+00:00",
+      "detail": "",
+      "run": 1
+    },
+    {
+      "step": "deploy",
+      "ok": true,
+      "at": "2026-08-31T23:19:44+00:00",
       "detail": "",
       "run": 2
     }

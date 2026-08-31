@@ -1,0 +1,62 @@
+{
+  "slug": "pipeline-test-03",
+  "cuts": [
+    {
+      "id": "cut-account-totals",
+      "file": "lib\\accounts.ts",
+      "line": 17,
+      "lines_removed": 7
+    },
+    {
+      "id": "cut-account-rows",
+      "file": "lib\\accounts.ts",
+      "line": 31,
+      "lines_removed": 4
+    },
+    {
+      "id": "cut-running-balance",
+      "file": "lib\\accounts.ts",
+      "line": 42,
+      "lines_removed": 5
+    },
+    {
+      "id": "cut-amount-paise",
+      "file": "lib\\ledger.ts",
+      "line": 52,
+      "lines_removed": 5
+    },
+    {
+      "id": "cut-parse-line",
+      "file": "lib\\ledger.ts",
+      "line": 66,
+      "lines_removed": 9
+    }
+  ],
+  "count": 5,
+  "by_session": {
+    "1": [
+      "cut-amount-paise",
+      "cut-parse-line"
+    ],
+    "2": [
+      "cut-account-rows",
+      "cut-account-totals",
+      "cut-running-balance"
+    ]
+  },
+  "return_safety": {
+    "ok": true,
+    "checked": 5,
+    "violations": []
+  },
+  "partial_state_risks": [],
+  "typecheck": {
+    "ran": true,
+    "ok": true,
+    "error_count": 0,
+    "errors": [],
+    "missing_return": [],
+    "hint": ""
+  },
+  "ok": true
+}

@@ -18,7 +18,7 @@ from fnmatch import fnmatch
 from pathlib import Path
 
 from .cutter import gitignore_matcher
-from .test_runner import BOOT_TIMEOUT, free_port, run, wait_for
+from .test_runner import BOOT_TIMEOUT, free_port, run, stop_server, wait_for
 
 EXCLUDE = {"node_modules", ".next", ".git", "dist", "build", ".turbo",
            "coverage", "__pycache__", ".venv", ".pipeline",
@@ -134,10 +134,15 @@ def main(argv: list[str] | None = None) -> int:
         log = (project / ".pipeline")
         log.mkdir(parents=True, exist_ok=True)
         handle = (log / "deploy-server.log").open("w")
+        # Own process group on POSIX so stop_server can signal the group; on
+        # Windows taskkill /T walks the tree instead. Same contract as
+        # test_runner.boot - this is the pipeline's second place that starts a
+        # Next server, and it had the same leak.
+        extra = {} if os.name == "nt" else {"start_new_session": True}
         server = subprocess.Popen(
             [npm(), "run", "start", "--", "--port", str(port)], cwd=work,
             env={**os.environ, "PORT": str(port), "NODE_ENV": "production"},
-            stdout=handle, stderr=subprocess.STDOUT)
+            stdout=handle, stderr=subprocess.STDOUT, **extra)
         up = wait_for(preview, BOOT_TIMEOUT)
         step("preview", up, preview if up else f"no answer on {preview}")
         if up and a.hold:
@@ -146,12 +151,11 @@ def main(argv: list[str] | None = None) -> int:
     except Exception as e:
         steps.append({"step": "aborted", "ok": False, "detail": str(e)})
     finally:
-        if server and server.poll() is None:
-            server.terminate()
-            try:
-                server.wait(timeout=20)
-            except subprocess.TimeoutExpired:
-                server.kill()
+        # terminate() reached npm and orphaned its `next` child, so a deploy
+        # check left two node processes running and the temp tree pinned under
+        # them on Windows. Found after the test_runner fix, by counting
+        # processes rather than by trusting that one fix covered every site.
+        stop_server(server)
         shutil.rmtree(tmp, ignore_errors=True)
 
     report = {

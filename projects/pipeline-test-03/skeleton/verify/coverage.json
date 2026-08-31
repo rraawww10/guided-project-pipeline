@@ -1,0 +1,29 @@
+{
+  "c-1-1": {
+    "test": "verify/test_api_ledger.py::test_c_1_1_ledger_has_21_entries_and_6_diagnostics_in_line_order"
+  },
+  "c-1-2": {
+    "test": "verify/test_api_ledger.py::test_c_1_2_each_rejected_line_carries_its_own_first_broken_rule"
+  },
+  "c-1-3": {
+    "test": "verify/test_api_ledger.py::test_c_1_3_five_amounts_convert_to_integer_paise"
+  },
+  "c-1-4": {
+    "test": "verify/test_ui_ledger.py::test_c_1_4_ledger_page_draws_21_rows_above_6_numbered_complaints"
+  },
+  "c-2-1": {
+    "test": "verify/test_api_accounts.py::test_c_2_1_accounts_are_four_totals_sorted_by_name"
+  },
+  "c-2-2": {
+    "test": "verify/test_api_accounts.py::test_c_2_2_a_rejected_line_contributes_no_account_and_no_paise"
+  },
+  "c-2-3": {
+    "test": "verify/test_ui_account.py::test_c_2_3_rent_page_walks_three_rows_down_to_the_account_total"
+  },
+  "c-2-4": {
+    "test": "verify/test_ui_account.py::test_c_2_4_an_unknown_account_is_a_404_and_a_known_one_is_a_200"
+  },
+  "c-2-5": {
+    "test": "verify/test_ui_account.py::test_c_2_5_salary_running_column_and_the_sidebar_of_four_linked_accounts"
+  }
+}

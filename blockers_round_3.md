@@ -430,3 +430,112 @@ where the same path previously left 2 behind. Tests still 9 pass / 0 fail.
 5 selftest checks added, including one that spawns a real sleeping process and
 asserts it is dead after teardown. Selftest 348 -> 353.
 
+### Gate 2 - APPROVED
+
+9 pass / 0 fail / 0 skip / 0 missing, pytest rc 0, builder first pass.
+Mutation 5 of 5, 0 ungraded, 0 inconclusive, stayed_green empty everywhere.
+Gate 1's B1 did not materialise - the Builder handled notFound() correctly and
+c-2-4 is green on both the status and the element.
+
+**Rule 3 is weaker in flow 2 than pipeline-test-02's Gate 2 could claim.**
+verify/ is NOT byte-identical to the Gate 1 commit: the Verifier added an
+explicit timeout to helpers.py's text_of() at step 8, which it owns and holds
+the lock for. Nine lines, no assertion weakened, no expected value changed, and
+strictly better for step 10 where missing elements are the norm.
+
+The point is not this diff, which is fine. It is that "the suite that graded the
+code is the one approved before any code existed" is a claim flow 2 cannot make
+by construction, because step 8 lets the Verifier edit verify/ after Gate 1.
+pipeline-test-02's Gate 2 note asserted byte-identity and happened to be right;
+nothing checked it. What a gate can actually verify is that every change is the
+Verifier's and weakens nothing - which here meant reading a nine-line diff.
+Worth a checker: diff verify/ against the Gate 1 commit and require every hunk
+to be non-weakening, or at least surface the diff at Gate 2 instead of leaving
+it to whoever thinks to run git diff.
+
+**B9 - a gate note is free prose and nothing protects it.** Passing the note
+through a shell let backticks fire as command substitution and silently delete a
+clause from the permanent record; the gate recorded 'approved' with a mangled
+sentence and reported success. Caught by reading the stored note back, not by
+anything in the pipeline. Repaired by re-recording through argv with no shell
+involved. My own mistake rather than a pipeline defect, but the pipeline has no
+defence: gate notes are read later by the spec-writer on a revision and by
+whoever writes lessons, and a note can be corrupted without any signal.
+
+### Steps 10-14 - HANDOVER phase  COMPLETED, all checks green
+
+Run wf_ca6aae72-d25, 14.5 min, 6 agents, 0 errors. Cut ran first pass, 5 cuts,
+0 retries. Leak scan clean, 0 leaks. Guide lint 0 errors and 2 warnings, both
+the intended G032 overrun disclosures. Deploy ok, 0 advisories, preview served.
+
+**B2 IS GENUINELY CLOSED, not merely owned.** skeleton-check.json reports
+typecheck_fail_open FALSE, 9 checked, 0 mismatches, 0 partial-state risks. The
+fail-open owner actually ran, so the TS2367 dead comparison did not reach the
+student skeleton. This was the one Gate 1 finding whose owner could have passed
+by failing to run, and checking the flag was the only way to know.
+
+**B3 ADJUDICATED: THE HINT-LENGTH PROXY DOES NOT MEASURE TEACHING TIME.**
+
+The Pack Writer, timing the sessions independently from the guide it wrote:
+
+    session 1: 48 minutes against the 40 cap  (spec estimate 38.5)
+    session 2: 45 minutes against the 40 cap  (spec estimate 38.5)
+
+and it located session 1's excess exactly: cut-parse-line "carries three rules,
+a rule ORDER, and the argument against Date - about 13 live minutes, not the
+flat 6 the linter charges."
+
+cut-parse-line's hint is **53 words**, under the 55-word nominal, so the
+weighted model charged it the flat 6.0 and W114 and W112 both stayed silent.
+A 53-word hint describes 13 minutes of live teaching. That is the proxy failing
+on its own terms, and it is the answer to the question left open at Gate 1:
+the hints were not being gamed - they were honest, and honest hint length still
+does not predict teaching load.
+
+What drives the time is the number of *rules* a cut states and whether their
+ORDER matters, not how many words state them. Three rules plus an ordering
+constraint compress to 53 words as easily as one rule does.
+
+Note this was reached without any dry run: the estimate came from the Pack
+Writer reading its own session plan. The step 13 measurement still has to
+confirm it, and the Pack Writer was slightly conservative last time -
+pipeline-test-02 it estimated at 48 and Priya measured 50.
+
+Fifth consecutive project to land here. The model in spec_linter.py is now
+known-wrong rather than merely uncalibrated, and the weight has to move to a
+quantity that tracks rules rather than prose length. NOT changing it before the
+dry run measures it - the same discipline that stopped the earlier premature fix.
+
+**W5 CONFIRMED, and it matters more than it looked.** The spec's named drop
+candidates do not exist as live minutes: session 1 names entry-desc markup and
+session 2 names txn-date/txn-desc, but all five cuts are in lib/ and every page
+file ships written in the skeleton, so no student types that markup and dropping
+it recovers nothing. A spec can name mitigations that are not mitigations and
+no checker notices. The Pack Writer found replacement trims that do recover
+minutes and bring session 1 to 40 and session 2 to 39-41, none of which removes
+anything a criterion grades.
+
+**Two spec claims corrected rather than repeated by the Pack Writer:**
+- W1: new Date("2026-02-30") is NOT invalid, it rolls silently to 2 March. The
+  fixture that actually catches a Date-based parser is line 9, 2026-1-06, which
+  Date accepts as 6 January. The guide teaches both cases correctly.
+- W2: "never through a float" is ungraded - Math.round(parseFloat(text) * 100)
+  returns all five values c-1-3 pins. The guide says so and tells the instructor
+  to argue the integer path on merit rather than claim the tests caught it.
+
+An agent correcting the approved spec's own reasoning, in the artifact a person
+teaches from, is the pipeline working.
+
+**B8 HAD A SECOND SITE, AND I MISSED IT.** Phase 3 left 2 node processes alive.
+deploy_check.py starts its own preview server with its own Popen and its own
+`server.terminate()` - the identical defect, in the pipeline's other server
+site. My earlier "verified fixed" was true only of the path I changed.
+
+Fixed the same way and verified the same way: deploy re-run, 0 node processes
+after, where it left 2 before. Swept every `subprocess.Popen` in pipeline/ to
+confirm there is no third site - there is not.
+
+The lesson is the one this run keeps repeating: fixing the instance is not
+fixing the class. mustRun had to go into four workflows, not one; stop_server
+had to go into two checkers, not one. Grep for the pattern after every fix.
+

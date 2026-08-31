@@ -1,0 +1,30 @@
+# ledger - rupees, one entry per line
+# date | account | description | amount
+
+2026-01-01 | salary | january pay | 45000.00
+2026-01-02 | rent | january rent | -18000.00
+2026-01-03 | food | groceries | -2450.75
+2026-01-04 | travel | metro card | -500.00
+2026-01-05 | food | canteen | -250.05
+2026-1-06 | food | tea | -30.00
+2026-01-07 | travel | auto | -120.50
+2026-01-08 | rent | maintenance | -1200.00
+2026-01-09 | food | dinner | -899.00
+2026-01-10 |  | printer paper | -450.00
+2026-01-11 | travel | bus | -45.00
+2026-01-12 | food | fruit | -310.25
+2026-01-13 | salary | freelance invoice | 12000.00
+2026-01-14 | food | coffee
+2026-01-15 | travel | train ticket | -1650.00
+2026-01-16 | food | rice and dal | -1105.50
+2026-02-30 | rent | february rent | -18000.00
+2026-01-18 | food | snacks | -75.00
+2026-13-02 | travel | flight | -6000.00
+2026-01-20 | salary | bonus | 5000.00
+2026-01-21 | food | milk | -60.00
+2026-01-22 | utilities | water bill | -350.5
+2026-01-23 | travel | cab | -240.00
+2026-01-24 | food | eggs | -95.00
+2026-01-25 | rent | electricity | 1,200.00
+2026-01-26 | travel | fuel | -2000.00
+2026-01-27 | food | lunch | -180.00

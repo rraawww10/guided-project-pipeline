@@ -1,0 +1,35 @@
+{
+  "ok": true,
+  "target": "app",
+  "preview": "http://127.0.0.1:50920",
+  "advisories": [],
+  "advisories_allowed": false,
+  "seconds": 84.5,
+  "steps": [
+    {
+      "step": "fresh copy",
+      "ok": true,
+      "detail": "C:\\Users\\Hp\\AppData\\Local\\Temp\\gp-deploy-pipeline-test-03-f4x9a0vn\\app"
+    },
+    {
+      "step": "install",
+      "ok": true,
+      "detail": "\nadded 58 packages in 23s\n"
+    },
+    {
+      "step": "install advisories",
+      "ok": true,
+      "detail": "none"
+    },
+    {
+      "step": "build",
+      "ok": true,
+      "detail": "\n> pipeline-test-03@0.0.0 build\n> next build\n\n   \u00e2\u2013\u00b2 Next.js 15.5.24\n\n   Creating an optimized production build ...\n \u00e2\u0153\u201c Compiled successfully in 15.2s\n   Linting and checking validity of types ...\n   Collecting page data ...\n   Generating static pages (0/4) ...\n   Generating static pages (1/4) \n   Generating static pages (2/4) \n   Generating static pages (3/4) \n \u00e2\u0153\u201c Generating static pages (4/4)\n   Finalizing page optimization ...\n   Collecting build traces ...\n\nRoute (app)                                 Size  First Load JS\n\u00e2\u201d\u0152 \u00e2\u2014\u2039 /                                      754 B         103 kB\n\u00e2\u201d\u0153 \u00e2\u2014\u2039 /_not-found                            994 B         104 kB\n\u00e2\u201d\u0153 \u00c6\u2019 /accounts/[name]                     3.46 kB         106 kB\n\u00e2\u201d\u0153 \u00c6\u2019 /api/accounts                          131 B         103 kB\n\u00e2\u201d\u201d \u00c6\u2019 /api/ledger                            131 B         103 kB\n+ First Load JS shared by all             103 kB\n  \u00e2\u201d\u0153 chunks/255-c5a697ddbf82d774.js       46.4 kB\n  \u00e2\u201d\u0153 chunks/4bd1b696-c023c6e3521b1417.js  54.2 kB\n  \u00e2\u201d\u201d other shared chunks (total)          1.97 kB\n\n\n\u00e2\u2014\u2039  (Static)   prerendered as static content\n\u00c6\u2019  (Dynamic)  server-rendered on demand\n\n"
+    },
+    {
+      "step": "preview",
+      "ok": true,
+      "detail": "http://127.0.0.1:50920"
+    }
+  ]
+}
