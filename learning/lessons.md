@@ -303,6 +303,57 @@ gets a strikethrough and a date.
   second command, so `cd app
 rm ../verify/t.py` used to slip past entirely.
 
+## What a cut costs to teach
+
+- **Hint length does not predict teaching time, and pipeline-test-03 proved it
+  outright.** Round 3 weighted a cut by its hint words, calibrated on the two
+  timed flow-2 sessions. The next project came in with every cut at 46-53 words,
+  under the 55-word nominal; the linter reported both sessions at 38.5 against a
+  40 cap and stayed silent; the Pack Writer then timed them at 48 and 45. The
+  hints were not being gamed - a direct instruction not to tune them moved five
+  cuts by one word in total. They were honest, and honest length still predicts
+  nothing, because three ordered rules compress into 53 words as easily as one
+  rule does.
+
+- **What costs live minutes is the number of decisions a cut states, and whether
+  their order matters.** The Pack Writer located the whole overrun in one cut:
+  `cut-parse-line` "carries three rules, a rule ORDER, and the argument against
+  Date - about 13 live minutes, not the flat 6 the linter charges", on a 53-word
+  hint. The weight is now 6 minutes plus 1.7 per branch the hint states, with a
+  small residual on length for the case decisions cannot see - an algorithm with
+  no conditional prose at all, like pipeline-test-01's breadth-first
+  `cut-reveal-from`, 103 words and 41 lines and zero stated conditions.
+
+- **The fitted marker set beat the honest one, and the honest one shipped.**
+  Including positional words (`first`, `next`) fitted the four sessions visibly
+  better - worst error 3.2 against 4.8 - because "the first number is the first
+  object's own paise" scored two decisions. It describes an element, not a
+  branch. With four data points a regex that happens to fire more is
+  indistinguishable from one that measures more, so the positional markers were
+  dropped and the worse fit kept. **Prefer the model you can explain to the model
+  that fits.**
+
+- **The model was biased in opposite directions by flow, which the flat weight
+  hid.** It ran 6.5 to 13 minutes LOW on all four flow-2 sessions and about 10
+  minutes HIGH on recipe-box s1 and tip-split s1. Flow 1 writes many small cuts
+  where flow 2 writes few complex ones, so one flat per-cut number cannot serve
+  both. Flow 1 keeps the weight it was calibrated on; only flow 2 moved.
+
+- **A named drop candidate that costs no live minutes is worse than naming
+  none.** pipeline-test-03's spec offered markup elements as its trims, and the
+  Pack Writer found that all five cuts were in `lib/` while every page file
+  shipped written - no student typed that markup, so dropping it recovered
+  nothing. The spec read as though it had slack it did not have. A drop candidate
+  must be something a student types during the session, and no checker tests
+  that.
+
+- **Two free parameters against four points overfits by construction.** Only two
+  of the four sessions were actually timed; the other two are the Pack Writer's
+  estimates, and it ran about 2 minutes conservative on pipeline-test-02 (48
+  estimated, 50 measured). The constants are provisional. The estimate is written
+  into `lint.json` on every run so the next timed session can disagree with it in
+  public.
+
 ## Which findings can become linter rules
 
 Ten Gate 1 rejections across five projects, classified. The point of the

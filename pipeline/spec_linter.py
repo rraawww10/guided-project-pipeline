@@ -95,31 +95,61 @@ SETUP_MINUTES = 6.0          # project setup, on the session that carries it
 SESSION_MINUTES_CAP = 40.0
 SESSION_MINUTES_HARD = 50.0
 
-# --- oversized cuts, flow 2 only -------------------------------------------
-# MINUTES_PER_CUT above weighs every cut the same 6 minutes. Four consecutive
-# projects then overran on the same shape - one cut far larger than its
-# siblings - and a flat weight cannot see it. The two flow-2 sessions with a
-# measured dry run both carry a cut over 100 hint words and both ran ~13
-# minutes past the flat estimate:
+# --- how much a cut costs to teach, flow 2 only -----------------------------
+# MINUTES_PER_CUT above weighs every cut the same 6 minutes. Five consecutive
+# projects overran on one cut far larger than its siblings, so round 3 first
+# weighted a cut by its HINT LENGTH. pipeline-test-03 disproved that outright:
+# every cut came in at 46-53 words, under the nominal, the linter reported both
+# sessions at 38.5 against the 40 cap and stayed silent - and the Pack Writer
+# then timed session 1 at 48 and session 2 at 45, locating the excess exactly:
 #
-#   pipeline-test-01 s2  cuts 103 + 81 words   flat 32.5  measured 45
-#   pipeline-test-02 s2  cuts 110 + 68 + 70    flat 37.0  measured 50
+#   cut-parse-line "carries three rules, a rule ORDER, and the argument against
+#   Date - about 13 live minutes, not the flat 6 the linter charges"
 #
-# and against the sessions that fitted, whose largest cut is at most 51 words
-# (tip-split 3, recipe-box 1 and 4). The gap between 51 and 76 is where the
-# nominal sits. A hint is prose, so its length is a proxy for how many rules
-# have to be explained live, not for how many lines get typed - measured
-# lines_removed correlates only loosely (110 words -> 18 lines, 76 -> 23).
-# That is why this feeds the estimate and a warning, never an error.
+# on a 53-word hint. The hints were not being gamed; they were honest. Length
+# simply does not predict teaching load, because three ordered rules compress to
+# 53 words as easily as one rule does. What costs live minutes is the number of
+# decisions a cut states and whether their order matters.
 #
-# Calibrated: 32.5 + 74*0.15 = 43.6 against 45, and 37.0 + 83*0.15 = 49.5
-# against 50. Flow-1 specs write far terser hints (recipe-box averages 30
-# words against flow 2's 75), so the same rate misreads them; flow 1 keeps the
-# flat weight it was calibrated on.
-NOMINAL_HINT_WORDS = 55        # a cut this size costs the flat MINUTES_PER_CUT
-MINUTES_PER_OVERSIZE_WORD = 0.15
+# So the weight is decisions first, with a small residual on length for the case
+# decisions cannot see: an algorithm with no conditional prose at all.
+# pipeline-test-01's cut-reveal-from is a breadth-first flood fill, 103 words and
+# 41 lines removed, and states zero conditions.
+#
+# CALIBRATION IS THIN - four sessions, and only two of them measured:
+#
+#   pipeline-test-01 s2   flat 32.5   model 40.6   measured 45   (hero)
+#   pipeline-test-02 s2   flat 37.0   model 53.9   measured 50   (Priya)
+#   pipeline-test-03 s1   flat 38.5   model 52.1   pack est 48
+#   pipeline-test-03 s2   flat 38.5   model 40.2   pack est 45
+#
+# Worst error 4.8 minutes against a flat model that was 6.5 to 13 minutes low on
+# every one of them. The gain is not precision, it is that the error now falls on
+# both sides instead of always short. Two free parameters against four points
+# overfits by construction: treat these constants as provisional and move them
+# when a fifth timed session disagrees, which is why the estimate is written into
+# lint.json on every run.
+#
+# Flow 1 keeps the flat weight it was calibrated on. Its specs write many small
+# cuts where flow 2 writes few large ones, so the flat 6 over-charges it - the
+# model reads recipe-box s1 and tip-split s1 about 10 minutes HIGH - and those
+# three projects have shipped.
+NOMINAL_HINT_WORDS = 55        # length beyond which the residual starts
+MINUTES_PER_DECISION = 1.7     # one stated condition, or one ordering between rules
+MINUTES_PER_OVERSIZE_WORD = 0.04
 CUT_SHARE_CAP = 0.45           # one cut's share of a session's cut minutes
 SHARE_MIN_CUTS = 3             # below this a "share" is arithmetic, not skew
+
+# A decision is a branch the instructor has to state and justify: a condition, or
+# an ordering between rules. Deliberately NOT positional words like "first" or
+# "next" - "the first number is the first object's own paise" describes an
+# element, not a branch. An earlier marker set included them, fitted the four
+# sessions visibly better (worst error 3.2 against 4.8), and was dropped: with
+# four points a regex that happens to fire more is indistinguishable from one
+# that measures more, and the positional reading is plainly not a decision.
+RE_DECISION = re.compile(
+    r"\b(unless|otherwise|when|if|else|except|then|before|in that order|falls? through)\b",
+    re.IGNORECASE)
 
 REQUIRED_MD_HEADINGS = ["## Outcome", "## Out of scope", "## Sessions"]
 
@@ -227,14 +257,32 @@ def cut_words(cut: object) -> int:
     return len((cut.get("hint") or "").split())
 
 
+def cut_decisions(cut: object) -> int:
+    """How many branches the instructor has to state and justify.
+
+    This is the thing hint length was standing in for and failed at:
+    pipeline-test-03's cut-parse-line states four ordered fallbacks in 53 words
+    and takes about 13 live minutes, while cut-account-totals states one rule in
+    46 words and takes about 6.
+    """
+    if not isinstance(cut, dict):
+        return 0
+    return len(RE_DECISION.findall(cut.get("hint") or ""))
+
+
 def cut_minutes(cut: object, weighted: bool) -> float:
-    """The flat cost for a nominal cut, plus a surcharge for the hint words
-    above nominal. Never below MINUTES_PER_CUT - a short hint is not a cheaper
-    cut, it is just a cut whose cost the flat weight already covers."""
+    """The flat cost for a one-rule cut, plus what its decisions cost, plus a
+    small residual on length for the algorithm that states no conditions at all.
+
+    Never below MINUTES_PER_CUT - a cut with no branches is not free, it is a
+    cut whose cost the flat weight already covers.
+    """
     if not weighted:
         return MINUTES_PER_CUT
     over = max(0, cut_words(cut) - NOMINAL_HINT_WORDS)
-    return MINUTES_PER_CUT + MINUTES_PER_OVERSIZE_WORD * over
+    return (MINUTES_PER_CUT
+            + MINUTES_PER_DECISION * cut_decisions(cut)
+            + MINUTES_PER_OVERSIZE_WORD * over)
 
 
 def session_minutes(s: dict, carries_setup: bool, *, weighted: bool = False) -> float:
@@ -275,11 +323,12 @@ def _check_cut_share(lint: Lint, sessions: list[dict]) -> None:
                   f"cut {cid} is {share:.0%} of the session's {total:g} cut "
                   f"minutes ({big_m:g} against siblings at "
                   f"{', '.join(format(m, 'g') for m in rest)}) - over the "
-                  f"{CUT_SHARE_CAP:.0%} cap, on {cut_words(big)} hint words "
-                  f"against a {NOMINAL_HINT_WORDS}-word nominal. Four projects "
-                  f"have overrun on this shape. Split {cid} into two cuts, or "
-                  f"name a drop candidate inside this session. Do NOT move it "
-                  f"into the setup session - that is E113.")
+                  f"{CUT_SHARE_CAP:.0%} cap, on {cut_decisions(big)} stated "
+                  f"decisions and {cut_words(big)} hint words. Five projects "
+                  f"have overrun on this shape. Split {cid} so each half states "
+                  f"fewer decisions, or name a drop candidate inside this "
+                  f"session. Do NOT move it into the setup session - that is "
+                  f"E113. Shortening the hint does not make the cut smaller.")
 
 
 def _check_session_load(lint: Lint, sessions: list[dict], weighted: bool = False) -> None:
@@ -591,10 +640,11 @@ def minute_estimates(project: Path) -> list[dict]:
         # because it carries four ordinary cuts, and the two need opposite fixes.
         if weighted and cuts:
             per = sorted(((cut_minutes(c, True), c.get("id", "?") if isinstance(c, dict) else "?",
-                           cut_words(c)) for c in cuts), reverse=True)
-            total = sum(m for m, _, _ in per)
-            row["cut_minutes"] = [{"id": i, "minutes": round(m, 1), "hint_words": w}
-                                  for m, i, w in per]
+                           cut_words(c), cut_decisions(c)) for c in cuts), reverse=True)
+            total = sum(m for m, _, _, _ in per)
+            row["cut_minutes"] = [{"id": i, "minutes": round(m, 1),
+                                   "decisions": dc, "hint_words": w}
+                                  for m, i, w, dc in per]
             row["largest_cut_share"] = round(per[0][0] / total, 2) if total else 0.0
         out.append(row)
     return out

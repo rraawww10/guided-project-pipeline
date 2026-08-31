@@ -316,47 +316,57 @@ def test_linter(tmp: Path) -> None:
 
 # ------------------------------------------------------- oversized cuts ----
 def test_cut_share(tmp: Path) -> None:
-    """The shape four consecutive projects overran on: one cut far larger than
-    its siblings. Flat MINUTES_PER_CUT could not see it, so nothing before the
-    step 13 dry run did. Calibrated in spec_linter against the two flow-2
-    sessions that have a measured time."""
-    print("oversized cuts")
+    """What a cut costs to teach is its decisions, not its hint length.
 
-    def cut(i: int, words: int) -> dict:
-        # "Assign value ... to the row" plus filler, to hit an exact word count.
-        base = f"Assign value number {i} to the row"
-        pad = ["and"] * max(0, words - len(base.split()))
-        return {"id": f"cut-x{i}", "file": "a.ts", "hint": " ".join([base] + pad)}
+    Round 3 first weighted a cut by hint words. pipeline-test-03 disproved it:
+    every cut came in under the 55-word nominal, the linter reported both
+    sessions at 38.5 against a 40 cap, and the Pack Writer then timed them at 48
+    and 45 - locating the excess in cut-parse-line, four ordered fallbacks in 53
+    words, about 13 live minutes against the flat 6 the linter charged.
+    """
+    print("cut cost and share")
 
-    check("a nominal cut costs the flat weight",
-          spec_linter.cut_minutes(cut(0, spec_linter.NOMINAL_HINT_WORDS), True),
-          spec_linter.MINUTES_PER_CUT)
-    check("a short hint is not a cheaper cut",
-          spec_linter.cut_minutes(cut(0, 5), True), spec_linter.MINUTES_PER_CUT)
-    check("an oversized cut costs the surcharge",
-          spec_linter.cut_minutes(cut(0, spec_linter.NOMINAL_HINT_WORDS + 40), True),
-          spec_linter.MINUTES_PER_CUT + 40 * spec_linter.MINUTES_PER_OVERSIZE_WORD)
+    def cut(i: int, decisions: int = 0, words: int = 20) -> dict:
+        """A hint with an exact decision count and an exact word count."""
+        head = f"Set value number {i} from the row"          # 6 words, no markers
+        branches = ["unless it is empty"] * decisions        # 4 words each, 1 marker
+        used = len(head.split()) + 4 * decisions
+        pad = ["and"] * max(0, words - used)
+        return {"id": f"cut-x{i}", "file": "a.ts",
+                "hint": " ".join([head] + branches + pad)}
+
+    check("a cut with no decisions costs the flat weight",
+          spec_linter.cut_minutes(cut(0), True), spec_linter.MINUTES_PER_CUT)
+    check("each decision adds its minutes",
+          spec_linter.cut_minutes(cut(0, decisions=3), True),
+          spec_linter.MINUTES_PER_CUT + 3 * spec_linter.MINUTES_PER_DECISION)
     check("unweighted ignores the hint entirely",
-          spec_linter.cut_minutes(cut(0, 200), False), spec_linter.MINUTES_PER_CUT)
-    check("a cut that is not a dict counts no words", spec_linter.cut_words(3), 0)
+          spec_linter.cut_minutes(cut(0, decisions=9, words=200), False),
+          spec_linter.MINUTES_PER_CUT)
+    check("a cut that is not a dict has no decisions", spec_linter.cut_decisions(3), 0)
 
-    # pipeline-test-02 session 2 as shipped: 3 cuts of 110, 68 and 70 hint
-    # words, 1 build, 4 concepts, no setup. Flat said 37.0 and Priya measured 50.
-    shipped = {"n": 2, "cuts": [cut(0, 110), cut(1, 68), cut(2, 70)],
-               "builds": ["ep-x"], "teaches": ["a", "b", "c", "d"]}
-    check("the flat estimate missed pipeline-test-02 session 2",
-          spec_linter.session_minutes(shipped, False), 37.0)
-    check("the weighted estimate lands within 1 minute of the measured 50",
-          abs(spec_linter.session_minutes(shipped, False, weighted=True) - 50.0) <= 1.0, True)
+    # the pipeline-test-03 finding, as a check: short and branchy beats long and flat
+    short_branchy = cut(0, decisions=5, words=53)
+    long_flat = cut(1, decisions=0, words=103)
+    check("a 53-word cut with five decisions costs more than a 103-word cut with none",
+          spec_linter.cut_minutes(short_branchy, True) >
+          spec_linter.cut_minutes(long_flat, True), True)
+    check("and length alone still costs something - an algorithm states no conditions",
+          spec_linter.cut_minutes(long_flat, True) > spec_linter.MINUTES_PER_CUT, True)
 
-    # pipeline-test-01 session 2: 2 cuts of 103 and 81, 2 builds, 3 concepts.
-    # Flat said 32.5, under the cap, and it ran 45.
-    t01 = {"n": 2, "cuts": [cut(0, 103), cut(1, 81)],
-           "builds": ["ep-x", "sc-y"], "teaches": ["a", "b", "c"]}
-    check("the flat estimate cleared the cap on a session that ran 45",
-          spec_linter.session_minutes(t01, False) <= spec_linter.SESSION_MINUTES_CAP, True)
-    check("the weighted estimate puts it over the cap",
-          spec_linter.session_minutes(t01, False, weighted=True) > spec_linter.SESSION_MINUTES_CAP, True)
+    check("decision words are matched on word boundaries",
+          spec_linter.cut_decisions({"hint": "a specific ifference thenceforth"}), 0)
+    check("positional words are not decisions - 'the first number' is not a branch",
+          spec_linter.cut_decisions({"hint": "The first number, then the next one"}), 1)
+
+    # pipeline-test-03 session 1 as shipped: 2 cuts, 2 builds, 3 concepts, setup.
+    # Flat said 38.5 and the Pack Writer timed it at 48.
+    s1 = {"n": 1, "cuts": [cut(0, decisions=3, words=51), cut(1, decisions=5, words=53)],
+          "builds": ["ep-x", "sc-y"], "teaches": ["a", "b", "c"]}
+    check("the flat estimate cleared the cap on a session timed at 48",
+          spec_linter.session_minutes(s1, True) <= spec_linter.SESSION_MINUTES_CAP, True)
+    check("the decision model puts it over, within 5 minutes of the measurement",
+          abs(spec_linter.session_minutes(s1, True, weighted=True) - 48) <= 5, True)
 
     def share_codes(cuts: list[dict]) -> set[str]:
         lint = Lint()
@@ -364,25 +374,26 @@ def test_cut_share(tmp: Path) -> None:
         return {w["code"] for w in lint.warnings}
 
     check("one cut over its share of the session warns",
-          "W114" in share_codes([cut(0, 110), cut(1, 68), cut(2, 70)]), True)
-    check("balanced cuts do not warn",
-          "W114" in share_codes([cut(0, 47), cut(1, 33), cut(2, 29)]), False)
+          "W114" in share_codes([cut(0, decisions=6), cut(1), cut(2)]), True)
+    check("cuts with even decision counts do not warn",
+          "W114" in share_codes([cut(0, decisions=2), cut(1, decisions=2),
+                                 cut(2, decisions=2)]), False)
     check("two cuts never warn - a share below three is arithmetic, not skew",
-          "W114" in share_codes([cut(0, 103), cut(1, 20)]), False)
-    check("habit-tracker's cut-api-toggle shape is caught",
-          "W114" in share_codes([cut(0, 44), cut(1, 94), cut(2, 49)]), True)
+          "W114" in share_codes([cut(0, decisions=9), cut(1)]), False)
 
     skewed = Lint()
     spec_linter._check_cut_share(
-        skewed, [{"n": 1, "cuts": [cut(0, 110), cut(1, 68), cut(2, 70)]}])
+        skewed, [{"n": 1, "cuts": [cut(0, decisions=6), cut(1), cut(2)]}])
     msg = next(w["message"] for w in skewed.warnings if w["code"] == "W114")
     check("the warning names the offending cut", "cut-x0" in msg, True)
     check("the warning forbids the E113 escape", "E113" in msg, True)
+    check("and says shortening the hint will not help",
+          "Shortening the hint" in msg, True)
 
-    # Flow 1 keeps the weight it was calibrated on rather than failing three
-    # shipped projects retroactively.
+    # Flow 1 keeps the flat weight it was calibrated on: its specs write many
+    # small cuts, and the flat 6 reads recipe-box and tip-split about 10 high.
     skew = json.loads(json.dumps(GOOD_SPEC))
-    skew["sessions"][0]["cuts"] = [cut(0, 110), cut(1, 68), cut(2, 70)]
+    skew["sessions"][0]["cuts"] = [cut(0, decisions=6), cut(1), cut(2)]
     skew["sessions"][0]["criteria"] = [
         {"id": f"c-1-{i+1}", "check": f"GET /api/todos returns 200 for case number {i}",
          "target": "ep-todos-list", "cuts": [f"cut-x{i}"]} for i in range(3)]
@@ -392,15 +403,15 @@ def test_cut_share(tmp: Path) -> None:
           "W114" in {w["code"] for w in lint_spec(p1).warnings}, False)
     check("flow 1 keeps the flat estimate",
           spec_linter.minute_estimates(p1)[0]["minutes"],
-          spec_linter.session_minutes(skew["sessions"][0], True, weighted=False))
+          spec_linter.session_minutes(skew["sessions"][0], True))
 
     p2 = make_project(tmp / "f2", skew, md, flow=2)
     check("flow 2 raises W114 on the same spec",
           "W114" in {w["code"] for w in lint_spec(p2).warnings}, True)
     est = spec_linter.minute_estimates(p2)[0]
     check("flow 2 reports the weighted estimate", est["weighted"], True)
-    check("the estimate breaks the session down per cut",
-          [c["id"] for c in est["cut_minutes"]], ["cut-x0", "cut-x2", "cut-x1"])
+    check("the estimate reports decisions per cut, which is what drove the number",
+          [c["decisions"] for c in est["cut_minutes"]], [6, 0, 0])
     check("the estimate reports the largest cut's share",
           est["largest_cut_share"] > spec_linter.CUT_SHARE_CAP, True)
     check("a project with no state file reads as flow 1", spec_linter._flow(tmp / "nope"), 1)

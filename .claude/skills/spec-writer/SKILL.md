@@ -97,28 +97,50 @@ many cuts as the others overruns - the last project shipped one at 45 minutes
 against the 40 cap. Give session 1 one or two fewer cuts than sessions 2 and 3.
 
 **Teaching minutes are estimated, not just counted (`E111` / `W112`).** The
-linter costs a session at roughly: 10 minutes of base, 6 per cut, 3 per
-endpoint or screen built, 1.5 per concept in `teaches`, plus 6 for the setup
-session. Over 40 is a warning, over 50 is a rejection. Keep `teaches` honest -
-padding it costs minutes.
+linter costs a session at roughly: 10 minutes of base, then each cut (see the
+next rule for what a cut costs), 3 per endpoint or screen built, 1.5 per concept
+in `teaches`, plus 6 for the setup session. Over 40 is a warning, over 50 is a
+rejection. Keep `teaches` honest - padding it costs minutes.
 
-**A cut is not a fixed 6 minutes, and no cut may dominate its session
-(`W114`).** On flow 2 a cut costs 6 minutes up to a 55-word hint and 0.15
-minutes for every word beyond it, because what costs live minutes is how many
-rules have to be explained, and the hint is where they are stated. A cut taking
-more than 45% of a session's cut minutes is warned. **Four consecutive projects
-overran on exactly this shape** - one cut far larger than its siblings, most
-recently a 110-word `cut-line-status` in a session that ran 50 minutes against
-40. Two consequences for how you write:
+The estimate is calibrated on four sessions, only two of them actually timed,
+and its worst error is about 5 minutes. It is a signal to design against, not a
+measurement. Nothing before the step 13 dry run measures teaching time.
 
-- A hint running past about 55 words is a signal the cut does too much. Split it
-  into two cuts with their own criteria, rather than writing one longer hint.
-- Do not relieve a heavy session by moving a cut into the setup session. That
-  trades `W114` for `E113`. Split the cut where it is, or drop something from
-  that session.
+**A cut costs what its DECISIONS cost, not what its hint length costs
+(`W114`).** On flow 2 a cut is priced at 6 minutes plus 1.7 for every branch its
+hint states - a condition (`unless`, `otherwise`, `when`, `if`, `except`) or an
+ordering between rules (`then`, `before`, `in that order`) - plus a small
+residual for length beyond 55 words, which catches an algorithm that states no
+conditions at all. A cut taking more than 45% of a session's cut minutes is
+warned.
+
+**This replaced a word-count model that pipeline-test-03 disproved.** Every cut
+in that spec came in at 46-53 words, under the old nominal; the linter reported
+both sessions at 38.5 against the 40 cap and said nothing; the Pack Writer then
+timed session 1 at 48 and session 2 at 45. The excess was one cut,
+`cut-parse-line`, which states four ordered fallbacks in 53 words and takes
+about 13 live minutes. Three ordered rules compress into 53 words as easily as
+one rule does.
+
+So, when a cut prices high:
+
+- **Split it so each half states fewer decisions.** That is the only move that
+  makes the session shorter.
+- **Do not shorten the hint.** It changes the estimate barely and the teaching
+  time not at all, and it makes the hint worse. The word term exists only to
+  catch algorithms with no conditional prose; it is not a lever.
+- **Do not move a cut into the setup session** to relieve a heavy one. That
+  trades `W114` for `E113`.
+
+**Name drop candidates that are actually live minutes.** pipeline-test-03's spec
+named markup elements as its trims - but all five cuts were in `lib/` and every
+page file shipped written, so no student typed that markup and dropping it
+recovered nothing. A named mitigation that costs zero live minutes is worse than
+naming none, because it reads as slack that is not there. A drop candidate must
+be something a student types during the session.
 
 The estimate is in `lint.json` under `session_minutes`, broken down per cut with
-its hint words. Read it rather than counting cuts in your head.
+its decision count. Read it rather than counting in your head.
 
 **Hints name something concrete, and never say "return" (`W066` / `W067`).**
 Name the symbol, the state value, the path, the status or the count the student
