@@ -41,7 +41,7 @@ from pathlib import Path
 from . import (cutter, deploy_check, gate1, guide_linter, leak_scan, mutation,
                redfirst, spec_linter, test_runner, watchdog)
 from .state import (GATES, RETRY_LIMIT, STEP_RUN_LIMIT, State, frozen_hash,
-                    project_dir, spec_drift, spec_hash)
+                    project_dir, spec_drift, spec_hash, verify_hash)
 
 HERE = Path(__file__).parent
 
@@ -281,18 +281,36 @@ def cmd_deploy(a) -> int:
 def cmd_gate(a) -> int:
     st = State(a.slug)
     gate = f"gate{a.n}"
+    # A note passed with -m has already been through the shell by the time it
+    # gets here, and a backtick or $() in it fires as a substitution: on
+    # pipeline-test-03 that silently deleted a clause from an approved Gate 2
+    # note, which recorded and reported success. --note-file never touches a
+    # shell. Whichever is used, the stored length is echoed so a truncation is
+    # visible at the moment it happens rather than whenever someone re-reads it.
+    if getattr(a, "note_file", ""):
+        if a.note:
+            sys.exit("pass -m or --note-file, not both")
+        nf = Path(a.note_file)
+        if not nf.exists():
+            sys.exit(f"note file not found: {nf}")
+        a.note = nf.read_text(encoding="utf-8")
     approved = a.decision == "approve"
     extra: dict = {}
     if approved:
         blockers = _gate_blockers(st, a.n, override=bool(getattr(a, "override", False)))
         if blockers:
             sys.exit("cannot approve - these have not passed yet:\n  " + "\n  ".join(blockers))
+        if a.n == 2:
+            extra = _verify_moved(st)
         if a.n == 1:
             if getattr(a, "override", False) and not a.note:
                 sys.exit("--override needs -m \"<why nothing downstream catching it is "
                          "acceptable>\" - it is recorded in state.json")
             extra = _approve_spec(st, a)
     st.record_gate(gate, approved, a.note, extra)
+    if a.note:
+        print(f"note recorded: {len(a.note)} characters, "
+              f"{len(a.note.splitlines())} lines")
     if approved:
         # each gate guards one phase; approving it opens the next one. Works for
         # both flows because it reads the flow's own phase order.
@@ -314,6 +332,35 @@ def cmd_gate(a) -> int:
                  3: "step 9, pack-writer"}[a.n])
         print(f"sent back to {back}")
     return 0
+
+
+def _verify_moved(st: State) -> dict:
+    """Did the suite change between Gate 1 approving it and Gate 2 reading it?
+
+    Gate 1 approves the tests as well as the plan. In flow 2 the Verifier then
+    legitimately writes verify/ at step 8, so the suite CAN move and this does
+    not block - but nothing said so, and pipeline-test-02's Gate 2 note asserted
+    byte identity that had been read off git by hand. pipeline-test-03's
+    Verifier added a timeout to helpers.py and the same assertion would have
+    been false. Gate 2 states it either way and records it, so the human reads a
+    nine-line diff instead of assuming.
+    """
+    g1 = (st.data.get("gates") or {}).get("gate1") or {}
+    was, now = g1.get("verify_hash"), verify_hash(st.dir)
+    if not was:
+        print("note: Gate 1 recorded no tests hash (approved before this check "
+              "existed), so whether the suite moved cannot be established here")
+        return {"verify_hash": now, "verify_moved": None}
+    if was == now:
+        print(f"tests unchanged since Gate 1 ({now[:12]}) - the suite that graded "
+              f"this code is the one approved before any code existed")
+        return {"verify_hash": now, "verify_moved": False}
+    print(f"NOTE: verify/ CHANGED since Gate 1 ({was[:12]} -> {now[:12] if now else 'gone'}).")
+    print("      Flow 2 lets the Verifier write verify/ at step 8, so this is allowed.")
+    print("      Read the diff before approving - a gate cannot tell a tightened")
+    print("      assertion from a weakened one:")
+    print(f"        git diff -- {st.dir / 'verify'}")
+    return {"verify_hash": now, "verify_moved": True}
 
 
 def _approve_spec(st: State, a) -> dict:
@@ -348,7 +395,11 @@ def _approve_spec(st: State, a) -> dict:
     print(f"spec frozen at {h[:12]} and archived to {archive} ({', '.join(kept)})")
     print("the write guard now refuses edits to spec.md and spec.json; "
           "`pipeline revise` is the only way to reopen them")
-    return {"spec_hash": h, "override": bool(getattr(a, "override", False))}
+    vh = verify_hash(d)
+    if vh:
+        print(f"tests recorded at {vh[:12]} - Gate 2 reports whether the suite moved")
+    return {"spec_hash": h, "verify_hash": vh,
+            "override": bool(getattr(a, "override", False))}
 
 
 def _gate_blockers(st: State, n: int, override: bool = False) -> list[str]:
@@ -982,6 +1033,11 @@ def build_parser() -> argparse.ArgumentParser:
     g.add_argument("n", type=int, choices=[0, 1, 2, 3])
     g.add_argument("decision", choices=["approve", "reject"])
     g.add_argument("-m", "--note", default="")
+    g.add_argument("-F", "--note-file", default="",
+                   help="read the note from a file instead of the command line. A "
+                        "gate note is the permanent record and is read later by the "
+                        "Spec Writer on a revision; passing prose through a shell "
+                        "lets backticks and $() fire and silently delete part of it.")
     g.add_argument("--override", action="store_true",
                    help="gate 1 only: approve despite the stopping rule. Needs -m, "
                         "and is recorded in state.json as an override.")

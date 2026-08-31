@@ -87,6 +87,34 @@ def spec_hash(project: Path) -> str | None:
     return h.hexdigest()
 
 
+def verify_hash(project: Path) -> str | None:
+    """A stable digest of the whole verify/ tree. None if there is no tree.
+
+    Gate 1 approves the tests as well as the plan, and pipeline-test-02's Gate 2
+    note claimed "verify/ byte-identical to the Gate 1 commit" - which was true,
+    and which nothing checked. It was read off git by hand. In flow 2 the
+    Verifier legitimately writes verify/ at step 8, AFTER Gate 1, so byte
+    identity is not a property Gate 2 can assume; pipeline-test-03's Verifier
+    added a timeout to helpers.py and the claim would have been false.
+
+    What Gate 2 can do is say plainly whether the suite moved, so the human
+    reads the diff instead of assuming either way. Paths are mixed in, so a
+    renamed or deleted test changes the hash.
+    """
+    root = project / "verify"
+    if not root.is_dir():
+        return None
+    h = hashlib.sha256()
+    for f in sorted(p for p in root.rglob("*") if p.is_file()):
+        if "__pycache__" in f.parts:
+            continue
+        h.update(str(f.relative_to(root)).replace(chr(92), "/").encode())
+        h.update(b"\0")
+        h.update(f.read_bytes())
+        h.update(b"\0")
+    return h.hexdigest()
+
+
 def frozen_hash(project: Path) -> str | None:
     """The spec hash recorded when Gate 1 was approved, if it was."""
     marker = project / ".pipeline" / "SPEC_FROZEN"

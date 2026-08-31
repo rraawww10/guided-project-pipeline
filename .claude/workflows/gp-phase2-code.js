@@ -197,27 +197,69 @@ const mutationOut = await agent(
         checked: { type: 'integer' },
         of_total: { type: 'integer' },
         ungraded_tasks: { type: 'array', items: { type: 'string' } },
+        inconclusive_tasks: { type: 'array', items: { type: 'string' } },
         seconds: { type: 'number' },
       },
     } })
 mustRun('mutation', mutationOut)
 
-log(`mutation: ${mutationOut.ok ? 'every task is graded' :
-     `UNGRADED ${(mutationOut.ungraded_tasks || []).join(', ')}`}`)
+const ungraded = mutationOut.ungraded_tasks || []
+const inconclusive = mutationOut.inconclusive_tasks || []
 
+log(`mutation: ${mutationOut.ok ? 'every task is graded'
+    : ungraded.length ? `UNGRADED ${ungraded.join(', ')}`
+    : inconclusive.length ? `INCONCLUSIVE ${inconclusive.join(', ')}`
+    : 'failed without naming a task'}`)
+
+// mutation.ok is false for two unrelated reasons and they need opposite
+// actions. This branch used to report every failure as ungraded and print an
+// instruction to reject a Gate-1-approved spec - which is the exact wrong
+// output pipeline/cli.py::_checker records: "an unguarded crash in `mutation`
+// read as 'the spec is wrong' and printed an instruction to reject a
+// Gate-1-approved spec that was correct". pipeline-test-03 hit it with
+// ungraded_tasks empty and inconclusive_tasks holding one entry.
 if (!mutationOut.ok) {
-  // An ungraded task is a spec problem, not a code problem: the requirement
-  // list does not notice the task. That re-enters at step 3.
-  return {
+  const common = {
     slug, gate: 2, ready: false, retries_used: attempt, counts: results.counts,
-    blocked: 'the mutation check found student tasks that grade nothing',
-    ungraded_tasks: mutationOut.ungraded_tasks || [],
-    reason: 'a task no requirement notices can be left empty with every criterion ' +
-            'green. This is a SPEC problem - the requirement list is wrong, not the ' +
-            'code - so it re-enters at step 3.',
-    fix: `python3 -m pipeline gate ${slug} 1 reject -m "<add a requirement that ` +
-         `notices each ungraded task>" && python3 -m pipeline revise ${slug}`,
+    ungraded_tasks: ungraded, inconclusive_tasks: inconclusive,
     read_next: [`projects/${slug}/mutation.json`, `projects/${slug}/results.json`],
+  }
+  if (ungraded.length) {
+    // The suite cannot see the task at all. The requirement list is wrong.
+    return { ...common,
+      blocked: 'the mutation check found student tasks that grade nothing',
+      reason: 'a task no requirement notices can be left empty with every criterion ' +
+              'green. This is a SPEC problem - the requirement list is wrong, not the ' +
+              'code - so it re-enters at step 3.',
+      fix: `python3 -m pipeline gate ${slug} 1 reject -m "<add a requirement that ` +
+           `notices each ungraded task>" && python3 -m pipeline revise ${slug}`,
+    }
+  }
+  if (inconclusive.length) {
+    // The mutant proved nothing either way. NOT a verdict about the project,
+    // and rejecting the spec over it would be rejecting a spec that may be
+    // correct. A cut every criterion declares is the usual cause: its expected
+    // set is the whole suite, so nothing is left over to stay green and prove
+    // the harness was alive. mutation.py takes that control from the run, so
+    // this now means the whole run produced no passing criterion anywhere.
+    return { ...common,
+      blocked: 'the mutation check could not reach a verdict',
+      reason: 'an INCONCLUSIVE task is not an ungraded task. No criterion passed ' +
+              'against the mutant AND no other mutant in the run proved the harness ' +
+              'alive, so nothing was learned about whether the task is graded. Do ' +
+              'NOT reject the spec over this - read the run first.',
+      fix: 'read mutation.json and the junit for the named task. If the suite ran ' +
+           'and every criterion failed, the harness may be broken for the whole run ' +
+           '(a port, a fixture path, an install) - that is a pipeline fault. If the ' +
+           'suite did not run, boot the mutant by hand and see why.',
+    }
+  }
+  return { ...common,
+    blocked: 'the mutation check failed without naming a task',
+    reason: 'mutation.ok is false but neither ungraded_tasks nor inconclusive_tasks ' +
+            'holds anything. That is a pipeline fault, not a verdict - no conclusion ' +
+            'about the project follows from it.',
+    fix: `read projects/${slug}/mutation.json directly`,
   }
 }
 

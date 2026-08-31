@@ -28,7 +28,7 @@ from . import (cli, code_check, cutter, deploy_check, gate1, guard, guide_linter
 from .deploy_check import find_advisories
 from .spec_linter import Lint, _scan_placeholder, _scan_vague, lint_spec
 from .state import (GATES_BY_FLOW, PHASES_BY_FLOW, RETRY_LIMIT, STEP_RUN_LIMIT,
-                    State, frozen_hash, spec_drift, spec_hash)
+                    State, frozen_hash, spec_drift, spec_hash, verify_hash)
 
 ROOT = Path(__file__).resolve().parent.parent
 FAILURES: list[str] = []
@@ -312,6 +312,48 @@ def test_linter(tmp: Path) -> None:
     rep = json.loads((q / "lint.json").read_text())
     check("lint.json reports session minutes", rep["session_minutes"][0]["minutes"], 35.5)
     check("lint.json reports the spec hash", rep["spec_hash"], spec_hash(q))
+
+
+# ------------------------------------------------- the tests Gate 1 saw ----
+def test_verify_moved(tmp: Path) -> None:
+    """Gate 1 approves the tests too, and flow 2 lets the Verifier rewrite them
+    at step 8. pipeline-test-02's Gate 2 note asserted verify/ was byte-identical
+    to its Gate 1 commit - true, read off git by hand, and checked by nothing.
+    pipeline-test-03's Verifier added a timeout to helpers.py and the same
+    assertion would have been false. Gate 2 now states it either way."""
+    print("the tests Gate 1 saw")
+
+    d = tmp / "projects" / "fixture"
+    (d / "verify").mkdir(parents=True)
+    (d / ".pipeline").mkdir()
+    (d / "verify" / "test_a.py").write_text("def test_a(): assert 1")
+    first = verify_hash(d)
+    check("a verify tree hashes", bool(first), True)
+    check("hashing twice gives the same answer", verify_hash(d), first)
+
+    (d / "verify" / "test_a.py").write_text("def test_a(): assert 2")
+    check("editing a test changes the hash", verify_hash(d) != first, True)
+
+    (d / "verify" / "test_a.py").write_text("def test_a(): assert 1")
+    check("and reverting it changes back", verify_hash(d), first)
+
+    (d / "verify" / "test_b.py").write_text("def test_b(): assert 1")
+    added = verify_hash(d)
+    check("adding a test changes the hash", added != first, True)
+    (d / "verify" / "test_b.py").unlink()
+    check("removing it changes back", verify_hash(d), first)
+
+    # a rename must not slip through: the path is mixed into the digest
+    (d / "verify" / "test_a.py").rename(d / "verify" / "test_c.py")
+    check("renaming a test changes the hash", verify_hash(d) != first, True)
+    (d / "verify" / "test_c.py").rename(d / "verify" / "test_a.py")
+
+    cache = d / "verify" / "__pycache__"
+    cache.mkdir()
+    (cache / "test_a.pyc").write_bytes(bytes([0, 1]))
+    check("__pycache__ is not part of the suite", verify_hash(d), first)
+
+    check("no verify tree hashes to nothing", verify_hash(tmp / "nope"), None)
 
 
 # ------------------------------------------------------- oversized cuts ----
@@ -1871,7 +1913,7 @@ def test_readme_count() -> None:
 def main() -> int:
     tmp = Path(tempfile.mkdtemp(prefix="gp-selftest-"))
     try:
-        for t in (test_linter, test_cut_share, test_mutation_run_control, test_stop_server, test_cutter, test_return_safety, test_skeleton_check,
+        for t in (test_linter, test_cut_share, test_mutation_run_control, test_stop_server, test_verify_moved, test_cutter, test_return_safety, test_skeleton_check,
                   test_gate1, test_spec_freeze, test_breaker_binding, test_state,
                   test_step_churn, test_guard, test_checker_crash_burns_a_retry,
                   test_revise, test_revise_flow2,
