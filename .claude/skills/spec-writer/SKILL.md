@@ -97,10 +97,28 @@ many cuts as the others overruns - the last project shipped one at 45 minutes
 against the 40 cap. Give session 1 one or two fewer cuts than sessions 2 and 3.
 
 **Teaching minutes are estimated, not just counted (`E111` / `W112`).** The
-linter now costs a session at roughly: 10 minutes of base, 6 per cut, 3 per
+linter costs a session at roughly: 10 minutes of base, 6 per cut, 3 per
 endpoint or screen built, 1.5 per concept in `teaches`, plus 6 for the setup
 session. Over 40 is a warning, over 50 is a rejection. Keep `teaches` honest -
 padding it costs minutes.
+
+**A cut is not a fixed 6 minutes, and no cut may dominate its session
+(`W114`).** On flow 2 a cut costs 6 minutes up to a 55-word hint and 0.15
+minutes for every word beyond it, because what costs live minutes is how many
+rules have to be explained, and the hint is where they are stated. A cut taking
+more than 45% of a session's cut minutes is warned. **Four consecutive projects
+overran on exactly this shape** - one cut far larger than its siblings, most
+recently a 110-word `cut-line-status` in a session that ran 50 minutes against
+40. Two consequences for how you write:
+
+- A hint running past about 55 words is a signal the cut does too much. Split it
+  into two cuts with their own criteria, rather than writing one longer hint.
+- Do not relieve a heavy session by moving a cut into the setup session. That
+  trades `W114` for `E113`. Split the cut where it is, or drop something from
+  that session.
+
+The estimate is in `lint.json` under `session_minutes`, broken down per cut with
+its hint words. Read it rather than counting cuts in your head.
 
 **Hints name something concrete, and never say "return" (`W066` / `W067`).**
 Name the symbol, the state value, the path, the status or the count the student

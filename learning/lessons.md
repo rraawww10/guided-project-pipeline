@@ -303,6 +303,92 @@ gets a strikethrough and a date.
   second command, so `cd app
 rm ../verify/t.py` used to slip past entirely.
 
+## Which findings can become linter rules
+
+Ten Gate 1 rejections across five projects, classified. The point of the
+classification is that it decides what is worth promoting - "promote a finding
+class once it recurs" needs someone to have counted.
+
+| Class | Times | Owner now |
+|---|---|---|
+| A rule the spec states that no criterion grades | 6 | still the Spec Breaker |
+| Behaviour when a cut is open, or a collection is empty, is unstated | 3 | still the Spec Breaker |
+| A cut removes its function's only `return` (TS2355) | 2 | `W067` + the cutter's static scan |
+| Session load: setup imbalance, or one oversized cut | 2 | `E111` / `W112` / `E113` / `W114` |
+| A hint names no concrete symbol | 1 | `W066` |
+| A cut's marker boundary is unpinned | 1 | still the Spec Breaker |
+| No selectors pinned for UI criteria | 1 | still the Spec Breaker |
+
+- **The promotable classes have already been promoted, and the ones left are
+  prose-semantic.** Every class now owned by a script is checkable from
+  *structure* - a count, an id, a shape in spec.json. The two that keep recurring
+  are not: deciding that a stated rule has no criterion, or that a degenerate case
+  is unstated, means reading prose against intent. That is the Spec Breaker's job
+  and there is no cheap script that takes it over.
+
+- **Two structural proxies were tried against the corpus and both failed.**
+  "Every status code an endpoint declares must be named by a criterion" fires zero
+  times on all ten rejected rounds *and* all five approved specs - it has no
+  discriminating power, and section 9 of basic_needs_v1.md is explicit that a
+  check which has never caught anything is not proven. "Every cut's marker
+  boundary must be pinned in spec.md" is worse than useless: it stays silent on
+  pipeline-test-02 round 2, the one spec that actually had the defect, while
+  firing 9 times on approved flow-1 specs. **Test a candidate rule against the
+  round that contained the defect before writing it, not against the corpus in
+  general.** A rule that is quiet everywhere looks clean and proves nothing.
+
+- **Rounds are the cost, not steps.** pipeline-test-02 spent about 3.1 hours of
+  working time, and roughly 93 minutes of that was the PLAN phase run three
+  times. Nothing was slow; it ran twice more than it needed to. Until a recurring
+  class becomes checkable, the way to spend fewer minutes in this phase is fewer
+  Gate 1 rejections, not faster steps.
+
+- **The three agents in the PLAN phase cannot be overlapped.** The Test Writer
+  reads `ambiguity.md`, so spec -> ambiguity -> tests is a data dependency, not an
+  ordering convention. It is also the reason pipeline-test-02's suite could record
+  per test which reading of an ambiguity it took. Recorded in
+  `gp-phase1-spec.js` so it is not tried again as a speed-up.
+
+## Session timing
+
+- **Four consecutive projects overran on the same shape: one cut far larger than
+  its siblings.** recipe-box session 3 and tip-split session 1 both ran 45 against
+  a 40 minute cap; habit-tracker's `cut-api-toggle` was estimated at 6 minutes and
+  measured about 20; pipeline-test-02 session 2 ran 50 against a guide estimate of
+  48 and a spec estimate of 37. The estimator could not see any of it, because
+  `MINUTES_PER_CUT` weighed every cut the same 6 minutes. **A spec-linter minute
+  budget is not evidence.** It was arithmetic over counts, and the thing that
+  actually overruns is one block of live coding with too many rules in it.
+
+- **The fix belongs in the spec, not in the pack.** By the time the Pack Writer
+  times a session at step 9, the spec, the code, the tests and the skeleton are
+  all built and both gates are passed; the only real fix invalidates the build.
+  The pack can only disclose the overrun, which is what pipeline-test-02 did -
+  session-2.md declared 48 minutes at the top and shipped anyway. Cap the cut at
+  step 2 instead. `W114` now warns when one cut takes more than 45% of a
+  session's cut minutes, and cut minutes scale with hint length above a 55-word
+  nominal.
+
+- **Do not fix a heavy session by moving a cut into the setup session.** That
+  trades W114 for E113 - the session carrying the setup must hold strictly fewer
+  cuts than the others, which is the tip-split lesson. Split the oversized cut in
+  place, or name a drop candidate inside its own session.
+
+- **Hint length turned out to be the usable proxy, and only within a flow.**
+  Measured `lines_removed` correlates only loosely with teaching time (110 hint
+  words removed 18 lines, 76 words removed 23), because what costs live minutes is
+  how many rules have to be explained, not how many lines get typed. Flow-1 specs
+  write far terser hints than flow-2 ones - recipe-box averages 30 words against
+  flow 2's 75 - so the same per-word rate misreads them. The rule is gated to
+  flow 2 rather than applied retroactively to three shipped projects.
+
+- **Two flow-2 sessions have a measured time; the model is calibrated on two
+  points.** pipeline-test-01 session 2 (flat 32.5, measured 45) and
+  pipeline-test-02 session 2 (flat 37.0, measured 50). Both now estimate within a
+  minute. That is a small sample and the constants should move when the next dry
+  run disagrees with them - the estimate is reported in `lint.json` on every run
+  precisely so the disagreement is visible.
+
 ## Teaching
 
 <!-- Where students actually got stuck, from live sessions. -->

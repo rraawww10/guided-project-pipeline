@@ -27,7 +27,7 @@ This CLI is the single entry point for every script step and every gate.
   python -m pipeline spec-status <slug>       # is the spec still the approved one
   python -m pipeline gate <slug> 1|2|3 approve|reject [-m note] [--override]
   python -m pipeline ship <slug>              # step 12
-  python -m pipeline watch                    # nightly watchdog
+  python -m pipeline watch                    # replay shipped suites (on demand)
   python -m pipeline next <slug>              # what the pipeline wants next
 """
 from __future__ import annotations
@@ -67,7 +67,7 @@ STEPS_BY_FLOW = {
         (9, "pack", "AGENT", "pack-writer  -> pack/                (one pass, you read it)"),
         (10, "pack", "SCRIPT", "deploy       -> deploy.json"),
         (11, "pack", "GATE", "gate 3 - approve the pack"),
-        (12, "pack", "SCRIPT", "ship         -> handover + nightly watchdog"),
+        (12, "pack", "SCRIPT", "ship         -> handover + watchdog on demand"),
     ],
     2: [
         (0, "idea", "PERSON", "stack input   -> pipeline stack <slug> --stack .. --sessions .. --minutes .."),
@@ -85,7 +85,7 @@ STEPS_BY_FLOW = {
         (12, "pack", "SCRIPT", "deploy        -> deploy.json"),
         (13, "pack", "PERSON", "dry run       -> pipeline dryrun <slug> --session N --minutes M --by <who>"),
         (14, "pack", "GATE", "gate 3 - approve the pack"),
-        (15, "pack", "SCRIPT", "ship          -> handover + nightly watchdog + feedback intake"),
+        (15, "pack", "SCRIPT", "ship          -> handover + watchdog on demand + feedback intake"),
     ],
 }
 STEPS = STEPS_BY_FLOW[1]      # kept for callers that predate the flow split
@@ -449,8 +449,15 @@ def cmd_ship(a) -> int:
         sys.exit("blocked: gate3 has not been approved")
     (st.dir / ".pipeline" / "SHIPPED").write_text(st.data["gates"]["gate3"]["at"] + "\n")
     st.log_step("ship", True)
-    print(f"{a.slug} shipped. The nightly watchdog will replay its tests from now on.\n"
-          f"cron: 0 2 * * * cd {Path.cwd()} && python -m pipeline watch")
+    # basic_needs_v1.md section 10 keeps nightly checks out of scope until
+    # something is actually live, and nothing is. This used to hand over a cron
+    # line, which read as an instruction to install one; no schedule was ever
+    # installed, so `watchdog-latest.json` has only ever come from a hand run.
+    # The watchdog itself stays - `pipeline watch` runs it on demand, and the
+    # cron line goes back the day the first project is taught for real.
+    print(f"{a.slug} shipped. Its suite is now part of `pipeline watch`, "
+          f"which is run on demand - there is no nightly schedule while "
+          f"nothing is live.")
     return 0
 
 

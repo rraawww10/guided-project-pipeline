@@ -95,6 +95,32 @@ SETUP_MINUTES = 6.0          # project setup, on the session that carries it
 SESSION_MINUTES_CAP = 40.0
 SESSION_MINUTES_HARD = 50.0
 
+# --- oversized cuts, flow 2 only -------------------------------------------
+# MINUTES_PER_CUT above weighs every cut the same 6 minutes. Four consecutive
+# projects then overran on the same shape - one cut far larger than its
+# siblings - and a flat weight cannot see it. The two flow-2 sessions with a
+# measured dry run both carry a cut over 100 hint words and both ran ~13
+# minutes past the flat estimate:
+#
+#   pipeline-test-01 s2  cuts 103 + 81 words   flat 32.5  measured 45
+#   pipeline-test-02 s2  cuts 110 + 68 + 70    flat 37.0  measured 50
+#
+# and against the sessions that fitted, whose largest cut is at most 51 words
+# (tip-split 3, recipe-box 1 and 4). The gap between 51 and 76 is where the
+# nominal sits. A hint is prose, so its length is a proxy for how many rules
+# have to be explained live, not for how many lines get typed - measured
+# lines_removed correlates only loosely (110 words -> 18 lines, 76 -> 23).
+# That is why this feeds the estimate and a warning, never an error.
+#
+# Calibrated: 32.5 + 74*0.15 = 43.6 against 45, and 37.0 + 83*0.15 = 49.5
+# against 50. Flow-1 specs write far terser hints (recipe-box averages 30
+# words against flow 2's 75), so the same rate misreads them; flow 1 keeps the
+# flat weight it was calibrated on.
+NOMINAL_HINT_WORDS = 55        # a cut this size costs the flat MINUTES_PER_CUT
+MINUTES_PER_OVERSIZE_WORD = 0.15
+CUT_SHARE_CAP = 0.45           # one cut's share of a session's cut minutes
+SHARE_MIN_CUTS = 3             # below this a "share" is arithmetic, not skew
+
 REQUIRED_MD_HEADINGS = ["## Outcome", "## Out of scope", "## Sessions"]
 
 
@@ -182,16 +208,81 @@ def _setup_session(sessions: list[dict]) -> int | None:
     return sessions[0].get("n") if sessions else None
 
 
-def session_minutes(s: dict, carries_setup: bool) -> float:
+def _flow(project: Path) -> int:
+    """A state file with no flow key is flow 1, same rule as state.py. A
+    project with no state file at all reads as flow 1 too, so a bare fixture
+    keeps the behaviour it was written against."""
+    try:
+        return int(json.loads(
+            (project / ".pipeline" / "state.json").read_text()).get("flow", 1))
+    except (OSError, json.JSONDecodeError, TypeError, ValueError):
+        return 1
+
+
+def cut_words(cut: object) -> int:
+    """Hint length in words. Tolerates a cut that is not a dict: the session
+    load checks are also called on bare count fixtures."""
+    if not isinstance(cut, dict):
+        return 0
+    return len((cut.get("hint") or "").split())
+
+
+def cut_minutes(cut: object, weighted: bool) -> float:
+    """The flat cost for a nominal cut, plus a surcharge for the hint words
+    above nominal. Never below MINUTES_PER_CUT - a short hint is not a cheaper
+    cut, it is just a cut whose cost the flat weight already covers."""
+    if not weighted:
+        return MINUTES_PER_CUT
+    over = max(0, cut_words(cut) - NOMINAL_HINT_WORDS)
+    return MINUTES_PER_CUT + MINUTES_PER_OVERSIZE_WORD * over
+
+
+def session_minutes(s: dict, carries_setup: bool, *, weighted: bool = False) -> float:
     return round(
         BASE_MINUTES
-        + MINUTES_PER_CUT * len(s.get("cuts") or [])
+        + sum(cut_minutes(c, weighted) for c in (s.get("cuts") or []))
         + MINUTES_PER_BUILD * len(s.get("builds") or [])
         + MINUTES_PER_CONCEPT * len(s.get("teaches") or [])
         + (SETUP_MINUTES if carries_setup else 0.0), 1)
 
 
-def _check_session_load(lint: Lint, sessions: list[dict]) -> None:
+def _check_cut_share(lint: Lint, sessions: list[dict]) -> None:
+    """One cut far larger than its siblings - the shape four consecutive
+    projects overran on, most recently pipeline-test-02 session 2 at 50 minutes
+    against 40 and habit-tracker's cut-api-toggle, estimated 6 and measured
+    about 20.
+
+    A warning, not an error, for the same reason W112 is: the session may still
+    be teachable, and the fix is a judgement call about which rules belong in
+    one live-coding block. Under SHARE_MIN_CUTS cuts a share is arithmetic - two
+    cuts always split at least 50/50 - so those sessions are left to W112.
+    """
+    for s in sessions:
+        cuts = s.get("cuts") or []
+        if len(cuts) < SHARE_MIN_CUTS:
+            continue
+        mins = [(c, cut_minutes(c, True)) for c in cuts]
+        total = sum(m for _, m in mins)
+        if total <= 0:
+            continue
+        big, big_m = max(mins, key=lambda cm: cm[1])
+        share = big_m / total
+        if share <= CUT_SHARE_CAP:
+            continue
+        cid = big.get("id", "?") if isinstance(big, dict) else "?"
+        rest = sorted(m for c, m in mins if c is not big)
+        lint.warn("W114", f"session {s.get('n')}",
+                  f"cut {cid} is {share:.0%} of the session's {total:g} cut "
+                  f"minutes ({big_m:g} against siblings at "
+                  f"{', '.join(format(m, 'g') for m in rest)}) - over the "
+                  f"{CUT_SHARE_CAP:.0%} cap, on {cut_words(big)} hint words "
+                  f"against a {NOMINAL_HINT_WORDS}-word nominal. Four projects "
+                  f"have overrun on this shape. Split {cid} into two cuts, or "
+                  f"name a drop candidate inside this session. Do NOT move it "
+                  f"into the setup session - that is E113.")
+
+
+def _check_session_load(lint: Lint, sessions: list[dict], weighted: bool = False) -> None:
     """Weigh setup cost and teaching minutes, not just counts.
 
     Round 1 found both overruns at step 9, where the only real fix is a Gate 1
@@ -205,7 +296,7 @@ def _check_session_load(lint: Lint, sessions: list[dict]) -> None:
     for s in sessions:
         n = s.get("n")
         w = f"session {n}"
-        mins = session_minutes(s, n == setup_n)
+        mins = session_minutes(s, n == setup_n, weighted=weighted)
         if mins > SESSION_MINUTES_HARD:
             lint.err("E111", w,
                      f"estimated {mins:g} teaching minutes against a "
@@ -443,7 +534,13 @@ def lint_spec(project: Path) -> Lint:
         lint.err("E091", missing, "declared but no session builds it")
 
     _check_grading_independence(lint, cut_signature)
-    _check_session_load(lint, sessions)
+    # Flow 1 keeps the flat cut weight it was calibrated on; the oversize
+    # surcharge and W114 step aside rather than fail three shipped projects
+    # retroactively.
+    weighted = _flow(project) >= 2
+    _check_session_load(lint, sessions, weighted)
+    if weighted:
+        _check_cut_share(lint, sessions)
 
     # -- spec.md ----------------------------------------------------------
     if not sm.exists():
@@ -476,14 +573,31 @@ def minute_estimates(project: Path) -> list[dict]:
         return []
     sessions = spec.get("sessions") or []
     setup_n = _setup_session(sessions)
-    return [{"n": s.get("n"),
-             "minutes": session_minutes(s, s.get("n") == setup_n),
-             "cuts": len(s.get("cuts") or []),
-             "builds": len(s.get("builds") or []),
-             "concepts": len(s.get("teaches") or []),
-             "carries_setup": s.get("n") == setup_n,
-             "over_cap": session_minutes(s, s.get("n") == setup_n) > SESSION_MINUTES_CAP}
-            for s in sessions]
+    weighted = _flow(project) >= 2
+    out = []
+    for s in sessions:
+        mins = session_minutes(s, s.get("n") == setup_n, weighted=weighted)
+        cuts = s.get("cuts") or []
+        row = {"n": s.get("n"),
+               "minutes": mins,
+               "cuts": len(cuts),
+               "builds": len(s.get("builds") or []),
+               "concepts": len(s.get("teaches") or []),
+               "carries_setup": s.get("n") == setup_n,
+               "over_cap": mins > SESSION_MINUTES_CAP,
+               "weighted": weighted}
+        # Gate 1 reads this. Without the per-cut split, a session that is over
+        # only because one cut is oversized looks the same as one that is over
+        # because it carries four ordinary cuts, and the two need opposite fixes.
+        if weighted and cuts:
+            per = sorted(((cut_minutes(c, True), c.get("id", "?") if isinstance(c, dict) else "?",
+                           cut_words(c)) for c in cuts), reverse=True)
+            total = sum(m for m, _, _ in per)
+            row["cut_minutes"] = [{"id": i, "minutes": round(m, 1), "hint_words": w}
+                                  for m, i, w in per]
+            row["largest_cut_share"] = round(per[0][0] / total, 2) if total else 0.0
+        out.append(row)
+    return out
 
 
 def main(argv: list[str]) -> int:

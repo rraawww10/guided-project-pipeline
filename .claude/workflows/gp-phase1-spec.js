@@ -172,6 +172,16 @@ log(`gate 1 stopping rule: ${verdict.verdict}` +
 // requirements_doc.md rule 1: "Tests are written before the code, by a different
 // AI." Rule 2, red-first: "Every new test must fail before the code is written.
 // A test that passes early proves nothing."
+//
+// DO NOT run this in parallel with the Spec Breaker to save wall clock. It reads
+// ambiguity.md, so the Breaker is a data dependency and not merely an ordering.
+// That dependency is the point: pipeline-test-02 shipped 11 tests each recording
+// in its docstring which reading of an ambiguity it took, which is what let Gate
+// 1 approve four findings owned by 'nothing' with its eyes open. Started early,
+// the Test Writer picks a reading nobody has flagged yet.
+// The three agents in this phase are serial by construction - spec -> ambiguity
+// -> tests. The phase gets faster by needing fewer Gate 1 rounds, not by
+// overlapping these.
 phase('Tests')
 await lock('verify', 'lock:verify')
 const tests = await spawn('test-writer',
@@ -196,14 +206,19 @@ const tests = await spawn('test-writer',
         notes: { type: 'string' },
       },
     } })
-await lock('off', 'unlock:verify')
-
+// One command runner for both, the same shape as `breaker end` + `gate1-check`
+// above. The unlock has to come first because redfirst writes redfirst.json
+// into a tree the lock still covers; two agent spawns to run two ordered shell
+// commands bought nothing but the spawn.
 const redfirst = await agent(
-  `Run exactly this from the repo root and nothing else:\n\n` +
+  `Run exactly these two commands from the repo root, in order, and nothing else:\n\n` +
+  `    python3 -m pipeline unlock ${slug}\n` +
   `    python3 -m pipeline redfirst ${slug} --static-only\n\n` +
-  `It checks that no test in projects/${slug}/verify/ is one that cannot go red - ` +
+  `The first releases the write lock on projects/${slug}/verify/. The second ` +
+  `checks that no test in projects/${slug}/verify/ is one that cannot go red - ` +
   `no assertion at all, or only trivially true ones. Then read ` +
-  `projects/${slug}/redfirst.json and return it.\n\n` +
+  `projects/${slug}/redfirst.json and return it. If the unlock failed, say so and ` +
+  `set ok false.\n\n` +
   `Do NOT edit any file. Do NOT fix anything. You are a command runner.`,
   { label: `redfirst:${slug}`, phase: 'Tests', effort: 'low',
     schema: {

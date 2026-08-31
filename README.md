@@ -248,6 +248,7 @@ checked shape. It now also checks the three defects that recurred:
 | `E110` | Two cuts graded by exactly the same criteria are rejected | `cut-fraction-scale` / `cut-recipe-scale-quantity` were graded only by c-4-2/3/4, so one could be left empty with every criterion green. The same rule catches the skeleton-check blind spot: `cut-store-find-one` / `cut-api-recipe-get` share a signature, which is exactly why c-3-2 went green with find-one still empty |
 | `E111` / `W112` | Teaching minutes per session, weighing setup cost | Both projects shipped a session at 45 minutes against a 40 minute cap, found at step 9 where the only fix invalidates the whole build |
 | `E113` | The session carrying the setup must have strictly fewer cuts than the others | tip-split session 1 carried 4 cuts *plus* all the setup while session 2 also carried 4 |
+| `W114` | One cut taking more than 45% of a session's cut minutes (flow 2) | Four consecutive projects overran on one cut far larger than its siblings - habit-tracker's `cut-api-toggle` estimated at 6 minutes and measured about 20, pipeline-test-02 session 2 at 50 against a 40 minute cap. A flat 6 minutes per cut could not see it, so cut minutes now scale with hint length above a 55-word nominal |
 | `W066` | A hint that names nothing concrete - no symbol, path, method or count | `cut-recipe-scale-quantity` not naming `scaleQuantity` made a second cut bypassable |
 | `W067` | A hint phrased as "return ..." | It tells the Builder to put the return inside the markers - the TS2355 shape |
 
@@ -330,7 +331,7 @@ way. The live-session key is the part still to decide.
 python3 -m pipeline.selftest
 ```
 
-318 checks on the deterministic core - linter rules and their false positives,
+340 checks on the deterministic core - linter rules and their false positives,
 cutter comment styles and every malformed-marker case, the skeleton check, the
 write guard, and the gate and retry logic. No agents, no network, about a
 second. Run it before trusting a change to any script.

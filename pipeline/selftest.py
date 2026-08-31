@@ -313,6 +313,98 @@ def test_linter(tmp: Path) -> None:
     check("lint.json reports the spec hash", rep["spec_hash"], spec_hash(q))
 
 
+# ------------------------------------------------------- oversized cuts ----
+def test_cut_share(tmp: Path) -> None:
+    """The shape four consecutive projects overran on: one cut far larger than
+    its siblings. Flat MINUTES_PER_CUT could not see it, so nothing before the
+    step 13 dry run did. Calibrated in spec_linter against the two flow-2
+    sessions that have a measured time."""
+    print("oversized cuts")
+
+    def cut(i: int, words: int) -> dict:
+        # "Assign value ... to the row" plus filler, to hit an exact word count.
+        base = f"Assign value number {i} to the row"
+        pad = ["and"] * max(0, words - len(base.split()))
+        return {"id": f"cut-x{i}", "file": "a.ts", "hint": " ".join([base] + pad)}
+
+    check("a nominal cut costs the flat weight",
+          spec_linter.cut_minutes(cut(0, spec_linter.NOMINAL_HINT_WORDS), True),
+          spec_linter.MINUTES_PER_CUT)
+    check("a short hint is not a cheaper cut",
+          spec_linter.cut_minutes(cut(0, 5), True), spec_linter.MINUTES_PER_CUT)
+    check("an oversized cut costs the surcharge",
+          spec_linter.cut_minutes(cut(0, spec_linter.NOMINAL_HINT_WORDS + 40), True),
+          spec_linter.MINUTES_PER_CUT + 40 * spec_linter.MINUTES_PER_OVERSIZE_WORD)
+    check("unweighted ignores the hint entirely",
+          spec_linter.cut_minutes(cut(0, 200), False), spec_linter.MINUTES_PER_CUT)
+    check("a cut that is not a dict counts no words", spec_linter.cut_words(3), 0)
+
+    # pipeline-test-02 session 2 as shipped: 3 cuts of 110, 68 and 70 hint
+    # words, 1 build, 4 concepts, no setup. Flat said 37.0 and Priya measured 50.
+    shipped = {"n": 2, "cuts": [cut(0, 110), cut(1, 68), cut(2, 70)],
+               "builds": ["ep-x"], "teaches": ["a", "b", "c", "d"]}
+    check("the flat estimate missed pipeline-test-02 session 2",
+          spec_linter.session_minutes(shipped, False), 37.0)
+    check("the weighted estimate lands within 1 minute of the measured 50",
+          abs(spec_linter.session_minutes(shipped, False, weighted=True) - 50.0) <= 1.0, True)
+
+    # pipeline-test-01 session 2: 2 cuts of 103 and 81, 2 builds, 3 concepts.
+    # Flat said 32.5, under the cap, and it ran 45.
+    t01 = {"n": 2, "cuts": [cut(0, 103), cut(1, 81)],
+           "builds": ["ep-x", "sc-y"], "teaches": ["a", "b", "c"]}
+    check("the flat estimate cleared the cap on a session that ran 45",
+          spec_linter.session_minutes(t01, False) <= spec_linter.SESSION_MINUTES_CAP, True)
+    check("the weighted estimate puts it over the cap",
+          spec_linter.session_minutes(t01, False, weighted=True) > spec_linter.SESSION_MINUTES_CAP, True)
+
+    def share_codes(cuts: list[dict]) -> set[str]:
+        lint = Lint()
+        spec_linter._check_cut_share(lint, [{"n": 1, "cuts": cuts}])
+        return {w["code"] for w in lint.warnings}
+
+    check("one cut over its share of the session warns",
+          "W114" in share_codes([cut(0, 110), cut(1, 68), cut(2, 70)]), True)
+    check("balanced cuts do not warn",
+          "W114" in share_codes([cut(0, 47), cut(1, 33), cut(2, 29)]), False)
+    check("two cuts never warn - a share below three is arithmetic, not skew",
+          "W114" in share_codes([cut(0, 103), cut(1, 20)]), False)
+    check("habit-tracker's cut-api-toggle shape is caught",
+          "W114" in share_codes([cut(0, 44), cut(1, 94), cut(2, 49)]), True)
+
+    skewed = Lint()
+    spec_linter._check_cut_share(
+        skewed, [{"n": 1, "cuts": [cut(0, 110), cut(1, 68), cut(2, 70)]}])
+    msg = next(w["message"] for w in skewed.warnings if w["code"] == "W114")
+    check("the warning names the offending cut", "cut-x0" in msg, True)
+    check("the warning forbids the E113 escape", "E113" in msg, True)
+
+    # Flow 1 keeps the weight it was calibrated on rather than failing three
+    # shipped projects retroactively.
+    skew = json.loads(json.dumps(GOOD_SPEC))
+    skew["sessions"][0]["cuts"] = [cut(0, 110), cut(1, 68), cut(2, 70)]
+    skew["sessions"][0]["criteria"] = [
+        {"id": f"c-1-{i+1}", "check": f"GET /api/todos returns 200 for case number {i}",
+         "target": "ep-todos-list", "cuts": [f"cut-x{i}"]} for i in range(3)]
+    md = GOOD_MD + "\n" + "\n".join(f"cut-x{i} c-1-{i+1}" for i in range(3)) + "\n"
+    p1 = make_project(tmp / "f1", skew, md, flow=1)
+    check("flow 1 does not raise W114 retroactively",
+          "W114" in {w["code"] for w in lint_spec(p1).warnings}, False)
+    check("flow 1 keeps the flat estimate",
+          spec_linter.minute_estimates(p1)[0]["minutes"],
+          spec_linter.session_minutes(skew["sessions"][0], True, weighted=False))
+
+    p2 = make_project(tmp / "f2", skew, md, flow=2)
+    check("flow 2 raises W114 on the same spec",
+          "W114" in {w["code"] for w in lint_spec(p2).warnings}, True)
+    est = spec_linter.minute_estimates(p2)[0]
+    check("flow 2 reports the weighted estimate", est["weighted"], True)
+    check("the estimate breaks the session down per cut",
+          [c["id"] for c in est["cut_minutes"]], ["cut-x0", "cut-x2", "cut-x1"])
+    check("the estimate reports the largest cut's share",
+          est["largest_cut_share"] > spec_linter.CUT_SHARE_CAP, True)
+    check("a project with no state file reads as flow 1", spec_linter._flow(tmp / "nope"), 1)
+
+
 # ---------------------------------------------------------------- cutter ----
 def test_cutter(tmp: Path) -> None:
     print("cutter")
@@ -1678,7 +1770,7 @@ def test_readme_count() -> None:
 def main() -> int:
     tmp = Path(tempfile.mkdtemp(prefix="gp-selftest-"))
     try:
-        for t in (test_linter, test_cutter, test_return_safety, test_skeleton_check,
+        for t in (test_linter, test_cut_share, test_cutter, test_return_safety, test_skeleton_check,
                   test_gate1, test_spec_freeze, test_breaker_binding, test_state,
                   test_step_churn, test_guard, test_checker_crash_burns_a_retry,
                   test_revise, test_revise_flow2,
