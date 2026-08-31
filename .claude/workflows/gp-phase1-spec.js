@@ -35,6 +35,29 @@ const spawn = async (name, prompt, opts = {}) => {
   }
 }
 
+// A checker has three outcomes, not two: pass, fail, and DID NOT RUN. Python's
+// `_checker` in pipeline/cli.py learned this - "a crash is a failed checker,
+// never a verdict" - but these scripts had not. A failed agent returns null, so
+// the next `.ok` threw `TypeError: null is not an object` from whatever line
+// happened to touch it first: no name for what did not run, and a type error
+// where a lost connection belonged. pipeline-test-03 hit it when the API was
+// briefly unreachable and the run died on `lint.ok`.
+//
+// Guard on the line AFTER the assignment, never by wrapping the call. Wrapping
+// adds an opening paren to a multi-line call that already ends in `} })`, and a
+// miscount there still parses - it just quietly binds the wrong thing.
+const mustRun = (label, result) => {
+  if (result === null || result === undefined) {
+    throw new Error(
+      `checker "${label}" did not run - it returned no result. This is a ` +
+      `pipeline or transport fault, not a verdict about the project: nothing ` +
+      `has been judged and no retry should be burned for it. Fix the cause and ` +
+      `resume; the project state on disk is untouched by this failure.`)
+  }
+  return result
+}
+
+
 // Rule 1: the tests are written by a different agent from the builder, and that
 // agent cannot reach the code. The lock is what enforces it - prose in a prompt
 // is not enforcement. In this flow verify/ belongs to the spec phase, so the
@@ -97,6 +120,7 @@ while (attempt < RETRY_LIMIT) {
       phase: 'Draft' })
 
   lint = await runLint()
+  mustRun('lint', lint)
   log(`lint attempt ${attempt}: ${lint.ok ? 'clean' : `${lint.error_count} errors`}`)
   if (lint.ok) break
 }
@@ -128,6 +152,7 @@ const ambiguity = await spawn('spec-breaker',
         titles: { type: 'array', items: { type: 'string' } },
       },
     } })
+mustRun('spec-breaker', ambiguity)
 
 // Bind the report to the exact spec it reviewed, then apply the stopping rule.
 // `pipeline lint` opened the pass when it went clean, so `end` refuses if the
@@ -163,6 +188,7 @@ const verdict = await agent(
                         must_fix_now: { type: 'boolean' } } } },
       },
     } })
+mustRun('gate1-rule', verdict)
 
 log(`gate 1 stopping rule: ${verdict.verdict}` +
     (verdict.counts ? ` (${verdict.counts.blocking} blocking, ` +
@@ -206,6 +232,7 @@ const tests = await spawn('test-writer',
         notes: { type: 'string' },
       },
     } })
+mustRun('test-writer', tests)
 // One command runner for both, the same shape as `breaker end` + `gate1-check`
 // above. The unlock has to come first because redfirst writes redfirst.json
 // into a tree the lock still covers; two agent spawns to run two ordered shell
@@ -231,6 +258,7 @@ const redfirst = await agent(
           properties: { test: { type: 'string' }, problem: { type: 'string' } } } },
       },
     } })
+mustRun('redfirst', redfirst)
 
 log(`tests: ${(tests.criteria_covered || []).length} criteria covered, ` +
     `red-first ${redfirst.ok ? 'clean' : `${(redfirst.vacuous_tests || []).length} vacuous`}`)

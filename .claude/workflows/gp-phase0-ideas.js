@@ -35,6 +35,29 @@ const spawn = async (name, prompt, opts = {}) => {
   }
 }
 
+// A checker has three outcomes, not two: pass, fail, and DID NOT RUN. Python's
+// `_checker` in pipeline/cli.py learned this - "a crash is a failed checker,
+// never a verdict" - but these scripts had not. A failed agent returns null, so
+// the next `.ok` threw `TypeError: null is not an object` from whatever line
+// happened to touch it first: no name for what did not run, and a type error
+// where a lost connection belonged. pipeline-test-03 hit it when the API was
+// briefly unreachable and the run died on `lint.ok`.
+//
+// Guard on the line AFTER the assignment, never by wrapping the call. Wrapping
+// adds an opening paren to a multi-line call that already ends in `} })`, and a
+// miscount there still parses - it just quietly binds the wrong thing.
+const mustRun = (label, result) => {
+  if (result === null || result === undefined) {
+    throw new Error(
+      `checker "${label}" did not run - it returned no result. This is a ` +
+      `pipeline or transport fault, not a verdict about the project: nothing ` +
+      `has been judged and no retry should be burned for it. Fix the cause and ` +
+      `resume; the project state on disk is untouched by this failure.`)
+  }
+  return result
+}
+
+
 const IDEAS = {
   type: 'object',
   required: ['ok', 'count', 'problems'],
@@ -65,6 +88,7 @@ const stack = await agent(
         limits: { type: 'string' },
       },
     } })
+mustRun('stack', stack)
 
 if (stack.missing) {
   return {
