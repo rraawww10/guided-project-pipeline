@@ -539,3 +539,71 @@ The lesson is the one this run keeps repeating: fixing the instance is not
 fixing the class. mustRun had to go into four workflows, not one; stop_server
 had to go into two checkers, not one. Grep for the pattern after every fix.
 
+
+---
+
+## Resolution status - every finding above
+
+Written after auditing the log rather than from memory. "Fixed" means committed
+with a selftest check; "verified" means measured, not asserted.
+
+| # | Finding | Status |
+|---|---|---|
+| B1 | API unreachable, ENOTFOUND | Environmental. Transient, DNS resolved on retest. Nothing to fix. |
+| B2 | Workflows crashed with TypeError on a null checker result | **Fixed** d52d219 - `mustRun` in all four workflows |
+| B2' | Gate 1's TS2367 finding, owner typecheck | **Closed** - skeleton-check reports typecheck_fail_open false, so it really ran |
+| B3 | Hint length does not predict teaching time | **Fixed** 63fdc97 - priced by stated decisions; worst error 4.8 vs 6.5-13 |
+| B4 | Gate 1 round 1 rejected, 2 blockers owned by nothing | Resolved by round 2. The rule working, not a defect. |
+| B5 | Phase-2 workflow reported inconclusive as ungraded and told a human to reject a correct spec | **Fixed** dd27737 - the two branch separately |
+| B6 | The inconclusive verdict was correct; my instinct to loosen `ran` was wrong | No fix needed. Recorded because it nearly shipped. |
+| B7 | Proposed rule: a cut declared by every criterion | **Superseded, deliberately not added** - see below |
+| B8 | Every run leaked its servers, two sites | **Fixed and verified** 8aad102 + d15a16f - 0 processes where 2 leaked |
+| B9 | A gate note is free prose and a shell can eat it | **Fixed** dd27737 - `--note-file`, plus the stored length echoed |
+| Rule 3 | Nothing checked whether verify/ moved between Gate 1 and Gate 2 | **Fixed** dd27737 - `verify_hash` recorded at Gate 1, reported at Gate 2 |
+| Gate 0 | Pick number and stated reason named different ideas | Decided against a checker - matching prose to an idea is judgement, rule 1 territory. First occurrence in six runs. |
+| W5 | The spec named drop candidates that cost no live minutes | Guidance added to spec-writer. No checker - see below. |
+
+### B7 is superseded, and that is the whole reason not to add it
+
+The proposed rule was: a cut declared by every criterion can never be isolated by
+the mutation check. Both halves of it are now owned:
+
+- **One** such cut is handled correctly by mutation's run-level harness control.
+  Its expected set is the whole suite, so nothing stays green to prove the
+  harness was alive - but another mutant in the same run does prove it, and
+  cut-parse-line now returns a verdict instead of blocking.
+- **Two or more** have identical criteria sets by construction, and `E110`
+  already rejects exactly that shape at step 2. Verified by constructing the
+  spec and running the check.
+
+So a new rule would fire only on shapes the pipeline now gets right. That is the
+same standard that rejected the two candidate rules earlier in this run: a check
+which cannot discriminate is not worth its false positives.
+
+### Two things deliberately left open, with reasons
+
+**The Gate 1 stopping rule treats a fail-open owner as owned.** Rule 8 approves
+when every blocking finding sits in a column a downstream checker owns. It cannot
+tell "owned" from "checked", and `typecheck` passes when it cannot run - so a
+blocking finding whose only owner is fail-open is closer to `nothing` than the
+rule treats it. Real, and it changes what Gate 1 approves. That is a decision to
+take deliberately, not to fold into a cleanup commit. Mitigated for now by the
+Gate 1 note requiring step 10 to read the flag, which worked: it read false.
+
+**No checker proves a named drop candidate is real.** pipeline-test-03's spec
+offered markup as its trims while every page file shipped written, so the slack
+did not exist. Detecting this needs to know which files a student types, which
+is the cut list crossed with the guide's plan - the data is there but the rule
+is not obvious, and W5 has occurred once. Recorded for the next occurrence
+rather than guessed at now.
+
+### What this run cost, and what it bought
+
+Nine defects, six of them in the pipeline rather than the project. Five are
+fixed and committed, two were correct as they stood, one is superseded and one
+is a deliberate open decision. Selftest 318 -> 363 across the run.
+
+The recurring shape: **fixing the instance is not fixing the class.** `mustRun`
+needed four workflows, not one. `stop_server` needed two checkers, not one. Both
+second sites were found by looking after the fix rather than before, and the
+server leak's second site was found only because phase 3 was counted.
