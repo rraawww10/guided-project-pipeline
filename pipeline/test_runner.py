@@ -14,6 +14,7 @@ import json
 import os
 import re
 import shutil
+import signal
 import socket
 import subprocess
 import sys
@@ -180,8 +181,57 @@ def boot(target: Path, port: int, log: Path) -> subprocess.Popen:
     if build.returncode != 0:
         raise RuntimeError(f"npm run build failed - see {log}")
     handle = log.open("a")
+    # POSIX: give the server its own process group so stop_server can signal the
+    # group. Windows has no process groups in that sense; taskkill /T walks the
+    # parent-child tree instead, so nothing extra is needed at spawn time.
+    extra = {} if os.name == "nt" else {"start_new_session": True}
     return subprocess.Popen([npm(), "run", "start", "--", "--port", str(port)],
-                            cwd=target, env=env, stdout=handle, stderr=subprocess.STDOUT)
+                            cwd=target, env=env, stdout=handle,
+                            stderr=subprocess.STDOUT, **extra)
+
+
+def stop_server(server: subprocess.Popen | None) -> None:
+    """Kill the server's whole process tree, not just the handle we hold.
+
+    What Popen returns here is `npm run start`; npm spawns `next start` as a
+    child. terminate() reached npm and left `next` running, so every mutation
+    run leaked two processes per mutant. On Windows the orphan keeps a handle on
+    the mutant directory and the NEXT run dies in mutate_one with
+
+        PermissionError: [WinError 32] ... used by another process
+
+    one whole run away from the cause, because mutation.py's rmtree passes
+    ignore_errors=True and said nothing the first time. pipeline-test-03 found
+    it with 12 orphans alive from a run that had already reported success.
+
+    The leak itself is not Windows-specific - on POSIX an orphan holding an open
+    file does not block unlink, so it shows up as drifting node processes and a
+    port that is still bound rather than as a crash.
+    """
+    if server is None or server.poll() is not None:
+        return
+    if os.name == "nt":
+        # /T takes the tree, /F forces it. Fall through to terminate() if
+        # taskkill is unavailable, so this is never worse than it was.
+        try:
+            subprocess.run(["taskkill", "/F", "/T", "/PID", str(server.pid)],
+                           capture_output=True, timeout=30)
+        except (OSError, subprocess.SubprocessError):
+            server.terminate()
+    else:
+        try:
+            os.killpg(os.getpgid(server.pid), signal.SIGTERM)
+        except (ProcessLookupError, PermissionError, OSError):
+            server.terminate()
+    try:
+        server.wait(timeout=20)
+    except subprocess.TimeoutExpired:
+        if os.name != "nt":
+            try:
+                os.killpg(os.getpgid(server.pid), signal.SIGKILL)
+            except (ProcessLookupError, PermissionError, OSError):
+                pass
+        server.kill()
 
 
 def parse_junit(xml_path: Path) -> dict[str, dict]:
@@ -286,12 +336,7 @@ def main(argv: list[str] | None = None) -> int:
     except Exception as e:
         stdout, stderr, rc = "", str(e), 99
     finally:
-        if server and server.poll() is None:
-            server.terminate()
-            try:
-                server.wait(timeout=20)
-            except subprocess.TimeoutExpired:
-                server.kill()
+        stop_server(server)
 
     by_node = parse_junit(xml)
     criteria = map_to_criteria(spec, coverage, by_node)

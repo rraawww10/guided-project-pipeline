@@ -252,3 +252,181 @@ settle this.** The prediction on record: if session 2 runs near 50 on a 38.5
 estimate, the flat-plus-surcharge model is wrong in a way hint length cannot fix.
 
 
+### Gate 1 - APPROVED round 2 (human), on the rule's own verdict, no --override
+
+Committed before the code phase per the working conventions:
+  d52d219  workflows: a checker that did not run is not a verdict
+  076a6fa  pipeline-test-03: the Gate 1 approved spec, round 2
+
+Spec frozen at 46b5465b4952. Two blockers ship, both in a downstream checker's
+column, and one of them carries a caveat that is itself a finding:
+
+**B2's owner can fail open.** `typecheck` is the second-line check, and a
+fail-open owner passes when it cannot run - which is the one way a blocking
+finding in an *owned* column still reaches the skeleton. The Gate 1 note
+requires step 10 to read `typecheck_fail_open` in skeleton-check.json and
+require it false. "Owned by a checker" is not the same claim as "checked", and
+the Gate 1 stopping rule cannot tell the two apart. Worth considering as a
+future rule: a blocking finding whose only owner is a fail-open check is closer
+to `nothing` than the rule currently treats it.
+
+### Steps 7-9 - CODE phase  BLOCKED at the mutation check
+
+Run wf_d8c8ff9a-34a, 32.7 min, 6 agents, 0 errors. The build itself was clean:
+9 pass / 0 fail / 0 skip / 0 missing, pytest rc 0, builder first pass, code
+retries 0 at the time of the build. B1 did not materialise - the Builder got
+notFound right, so c-2-4 is green.
+
+Mutation: 4 of 5 cuts proven graded with clean red sets. `cut-parse-line` came
+back INCONCLUSIVE, which sets mutation ok=false and stops the phase.
+
+**B5 - WORKFLOW REPORTS THE WRONG DIAGNOSIS AND PRESCRIBES THE WRONG FIX.**
+
+The phase-2 workflow returned:
+
+    blocked: "the mutation check found student tasks that grade nothing"
+    ungraded_tasks: []
+    reason:  "a task no requirement notices can be left empty with every
+              criterion green. This is a SPEC problem"
+    fix:     "pipeline gate 1 reject ... && pipeline revise"
+
+Every clause is wrong for what actually happened. `ungraded_tasks` is empty;
+the real cause is `inconclusive_tasks: ['cut-parse-line']`. The task is not
+unnoticed - it is declared by all nine criteria, and removing it turns all nine
+red. It cannot be left empty with anything green.
+
+Cause: gp-phase2-code.js branches on `!mutationOut.ok` and reports every failure
+as ungraded. Its result schema does not even declare `inconclusive_tasks`, so
+the distinction cannot survive the agent boundary. mutation.py gets this right -
+it separates the two lists and words the `why` accurately - and the workflow
+flattens them.
+
+This is the failure recorded verbatim in pipeline/cli.py::_checker: "an
+unguarded crash in `mutation` read as 'the spec is wrong' and printed an
+instruction to reject a Gate-1-approved spec that was correct." Same wrong
+output, reached down a different path. The Python side was hardened; the
+workflow was not. Second instance this run of a lesson learned on one side of
+the pipeline and not carried to the other - see B2.
+
+**B6 - THE INCONCLUSIVE VERDICT IS CORRECT, AND MY FIRST INSTINCT WAS WRONG.**
+
+The junit for the mutant shows tests=9 failures=9 errors=0, so the suite plainly
+ran, while `ran = any(status == 'pass')` in mutation.py called it "never ran".
+That looked like a bug. It is not.
+
+`cut-parse-line` is declared by **all nine** criteria. With its expected set
+equal to the whole suite, that mutant run has no criterion outside the set left
+to prove the harness was alive. All-red is therefore genuinely ambiguous between
+"removing it correctly turned everything red" and "the harness broke". The
+module comment says why the guard exists: a target whose log path could not be
+created once reported every criterion missing, counted them all red, and passed
+every task vacuously. Loosening `ran` would reintroduce exactly that false
+green, which the module calls its worst outcome.
+
+Recorded because I nearly shipped the loosening before checking `graded_by`.
+
+**B7 - A PROMOTABLE LINTER RULE, FOUND BY RUNNING THE PIPELINE.**
+
+The shape is detectable at step 2 from spec.json alone, with no code: *a cut
+declared by every criterion in the project can never be isolated by the mutation
+check.* Corpus:
+
+| project | cut | fires |
+|---|---|---|
+| pipeline-test-03 | cut-parse-line 9/9 | yes - blocked this run |
+| recipe-box (shipped) | cut-store-read-all 22/22 | yes |
+| tip-split (shipped) | cut-store-read-all 17/17 | yes |
+| habit-tracker, test-01, test-02 | - | clean, all rounds |
+
+It fires on the project it would have saved and on two shipped projects with the
+same unverifiable cut, and stays quiet on the three whose mutation runs were
+conclusive. recipe-box and tip-split shipped before mutation.py worked at all
+(commit 325743d, "it had never run, and it failed green"), which is why nobody
+saw it then.
+
+Unlike the two candidates rejected earlier, this one fires on the round that
+actually contains the defect. Firing at step 2 would have saved the whole code
+phase - 33 minutes plus a revise cycle - and it costs one pass over spec.json.
+
+**A second, complementary fix is available and NOT yet made:** mutation.py could
+take its harness-alive control from the run rather than the mutant. If any other
+mutant in the same run produced a passing criterion, the harness is proven live,
+and an all-red mutant is then genuine rather than ambiguous. In this run the
+other four mutants all produced passes minutes either side of cut-parse-line, so
+the harness was demonstrably healthy. Not implemented: it changes the semantics
+of the one checker whose false green is its worst outcome, and that is a human
+decision, not a mid-run edit.
+
+
+### Mutation fix applied and re-run  GREEN
+
+`_apply_run_control` added to mutation.py: the harness-alive control is taken
+from the run, not the mutant. Two independent conditions, both required, because
+a false green is this checker's worst outcome:
+
+  1. some OTHER mutant in the run produced a passing criterion - the harness is
+     proven live by a run that is not this one;
+  2. this mutant produced real per-test outcomes, at least one pass or fail, not
+     the all-`missing` shape the original guard was written for.
+
+Neither alone suffices. Condition 2 alone would trust a run whose harness was
+broken for every mutant; condition 1 alone would trust a mutant that never
+reported a per-test outcome. 8 selftest checks cover it, including the two
+historical failure shapes and the case where reclassifying must still yield
+NOT GRADED rather than a green. Selftest 340 -> 348.
+
+Result: mutation ok=true, 5 of 5 checked, 0 ungraded, 0 inconclusive,
+`stayed_green` empty for every cut. cut-parse-line reports 9 red of 9 with the
+run-level reasoning stated in its `why`.
+
+**B8 - EVERY MUTATION RUN LEAKS ITS SERVERS. Found because it broke the re-run.**
+
+The first re-run crashed:
+
+    PermissionError: [WinError 32] The process cannot access the file because
+    it is being used by another process: .pipeline/mutants/cut-account-rows
+
+12 orphaned node processes were still alive from the previous run - 6 `npm run
+start` parents and 6 `next` children, one pair for the app and one per mutant.
+test_runner.py's teardown calls `server.terminate()` on the Popen it holds,
+which is npm; npm's `next` child survives, keeps a handle on the mutant
+directory, and Windows then refuses the rmtree.
+
+Two things hid it until now:
+
+- `shutil.rmtree(mdir, ignore_errors=True)` swallowed the failure on the first
+  run, so the leak left five undeleted mutant trees and said nothing. The crash
+  only came on the *next* run, in `mutate_one`, one layer away from the cause.
+- On POSIX an orphan holding an open file does not block unlink, so the same
+  leak would show as drifting processes rather than a hard failure. The process
+  leak is cross-platform; only the crash is Windows-specific.
+
+Confirmed reproducible: this green run leaked 10 more. Killed by hand both
+times, filtered on the project path so nothing else was touched.
+
+NOT FIXED - it is a change to test_runner.py's process handling, which is core
+and outside what was asked. The fix is to kill the tree rather than the parent:
+`taskkill /F /T /PID` on Windows, `os.killpg` with `start_new_session=True` on
+POSIX. Until then, every mutation run leaves ~2 processes per mutant behind and
+the run after it fails on Windows unless they are cleared.
+
+Cost of the two masked defects: code retries 2/15 burned on pipeline faults,
+neither of which was about the project. `_checker` labelled both correctly -
+"this is a pipeline fault, not the spec's; no conclusion can be drawn" - which
+is the Python hardening doing its job.
+
+### B8 FIXED and verified empirically
+
+`stop_server()` in test_runner.py now kills the tree rather than the handle:
+`taskkill /F /T /PID` on Windows, `os.killpg` on POSIX with the server spawned
+under `start_new_session=True` so it has a group to signal. Both paths fall back
+to the old `terminate()` if the tree kill is unavailable, so this is never worse
+than what it replaced.
+
+Verified by measurement, not assertion: `pipeline test pipeline-test-03` boots a
+server on exactly the path that used to leak. node processes before 0, after 0,
+where the same path previously left 2 behind. Tests still 9 pass / 0 fail.
+
+5 selftest checks added, including one that spawns a real sleeping process and
+asserts it is dead after teardown. Selftest 348 -> 353.
+

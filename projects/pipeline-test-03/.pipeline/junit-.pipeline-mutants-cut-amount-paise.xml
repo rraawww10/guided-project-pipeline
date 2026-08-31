@@ -1,0 +1,286 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="8" skipped="0" tests="9" time="25.148" timestamp="2026-09-01T04:22:40.044962+05:30" hostname="HERO"><testcase classname="verify.test_api_accounts" name="test_c_2_1_accounts_are_four_totals_sorted_by_name" time="0.424"><failure message="AssertionError: accounts are [], expected ['food', 'rent', 'salary', 'travel']&#10;assert [] == ['food', 'ren...ry', 'travel']&#10;  &#10;  Right contains 4 more items, first extra item: 'food'&#10;  Use -v to get more diff">api = &lt;httpx.Client object at 0x000001EA384A9400&gt;
+
+    def test_c_2_1_accounts_are_four_totals_sorted_by_name(api):
+        """c-2-1: GET /api/accounts returns 200 with a JSON array of 4 objects whose
+        account values in order are food, rent, salary and travel, and whose paise
+        values in the same order are -542555, -3720000, 6200000 and -455550.
+    
+        Both lists are asserted whole and in order, so the count, the ascending sort
+        and the four sums are graded together. None of it survives an unwritten
+        block: with cut-account-totals empty the array is empty, and with
+        cut-amount-paise empty there are no accepted entries to fold at all.
+        """
+        accounts = get_accounts(api)
+    
+&gt;       assert [a.get("account") for a in accounts] == ACCOUNT_NAMES, (
+            f"accounts are {[a.get('account') for a in accounts]}, "
+            f"expected {ACCOUNT_NAMES}"
+        )
+E       AssertionError: accounts are [], expected ['food', 'rent', 'salary', 'travel']
+E       assert [] == ['food', 'ren...ry', 'travel']
+E         
+E         Right contains 4 more items, first extra item: 'food'
+E         Use -v to get more diff
+
+verify\test_api_accounts.py:29: AssertionError</failure></testcase><testcase classname="verify.test_api_accounts" name="test_c_2_2_a_rejected_line_contributes_no_account_and_no_paise" time="0.346"><failure message="AssertionError: expected exactly 1 rent object, found []&#10;assert 0 == 1&#10; +  where 0 = len([])">api = &lt;httpx.Client object at 0x000001EA384F39D0&gt;
+
+    def test_c_2_2_a_rejected_line_contributes_no_account_and_no_paise(api):
+        """c-2-2: GET /api/accounts returns no object whose account is utilities, no
+        object whose account is the empty string, and a rent object whose paise is
+        -3720000, which is the sum of lines 5, 11 and 20 with the rejected line 28
+        left out.
+    
+        utilities is named only by line 25 and the empty account only by line 13,
+        and both lines are rejected; line 28 is a rent line rejected for its
+        thousands separator, so a parser that lets it through reads rent as
+        -3600000 rather than -3720000. The rent object is found by name, not by
+        index, because the criterion names it rather than positioning it.
+        """
+        accounts = get_accounts(api)
+        names = [a.get("account") for a in accounts]
+    
+        assert "utilities" not in names, (
+            f"utilities is named by the rejected line 25 only, but accounts are {names}"
+        )
+        assert "" not in names, (
+            f"the empty account is named by the rejected line 13 only, "
+            f"but accounts are {names}"
+        )
+    
+        rent = [a for a in accounts if a.get("account") == "rent"]
+&gt;       assert len(rent) == 1, f"expected exactly 1 rent object, found {rent}"
+E       AssertionError: expected exactly 1 rent object, found []
+E       assert 0 == 1
+E        +  where 0 = len([])
+
+verify\test_api_accounts.py:62: AssertionError</failure></testcase><testcase classname="verify.test_api_ledger" name="test_c_1_1_ledger_has_21_entries_and_6_diagnostics_in_line_order" time="0.428"><failure message="AssertionError: entries carry lineNo [], expected [4, 5, 6, 7, 8, 10, 11, 12, 14, 15, 16, 18, 19, 20, 21, 23, 24, 26, 27, 29, 30]&#10;assert [] == [4, 5, 6, 7, 8, 10, ...]&#10;  &#10;  Right contains 21 more items, first extra item: 4&#10;  Use -v to get more diff">api = &lt;httpx.Client object at 0x000001EA38635BD0&gt;
+
+    def test_c_1_1_ledger_has_21_entries_and_6_diagnostics_in_line_order(api):
+        """c-1-1: GET /api/ledger returns 200 with entries holding 21 objects whose
+        lineNo values in array order are 4, 5, 6, 7, 8, 10, 11, 12, 14, 15, 16, 18,
+        19, 20, 21, 23, 24, 26, 27, 29 and 30, with diagnostics holding 6 objects
+        whose lineNo values in array order are 9, 13, 17, 22, 25 and 28, with
+        entries[0] equal to lineNo 4, date 2026-01-01, account salary, description
+        january pay and paise 4500000, with entries[20] equal to lineNo 30, date
+        2026-01-27, account food, description lunch and paise -18000, and with the
+        entry whose lineNo is 20 carrying date 2026-02-30.
+    
+        The two lineNo lists are asserted as whole ordered lists, so the counts, the
+        ordering, and the fact that lines 1 to 3 never arrive are one assertion
+        each. Neither list can be produced by an unwritten block: with
+        cut-parse-line empty every line is rejected, so entries is empty and
+        diagnostics holds 27.
+    
+        ambiguity.md W1 records that line 20 does not discriminate a Date-based
+        parser the way spec.md's prose claims (V8 accepts 2026-02-30 and rolls it
+        over). The criterion still pins the stored string, so that is what this
+        asserts: the entry is present and its date is the ten characters the file
+        holds, not a rolled-over 2026-03-02.
+        """
+        body = get_ledger(api)
+        entries = body["entries"]
+        diagnostics = body["diagnostics"]
+    
+&gt;       assert [e.get("lineNo") for e in entries] == ENTRY_LINE_NOS, (
+            f"entries carry lineNo {[e.get('lineNo') for e in entries]}, "
+            f"expected {ENTRY_LINE_NOS}"
+        )
+E       AssertionError: entries carry lineNo [], expected [4, 5, 6, 7, 8, 10, 11, 12, 14, 15, 16, 18, 19, 20, 21, 23, 24, 26, 27, 29, 30]
+E       assert [] == [4, 5, 6, 7, 8, 10, ...]
+E         
+E         Right contains 21 more items, first extra item: 4
+E         Use -v to get more diff
+
+verify\test_api_ledger.py:50: AssertionError</failure></testcase><testcase classname="verify.test_api_ledger" name="test_c_1_2_each_rejected_line_carries_its_own_first_broken_rule" time="0.358" /><testcase classname="verify.test_api_ledger" name="test_c_1_3_five_amounts_convert_to_integer_paise" time="0.341"><failure message="AssertionError: expected exactly 1 entry with lineNo 8, found 0: []">api = &lt;httpx.Client object at 0x000001EA3863D810&gt;
+
+    def test_c_1_3_five_amounts_convert_to_integer_paise(api):
+        """c-1-3: GET /api/ledger returns the entry with lineNo 8 with paise -25005,
+        the entry with lineNo 6 with paise -245075, the entry with lineNo 19 with
+        paise -110550, the entry with lineNo 10 with paise -12050 and the entry with
+        lineNo 16 with paise 1200000.
+    
+        Five different values, four of them with non-zero paise digits, so no
+        constant satisfies all five. Line 8 is the truncating-float fixture:
+        250.05 * 100 is 25004.999... in floating point, so a truncating conversion
+        lands on -25004 and fails here. ambiguity.md W2 records that a rounding
+        float still passes all five - that gap belongs to Gate 1, and this test
+        grades the five values the criterion actually pins.
+    
+        Each value is asserted as an int identical to the literal, so a float-typed
+        -25005.0 is not what is being read: the type is checked before the value.
+        """
+        entries = get_ledger(api)["entries"]
+    
+        for line_no, paise in PAISE_BY_LINE.items():
+&gt;           entry = one_by_line_no(entries, line_no, "entry")
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+verify\test_api_ledger.py:121: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+items = [], line_no = 8, what = 'entry'
+
+    def one_by_line_no(items: list[dict], line_no: int, what: str) -&gt; dict:
+        """The single object carrying this lineNo, found by lineNo and never by index.
+    
+        c-1-2 and c-1-3 each read specific file lines, so this is the lookup they
+        use; a duplicate or a miss fails here rather than reading a wrong object.
+        """
+        found = [i for i in items if i.get("lineNo") == line_no]
+&gt;       assert len(found) == 1, (
+               ^^^^^^^^^^^^^^^
+            f"expected exactly 1 {what} with lineNo {line_no}, "
+            f"found {len(found)}: {found}"
+        )
+E       AssertionError: expected exactly 1 entry with lineNo 8, found 0: []
+
+verify\helpers.py:162: AssertionError</failure></testcase><testcase classname="verify.test_ui_account" name="test_c_2_3_rent_page_walks_three_rows_down_to_the_account_total" time="0.968"><failure message="AssertionError: /accounts/rent answered 404, expected 200&#10;assert (&lt;Response url='http://127.0.0.1:56487/accounts/rent' request=&lt;Request url='http://127.0.0.1:56487/accounts/rent' method='GET'&gt;&gt; is not None and 404 == 200)&#10; +  where 404 = &lt;Response url='http://127.0.0.1:56487/accounts/rent' request=&lt;Request url='http://127.0.0.1:56487/accounts/rent' method='GET'&gt;&gt;.status">page = &lt;Page url='http://127.0.0.1:56487/accounts/rent'&gt;
+
+    def test_c_2_3_rent_page_walks_three_rows_down_to_the_account_total(page):
+        """c-2-3: /accounts/rent responds 200 and renders account-title with text
+        rent, account-total with text -37200.00, exactly 3 elements with data-testid
+        account-txn-&lt;lineNo&gt; whose lineNo values in document order are 5, 11 and 20,
+        and txn-running-5, txn-running-11 and txn-running-20 with texts -18000.00,
+        -19200.00 and -37200.00.
+    
+        The three row wrappers are enumerated on `account-txn-`, which spec.md
+        states is the prefix of no other data-testid on the page (the cells inside
+        each row are `txn-*`), and the list is compared whole so an extra row fails
+        as loudly as a missing one.
+    
+        None of the three running texts is a value an unwritten block produces: with
+        cut-running-balance empty every txn-running cell renders the single
+        character `-`, and the running column is a real scan rather than a repeated
+        total, because -18000.00, -19200.00 and -37200.00 are three different
+        strings and only the last equals account-total.
+        """
+        response = open_account(page, "rent")
+&gt;       assert response is not None and response.status == 200, (
+            f"/accounts/rent answered "
+            f"{response.status if response else 'no response'}, expected 200"
+        )
+E       AssertionError: /accounts/rent answered 404, expected 200
+E       assert (&lt;Response url='http://127.0.0.1:56487/accounts/rent' request=&lt;Request url='http://127.0.0.1:56487/accounts/rent' method='GET'&gt;&gt; is not None and 404 == 200)
+E        +  where 404 = &lt;Response url='http://127.0.0.1:56487/accounts/rent' request=&lt;Request url='http://127.0.0.1:56487/accounts/rent' method='GET'&gt;&gt;.status
+
+verify\test_ui_account.py:57: AssertionError</failure></testcase><testcase classname="verify.test_ui_account" name="test_c_2_4_an_unknown_account_is_a_404_and_a_known_one_is_a_200" time="0.399"><failure message="AssertionError: /accounts/salary answered 404, expected 200&#10;assert (&lt;Response url='http://127.0.0.1:56487/accounts/salary' request=&lt;Request url='http://127.0.0.1:56487/accounts/salary' method='GET'&gt;&gt; is not None and 404 == 200)&#10; +  where 404 = &lt;Response url='http://127.0.0.1:56487/accounts/salary' request=&lt;Request url='http://127.0.0.1:56487/accounts/salary' method='GET'&gt;&gt;.status">page = &lt;Page url='http://127.0.0.1:56487/accounts/salary'&gt;
+
+    def test_c_2_4_an_unknown_account_is_a_404_and_a_known_one_is_a_200(page):
+        """c-2-4: /accounts/nope responds 404 and renders an element with data-testid
+        account-missing and text `Account not found`, /accounts/utilities responds
+        404, /accounts/Rent responds 404, and /accounts/salary responds 200 and
+        renders account-title with text salary and account-total with text
+        62000.00.
+    
+        utilities is named only by the rejected line 25, so a parser that accepted
+        that line would answer 200 here. Rent is the case-sensitivity fixture: the
+        match is exact, so /accounts/Rent misses while /accounts/rent hits.
+    
+        The 404s alone would be green on an unwritten build - with cut-account-rows
+        empty every account page 404s - so the salary half is what makes this
+        criterion bite, and its account-total is what ties it to
+        cut-account-totals. ambiguity.md W3 notes the total's source is not
+        otherwise observable; c-2-5 reads the sidebar total, which can only come
+        from accountTotals.
+        """
+        missing_response = open_account(page, "nope")
+        assert missing_response is not None and missing_response.status == 404, (
+            f"/accounts/nope answered "
+            f"{missing_response.status if missing_response else 'no response'}, "
+            f"expected 404"
+        )
+        missing = by_testid(page, "account-missing")
+        expect(missing).to_have_count(1, timeout=LOAD_TIMEOUT)
+        assert text_of(missing) == "Account not found", (
+            f"account-missing reads {text_of(missing)!r}, expected 'Account not found'"
+        )
+    
+        for name in ("utilities", "Rent"):
+            response = open_account(page, name)
+            assert response is not None and response.status == 404, (
+                f"/accounts/{name} answered "
+                f"{response.status if response else 'no response'}, expected 404"
+            )
+    
+        salary_response = open_account(page, "salary")
+&gt;       assert salary_response is not None and salary_response.status == 200, (
+            f"/accounts/salary answered "
+            f"{salary_response.status if salary_response else 'no response'}, "
+            f"expected 200"
+        )
+E       AssertionError: /accounts/salary answered 404, expected 200
+E       assert (&lt;Response url='http://127.0.0.1:56487/accounts/salary' request=&lt;Request url='http://127.0.0.1:56487/accounts/salary' method='GET'&gt;&gt; is not None and 404 == 200)
+E        +  where 404 = &lt;Response url='http://127.0.0.1:56487/accounts/salary' request=&lt;Request url='http://127.0.0.1:56487/accounts/salary' method='GET'&gt;&gt;.status
+
+verify\test_ui_account.py:124: AssertionError</failure></testcase><testcase classname="verify.test_ui_account" name="test_c_2_5_salary_running_column_and_the_sidebar_of_four_linked_accounts" time="0.160"><failure message="AssertionError: /accounts/salary answered 404, expected 200&#10;assert (&lt;Response url='http://127.0.0.1:56487/accounts/salary' request=&lt;Request url='http://127.0.0.1:56487/accounts/salary' method='GET'&gt;&gt; is not None and 404 == 200)&#10; +  where 404 = &lt;Response url='http://127.0.0.1:56487/accounts/salary' request=&lt;Request url='http://127.0.0.1:56487/accounts/salary' method='GET'&gt;&gt;.status">page = &lt;Page url='http://127.0.0.1:56487/accounts/salary'&gt;
+
+    def test_c_2_5_salary_running_column_and_the_sidebar_of_four_linked_accounts(page):
+        """c-2-5: /accounts/salary renders txn-running-4, txn-running-16 and
+        txn-running-23 with texts 45000.00, 57000.00 and 62000.00, renders exactly 4
+        elements with data-testid account-link-&lt;name&gt; whose names in document order
+        are food, rent, salary and travel, renders account-link-food with href
+        /accounts/food, and renders account-list-total-food with text -5425.55.
+    
+        This is the second running-balance fixture and it is an all-positive
+        account, so the scan is graded on a shape c-2-3's all-negative rent column
+        does not reach - a sign error or a subtraction passes neither. Nor does a
+        constant: the three texts differ from each other and from rent's three.
+    
+        The sidebar is enumerated on `account-link-`, a prefix of no other testid
+        (`account-list-total-` diverges at the third character), and the names are
+        compared as a whole ordered list, so the count and the ascending order are
+        one assertion. Reading taken: "whose names in document order" is read off
+        the `&lt;name&gt;` in each data-testid, the same way c-2-3 reads "whose lineNo
+        values in document order" off `account-txn-&lt;lineNo&gt;`. The href is read as an
+        attribute, so the sidebar is real navigation and not four spans with the
+        right testids.
+        """
+        response = open_account(page, "salary")
+&gt;       assert response is not None and response.status == 200, (
+            f"/accounts/salary answered "
+            f"{response.status if response else 'no response'}, expected 200"
+        )
+E       AssertionError: /accounts/salary answered 404, expected 200
+E       assert (&lt;Response url='http://127.0.0.1:56487/accounts/salary' request=&lt;Request url='http://127.0.0.1:56487/accounts/salary' method='GET'&gt;&gt; is not None and 404 == 200)
+E        +  where 404 = &lt;Response url='http://127.0.0.1:56487/accounts/salary' request=&lt;Request url='http://127.0.0.1:56487/accounts/salary' method='GET'&gt;&gt;.status
+
+verify\test_ui_account.py:160: AssertionError</failure></testcase><testcase classname="verify.test_ui_ledger" name="test_c_1_4_ledger_page_draws_21_rows_above_6_numbered_complaints" time="21.439"><failure message="AssertionError: Locator expected to have text '21'&#10;Actual value: 0 &#10;Call log:&#10;  - Expect &quot;to_have_text&quot; with timeout 20000ms&#10;  - waiting for get_by_test_id(&quot;entry-count&quot;)&#10;    43 × locator resolved to &lt;span data-testid=&quot;entry-count&quot;&gt;0&lt;/span&gt;&#10;       - unexpected value &quot;0&quot;&#10;&#10;Aria snapshot:&#10;- text: &quot;0&quot;">page = &lt;Page url='http://127.0.0.1:56487/'&gt;
+
+    def test_c_1_4_ledger_page_draws_21_rows_above_6_numbered_complaints(page):
+        """c-1-4: `/` renders an element with data-testid entry-count and text 21,
+        renders 21 elements with data-testid entry-row-&lt;lineNo&gt; whose lineNo values
+        in document order are 4, 5, 6, 7, 8, 10, 11, 12, 14, 15, 16, 18, 19, 20, 21,
+        23, 24, 26, 27, 29 and 30, renders entry-account-4 with text salary,
+        entry-amount-4 with text 45000.00 and entry-amount-8 with text -250.05,
+        renders an element with data-testid reject-count and text 6, and renders
+        reject-row-17 with text `line 17: expected 4 fields, found 3`.
+    
+        The row list is compared as a whole ordered list, which is how the criterion
+        grades that lines 1 to 3 are skipped before parsing: none of entry-row-1,
+        entry-row-2 or entry-row-3 is in the expected list, so one appearing fails.
+        Reading these off the `entry-row-` family and comparing the full list also
+        keeps the match exact rather than by prefix - entry-row-1 is a string prefix
+        of entry-row-16, so an equality test on the list is the only safe read.
+    
+        entry-amount-8 is the -250.05 cell, so this criterion carries the paise
+        conversion onto the screen as well; the unwritten blocks cannot produce any
+        of these values, because with cut-parse-line empty every line is rejected
+        and entry-count reads 0 against reject-count 27.
+        """
+        open_ledger(page)
+    
+        count = by_testid(page, "entry-count")
+        expect(count).to_have_count(1, timeout=LOAD_TIMEOUT)
+&gt;       expect(count).to_have_text("21", timeout=LOAD_TIMEOUT)
+E       AssertionError: Locator expected to have text '21'
+E       Actual value: 0 
+E       Call log:
+E         - Expect "to_have_text" with timeout 20000ms
+E         - waiting for get_by_test_id("entry-count")
+E           43 × locator resolved to &lt;span data-testid="entry-count"&gt;0&lt;/span&gt;
+E              - unexpected value "0"
+E       
+E       Aria snapshot:
+E       - text: "0"
+
+verify\test_ui_ledger.py:49: AssertionError</failure></testcase></testsuite></testsuites>

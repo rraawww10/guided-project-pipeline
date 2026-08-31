@@ -217,4 +217,11 @@ def line_nos(locator: Locator, prefix: str) -> list[int]:
 
 
 def text_of(locator: Locator) -> str:
-    return normalize(locator.text_content())
+    """The element's text, whitespace-collapsed, waited for with LOAD_TIMEOUT.
+
+    `text_content()` retries until the element exists. The timeout is passed
+    explicitly so a missing element - which is what the skeleton renders where
+    a cut is still open - fails on this suite's own 20s budget rather than on
+    Playwright's hidden 30s default.
+    """
+    return normalize(locator.text_content(timeout=LOAD_TIMEOUT))

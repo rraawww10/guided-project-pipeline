@@ -13,6 +13,7 @@ from __future__ import annotations
 import argparse
 import contextlib
 import io
+import inspect
 import json
 import os
 import re
@@ -403,6 +404,95 @@ def test_cut_share(tmp: Path) -> None:
     check("the estimate reports the largest cut's share",
           est["largest_cut_share"] > spec_linter.CUT_SHARE_CAP, True)
     check("a project with no state file reads as flow 1", spec_linter._flow(tmp / "nope"), 1)
+
+
+# ------------------------------------------------- mutation run control ----
+def test_mutation_run_control(tmp: Path) -> None:
+    """Whether the harness was alive is a property of the run, not the mutant.
+
+    A cut every criterion declares has no criterion outside its expected set, so
+    "did anything pass" can never be true for it however healthy the harness is.
+    pipeline-test-03's cut-parse-line went 9 red of 9 with the suite plainly
+    executing and was called "never ran"; recipe-box and tip-split both shipped
+    a cut-store-read-all with the same shape.
+    """
+    print("mutation run control")
+
+    def R(task, inconclusive, outcomes, red):
+        return {"task": task, "inconclusive": inconclusive, "_outcomes": outcomes,
+                "went_red": red, "ok": bool(red) and not inconclusive}
+
+    def state(rs):
+        return [(r["task"], r["ok"], r["inconclusive"]) for r in rs]
+
+    # the shape that blocked pipeline-test-03: all-red mutant beside a healthy one
+    rs = [R("parse-line", True, True, ["c-1-1", "c-1-2"]), R("paise", False, True, ["c-1-1"])]
+    mutation._apply_run_control(rs)
+    check("an all-red mutant beside a live one is conclusive",
+          state(rs), [("parse-line", True, False), ("paise", True, False)])
+
+    # the failure the original guard was written for: every criterion `missing`
+    rs = [R("a", True, False, ["c-1-1"]), R("b", True, False, ["c-1-1"])]
+    mutation._apply_run_control(rs)
+    check("an all-missing run stays inconclusive - the vacuous pass stays caught",
+          state(rs), [("a", False, True), ("b", False, True)])
+
+    # no mutant anywhere in the run proved the harness alive
+    rs = [R("a", True, True, ["c-1-1"]), R("b", True, True, ["c-1-1"])]
+    mutation._apply_run_control(rs)
+    check("real outcomes alone do not prove the harness - no control, no rescue",
+          state(rs), [("a", False, True), ("b", False, True)])
+
+    # harness proven live, but this mutant reported nothing real
+    rs = [R("a", True, False, ["c-1-1"]), R("b", False, True, ["c-1-1"])]
+    mutation._apply_run_control(rs)
+    check("a live harness does not rescue a mutant with no per-test outcome",
+          state(rs), [("a", False, True), ("b", True, False)])
+
+    # reclassifying must never invent a green: nothing red is still NOT GRADED
+    rs = [R("a", True, True, []), R("b", False, True, ["c-1-1"])]
+    mutation._apply_run_control(rs)
+    check("a reclassified mutant with nothing red is NOT GRADED, not ok",
+          state(rs), [("a", False, False), ("b", True, False)])
+    check("and it says so", rs[0]["why"].startswith("NOT GRADED"), True)
+
+    # a single-task run has no other mutant, so it can never self-rescue
+    rs = [R("only", True, True, ["c-1-1"])]
+    mutation._apply_run_control(rs)
+    check("a one-task run cannot be its own control", state(rs), [("only", False, True)])
+
+    check("the internal outcome flag never reaches the report",
+          any("_outcomes" in r for r in rs), False)
+
+
+# ----------------------------------------------------- server teardown ----
+def test_stop_server(tmp: Path) -> None:
+    """The teardown must kill the tree, not the handle.
+
+    Popen holds `npm run start`; npm spawns `next start` beneath it. terminate()
+    reached npm and left next running, so every mutation run leaked two
+    processes per mutant. On Windows the orphan held the mutant directory and
+    the NEXT run died in mutate_one with WinError 32, one whole run from the
+    cause. pipeline-test-03 found 12 alive from a run that reported success.
+    """
+    print("server teardown")
+
+    check("stopping nothing is not an error",
+          test_runner.stop_server(None), None)
+
+    done = subprocess.Popen([sys.executable, "-c", "pass"])
+    done.wait(timeout=30)
+    check("stopping an already-exited server is not an error",
+          test_runner.stop_server(done), None)
+
+    live = subprocess.Popen([sys.executable, "-c", "import time; time.sleep(45)"],
+                            **({} if os.name == "nt" else {"start_new_session": True}))
+    check("a live server is running before teardown", live.poll(), None)
+    test_runner.stop_server(live)
+    check("and it is dead after", live.poll() is not None, True)
+
+    check("boot asks POSIX for its own process group, and Windows for none",
+          "start_new_session" in inspect.getsource(test_runner.boot), True)
 
 
 # ---------------------------------------------------------------- cutter ----
@@ -1770,7 +1860,7 @@ def test_readme_count() -> None:
 def main() -> int:
     tmp = Path(tempfile.mkdtemp(prefix="gp-selftest-"))
     try:
-        for t in (test_linter, test_cut_share, test_cutter, test_return_safety, test_skeleton_check,
+        for t in (test_linter, test_cut_share, test_mutation_run_control, test_stop_server, test_cutter, test_return_safety, test_skeleton_check,
                   test_gate1, test_spec_freeze, test_breaker_binding, test_state,
                   test_step_churn, test_guard, test_checker_crash_burns_a_retry,
                   test_revise, test_revise_flow2,

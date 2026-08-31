@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="9" time="4.710" timestamp="2026-09-01T04:24:25.757993+05:30" hostname="HERO"><testcase classname="verify.test_api_accounts" name="test_c_2_1_accounts_are_four_totals_sorted_by_name" time="0.426" /><testcase classname="verify.test_api_accounts" name="test_c_2_2_a_rejected_line_contributes_no_account_and_no_paise" time="0.377" /><testcase classname="verify.test_api_ledger" name="test_c_1_1_ledger_has_21_entries_and_6_diagnostics_in_line_order" time="0.315" /><testcase classname="verify.test_api_ledger" name="test_c_1_2_each_rejected_line_carries_its_own_first_broken_rule" time="0.323" /><testcase classname="verify.test_api_ledger" name="test_c_1_3_five_amounts_convert_to_integer_paise" time="0.312" /><testcase classname="verify.test_ui_account" name="test_c_2_3_rent_page_walks_three_rows_down_to_the_account_total" time="1.303"><failure message="AssertionError: txn-running-5 reads '-', expected '-18000.00'&#10;assert '-' == '-18000.00'&#10;  &#10;  - -18000.00&#10;  + -">page = &lt;Page url='http://127.0.0.1:53760/accounts/rent'&gt;
+
+    def test_c_2_3_rent_page_walks_three_rows_down_to_the_account_total(page):
+        """c-2-3: /accounts/rent responds 200 and renders account-title with text
+        rent, account-total with text -37200.00, exactly 3 elements with data-testid
+        account-txn-&lt;lineNo&gt; whose lineNo values in document order are 5, 11 and 20,
+        and txn-running-5, txn-running-11 and txn-running-20 with texts -18000.00,
+        -19200.00 and -37200.00.
+    
+        The three row wrappers are enumerated on `account-txn-`, which spec.md
+        states is the prefix of no other data-testid on the page (the cells inside
+        each row are `txn-*`), and the list is compared whole so an extra row fails
+        as loudly as a missing one.
+    
+        None of the three running texts is a value an unwritten block produces: with
+        cut-running-balance empty every txn-running cell renders the single
+        character `-`, and the running column is a real scan rather than a repeated
+        total, because -18000.00, -19200.00 and -37200.00 are three different
+        strings and only the last equals account-total.
+        """
+        response = open_account(page, "rent")
+        assert response is not None and response.status == 200, (
+            f"/accounts/rent answered "
+            f"{response.status if response else 'no response'}, expected 200"
+        )
+    
+        title = by_testid(page, "account-title")
+        expect(title).to_have_count(1, timeout=LOAD_TIMEOUT)
+        assert text_of(title) == "rent", f"account-title reads {text_of(title)!r}"
+    
+        total = by_testid(page, "account-total")
+        expect(total).to_have_count(1, timeout=LOAD_TIMEOUT)
+        assert text_of(total) == RENT_TOTAL_TEXT, (
+            f"account-total reads {text_of(total)!r}, expected {RENT_TOTAL_TEXT!r}"
+        )
+    
+        rows = family(page, "account-txn-")
+        expect(rows).to_have_count(len(RENT_ROW_LINE_NOS), timeout=LOAD_TIMEOUT)
+        assert line_nos(rows, "account-txn-") == RENT_ROW_LINE_NOS, (
+            f"rent rows are {line_nos(rows, 'account-txn-')} in document order, "
+            f"expected {RENT_ROW_LINE_NOS}"
+        )
+    
+        for line_no, expected in RENT_RUNNING_TEXT.items():
+            cell = by_testid(page, f"txn-running-{line_no}")
+&gt;           assert text_of(cell) == expected, (
+                f"txn-running-{line_no} reads {text_of(cell)!r}, expected {expected!r}"
+            )
+E           AssertionError: txn-running-5 reads '-', expected '-18000.00'
+E           assert '-' == '-18000.00'
+E             
+E             - -18000.00
+E             + -
+
+verify\test_ui_account.py:81: AssertionError</failure></testcase><testcase classname="verify.test_ui_account" name="test_c_2_4_an_unknown_account_is_a_404_and_a_known_one_is_a_200" time="0.503" /><testcase classname="verify.test_ui_account" name="test_c_2_5_salary_running_column_and_the_sidebar_of_four_linked_accounts" time="0.411"><failure message="AssertionError: txn-running-4 reads '-', expected '45000.00'&#10;assert '-' == '45000.00'&#10;  &#10;  - 45000.00&#10;  + -">page = &lt;Page url='http://127.0.0.1:53760/accounts/salary'&gt;
+
+    def test_c_2_5_salary_running_column_and_the_sidebar_of_four_linked_accounts(page):
+        """c-2-5: /accounts/salary renders txn-running-4, txn-running-16 and
+        txn-running-23 with texts 45000.00, 57000.00 and 62000.00, renders exactly 4
+        elements with data-testid account-link-&lt;name&gt; whose names in document order
+        are food, rent, salary and travel, renders account-link-food with href
+        /accounts/food, and renders account-list-total-food with text -5425.55.
+    
+        This is the second running-balance fixture and it is an all-positive
+        account, so the scan is graded on a shape c-2-3's all-negative rent column
+        does not reach - a sign error or a subtraction passes neither. Nor does a
+        constant: the three texts differ from each other and from rent's three.
+    
+        The sidebar is enumerated on `account-link-`, a prefix of no other testid
+        (`account-list-total-` diverges at the third character), and the names are
+        compared as a whole ordered list, so the count and the ascending order are
+        one assertion. Reading taken: "whose names in document order" is read off
+        the `&lt;name&gt;` in each data-testid, the same way c-2-3 reads "whose lineNo
+        values in document order" off `account-txn-&lt;lineNo&gt;`. The href is read as an
+        attribute, so the sidebar is real navigation and not four spans with the
+        right testids.
+        """
+        response = open_account(page, "salary")
+        assert response is not None and response.status == 200, (
+            f"/accounts/salary answered "
+            f"{response.status if response else 'no response'}, expected 200"
+        )
+    
+        for line_no, expected in SALARY_RUNNING_TEXT.items():
+            cell = by_testid(page, f"txn-running-{line_no}")
+&gt;           assert text_of(cell) == expected, (
+                f"txn-running-{line_no} reads {text_of(cell)!r}, expected {expected!r}"
+            )
+E           AssertionError: txn-running-4 reads '-', expected '45000.00'
+E           assert '-' == '45000.00'
+E             
+E             - 45000.00
+E             + -
+
+verify\test_ui_account.py:167: AssertionError</failure></testcase><testcase classname="verify.test_ui_ledger" name="test_c_1_4_ledger_page_draws_21_rows_above_6_numbered_complaints" time="0.482" /></testsuite></testsuites>

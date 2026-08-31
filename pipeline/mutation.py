@@ -91,6 +91,53 @@ def graded_by(spec: dict, task_id: str) -> list[str]:
             for c in s.get("criteria", []) if task_id in (c.get("cuts") or [])]
 
 
+def _apply_run_control(results: list[dict]) -> None:
+    """Take the harness-alive control from the run, not from the mutant.
+
+    Per-mutant, "did anything pass" is the only evidence available that the
+    harness was working, and it is unavailable by construction to a cut every
+    criterion declares - its expected set IS the suite, so nothing is left over
+    to stay green. That is not a rare shape: pipeline-test-03's cut-parse-line,
+    and recipe-box's and tip-split's cut-store-read-all, are all declared by
+    every criterion in their project.
+
+    Across the run the evidence does exist. Mutants are independent runs of the
+    same harness minutes apart, so one mutant that produced a passing criterion
+    proves the harness boots, serves and grades. An all-red mutant in that same
+    run is then a real result rather than an ambiguous one.
+
+    Two independent conditions, both required, because a false green is this
+    checker's worst outcome:
+
+      1. some *other* mutant in this run produced a passing criterion - the
+         harness is proven live by a run that is not this one;
+      2. this mutant produced real per-test outcomes - at least one pass or
+         fail, not the all-`missing` shape the original guard was written for,
+         where a target whose log path could not be created reported every
+         criterion missing and passed every task vacuously.
+
+    Neither alone is enough. Condition 2 alone would trust a run whose harness
+    was broken for every mutant; condition 1 alone would trust a mutant that
+    never reported a per-test outcome at all.
+    """
+    live = any(r.get("_outcomes") and not r["inconclusive"] for r in results)
+    for r in results:
+        if r["inconclusive"] and live and r.get("_outcomes"):
+            r["inconclusive"] = False
+            r["ok"] = bool(r["went_red"])
+            r["why"] = (
+                "removing it turns its requirements red - every criterion in the "
+                "project declares this task, so no criterion could stay green to "
+                "prove the harness was alive; another mutant in this run produced "
+                "a passing criterion, which proves it, and this mutant reported "
+                "real per-test outcomes rather than the all-missing shape"
+                if r["went_red"] else
+                "NOT GRADED: every requirement that declares this task still "
+                "passes with it removed, so a student can leave it empty")
+    for r in results:
+        r.pop("_outcomes", None)
+
+
 def run(project: Path, only: list[str] | None = None, max_tasks: int | None = None,
         target: str = "app") -> dict:
     spec = json.loads((project / "spec.json").read_text())
@@ -131,10 +178,20 @@ def run(project: Path, only: list[str] | None = None, max_tasks: int | None = No
         # whose log path could not be created reported all criteria "missing",
         # counted every one as red, and passed every task vacuously.
         ran = any(c.get("status") == "pass" for c in crit.values())
+        # A cut every criterion declares has no criterion outside its expected
+        # set, so `ran` can never be true for it however healthy the harness is:
+        # pipeline-test-03's cut-parse-line went 9 red of 9 with the suite
+        # plainly executing (junit tests=9 failures=9 errors=0) and was still
+        # called "never ran". Whether the suite produced real per-test outcomes
+        # is the other half of the question, and it is what separates this from
+        # the failure the guard above exists for - a target whose log path could
+        # not be created reported every criterion *missing*, not failed.
+        outcomes = any(c.get("status") in ("pass", "fail") for c in crit.values())
         results.append({
             "task": task,
             "ok": bool(red) and ran,
             "inconclusive": not ran,
+            "_outcomes": outcomes,
             "lines_removed": removed,
             "graded_by": expect,
             "went_red": red,
@@ -148,6 +205,8 @@ def run(project: Path, only: list[str] | None = None, max_tasks: int | None = No
                     "passes with it removed, so a student can leave it empty"),
         })
         shutil.rmtree(mdir, ignore_errors=True)
+
+    _apply_run_control(results)
 
     ungraded = [r["task"] for r in results if not r["ok"] and not r.get("inconclusive")]
     inconclusive = [r["task"] for r in results if r.get("inconclusive")]
