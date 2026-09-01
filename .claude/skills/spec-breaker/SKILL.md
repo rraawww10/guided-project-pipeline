@@ -83,6 +83,21 @@ generous.
 | `pack-writer` | step 9 - a person reads the guide at Gate 3 |
 | `nothing` | **no downstream checker sees this.** It ships as written |
 
+**Two owners can pass by not running, and the rule now says so.** `typecheck`
+is the fail-open second-line check: when the toolchain cannot be reached it
+reports no error, so a blocking finding parked there can reach the student
+skeleton with every gate green. `code-check` runs *nothing at all* unless
+spec.json declares a matching entry in `code_checks` - if that list is empty,
+writing `code-check` is writing `nothing` in a checker's clothing, and the Gate 1
+rule now rejects it as such.
+
+Neither is a reason to avoid naming them when they are genuinely the owner.
+A blocking finding on `typecheck` still approves; the rule records the obligation
+to confirm the check actually ran, in `gate1.json` under `verify_later`. What you
+must not do is reach for `typecheck` or `code-check` because they sound owned.
+pipeline-test-03's B2 was correctly owned by `typecheck` and was caught only
+because a person read `typecheck_fail_open` at step 10 by hand.
+
 Be honest about `nothing`. It is not a severity score - it is a statement about
 the pipeline. "The Builder will pick the wrong order and the test will pin the
 wrong thing" is `test-runner`, and it costs one retry. "The cut can be left

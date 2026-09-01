@@ -703,6 +703,42 @@ def test_gate1(tmp: Path) -> None:
     check("a worth-a-look finding owned by nothing does not block",
           run(AMBIGUITY_MD)["counts"]["worth_a_look"], 1)
 
+    # --- an owner that can pass by not running is owned only conditionally.
+    # pipeline-test-03's B2 (a TS2367 dead comparison once the cut is removed)
+    # was owned by typecheck, which is the fail-open second-line check. It was
+    # caught only because a human was told by hand to read typecheck_fail_open
+    # at step 10. Nothing enforced that; now the report carries the obligation.
+    fo = AMBIGUITY_MD.replace("- **Owner:** test-runner", "- **Owner:** typecheck")
+    r = run(fo)
+    check("a blocking finding on a fail-open owner is still approve-eligible",
+          r["ok"], True)
+    check("but the obligation to confirm it ran is recorded",
+          [v["id"] for v in r["verify_later"]], ["A1"])
+    check("only blocking findings carry the obligation - B1 ships either way",
+          all(v["id"] != "B1" for v in r["verify_later"]), True)
+    check("and it names the report and the flag to read",
+          (r["verify_later"][0]["report"], r["verify_later"][0]["flag"]),
+          ("skeleton-check.json", "typecheck_fail_open"))
+    check("the approve line says the verdict is conditional",
+          any("PROVIDED" in x for x in r["reasons"]), True)
+    check("an ordinary owner leaves verify_later empty",
+          run(AMBIGUITY_MD)["verify_later"], [])
+
+    # `code-check` owns nothing unless spec.json declares something to run, and
+    # that is decidable at Gate 1 rather than deferrable.
+    cc = AMBIGUITY_MD.replace("- **Owner:** test-runner", "- **Owner:** code-check")
+    r = run(cc)
+    check("code-check with no declared code_checks is nothing wearing a name",
+          r["ok"], False)
+    check("and the report says why", any("declares no code_checks" in x
+                                          for x in r["reasons"]), True)
+    spec = json.loads((p / "spec.json").read_text())
+    spec["code_checks"] = ["utc-dates"]
+    (p / "spec.json").write_text(json.dumps(spec))
+    check("with a declared code check it owns the finding again", run(cc)["ok"], True)
+    del spec["code_checks"]
+    (p / "spec.json").write_text(json.dumps(spec))
+
     unowned = AMBIGUITY_MD.replace("- **Owner:** test-runner", "- **Owner:** nothing")
     r = run(unowned)
     check("a blocking finding owned by nothing is a reject", r["ok"], False)

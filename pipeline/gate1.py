@@ -45,6 +45,35 @@ OWNERS = {
 }
 UNOWNED = "nothing"
 
+# Rule 8 asks whether a downstream checker OWNS a finding. It cannot ask whether
+# that checker will actually RUN, and two owners can pass by not running:
+#
+#   typecheck    tsc over the generated skeleton, and the second-line check.
+#                skeleton-check.json carries `typecheck_fail_open`, which is true
+#                when the toolchain could not be reached. A fail-open check that
+#                does not run reports no error, so a blocking finding parked
+#                there can reach the student skeleton with every gate green.
+#                pipeline-test-03's B2 - a TS2367 dead comparison once
+#                cut-parse-line is removed - was owned by exactly this, and the
+#                only reason it was caught is that a human was told to read the
+#                flag at step 10 and did. It read false. Nothing enforced that.
+#
+#   code-check   step 6, but ONLY for the named checks spec.json declares in
+#                `code_checks`. With that list empty the checker runs nothing at
+#                all, so the column is `nothing` wearing a checker's name. This
+#                one is decidable here, from the spec, so it is decided rather
+#                than deferred.
+#
+# Neither is downgraded to `nothing` outright. typecheck usually does run, and
+# rejecting a spec over a check that will probably work is a worse trade than
+# recording the obligation. What changes is that the obligation stops depending
+# on a person remembering to write it in a gate note.
+FAIL_OPEN = {
+    "typecheck": ("skeleton-check.json", "typecheck_fail_open",
+                  "step 10 must read typecheck_fail_open and require it false - "
+                  "a fail-open check that did not run passes without looking"),
+}
+
 RE_SECTION = re.compile(r"^##\s+(.+?)\s*$")
 RE_FINDING = re.compile(r"^###\s+([A-Za-z]+\d+)\s*[-–—:]?\s*(.*)$")
 RE_OWNER = re.compile(r"^\s*[-*]\s*\*\*Owner:\*\*\s*`?([a-z-]+)`?", re.IGNORECASE)
@@ -76,8 +105,9 @@ def parse_findings(md: str) -> list[dict]:
     return findings
 
 
-def classify(findings: list[dict]) -> list[dict]:
+def classify(findings: list[dict], code_checks: list | None = None) -> list[dict]:
     out = []
+    declared = list(code_checks or [])
     for f in findings:
         blocking = f["section"] in BLOCKING_HEADINGS
         owner = f["owner"]
@@ -85,12 +115,21 @@ def classify(findings: list[dict]) -> list[dict]:
         # checkers, is treated as unowned - the Breaker must say who catches it.
         valid = owner in OWNERS
         effective = owner if valid else UNOWNED
+        why_unowned = None
+        # `code-check` owns nothing unless the spec declares something for it to
+        # run. Decidable from spec.json, so decide it instead of deferring.
+        if effective == "code-check" and not declared:
+            effective, why_unowned = UNOWNED, (
+                "declared owner 'code-check', but spec.json declares no "
+                "code_checks, so that checker runs nothing at all")
         out.append({
             **f,
             "blocking": blocking,
             "owner_declared": owner,
             "owner": effective,
             "owner_valid": valid,
+            "owner_downgraded": why_unowned,
+            "fail_open": effective in FAIL_OPEN,
             "caught_by": OWNERS[effective],
             "must_fix_now": blocking and effective == UNOWNED,
         })
@@ -111,7 +150,9 @@ def check(project: Path) -> dict:
         "reasons": [],
         "rule": ("reject when any blocking finding is owned by 'nothing'; approve "
                  "when every remaining finding sits in a column a downstream "
-                 "checker owns"),
+                 "checker owns. An owner that can pass by not running is owned "
+                 "only conditionally: it approves, and the confirmation it "
+                 "actually ran is listed in verify_later"),
     }
 
     if not amb.exists():
@@ -136,7 +177,13 @@ def check(project: Path) -> dict:
             f"was written. Re-run the Spec Breaker.")
         return report
 
-    findings = classify(parse_findings(amb.read_text()))
+    code_checks = []
+    try:
+        code_checks = json.loads(
+            (project / "spec.json").read_text()).get("code_checks") or []
+    except (OSError, json.JSONDecodeError):
+        pass
+    findings = classify(parse_findings(amb.read_text()), code_checks)
     report["findings"] = findings
     blocking = [f for f in findings if f["blocking"]]
     unowned = [f for f in blocking if f["must_fix_now"]]
@@ -145,6 +192,24 @@ def check(project: Path) -> dict:
         "worth_a_look": len(findings) - len(blocking),
         "unowned_blocking": len(unowned),
     }
+    downgraded = [f for f in findings if f.get("owner_downgraded")]
+    for f in downgraded:
+        report["reasons"].append(f"{f['id']}: {f['owner_downgraded']}")
+
+    # A blocking finding parked on a fail-open owner is approve-eligible, but
+    # the obligation to confirm the check actually ran is recorded here rather
+    # than left to whoever writes the gate note. pipeline-test-03 got this right
+    # only because a human was told to read the flag by hand.
+    report["verify_later"] = [
+        {"id": f["id"], "title": f["title"][:70], "owner": f["owner"],
+         "report": FAIL_OPEN[f["owner"]][0], "flag": FAIL_OPEN[f["owner"]][1],
+         "requirement": FAIL_OPEN[f["owner"]][2]}
+        for f in findings if f["blocking"] and f.get("fail_open")]
+    for v in report["verify_later"]:
+        report["reasons"].append(
+            f"{v['id']} is blocking and owned by '{v['owner']}', which can pass by "
+            f"not running - {v['requirement']}")
+
     missing_owner = [f["id"] for f in findings if not f["owner_valid"]]
     if missing_owner:
         report["reasons"].append(
@@ -159,10 +224,14 @@ def check(project: Path) -> dict:
 
     report["ok"] = True
     report["verdict"] = "approve-eligible"
+    n_fo = len(report["verify_later"])
     report["reasons"].append(
         f"{len(blocking)} blocking finding(s), all owned by a downstream checker; "
         f"{report['counts']['worth_a_look']} worth a look. Nothing here escapes to the "
-        f"shipped project.")
+        f"shipped project"
+        + (f", PROVIDED the {n_fo} finding(s) in verify_later are confirmed to have "
+           f"actually been checked - see each one's report and flag."
+           if n_fo else "."))
     return report
 
 

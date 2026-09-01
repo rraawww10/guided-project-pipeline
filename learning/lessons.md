@@ -394,6 +394,37 @@ guide alone. Three predictions were on record before it ran:
   "the plan was taught untrimmed". That is one sentence in the dryrun note and it
   is worth making mandatory.
 
+## "Owned by a checker" is not "checked"
+
+- **Rule 8 could not tell an owner that runs from an owner that passes by not
+  running.** Gate 1 approves when every blocking finding sits in a column a
+  downstream checker owns. `typecheck` is the fail-open second-line check: with
+  the toolchain unreachable it reports no error, so a blocking finding parked
+  there reaches the student skeleton with every gate green.
+  pipeline-test-03's B2 - a TS2367 dead comparison once `cut-parse-line` is
+  removed - was correctly owned by `typecheck`, and was caught only because the
+  Gate 1 note told a person to read `typecheck_fail_open` at step 10 by hand. It
+  read false. **Nothing in the pipeline enforced that, and the next note might
+  not say it.**
+
+- **The fix is to record the obligation, not to reject.** Downgrading a
+  fail-open owner to `nothing` would have rejected a spec whose check did in fact
+  run - a worse trade. `gate1.json` now carries `verify_later`, naming the
+  finding, the report and the flag that has to be read, and the approve line says
+  the verdict is conditional on it. The obligation stops depending on whoever
+  writes the gate note.
+
+- **One of the two was decidable on the spot, so it is decided.** `code-check`
+  runs nothing unless spec.json declares an entry in `code_checks`. With that
+  list empty it is `nothing` wearing a checker's name, and that is readable from
+  the spec at Gate 1 - so it is now a reject rather than a deferred obligation.
+  Prefer deciding to deferring whenever the data is already in front of you.
+
+- **The general shape: a rule about ownership needs a notion of liveness.** Any
+  check that can be skipped, fail open, or be configured out of existence is only
+  conditionally an owner. Before adding a name to the OWNERS table, ask what
+  happens when that checker cannot run.
+
 ## Which findings can become linter rules
 
 Ten Gate 1 rejections across five projects, classified. The point of the

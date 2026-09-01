@@ -48,7 +48,7 @@ pipeline/           # orchestrator + every script (Python)
   code_check.py     # shape checks a criterion can name (e.g. utc-dates)
   guard.py          # PreToolUse hook - write locks and the frozen spec
   watchdog.py       # nightly replay of shipped test suites
-  selftest.py       # 363 deterministic checks on the scripts
+  selftest.py       # 372 deterministic checks on the scripts
   templates/        # CONTRACT.md (spec.json shape), idea_template.md
 .claude/
   agents/           # idea-generator, spec-writer, spec-breaker, test-writer,
@@ -84,7 +84,7 @@ python3 -m pipeline dryrun <slug> --session N --minutes M --by <who>   # step 13
 python3 -m pipeline ship <slug>
 python3 -m pipeline watch                     # nightly watchdog
 python3 -m pipeline feedback <slug> -m ".."   # step 15, re-enters at step 3
-python3 -m pipeline.selftest                  # run 363 deterministic checks
+python3 -m pipeline.selftest                  # run 372 deterministic checks
 ```
 
 Per-step checkers: `ideas`, `lint`, `breaker begin|end`, `gate1-check`,
@@ -110,7 +110,10 @@ Per-step checkers: `ideas`, `lint`, `breaker begin|end`, `gate1-check`,
 7. A report must name the spec it read - `ambiguity.md` is bound to a spec hash and a
    stale report is rejected at Gate 1.
 8. Gate 1 terminates: approve when every finding sits in a column a downstream checker
-   owns, not when the blocking count reaches zero.
+   owns, not when the blocking count reaches zero. An owner that can pass by *not
+   running* owns a finding only conditionally - `gate1.json` lists those under
+   `verify_later` with the report and flag that must be read later, because
+   "owned" and "checked" are not the same claim.
 
 ## Two critical artifacts
 
