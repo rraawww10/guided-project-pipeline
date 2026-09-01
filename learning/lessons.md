@@ -354,6 +354,46 @@ rm ../verify/t.py` used to slip past entirely.
   into `lint.json` on every run so the next timed session can disagree with it in
   public.
 
+## What the first out-of-sample measurement said
+
+pipeline-test-03 session 1 measured **47 minutes**, taught by Priya from the
+guide alone. Three predictions were on record before it ran:
+
+| Prediction | Said | Error |
+|---|---|---|
+| Pack Writer | 48 | **+1.0** |
+| decision-count linter model | 52.1 | +5.1 |
+| old flat model | 38.5 | -8.5 |
+
+- **The decision-count model beat the flat model and lost to the Pack Writer, and
+  both of those are the expected result.** The flat model was 8.5 low and silent;
+  the new one was 5.1 high and raised E111 at step 2. But the Pack Writer was five
+  times closer, because it reads the session plan it has just written while the
+  linter reads prose in spec.json before any plan exists. **The linter is not
+  competing with the Pack Writer and cannot win.** Its job is to be wrong by about
+  five minutes nine steps earlier, where the fix is one Spec Writer pass instead
+  of a rebuild. A session the linter prices near the cap is a question for the
+  Pack Writer, not an answer.
+
+- **Refitting on the measurement was not worth doing.** The model was fitted
+  against the Pack Writer's estimate of 48; the real number was 47. Refitting
+  moves MINUTES_PER_DECISION 1.7 -> 1.6 and the worst error 5.1 -> 4.9. That is
+  noise, and refitting two parameters on four points again buys nothing. **Resist
+  refitting on every new point** - it feels like calibration and is mostly
+  chasing sampling error.
+
+- **Five projects, five overruns, and the estimate is still not the fix.** 45, 45,
+  45, 50, 47 against a 40 minute cap. Every model so far has been an argument
+  about how wrong the estimate is. The thing that has never been tried is
+  reducing what a session contains once the Pack Writer prices it - the trims
+  exist in every guide and no run has confirmed they were pulled.
+
+- **Two dry runs in a row could not say whether the guide's trims were used.**
+  pipeline-test-02 recorded the same gap. Until a dry-run note says which trims
+  were pulled, a measured overrun cannot distinguish "the plan is too big" from
+  "the plan was taught untrimmed". That is one sentence in the dryrun note and it
+  is worth making mandatory.
+
 ## Which findings can become linter rules
 
 Ten Gate 1 rejections across five projects, classified. The point of the

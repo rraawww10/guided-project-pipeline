@@ -22,7 +22,8 @@
     "cut": 1,
     "deploy": 2,
     "leak-scan": 1,
-    "guide-lint": 1
+    "guide-lint": 1,
+    "dryrun": 1
   },
   "gates": {
     "gate0": {
@@ -185,9 +186,23 @@
       "at": "2026-08-31T23:19:44+00:00",
       "detail": "",
       "run": 2
+    },
+    {
+      "step": "dryrun",
+      "ok": true,
+      "at": "2026-09-01T03:54:02+00:00",
+      "detail": "session 1, 47 min, Priya",
+      "run": 1
     }
   ],
   "ticket": null,
-  "dry_run": null,
+  "dry_run": {
+    "at": "2026-09-01T03:54:02+00:00",
+    "session": 1,
+    "minutes": 47,
+    "by": "Priya",
+    "taught_without_the_code": true,
+    "note": "Session 1 taught from pack/session-1.md by Priya, who did not build it. Measured 47 minutes against the 40 minute cap - 7 over, and 1 under the guide's own disclosed estimate of 48.\n\nRecorded as taught: no --could-not-teach, so the guide carried the session without app/ being opened.\n\nNOT KNOWN FROM THIS RUN, and it weakens the number the same way pipeline-test-02's did: whether the two trims the guide names were pulled - the pre-written regexes at minute 14, and reading parseLedger in 60 seconds rather than four minutes. If they were not pulled, 47 is the untrimmed cost and the trims would bring it near 40. If they were, 47 is the trimmed cost and the 40 minute plan does not hold. Ask before scheduling."
+  },
   "feedback": []
 }

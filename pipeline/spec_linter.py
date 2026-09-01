@@ -116,19 +116,32 @@ SESSION_MINUTES_HARD = 50.0
 # pipeline-test-01's cut-reveal-from is a breadth-first flood fill, 103 words and
 # 41 lines removed, and states zero conditions.
 #
-# CALIBRATION IS THIN - four sessions, and only two of them measured:
+# CALIBRATION IS THIN - four sessions, three of them measured:
 #
 #   pipeline-test-01 s2   flat 32.5   model 40.6   measured 45   (hero)
 #   pipeline-test-02 s2   flat 37.0   model 53.9   measured 50   (Priya)
-#   pipeline-test-03 s1   flat 38.5   model 52.1   pack est 48
+#   pipeline-test-03 s1   flat 38.5   model 52.1   measured 47   (Priya)
 #   pipeline-test-03 s2   flat 38.5   model 40.2   pack est 45
 #
-# Worst error 4.8 minutes against a flat model that was 6.5 to 13 minutes low on
-# every one of them. The gain is not precision, it is that the error now falls on
-# both sides instead of always short. Two free parameters against four points
-# overfits by construction: treat these constants as provisional and move them
-# when a fifth timed session disagrees, which is why the estimate is written into
-# lint.json on every run.
+# pipeline-test-03 s1 is the only OUT-OF-SAMPLE point this model has faced: it
+# was fitted against the Pack Writer's estimate of 48 and the session then
+# measured 47, so the model over-predicted by 5.1. Refitting on the measurement
+# moves MINUTES_PER_DECISION 1.7 -> 1.6 and the worst error 5.1 -> 4.9. That is
+# noise, and refitting two parameters on four points again would buy nothing, so
+# the constants stand.
+#
+# Worst error about 5 minutes, against a flat model that was 6.5 to 13 minutes
+# low on every one of them and silent on this one. The gain is not precision -
+# the error now falls on both sides instead of always short, and it arrives at
+# step 2 instead of step 9.
+#
+# KNOW WHAT THIS IS FOR. The Pack Writer predicted 48 against the measured 47 -
+# five times closer than this model - because it reads the session plan it just
+# wrote, while the linter reads prose in spec.json before any plan exists. The
+# linter is not trying to win that comparison and cannot. Its job is to be wrong
+# by about five minutes nine steps earlier, where the fix is one Spec Writer pass
+# rather than a rebuild. Treat a session it prices near the cap as a question for
+# the Pack Writer, not as an answer.
 #
 # Flow 1 keeps the flat weight it was calibrated on. Its specs write many small
 # cuts where flow 2 writes few large ones, so the flat 6 over-charges it - the
