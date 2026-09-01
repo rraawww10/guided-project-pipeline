@@ -23,7 +23,8 @@
     "deploy": 2,
     "leak-scan": 1,
     "guide-lint": 1,
-    "dryrun": 1
+    "dryrun": 2,
+    "ship": 1
   },
   "gates": {
     "gate0": {
@@ -44,7 +45,11 @@
       "at": "2026-08-31T23:02:07+00:00",
       "note": "GATE 2 APPROVED. Human decision, pre-authorised after B8 was fixed. Read as every criterion, not as a summary.\n\nRESULTS: 9 pass, 0 fail, 0 skip, 0 missing, pytest rc 0. Session 1 c-1-1..c-1-4 and session 2 c-2-1..c-2-5 all green. Built first pass - no builder/test-runner loop.\n\nMUTATION: 5 of 5 tasks checked, 0 ungraded, 0 inconclusive, stayed_green empty for every cut. For every cut the set that went red equals the set that grades it:\n  cut-parse-line        9 lines -> all 9 criteria\n  cut-account-totals    7 lines -> c-2-1 c-2-2 c-2-3 c-2-4 c-2-5\n  cut-amount-paise      5 lines -> 8 criteria\n  cut-running-balance   5 lines -> c-2-3 c-2-5\n  cut-account-rows      4 lines -> c-2-3 c-2-4 c-2-5\n\nTHE MUTATION RESULT REQUIRED A CHECKER FIX, AND THAT IS PART OF THIS GATE'S RECORD. cut-parse-line first came back INCONCLUSIVE and stopped the phase. It is declared by all nine criteria, so its expected set IS the suite and no criterion could stay green to prove the harness was alive - the per-mutant test, whether any criterion passed, can never be true for that shape. The junit showed tests=9 failures=9 errors=0, so the suite plainly ran. mutation.py now takes the harness-alive control from the run instead of the mutant, requiring both that another mutant produced a pass and that this mutant reported real per-test outcomes. Committed at 8aad102 with 8 selftest checks including both historical false-green shapes.\n\nGATE 1's B1 DID NOT MATERIALISE: the Builder handled notFound() correctly and c-2-4 is green on both the 404 status and the account-missing element. The finding was real and the Builder simply got it right.\n\nRULE 3, STATED PRECISELY RATHER THAN CLAIMED: spec-status reports drift null, still frozen at 46b5465b4952, so the Builder edited neither the spec nor - per the LOCK discipline - the tests. But verify/ is NOT byte-identical to the Gate 1 commit 076a6fa, and that is worth recording rather than glossing:\n\n  verify/helpers.py text_of() gained an explicit timeout=LOAD_TIMEOUT on\n  text_content(), plus a docstring. Made at step 8 by the Verifier, which owns\n  verify/ in flow 2 and held the lock for it. No assertion was weakened and no\n  expected value changed; a missing element now fails on the suite's own 20s\n  budget instead of Playwright's hidden 30s default, which is strictly better\n  for the skeleton check at step 10 where missing elements are the norm.\n\n  Noting the difference from pipeline-test-02, whose Gate 2 could say verify/\n  was byte-identical to its Gate 1 commit. Flow 2 lets the Verifier touch verify/\n  at step 8, so 'byte-identical' is not a property this gate can assume; what it\n  can check is that every change is the Verifier's and weakens nothing. Checked\n  by reading the diff, which is nine lines.\n\nTWO PIPELINE FAULTS BURNED CODE RETRIES 2/15, NEITHER ABOUT THIS PROJECT: the mutation inconclusive above, and a PermissionError from 12 orphaned node servers left by an earlier run (test_runner terminated npm and orphaned its next child). Both fixed at 8aad102; the server leak was verified fixed by measurement - a boot on the leaking path now leaves 0 processes where it left 2. _checker labelled both correctly as pipeline faults supporting no conclusion, which is the hardening working.\n\nSTILL OPEN FOR GATE 3:\n  - B2 typecheck_fail_open MUST read false in skeleton-check.json. typecheck is\n    the fail-open second-line check, and a fail-open owner passes when it cannot\n    run. If it reads true, B2 was never actually checked and the TS2367 dead\n    comparison reaches the skeleton.\n  - TIMING. Both sessions estimate 38.5 against the 40 cap on a model that ran\n    12.5 and 13 minutes low on the only two timed flow-2 sessions. The Spec\n    Breaker raised it independently in both Gate 1 rounds. The step 13 dry run is\n    the test, and the prediction on record is that near-50 means the weight has\n    to move off hint length to a quantity the spec writer does not author."
     },
-    "gate3": null
+    "gate3": {
+      "approved": true,
+      "at": "2026-09-01T03:57:02+00:00",
+      "note": "GATE 3 APPROVED. Human decision, made with the timing in front of it.\n\nTHE GATE'S QUESTION IS ANSWERED YES, WITH EVIDENCE. Priya, who did not build this\nproject, taught session 1 on 2026-09-01 from pack/session-1.md alone, without\nopening app/. taught_without_the_code true. That is what Gate 3 asks and it is\nanswered by a measurement rather than an opinion.\n\nTHE TIMING, AND THIS TIME THE DECISIVE FACT IS KNOWN. Session 1 measured 47\nminutes against the 40 minute cap - 7 over, and 1 UNDER the guide's own disclosed\nestimate of 48. THE TRIMS WERE NOT PULLED. 47 is therefore the cost of teaching\nthe plan in full, not the cost of the session as the guide intends it taught.\n\nThe guide names three trims for session 1 - the npm ci moved before the session,\nboth regexes handed over pre-written at minute 14, and the rule-order argument\ndeferred to session 2's recap - and prices them as bringing the session to 40.\nNothing in this measurement contradicts that. It establishes the untrimmed\nceiling and leaves the trimmed plan untested.\n\nThis is the answer the last two dry runs could not give. pipeline-test-02 shipped\nat 50 against 40 without knowing whether its levers had been pulled, so its\noverrun could not be told apart from a session taught long. Here it can:\nthe plan is not too big, it was taught in full.\n\nWHAT AN INSTRUCTOR MUST BE TOLD BEFORE THEY SCHEDULE THIS: session 1 runs 47\nminutes taught complete. To fit 40, pull the three trims the guide names - they\nare real live minutes, unlike the drop candidates the SPEC named, which were\nmarkup no student types (ambiguity W5, caught by the Pack Writer). Teaching it\nuntrimmed is a legitimate choice; it just needs 47 minutes on the timetable.\n\nHANDOVER CHECKS ALL GREEN: cut ran first pass, 5 cuts, 0 retries. Leak scan clean,\n0 leaks. Guide lint 0 errors, 2 warnings, both the intended G032 overrun\ndisclosures. Deploy ok, 0 advisories. skeleton-check 9 checked, 0 mismatches, 0\npartial-state risks, and typecheck_fail_open FALSE - so Gate 1's B2, the TS2367\ndead comparison whose only owner could have passed by failing to run, was\ngenuinely checked rather than merely owned.\n\nWHAT THIS RUN TAUGHT THE PIPELINE, RECORDED HERE BECAUSE THE PROJECT IS THE\nSMALLER HALF OF IT. Nine defects found, six of them in the pipeline rather than\nthe project: workflows crashing with a TypeError instead of naming the checker\nthat did not run; the mutation check unable to reach a verdict on a cut every\ncriterion declares; two separate sites leaking a server per boot; the phase-2\nworkflow reporting an inconclusive result as ungraded and printing an instruction\nto reject a Gate-1-approved spec; and nothing at all checking whether the test\nsuite Gate 1 approved was the suite that graded the code. All fixed, each with a\nselftest check. Selftest 318 -> 363 across the run.\n\nTHE ESTIMATE, SCORED HONESTLY. Three predictions were on record before session 1\nran: the Pack Writer said 48, the new decision-count linter model said 52.1, the\nold flat model said 38.5. Measured 47. The linter model beat the flat one and\nlost to the Pack Writer by five times, which is the expected result - the Pack\nWriter reads the session plan it has just written, the linter reads prose in\nspec.json before a plan exists. Constants were NOT refitted on this point: doing\nso moves the worst error 5.1 to 4.9, which is noise.\n\nFIVE PROJECTS, FIVE SESSIONS OVER THE CAP - 45, 45, 45, 50, 47. Every fix so far\nhas argued about how wrong the estimate is. This is the first run where the guide\nnamed trims that are real and a dry run said whether they were used. The next\nlever is not a better estimate; it is confirming that a trimmed session actually\nlands at 40, which needs one more dry run of session 1 WITH the trims pulled.\n"
+    }
   },
   "steps": [
     {
@@ -193,16 +198,30 @@
       "at": "2026-09-01T03:54:02+00:00",
       "detail": "session 1, 47 min, Priya",
       "run": 1
+    },
+    {
+      "step": "dryrun",
+      "ok": true,
+      "at": "2026-09-01T03:56:33+00:00",
+      "detail": "session 1, 47 min, Priya",
+      "run": 2
+    },
+    {
+      "step": "ship",
+      "ok": true,
+      "at": "2026-09-01T03:57:12+00:00",
+      "detail": "",
+      "run": 1
     }
   ],
   "ticket": null,
   "dry_run": {
-    "at": "2026-09-01T03:54:02+00:00",
+    "at": "2026-09-01T03:56:33+00:00",
     "session": 1,
     "minutes": 47,
     "by": "Priya",
     "taught_without_the_code": true,
-    "note": "Session 1 taught from pack/session-1.md by Priya, who did not build it. Measured 47 minutes against the 40 minute cap - 7 over, and 1 under the guide's own disclosed estimate of 48.\n\nRecorded as taught: no --could-not-teach, so the guide carried the session without app/ being opened.\n\nNOT KNOWN FROM THIS RUN, and it weakens the number the same way pipeline-test-02's did: whether the two trims the guide names were pulled - the pre-written regexes at minute 14, and reading parseLedger in 60 seconds rather than four minutes. If they were not pulled, 47 is the untrimmed cost and the trims would bring it near 40. If they were, 47 is the trimmed cost and the 40 minute plan does not hold. Ask before scheduling."
+    "note": "Session 1 taught from pack/session-1.md by Priya, who did not build it, without opening app/. Measured 47 minutes against the 40 minute cap, and 1 under the guide's own disclosed estimate of 48.\n\nTRIMS WERE NOT PULLED. 47 is the cost of teaching the plan in full. The guide names three trims for this session - pre-session npm ci, both regexes handed over pre-written at minute 14, and the rule-order argument deferred to session 2's recap - and prices them as bringing session 1 to 40. So the 40 minute plan holds WITH the trims and this measurement does not contradict it; it measures the untrimmed ceiling.\n\nThis is the answer pipeline-test-02's dry run could not give, and it is the difference between 'the plan is too big' and 'the plan was taught long'. It is the latter."
   },
   "feedback": []
 }

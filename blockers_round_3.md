@@ -607,3 +607,57 @@ The recurring shape: **fixing the instance is not fixing the class.** `mustRun`
 needed four workflows, not one. `stop_server` needed two checkers, not one. Both
 second sites were found by looking after the fix rather than before, and the
 server leak's second site was found only because phase 3 was counted.
+
+---
+
+## Run complete - pipeline-test-03 SHIPPED
+
+All 16 steps, all four gates approved on their own verdicts, no `--override`
+anywhere. Retries: idea 0, spec 0, **code 2/15**, pack 0 - and both code retries
+were pipeline faults (the mutation inconclusive and the orphaned-server
+PermissionError), neither a fault of the project. No ticket raised.
+
+**Step 13 settled the question two previous dry runs left open.** Session 1
+measured 47 minutes against the 40 cap, taught by Priya from the guide alone
+without opening `app/`, **with the trims NOT pulled**. So 47 is the untrimmed
+ceiling, not the cost of the session as the guide intends it taught. The guide
+prices its three trims as bringing session 1 to 40, and nothing here contradicts
+that - it simply leaves the trimmed plan untested.
+
+pipeline-test-02 shipped at 50 against 40 without knowing whether its levers had
+been used, so its overrun could not be told apart from a session taught long.
+This one can: **the plan is not too big, it was taught in full.**
+
+### The estimate, scored against a real measurement
+
+| Prediction | Said | Error |
+|---|---|---|
+| Pack Writer | 48 | **+1.0** |
+| decision-count linter model | 52.1 | +5.1 |
+| old flat model | 38.5 | -8.5 |
+
+The linter model beat the flat one and lost to the Pack Writer by five times.
+Both are the expected result and the second one is not a defect: the Pack Writer
+reads the session plan it has just written, the linter reads prose in spec.json
+before a plan exists. The linter's job is to be wrong by about five minutes nine
+steps earlier, where the fix is one Spec Writer pass instead of a rebuild.
+Constants were not refitted - doing so moves the worst error 5.1 to 4.9, which
+is noise.
+
+### What the run cost and what it bought
+
+Nine findings, six of them defects in the pipeline rather than the project. Five
+fixed and committed, two correct as they stood, one superseded, two left open
+deliberately with reasons. **Selftest 318 -> 363.** Zero orphaned server
+processes at the end of a run that began by leaking twelve.
+
+The shape that repeated all the way through: **fixing the instance is not fixing
+the class.** `mustRun` needed four workflows, `stop_server` needed two checkers,
+and both second sites were found by looking after the fix rather than before.
+
+### The one lever nobody has pulled yet
+
+Five projects, five sessions over the cap: 45, 45, 45, 50, 47. Every change so
+far has been an argument about how wrong the *estimate* is. The next run's most
+valuable measurement is not a better model - it is one dry run of session 1
+**with the trims pulled**, to confirm a trimmed session actually lands at 40.
