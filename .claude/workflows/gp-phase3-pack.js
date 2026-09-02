@@ -20,7 +20,7 @@ if (!slug || typeof slug !== 'string') throw new Error('pass the project slug, e
 // agentType, so fall back to the default agent pointed at the same skill file
 // on disk. Once the session has restarted the agent definition wins, and with
 // it the tool limits in its frontmatter.
-const REPO = '/home/nxtwave/AI_projects'
+const REPO = '.'  // repo-relative: agents run from the repo root, and this file is checked out on more than one machine
 const spawn = async (name, prompt, opts = {}) => {
   const body = `Read ${REPO}/.claude/skills/${name}/SKILL.md and follow it exactly.\n\n${prompt}`
   try {

@@ -23,7 +23,7 @@ if (!slug || typeof slug !== 'string') throw new Error('pass the project slug, e
 // agentType, so fall back to the default agent pointed at the same skill file
 // on disk. Once the session has restarted the agent definition wins, and with
 // it the tool limits in its frontmatter.
-const REPO = '/home/nxtwave/AI_projects'
+const REPO = '.'  // repo-relative: agents run from the repo root, and this file is checked out on more than one machine
 const spawn = async (name, prompt, opts = {}) => {
   const body = `Read ${REPO}/.claude/skills/${name}/SKILL.md and follow it exactly.\n\n${prompt}`
   try {
@@ -140,6 +140,30 @@ const ambiguity = await spawn('spec-breaker',
   `Break the spec for guided project "${slug}".\n\n` +
   `Read projects/${slug}/spec.md and ` +
   `spec.json FIRST and on their own, then projects/${slug}/idea.md, then learning/lessons.md.\n\n` +
+  // The Spec Writer has read the previous rounds since flow 2 shipped; the
+  // Breaker never did, and that asymmetry is what stopped Gate 1 converging.
+  // pipeline-test-04: round 1 fixed all three briefed findings correctly, and
+  // round 2 came back with the same 3-blocking/7-worth-a-look shape - 4 of its
+  // 10 findings were re-raises of round-1 findings on unchanged text, and 3 of
+  // those 4 had moved their `blocking` or `owner`. Those are precisely the two
+  // fields the stopping rule reads, so the gate outcome moved without the spec
+  // moving. Reading the prior round does not soften the pass: it makes the
+  // second look at an unchanged line answerable for disagreeing with the first.
+  `If projects/${slug}/.pipeline/round-*/ exists, this spec has already been through ` +
+  `Gate 1. AFTER your own first pass over the spec - never before it, so you form your ` +
+  `own reading first - read the highest-numbered round's ambiguity.md, gate1.json and ` +
+  `why.md. Then, for every finding you are about to write:\n` +
+  `  - If an earlier round raised the same line, say so: give its round and its old id, ` +
+  `and state what is different now.\n` +
+  `  - If you classify it MORE severely than that round did (worth a look -> blocking, ` +
+  `or a named owner -> nothing) and the line itself has not changed, justify the change ` +
+  `explicitly. gate1-check compares the rounds and reports the move as drift, so an ` +
+  `unexplained escalation will be read as the pass contradicting itself rather than as a ` +
+  `new defect.\n` +
+  `  - If why.md records a finding as deliberately kept or recorded-not-fixed, do not ` +
+  `re-raise it as blocking unless you have new evidence. Note it as already adjudicated.\n` +
+  `  - Findings genuinely new to this round need none of that - say plainly that they are ` +
+  `new, and whether they were present in the spec the earlier round read.\n\n` +
   `Write projects/${slug}/ambiguity.md. Do not edit the spec.`,
   { label: 'spec-breaker', phase: 'Break',
     schema: {
@@ -266,7 +290,12 @@ log(`tests: ${(tests.criteria_covered || []).length} criteria covered, ` +
 return {
   slug,
   gate: 1,
-  ready: true,
+  // The gate verdict, not "the phase finished". This was hardcoded true, so a
+  // rejected Gate 1 reported ready:true with the reject sitting in gate1_rule
+  // three fields further down - the one line a reader scans first was the one
+  // line that lied. A reject is a legitimate end to this phase; it is just not
+  // ready.
+  ready: !!verdict.ok,
   spec_attempts: attempt,
   lint: 'clean',
   ambiguity,

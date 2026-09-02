@@ -151,6 +151,21 @@ convention is that the return stays *outside* the markers and the cut assigns
 what feeds it. Write "put every todo into `body` and set `status` to 200", not
 "return every todo as JSON". `.pipeline/CONTRACT.md` has the pattern.
 
+**Every cut declares `writes_into`, and the hint must backtick that same symbol
+(`E121` / `E122` / `W068`).** `writes_into` is the name of the value declared
+above the markers that the block assigns to - the one the `return` outside the
+markers reads. Then say that name, in backticks, in the hint. Omit the field and
+you get `W068`; name a different symbol and you get `E121`.
+
+Get this wrong and the student's first keystroke is a type error. On
+pipeline-test-04 both `frames` hints said to append to `` `frames` `` while the
+value declared above the markers was `const out: number[][] = []` - and in
+`lib/frames.ts` the only `frames` in scope is the exported function, so
+`frames.push(...)` does not compile. Four findings across two Gate 1 rounds were
+this one class. If you declare the accumulator as `out` in spec.md, the hint
+says `` `out` ``, not `` `frames` `` - or rename the accumulator to match the
+hint. Either way the two agree, and the linter now checks that they do.
+
 ## Constraints the tests cannot see
 
 Some constraints are load-bearing and invisible to a test suite. "The date

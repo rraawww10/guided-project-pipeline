@@ -77,6 +77,7 @@ generous.
 | `typecheck` | step 8 - tsc over the generated skeleton |
 | `cutter` | step 8 - marker balance, placement, nesting, every declared cut present once |
 | `skeleton-check` | step 8 - the skeleton must fail exactly the criteria whose cuts were removed |
+| `mutation` | step 8 - leave-one-out: each task alone is removed and the suite must turn at least one of *that task's* criteria red. **This is the owner for "the cut can be left empty and every criterion still passes"** - a cut made toothless by a sibling's implementation, or graded only by criteria that pass either way. `skeleton-check` sees only all-open and no-cuts, so it cannot answer this; mutation runs the N single-task states in between. It is opt-in and narrowable, so it is fail-open: naming it approves, and the gate records that someone must confirm `checked == of_total` covered this task |
 | `test-runner` | step 6 - the Builder/test-runner loop, which fixes it for free |
 | `code-check` | step 6 - a named static check over the built code, declared by the spec in `code_checks`. Only `utc-dates` exists so far: no local-time `Date` accessors and no reading the real clock. If a constraint is about the *shape of the code* rather than its behaviour, ask whether a named check could own it before you write `nothing` |
 | `deploy-check` | step 10 - fresh copy, install, build, preview, install advisories |
@@ -135,6 +136,43 @@ what gets shipped. Everything else is worth a look.
 
 If you find nothing blocking, say so plainly and keep the file short. A clean
 report is a real result. Do not pad it.
+
+## A revision is not a fresh spec
+
+If `.pipeline/round-*/` exists, you are reading a spec that has already been
+through Gate 1. Form your own reading of the spec **first** - then read the
+highest-numbered round's `ambiguity.md`, `gate1.json` and `why.md` before you
+write anything.
+
+This matters because the stopping rule reads exactly two fields, `blocking` and
+`owner`, and **you write both**. Without the previous round in front of you, you
+are re-rolling those two values on text that did not change. That is not a
+theory: on pipeline-test-04 the same untouched criterion `c-1-6` was *worth a
+look / test-runner* in round 1 and *blocking / test-runner* in round 2, and
+`cut-pending-frame`'s owner moved from `return-safety` to `nothing` - the value
+the rule rejects on. Four of round 2's ten findings were re-raises on unchanged
+text. The spec's real defects were being fixed correctly each round while the
+verdict moved for reasons that had nothing to do with the spec.
+
+So for each finding:
+
+- **Re-raise of an earlier finding?** Name its round and old id, and say what is
+  different now. Ids renumber, so `gate1-check` matches on the spec ids you cite
+  in **Where:** - keep citing them.
+- **Classifying it more severely than the last round did**, on a line that has
+  not changed? Justify that in the finding. `gate1-check` compares the rounds
+  and lists the move under `drift`, and an unexplained escalation reads as this
+  pass contradicting the last one rather than as a new defect.
+- **Recorded in `why.md` as deliberately kept?** Do not re-raise it as blocking
+  without new evidence. Note that it is already adjudicated and move on.
+- **Genuinely new?** Say so, and say whether it was present in the spec the
+  earlier round read. "New to this round" and "there all along and missed" are
+  different facts, and the second one is worth knowing.
+
+None of this asks you to go easy. A defect the last round missed is still a
+defect - `frames` vs `out` was missed for a whole round and was worth blocking
+on. What it asks is that a second look at an unchanged line be answerable for
+disagreeing with the first.
 
 ## Do not touch the spec
 

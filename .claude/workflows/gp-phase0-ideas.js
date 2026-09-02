@@ -23,7 +23,7 @@ const RETRY_LIMIT = 15
 const slug = (args && args.slug) || args
 if (!slug || typeof slug !== 'string') throw new Error('pass the project slug, e.g. args: {"slug":"habit-tracker"}')
 
-const REPO = '/home/nxtwave/AI_projects'
+const REPO = '.'  // repo-relative: agents run from the repo root, and this file is checked out on more than one machine
 const spawn = async (name, prompt, opts = {}) => {
   const body = `Read ${REPO}/.claude/skills/${name}/SKILL.md and follow it exactly.\n\n${prompt}`
   try {

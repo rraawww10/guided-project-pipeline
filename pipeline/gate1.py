@@ -20,6 +20,7 @@ is approve over a finding that nothing downstream will catch.
 """
 from __future__ import annotations
 
+import hashlib
 import json
 import re
 import sys
@@ -37,6 +38,15 @@ OWNERS = {
     "typecheck": "step 8 - tsc over the generated skeleton",
     "cutter": "step 8 - marker balance, placement and the skeleton check",
     "skeleton-check": "step 8 - the skeleton must fail exactly the cut criteria",
+    # The vocabulary had no name for mutation.py, so the one class it exists to
+    # catch had nowhere to be parked. pipeline-test-04 round 3 rejected on
+    # "cut-pending-frame can be left empty with every criterion green" - which is
+    # mutation.py's docstring almost word for word ("a task no requirement
+    # notices is a task that grades nothing - the bypassable-cut defect") - and
+    # the Breaker had to write `nothing` because `mutation` was not on the list.
+    # A missing word cost a round.
+    "mutation": "step 8 - leave-one-out: each task alone removed must turn one "
+                "of its own criteria red",
     "test-runner": "step 6 - the Builder/test-runner loop fixes this for free",
     "code-check": "step 6 - a named static check the spec declares in code_checks",
     "deploy-check": "step 10 - fresh copy, install, build, preview",
@@ -72,11 +82,26 @@ FAIL_OPEN = {
     "typecheck": ("skeleton-check.json", "typecheck_fail_open",
                   "step 10 must read typecheck_fail_open and require it false - "
                   "a fail-open check that did not run passes without looking"),
+    # Opt-in and narrowable (`--only`, `--max`), so it costs one boot and build
+    # per task and a run can legitimately cover a subset. A finding parked here
+    # approves, but somebody has to confirm the mutant for THIS task was among
+    # the ones actually run.
+    "mutation": ("mutation.json", "checked",
+                 "step 8 must show checked == of_total, and the task this finding "
+                 "names must be among the mutants run - mutation is opt-in and "
+                 "--only/--max narrow it, so ok:true over a subset proves nothing "
+                 "about a task that was skipped"),
 }
 
 RE_SECTION = re.compile(r"^##\s+(.+?)\s*$")
 RE_FINDING = re.compile(r"^###\s+([A-Za-z]+\d+)\s*[-–—:]?\s*(.*)$")
 RE_OWNER = re.compile(r"^\s*[-*]\s*\*\*Owner:\*\*\s*`?([a-z-]+)`?", re.IGNORECASE)
+# The spec line a finding is about. Captured so a re-raise of the SAME line in a
+# later round can be recognised - see drift_against_prior_round below.
+RE_LINE = re.compile(r"^\s*[-*]\s*\*\*The line:\*\*\s*(.+?)\s*$", re.IGNORECASE)
+# Where the finding lives. The most reliable id-bearing field of the three, and
+# the one that made cut-pending-frame's owner drift visible across two rounds.
+RE_WHERE = re.compile(r"^\s*[-*]\s*\*\*Where:\*\*\s*(.+?)\s*$", re.IGNORECASE)
 
 BLOCKING_HEADINGS = {"blocking"}
 SOFT_HEADINGS = {"worth a look", "worth a look:", "non-blocking"}
@@ -95,14 +120,116 @@ def parse_findings(md: str) -> list[dict]:
         m_f = RE_FINDING.match(raw)
         if m_f:
             current = {"id": m_f.group(1), "title": m_f.group(2).strip(),
-                       "section": section, "owner": None}
+                       "section": section, "owner": None, "line": None, "where": None}
             findings.append(current)
             continue
         if current is not None:
             m_o = RE_OWNER.match(raw)
             if m_o:
                 current["owner"] = m_o.group(1).strip().lower()
+            m_l = RE_LINE.match(raw)
+            if m_l and current.get("line") is None:
+                current["line"] = m_l.group(1).strip()
+            m_w = RE_WHERE.match(raw)
+            if m_w and current.get("where") is None:
+                current["where"] = m_w.group(1).strip()
     return findings
+
+
+def line_key(line: str | None) -> str | None:
+    """An exact key for a verbatim re-quote of the same spec line."""
+    if not line:
+        return None
+    text = " ".join(line.split()).strip().strip("\"'`").strip()
+    if not text:
+        return None
+    return hashlib.sha256(text.encode("utf-8")).hexdigest()[:16]
+
+
+# The id vocabulary the spec linter already enforces: criteria, cuts, endpoints
+# and screens. A finding's *subject* is the set of those it talks about, and
+# unlike its own id (which renumbers) or its quoted line (which the Breaker
+# re-words freely between rounds) that set is stable.
+RE_SPEC_ID = re.compile(r"\b(?:c-\d+-\d+|S\d{2}-AC\d{2}|cut-[a-z0-9-]+|ep-[a-z0-9-]+|sc-[a-z0-9-]+)\b")
+
+
+def subject_key(finding: dict) -> tuple[str, ...]:
+    """The spec objects a finding is about, from its title and its quoted line.
+
+    Matched as a set and not by intersection: two different findings about the
+    same criterion must not be reported as one changing its mind.
+    """
+    text = " ".join(str(finding.get(k) or "")
+                    for k in ("title", "where", "line"))
+    return tuple(sorted(set(RE_SPEC_ID.findall(text))))
+
+
+def drift_against_prior_round(project: Path, findings: list[dict]) -> list[dict]:
+    """Findings that quote a line an earlier round already judged, judged differently.
+
+    The Gate 1 stopping rule reads exactly two fields - `blocking` and `owner` -
+    and the Spec Breaker writes both, with no memory of what it wrote last time.
+    On pipeline-test-04 the same unchanged criterion moved from "worth a look /
+    test-runner" to "blocking / test-runner" between rounds, and two more
+    findings moved their owner to `nothing`, which is what the rule rejects on.
+    Nothing noticed, because ids renumber and nothing compared the rounds.
+
+    This does NOT change the verdict. An escalation can be right - the point is
+    that a person reading the gate should be told the line did not change and
+    the judgement did, instead of having to diff two archived reports by hand.
+    """
+    rounds = sorted(
+        (d for d in (project / ".pipeline").glob("round-*") if (d / "gate1.json").is_file()),
+        key=lambda d: int(m.group(1)) if (m := re.search(r"(\d+)$", d.name)) else -1,
+    )
+    if not rounds:
+        return []
+    prior_dir = rounds[-1]
+    try:
+        prior = json.loads((prior_dir / "gate1.json").read_text())
+    except (OSError, json.JSONDecodeError):
+        return []
+
+    by_subject: dict[tuple[str, ...], dict] = {}
+    by_line: dict[str, dict] = {}
+    for f in prior.get("findings", []):
+        subj = tuple(f.get("subject") or subject_key(f))
+        if subj and subj not in by_subject:
+            by_subject[subj] = f
+        key = f.get("line_key") or line_key(f.get("line"))
+        if key and key not in by_line:
+            by_line[key] = f
+
+    drift = []
+    for f in findings:
+        subj = tuple(f.get("subject") or ())
+        was = by_subject.get(subj) if subj else None
+        if was is None:
+            was = by_line.get(f.get("line_key") or "")
+        if not was:
+            continue
+        harsher = f["blocking"] and not was.get("blocking")
+        unowned_now = f["owner"] == UNOWNED and was.get("owner") not in (None, UNOWNED)
+        if not (harsher or unowned_now):
+            continue
+        moves = []
+        if harsher:
+            moves.append(f"{was.get('section') or 'worth a look'} -> blocking")
+        if unowned_now:
+            moves.append(f"owner {was.get('owner')} -> {UNOWNED}")
+        drift.append({
+            "id": f["id"],
+            "prior_id": was.get("id"),
+            "prior_round": prior_dir.name,
+            "line": f.get("line"),
+            "moved": moves,
+            "note": (f"{prior_dir.name} judged this same line as "
+                     f"{was.get('section') or '?'} / owner {was.get('owner')}. The line "
+                     f"itself is unchanged, so either the earlier round was wrong or this "
+                     f"one is - the Breaker re-reads the spec with no memory of its own "
+                     f"previous verdict, and the rule reads only these two fields."),
+        })
+    return drift
 
 
 def classify(findings: list[dict], code_checks: list | None = None) -> list[dict]:
@@ -124,6 +251,8 @@ def classify(findings: list[dict], code_checks: list | None = None) -> list[dict
                 "code_checks, so that checker runs nothing at all")
         out.append({
             **f,
+            "line_key": line_key(f.get("line")),
+            "subject": list(subject_key(f)),
             "blocking": blocking,
             "owner_declared": owner,
             "owner": effective,
@@ -195,6 +324,14 @@ def check(project: Path) -> dict:
     downgraded = [f for f in findings if f.get("owner_downgraded")]
     for f in downgraded:
         report["reasons"].append(f"{f['id']}: {f['owner_downgraded']}")
+
+    # Informational, never a verdict change: the same spec line judged more
+    # harshly than the round before. See drift_against_prior_round.
+    report["drift"] = drift_against_prior_round(project, findings)
+    for d in report["drift"]:
+        report["reasons"].append(
+            f"{d['id']} (was {d['prior_round']} {d['prior_id']}): {'; '.join(d['moved'])} "
+            f"on an unchanged line")
 
     # A blocking finding parked on a fail-open owner is approve-eligible, but
     # the obligation to confirm the check actually ran is recorded here rather

@@ -75,6 +75,30 @@ The `goal:` line sits inside the block and is removed with it. What the student
 reads is the task's `hint` from `spec.json` - the wording a person approved at
 Gate 1, not a comment that can drift from it.
 
+### `writes_into` - the symbol the block assigns to
+
+Every cut is an assignment to a value declared above the markers, because the
+`return` has to stay outside them or the skeleton will not compile. `writes_into`
+records that value's name, and the linter checks the `hint` against it:
+
+* **E121** - the hint must name `writes_into` **in backticks**. Backticks and not
+  a bare word, because a bare word matches English prose: a hint ending "for a
+  game whose rolls ran out earlier" would otherwise satisfy a `writes_into` of
+  `out`.
+* **E122** - `writes_into` must be a bare identifier, not `out.rows[0]`.
+* **W068** - a cut that omits `writes_into` warns. It is optional so the three
+  projects that predate it still lint clean, but omit it and nothing compares
+  the hint's symbols to the code.
+
+This exists because pipeline-test-04 produced four findings of one class across
+two Gate 1 rounds. Round 2's A1: both `frames` hints told the student to append
+to `frames` while the value declared above the markers was `const out`, so
+`frames.push(...)` is a type error on the exported function - met on the
+student's first keystroke, and frozen at Gate 1. Nothing downstream could see
+it. W066 only checks that a backtick is present, and `tsc` sees the all-open
+skeleton where the TODO is still a comment. The Spec Breaker caught it on one
+pass of two, which is why it is a script now.
+
 ## The spec is frozen at Gate 1
 
 `pipeline gate <slug> 1 approve` hashes `spec.json` and `spec.md` together,
@@ -151,7 +175,8 @@ The linter checks they agree.
       "cuts": [
         {"id": "cut-api-todos-list",
          "file": "app/api/todos/route.ts",
-         "hint": "Return every todo from the store as JSON"}
+         "writes_into": "body",
+         "hint": "Put every todo the store holds into `body` and set `status` to 200"}
       ]
     }
   ]

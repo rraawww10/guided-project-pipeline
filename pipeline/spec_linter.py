@@ -68,6 +68,33 @@ RE_ANCHOR = re.compile(
 RE_HINT_RETURN = re.compile(r"^\s*(?:and\s+)?returns?\b|\breturn\s+(?:the|a|an|every|it|its)\b",
                             re.IGNORECASE)
 
+# Every cut is an assignment to a value declared above the markers, so a cut has
+# exactly one symbol it writes into. `writes_into` records it, and this is how a
+# hint is checked against it. Four findings across two Gate 1 rounds on
+# pipeline-test-04 were one class: a hint naming a symbol that is not the
+# declared accumulator. Round 2 A1 - both frames hints said to append to
+# `frames` while the value declared above the markers was `const out`, so
+# `frames.push` is a type error on the exported function, and the student meets
+# it on their first keystroke. Nothing downstream saw it: W066 only checks that
+# a backtick is present, tsc sees the all-open skeleton where the TODO is still
+# a comment, and the hint is frozen at Gate 1. The Breaker caught it on one pass
+# of two, which is exactly why it belongs in a script instead.
+RE_BACKTICKED = re.compile(r"`([^`]+)`")
+RE_IDENT = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
+
+
+def backticked_idents(text: str) -> set[str]:
+    """The identifiers a hint names in backticks - `frames()` and `rolls` both count."""
+    found: set[str] = set()
+    for raw in RE_BACKTICKED.findall(text or ""):
+        name = raw.strip()
+        if name.endswith("()"):
+            name = name[:-2].strip()
+        if RE_IDENT.match(name):
+            found.add(name)
+    return found
+
+
 # 40 minutes of live teaching. These caps are the session-fit heuristic that
 # Gate 1 would otherwise have to eyeball.
 MIN_CRITERIA, MAX_CRITERIA = 2, 6
@@ -531,6 +558,29 @@ def lint_spec(project: Path) -> Lint:
                           "skeleton will not compile (TS2355) - no red test, no build at "
                           "all. Prefer 'put X into <the value declared above>'. The cutter "
                           "checks the real marker placement at step 8.")
+
+            # The symbol the block assigns to. Optional, because three shipped
+            # projects predate it and a warning must not fail them retroactively
+            # - but once it is declared, the hint has to agree with it.
+            writes = c.get("writes_into")
+            named = backticked_idents(hint)
+            if writes is None:
+                lint.warn("W068", cw,
+                          "cut does not declare writes_into, the symbol the block "
+                          "assigns to. Nothing then compares the hint's symbols to the "
+                          "value declared above the markers, so a hint naming the wrong "
+                          "one reaches the student as a type error and is frozen at "
+                          "Gate 1. Declare it and this becomes E121.")
+            elif not isinstance(writes, str) or not RE_IDENT.match(writes.strip()):
+                lint.err("E122", cw,
+                         f"writes_into must be a bare identifier, got {writes!r}")
+            elif writes.strip() not in named:
+                lint.err("E121", cw,
+                         f"hint must name the value it writes into, in backticks: "
+                         f"writes_into is `{writes.strip()}` but the hint backticks "
+                         f"{sorted(named) if named else 'no identifier at all'}. A hint "
+                         f"pointing at a symbol that is not the one declared above the "
+                         f"markers is a type error on the student's first keystroke.")
 
         if len(s["cuts"]) > MAX_CUTS:
             lint.err("E065", w, f"{len(s['cuts'])} cut points - more than {MAX_CUTS} will not fit 40 minutes")

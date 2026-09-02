@@ -67,9 +67,16 @@ GOOD_SPEC = {
             # fixture said "Return every todo from the store as JSON" over code
             # whose only return sat inside the markers - it encoded the exact
             # TS2355 anti-pattern the linter and the cutter now reject.
+            # writes_into names the symbol the block assigns to, and the hint has
+            # to backtick that same symbol - E121. `body` is backticked here for
+            # that reason; an unbackticked write target cannot be checked, since
+            # a bare word matches English prose ("the rolls ran out earlier"
+            # would satisfy a writes_into of `out`).
             {"id": "cut-api-list", "file": "app/api/todos/route.ts",
-             "hint": "Put every todo the store holds into body and set status to 200"},
+             "writes_into": "body",
+             "hint": "Put every todo the store holds into `body` and set `status` to 200"},
             {"id": "cut-ui-rows", "file": "app/page.tsx",
+             "writes_into": "rows",
              "hint": "Render one `li` for each todo in `rows`, showing its title"},
         ],
     }],
@@ -290,6 +297,39 @@ def test_linter(tmp: Path) -> None:
     warned("hint phrased as 'return ...' warns about TS2355",
            lambda s: s["sessions"][0]["cuts"][0].update(
                hint="Return every todo from the store as JSON"), "W067")
+
+    # --- writes_into: the hint has to name the symbol the block assigns to.
+    # pipeline-test-04 round 2 A1 - both frames hints said to append to
+    # `frames` while the declared accumulator above the markers was `const out`.
+    # Four findings across two Gate 1 rounds were this one class, and the
+    # Breaker caught it on one pass of the two.
+    has("hint that names a symbol other than writes_into is rejected",
+        lambda s: s["sessions"][0]["cuts"][0].update(
+            writes_into="out",
+            hint="Append every todo the store holds to `body`"), "E121")
+    check("hint that backticks writes_into passes",
+          "E121" in codes(lambda s: s["sessions"][0]["cuts"][0].update(
+              writes_into="out",
+              hint="Append every todo the store holds to `out`")), False)
+    check("writes_into is matched on the backtick, not on the English prose",
+          "E121" in codes(lambda s: s["sessions"][0]["cuts"][0].update(
+              writes_into="out",
+              hint="Append the todos to `body` for a store that ran out of rows")), True)
+    check("a hint naming writes_into as a call still counts",
+          "E121" in codes(lambda s: s["sessions"][0]["cuts"][0].update(
+              writes_into="frames",
+              hint="Walk `rolls` and append each frame to `frames()`")), False)
+    has("writes_into that is not a bare identifier is rejected",
+        lambda s: s["sessions"][0]["cuts"][0].update(
+            writes_into="out.rows[0]",
+            hint="Put every todo into `out.rows[0]`"), "E122")
+    warned("a cut that declares no writes_into warns",
+           lambda s: s["sessions"][0]["cuts"][0].pop("writes_into"), "W068")
+
+    check("backticked_idents reads bare names, calls and nothing else",
+          spec_linter.backticked_idents(
+              "put `rolls` into `frames()` via `a-b` and `2` and plain out"),
+          {"rolls", "frames"})
 
     # false positives: domain words must survive
     for text in ("Screen sc-list renders one row per todo",
@@ -557,8 +597,8 @@ def test_cutter(tmp: Path) -> None:
     skel_route = (p / "skeleton" / "api" / "todos" / "route.ts").read_text()
     skel_page = (p / "skeleton" / "page.tsx").read_text()
     check("ts comment style",
-          "  // TODO(cut-api-list): Put every todo the store holds into body and set "
-          "status to 200" in skel_route, True)
+          "  // TODO(cut-api-list): Put every todo the store holds into `body` and set "
+          "`status` to 200" in skel_route, True)
     check("jsx comment style",
           "      {/* TODO(cut-ui-rows): Render one `li` for each todo in `rows`, "
           "showing its title */}" in skel_page, True)
@@ -724,6 +764,23 @@ def test_gate1(tmp: Path) -> None:
     check("an ordinary owner leaves verify_later empty",
           run(AMBIGUITY_MD)["verify_later"], [])
 
+    # --- `mutation` is a valid owner, and it is fail-open.
+    # The vocabulary had no name for mutation.py, so "the cut can be left empty
+    # with every criterion green" - the one class that check exists for - had
+    # nowhere to be parked. pipeline-test-04 round 3 rejected on exactly that,
+    # with the Breaker writing `nothing` because the list lacked the word.
+    mu = AMBIGUITY_MD.replace("- **Owner:** test-runner", "- **Owner:** mutation")
+    r = run(mu)
+    check("mutation is a valid owner, so a blocking finding on it approves",
+          (r["ok"], r["counts"]["unowned_blocking"]), (True, 0))
+    check("and it is fail-open, so the obligation is recorded",
+          [(v["id"], v["owner"], v["report"], v["flag"]) for v in r["verify_later"]],
+          [("A1", "mutation", "mutation.json", "checked")])
+    check("the requirement says a narrowed run proves nothing about a skipped task",
+          "of_total" in r["verify_later"][0]["requirement"], True)
+    check("mutation is not silently downgraded the way code-check is",
+          [f["owner_downgraded"] for f in r["findings"] if f["id"] == "A1"], [None])
+
     # `code-check` owns nothing unless spec.json declares something to run, and
     # that is decidable at Gate 1 rather than deferrable.
     cc = AMBIGUITY_MD.replace("- **Owner:** test-runner", "- **Owner:** code-check")
@@ -780,6 +837,58 @@ def test_gate1(tmp: Path) -> None:
     check("a report bound to an older spec is stale", r2["ok"], False)
     check("the staleness message names both hashes",
           "stale" in " ".join(r2["reasons"]), True)
+    (p / "spec.md").write_text(GOOD_MD)
+
+    # --- the rule reads `blocking` and `owner`, and the Breaker writes both with
+    # no memory of what it wrote last round. pipeline-test-04: c-1-6's finding
+    # was "worth a look / test-runner" in round 1 and "blocking / test-runner"
+    # in round 2 on a byte-identical criterion, and cut-pending-frame's owner
+    # moved from return-safety to nothing. Ids renumber (B3 -> A3) and the quoted
+    # line gets re-worded, so the subject - the spec ids the finding names - is
+    # what identifies a re-raise.
+    check("a finding's subject is the spec ids it names, across all three fields",
+          gate1.subject_key({"title": "c-1-6 wants a 404",
+                             "where": "spec.md, Session 1, criterion c-1-6",
+                             "line": "`/games/no-such-game` responds 404"}),
+          ("c-1-6",))
+    check("a finding that names no spec id has no subject",
+          gate1.subject_key({"title": "the heading casing", "where": "spec.md", "line": None}), ())
+    check("the quoted line and the where line are both parsed",
+          [(f["where"], f["line"]) for f in gate1.parse_findings(
+              "## Blocking\n### A1 - x\n- **Where:** criterion c-1-2\n"
+              "- **The line:** \"the order is not stated\"\n")],
+          [("criterion c-1-2", '"the order is not stated"')])
+
+    def with_prior(prior_md: str, now_md: str) -> dict:
+        prior = gate1.classify(gate1.parse_findings(prior_md), [])
+        d = p / ".pipeline" / "round-1"
+        d.mkdir(parents=True, exist_ok=True)
+        (d / "gate1.json").write_text(json.dumps({"findings": prior}))
+        return run(now_md)
+
+    softened = AMBIGUITY_MD.replace("## Blocking", "## Worth a look", 1)
+    r = with_prior(softened, AMBIGUITY_MD)
+    check("a finding escalated to blocking on the same subject is reported as drift",
+          [(x["id"], x["prior_id"], x["moved"]) for x in r["drift"]],
+          [("A1", "A1", ["worth a look -> blocking"])])
+    check("the drift reason says the line did not change",
+          any("unchanged line" in x for x in r["reasons"]), True)
+    check("drift is reported but never changes the verdict",
+          (r["ok"], r["counts"]["unowned_blocking"]), (True, 0))
+
+    orphaned = AMBIGUITY_MD.replace("- **Owner:** test-runner", "- **Owner:** nothing", 1)
+    check("an owner that moves to nothing on the same subject is drift too",
+          [x["moved"] for x in with_prior(AMBIGUITY_MD, orphaned)["drift"]],
+          [["owner test-runner -> nothing"]])
+    check("an unchanged classification is not drift",
+          with_prior(AMBIGUITY_MD, AMBIGUITY_MD)["drift"], [])
+    check("a softened finding is not drift - only harsher counts",
+          with_prior(AMBIGUITY_MD, softened)["drift"], [])
+    check("a finding about a different criterion is not the same subject",
+          with_prior(AMBIGUITY_MD.replace("c-1-2", "c-1-3"), AMBIGUITY_MD)["drift"], [])
+    shutil.rmtree(p / ".pipeline" / "round-1")
+    check("with no earlier round there is nothing to compare",
+          run(AMBIGUITY_MD)["drift"], [])
 
 
 # ------------------------------------------------------- spec freeze + drift ---
