@@ -1,0 +1,22 @@
+[
+  {
+    "id": "g-gutter",
+    "name": "All Gutters",
+    "rolls": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+  },
+  {
+    "id": "g-perfect",
+    "name": "Perfect Game",
+    "rolls": [10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10]
+  },
+  {
+    "id": "g-mixed",
+    "name": "Spare Heavy",
+    "rolls": [1, 4, 4, 5, 6, 4, 5, 5, 10, 0, 1, 7, 3, 6, 4, 10, 2, 8, 6]
+  },
+  {
+    "id": "g-partial",
+    "name": "Stopped at Six",
+    "rolls": [3, 4, 7, 2, 9, 0, 8, 1, 10, 10]
+  }
+]

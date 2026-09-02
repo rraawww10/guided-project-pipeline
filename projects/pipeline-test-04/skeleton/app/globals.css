@@ -1,0 +1,90 @@
+:root {
+  --ink: #1c1d21;
+  --paper: #f7f6f2;
+  --line: #cfcabb;
+  --lane: #ffffff;
+  --muted: #6c6a63;
+  color-scheme: light;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+.page {
+  margin: 0 auto;
+  max-width: 60rem;
+  padding: 2rem 1.5rem 4rem;
+}
+
+h1 {
+  margin: 0 0 1.5rem;
+  font-size: 1.5rem;
+  letter-spacing: 0.01em;
+}
+
+ol.plain {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.card-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.frame {
+  display: grid;
+  grid-template-rows: auto auto auto;
+  min-width: 4.25rem;
+  border: 1px solid var(--line);
+  background: var(--lane);
+}
+
+.frame-number {
+  padding: 0.15rem 0.4rem;
+  border-bottom: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 0.7rem;
+}
+
+.rolls {
+  padding: 0.5rem 0.4rem;
+  font-size: 1.1rem;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.08em;
+  text-align: center;
+}
+
+.score {
+  min-height: 1.6rem;
+  padding: 0.25rem 0.4rem;
+  border-top: 1px solid var(--line);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.total {
+  margin: 1.5rem 0 0;
+  font-size: 1.1rem;
+}
+
+.total span {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+.missing {
+  color: var(--muted);
+}

@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="5" skipped="0" tests="12" time="50.491" timestamp="2026-09-02T20:52:23.946924+05:30" hostname="HERO"><testcase classname="verify.test_api_games" name="test_c_1_1_games_are_the_four_seeded_games_in_seed_order" time="0.733" /><testcase classname="verify.test_api_games" name="test_c_1_2_mixed_game_splits_into_ten_frames_with_a_three_roll_tenth" time="0.594"><failure message="AssertionError: g-mixed split into 9 frames, expected 10: [[1, 4], [4, 5], [6, 4], [5, 5], [10], [0, 1], [7, 3], [6, 4], [10]]&#10;assert 9 == 10&#10; +  where 9 = len([[1, 4], [4, 5], [6, 4], [5, 5], [10], [0, 1], ...])">api = &lt;httpx.Client object at 0x00000242FE29B110&gt;
+
+    def test_c_1_2_mixed_game_splits_into_ten_frames_with_a_three_roll_tenth(api):
+        """c-1-2: GET /api/games returns the g-mixed game with frames equal to
+        [[1,4],[4,5],[6,4],[5,5],[10],[0,1],[7,3],[6,4],[10],[2,8,6]].
+    
+        Compared whole, in one equality, so a frame boundary that is off anywhere in
+        the list fails: the single-roll strike frames at 5 and 9, the nine two-roll
+        frames and the three-roll tenth are all inside the same assertion. The
+        length is asserted first so a nine-frame answer names itself.
+    
+        Neither state of an unwritten block satisfies this. With `cut-frames-scan`
+        open, `out` is empty and `frames` is `[]`. With only `cut-frames-tenth`
+        filled, `i` is still 0, so the tenth block appends every roll as one frame
+        and `frames` is `[[1,4,4,5,...,6]]`. Ten frames needs both cuts, which is
+        what spec.md's Grading integrity table claims for this criterion.
+        """
+        game = one_game(get_games(api), "g-mixed")
+        frames = game["frames"]
+    
+&gt;       assert len(frames) == 10, (
+            f"g-mixed split into {len(frames)} frames, expected 10: {frames}"
+        )
+E       AssertionError: g-mixed split into 9 frames, expected 10: [[1, 4], [4, 5], [6, 4], [5, 5], [10], [0, 1], [7, 3], [6, 4], [10]]
+E       assert 9 == 10
+E        +  where 9 = len([[1, 4], [4, 5], [6, 4], [5, 5], [10], [0, 1], ...])
+
+verify\test_api_games.py:93: AssertionError</failure></testcase><testcase classname="verify.test_api_games" name="test_c_1_3_partial_game_stops_after_six_frames_when_the_rolls_run_out" time="0.549" /><testcase classname="verify.test_api_score" name="test_c_2_1_perfect_game_scores_thirty_a_frame_to_three_hundred" time="0.608"><failure message="AssertionError: g-perfect frames are [30, 60, 90, 120, 150, 180, 210, 240, 270], expected [30, 60, 90, 120, 150, 180, 210, 240, 270, 300]&#10;assert [30, 60, 90, ...150, 180, ...] == [30, 60, 90, ...150, 180, ...]&#10;  &#10;  Right contains one more item: 300&#10;  Use -v to get more diff">api = &lt;httpx.Client object at 0x00000242FE4C4B00&gt;
+
+    def test_c_2_1_perfect_game_scores_thirty_a_frame_to_three_hundred(api):
+        """c-2-1: POST /api/games/score returns 200 with frames equal to
+        [30,60,90,120,150,180,210,240,270,300] for the 12 rolls of g-perfect.
+    
+        The declared 200 is asserted in `score_ok`. The array is compared whole, so
+        the tenth frame - the one whose bonus rolls are its own second and third
+        rolls, which is the reframing session 2 exists to teach - is graded in the
+        same assertion as the first nine.
+    
+        Not a value an unwritten block produces: spec.md declares
+        `cut-score-lookahead`'s fallback as `null`, so with that block open every
+        frame scores `null`, the array is ten nulls and not one entry of this list
+        appears. Twelve rolls in, ten frames out, so a suite that only counted
+        entries would not catch a lookahead that scored the wrong two rolls - the
+        equality does.
+        """
+        body = score_ok(api, PERFECT_ROLLS)
+&gt;       assert body["frames"] == PERFECT_SCORES, (
+            f"g-perfect frames are {body['frames']}, expected {PERFECT_SCORES}"
+        )
+E       AssertionError: g-perfect frames are [30, 60, 90, 120, 150, 180, 210, 240, 270], expected [30, 60, 90, 120, 150, 180, 210, 240, 270, 300]
+E       assert [30, 60, 90, ...150, 180, ...] == [30, 60, 90, ...150, 180, ...]
+E         
+E         Right contains one more item: 300
+E         Use -v to get more diff
+
+verify\test_api_score.py:56: AssertionError</failure></testcase><testcase classname="verify.test_api_score" name="test_c_2_2_mixed_game_cumulative_array_that_thirty_a_frame_cannot_fake" time="0.569"><failure message="AssertionError: g-mixed frames are [5, 14, 29, 49, 60, 61, 77, 97, 117], expected [5, 14, 29, 49, 60, 61, 77, 97, 117, 133]&#10;assert [5, 14, 29, 49, 60, 61, ...] == [5, 14, 29, 49, 60, 61, ...]&#10;  &#10;  Right contains one more item: 133&#10;  Use -v to get more diff">api = &lt;httpx.Client object at 0x00000242FE4C6650&gt;
+
+    def test_c_2_2_mixed_game_cumulative_array_that_thirty_a_frame_cannot_fake(api):
+        """c-2-2: POST /api/games/score returns frames equal to
+        [5,14,29,49,60,61,77,97,117,133] for the 19 rolls of g-mixed.
+    
+        spec.md calls this "the array that `30 * frame` cannot fake and the one to
+        read first when session 2 goes red". It mixes open frames, four spares, a
+        strike at frame 5, a strike at frame 9 and a spare-closing tenth, so two
+        errors that cancel cannot go green against it. Compared whole and in order,
+        which makes the per-frame steps - 5, 9, 15, 20, 11, 1, 16, 20, 20, 16 - part
+        of the assertion rather than just the 133 at the end.
+    
+        Not a value an unwritten block produces: with `cut-score-lookahead` open the
+        array is ten nulls.
+        """
+        body = score_ok(api, MIXED_ROLLS)
+&gt;       assert body["frames"] == MIXED_SCORES, (
+            f"g-mixed frames are {body['frames']}, expected {MIXED_SCORES}"
+        )
+E       AssertionError: g-mixed frames are [5, 14, 29, 49, 60, 61, 77, 97, 117], expected [5, 14, 29, 49, 60, 61, 77, 97, 117, 133]
+E       assert [5, 14, 29, 49, 60, 61, ...] == [5, 14, 29, 49, 60, 61, ...]
+E         
+E         Right contains one more item: 133
+E         Use -v to get more diff
+
+verify\test_api_score.py:76: AssertionError</failure></testcase><testcase classname="verify.test_api_score" name="test_c_2_3_partial_game_leaves_its_last_two_frames_null" time="0.584" /><testcase classname="verify.test_api_score" name="test_c_2_4_total_is_the_last_scored_frame_for_partial_and_zero_for_gutter" time="0.550" /><testcase classname="verify.test_api_score" name="test_c_2_5_bad_rolls_and_bad_json_are_the_same_four_hundred_and_empty_is_a_game" time="0.801" /><testcase classname="verify.test_ui_game" name="test_c_1_4_perfect_game_draws_ten_frame_boxes_ending_in_x_x_x" time="22.200"><failure message="AssertionError: Locator expected to have count '10'&#10;Actual value: 9 &#10;Call log:&#10;  - Expect &quot;to_have_count&quot; with timeout 20000ms&#10;  - waiting for locator(&quot;[data-testid^=\&quot;frame-\&quot;]&quot;)&#10;    43 × locator resolved to 9 elements&#10;       - unexpected value &quot;9&quot;">page = &lt;Page url='http://127.0.0.1:55354/games/g-perfect'&gt;
+
+    def test_c_1_4_perfect_game_draws_ten_frame_boxes_ending_in_x_x_x(page):
+        """c-1-4: /games/g-perfect renders 10 elements with data-testid frame-1
+        through frame-10 and displays the exact text 'X X X' in the element with
+        data-testid frame-10.
+    
+        The boxes are enumerated on the `frame-` prefix, which spec.md's element
+        table leaves to the frame boxes alone, and the suffixes are compared as one
+        ordered list ['1'..'10'] - so a grid of nine boxes, a grid of eleven, a grid
+        numbered from 0 and a `frame-10` rendered before `frame-9` each fail.
+        spec.json's element list pins the numbering as "frame-1 upwards", which is
+        what makes the order part of the requirement rather than an extra.
+    
+        The tenth box is the three-roll tenth `[10,10,10]`, whose first two rolls
+        add to 20 rather than 10, so no `/` appears and the text is three X glyphs
+        joined by single spaces. Equality, not containment: 'X X X X' is not
+        'X X X'. With either frame cut open the box does not exist at all, so no
+        value an unwritten block produces reads this way.
+        """
+        open_game(page, "g-perfect")
+    
+        boxes = family(page, "frame-")
+&gt;       expect(boxes).to_have_count(10, timeout=LOAD_TIMEOUT)
+E       AssertionError: Locator expected to have count '10'
+E       Actual value: 9 
+E       Call log:
+E         - Expect "to_have_count" with timeout 20000ms
+E         - waiting for locator("[data-testid^=\"frame-\"]")
+E           43 × locator resolved to 9 elements
+E              - unexpected value "9"
+
+verify\test_ui_game.py:85: AssertionError</failure></testcase><testcase classname="verify.test_ui_game" name="test_c_1_5_mixed_game_boxes_read_their_roll_symbols" time="20.533"><failure message="AssertionError: Locator expected to have count '1'&#10;Actual value: 0 &#10;Call log:&#10;  - Expect &quot;to_have_count&quot; with timeout 20000ms&#10;  - waiting for get_by_test_id(&quot;frame-10&quot;)&#10;    43 × locator resolved to 0 elements&#10;       - unexpected value &quot;0&quot;">page = &lt;Page url='http://127.0.0.1:55354/games/g-mixed'&gt;
+
+    def test_c_1_5_mixed_game_boxes_read_their_roll_symbols(page):
+        """c-1-5: /games/g-mixed displays the exact text '1 4' in the element with
+        data-testid frame-1, '6 /' in frame-3, 'X' in frame-5, '- 1' in frame-6 and
+        '2 / 6' in frame-10.
+    
+        Five boxes, one per symbol rule, each asserted by equality: two digits for
+        an open frame; a `/` for the second roll of a spare in frame-3 (`[6,4]`); a
+        lone `X` for the strike frame at 5, which holds one roll and not two; the
+        `-` gutter glyph in frame-6 (`[0,1]`, which spec.md says "is what grades the
+        `-` glyph for a gutter roll"); and the three-roll tenth `[2,8,6]`, where a
+        spare `/` and a bonus digit share one box.
+    
+        All five use `==` rather than `in`, so '1 4 5' does not satisfy frame-1 and
+        'X X' does not satisfy frame-5. Each box is required to exist before its
+        text is read. None of the five is a value an unwritten block produces: with
+        `cut-frames-scan` open there are no boxes at all, and with only
+        `cut-frames-tenth` filled there is a single box holding the whole roll list.
+        """
+        open_game(page, "g-mixed")
+    
+        for number, expected in MIXED_FRAME_TEXTS.items():
+            box = by_testid(page, f"frame-{number}")
+&gt;           expect(box).to_have_count(1, timeout=LOAD_TIMEOUT)
+E           AssertionError: Locator expected to have count '1'
+E           Actual value: 0 
+E           Call log:
+E             - Expect "to_have_count" with timeout 20000ms
+E             - waiting for get_by_test_id("frame-10")
+E               43 × locator resolved to 0 elements
+E                  - unexpected value "0"
+
+verify\test_ui_game.py:120: AssertionError</failure></testcase><testcase classname="verify.test_ui_game" name="test_c_1_6_unknown_id_says_so_and_draws_no_grid" time="0.408" /><testcase classname="verify.test_ui_game" name="test_c_2_6_partial_game_score_column_runs_out_into_two_empty_cells" time="1.931" /></testsuite></testsuites>

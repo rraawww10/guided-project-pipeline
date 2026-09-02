@@ -1,0 +1,62 @@
+{
+  "slug": "pipeline-test-04",
+  "cuts": [
+    {
+      "id": "cut-frames-scan",
+      "file": "lib\\frames.ts",
+      "line": 15,
+      "lines_removed": 9
+    },
+    {
+      "id": "cut-frames-tenth",
+      "file": "lib\\frames.ts",
+      "line": 26,
+      "lines_removed": 3
+    },
+    {
+      "id": "cut-pending-frame",
+      "file": "lib\\score.ts",
+      "line": 24,
+      "lines_removed": 7
+    },
+    {
+      "id": "cut-score-lookahead",
+      "file": "lib\\score.ts",
+      "line": 46,
+      "lines_removed": 7
+    },
+    {
+      "id": "cut-game-total",
+      "file": "lib\\score.ts",
+      "line": 71,
+      "lines_removed": 6
+    }
+  ],
+  "count": 5,
+  "by_session": {
+    "1": [
+      "cut-frames-scan",
+      "cut-frames-tenth"
+    ],
+    "2": [
+      "cut-game-total",
+      "cut-pending-frame",
+      "cut-score-lookahead"
+    ]
+  },
+  "return_safety": {
+    "ok": true,
+    "checked": 5,
+    "violations": []
+  },
+  "partial_state_risks": [],
+  "typecheck": {
+    "ran": true,
+    "ok": true,
+    "error_count": 0,
+    "errors": [],
+    "missing_return": [],
+    "hint": ""
+  },
+  "ok": true
+}

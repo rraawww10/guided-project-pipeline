@@ -1,0 +1,104 @@
+{
+  "ok": false,
+  "target": "skeleton",
+  "code_checks": {
+    "ok": true,
+    "checks": {}
+  },
+  "seconds": 178.4,
+  "counts": {
+    "pass": 2,
+    "fail": 10,
+    "skip": 0,
+    "missing": 0
+  },
+  "criteria": {
+    "c-1-1": {
+      "status": "pass",
+      "check": "GET /api/games returns 200 with a JSON array of 4 games whose id values are g-gutter, g-perfect, g-mixed and g-partial in that order, each carrying id, name, rolls and frames",
+      "session": 1,
+      "test": "verify/test_api_games.py::test_c_1_1_games_are_the_four_seeded_games_in_seed_order",
+      "message": ""
+    },
+    "c-1-2": {
+      "status": "fail",
+      "check": "GET /api/games returns the g-mixed game with frames equal to [[1,4],[4,5],[6,4],[5,5],[10],[0,1],[7,3],[6,4],[10],[2,8,6]]",
+      "session": 1,
+      "test": "verify/test_api_games.py::test_c_1_2_mixed_game_splits_into_ten_frames_with_a_three_roll_tenth",
+      "message": "AssertionError: g-mixed split into 0 frames, expected 10: []\nassert 0 == 10\n +  where 0 = len([])"
+    },
+    "c-1-3": {
+      "status": "fail",
+      "check": "GET /api/games returns the g-partial game with frames equal to [[3,4],[7,2],[9,0],[8,1],[10],[10]]",
+      "session": 1,
+      "test": "verify/test_api_games.py::test_c_1_3_partial_game_stops_after_six_frames_when_the_rolls_run_out",
+      "message": "AssertionError: g-partial split into 0 frames, expected 6: []\nassert 0 == 6\n +  where 0 = len([])"
+    },
+    "c-1-4": {
+      "status": "fail",
+      "check": "/games/g-perfect renders 10 elements with data-testid frame-1 through frame-10 and displays the exact text 'X X X' in the element with data-testid frame-10",
+      "session": 1,
+      "test": "verify/test_ui_game.py::test_c_1_4_perfect_game_draws_ten_frame_boxes_ending_in_x_x_x",
+      "message": "AssertionError: Locator expected to have count '10'\nActual value: 0 \nCall log:\n  - Expect \"to_have_count\" with timeout 20000ms\n  - waiting for locator(\"[data-testid^=\\\"frame-\\\"]\")\n    43 \u00d7 locator resolved to 0 elements\n       - unexpected value \"0\""
+    },
+    "c-1-5": {
+      "status": "fail",
+      "check": "/games/g-mixed displays the exact text '1 4' in the element with data-testid frame-1, '6 /' in frame-3, 'X' in frame-5, '- 1' in frame-6 and '2 / 6' in frame-10",
+      "session": 1,
+      "test": "verify/test_ui_game.py::test_c_1_5_mixed_game_boxes_read_their_roll_symbols",
+      "message": "AssertionError: Locator expected to have count '1'\nActual value: 0 \nCall log:\n  - Expect \"to_have_count\" with timeout 20000ms\n  - waiting for get_by_test_id(\"frame-1\")\n    43 \u00d7 locator resolved to 0 elements\n       - unexpected value \"0\""
+    },
+    "c-1-6": {
+      "status": "pass",
+      "check": "/games/no-such-game displays the exact text 'No game with id no-such-game' in the element with data-testid no-game and renders no element with data-testid frame-1",
+      "session": 1,
+      "test": "verify/test_ui_game.py::test_c_1_6_unknown_id_says_so_and_draws_no_grid",
+      "message": ""
+    },
+    "c-2-1": {
+      "status": "fail",
+      "check": "POST /api/games/score returns 200 with frames equal to [30,60,90,120,150,180,210,240,270,300] for the 12 rolls of g-perfect",
+      "session": 2,
+      "test": "verify/test_api_score.py::test_c_2_1_perfect_game_scores_thirty_a_frame_to_three_hundred",
+      "message": "AssertionError: g-perfect frames are [], expected [30, 60, 90, 120, 150, 180, 210, 240, 270, 300]\nassert [] == [30, 60, 90, ...150, 180, ...]\n  \n  Right contains 10 more items, first extra item: 30\n  Use -v to get more diff"
+    },
+    "c-2-2": {
+      "status": "fail",
+      "check": "POST /api/games/score returns frames equal to [5,14,29,49,60,61,77,97,117,133] for the 19 rolls of g-mixed",
+      "session": 2,
+      "test": "verify/test_api_score.py::test_c_2_2_mixed_game_cumulative_array_that_thirty_a_frame_cannot_fake",
+      "message": "AssertionError: g-mixed frames are [], expected [5, 14, 29, 49, 60, 61, 77, 97, 117, 133]\nassert [] == [5, 14, 29, 49, 60, 61, ...]\n  \n  Right contains 10 more items, first extra item: 5\n  Use -v to get more diff"
+    },
+    "c-2-3": {
+      "status": "fail",
+      "check": "POST /api/games/score returns frames equal to [7,16,25,34,null,null] for the 10 rolls of g-partial",
+      "session": 2,
+      "test": "verify/test_api_score.py::test_c_2_3_partial_game_leaves_its_last_two_frames_null",
+      "message": "AssertionError: g-partial scored 0 frames, expected 6: []\nassert 0 == 6\n +  where 0 = len([])"
+    },
+    "c-2-4": {
+      "status": "fail",
+      "check": "POST /api/games/score returns total 34 for the 10 rolls of g-partial and total 0 for the 20 rolls of g-gutter",
+      "session": 2,
+      "test": "verify/test_api_score.py::test_c_2_4_total_is_the_last_scored_frame_for_partial_and_zero_for_gutter",
+      "message": "AssertionError: g-partial total is -1, expected 34\nassert -1 == 34"
+    },
+    "c-2-5": {
+      "status": "fail",
+      "check": "POST /api/games/score rejects a body whose rolls is not an array of numbers with 400 and the JSON body {\"error\": \"rolls must be an array of numbers\"}, rejects a request whose body is not valid JSON with that same 400 body, and returns 200 with frames [] and total 0 for an empty rolls array",
+      "session": 2,
+      "test": "verify/test_api_score.py::test_c_2_5_bad_rolls_and_bad_json_are_the_same_four_hundred_and_empty_is_a_game",
+      "message": "AssertionError: an empty game totalled -1, expected 0\nassert -1 == 0\n +  where -1 = number(-1, \"the empty game's total\")"
+    },
+    "c-2-6": {
+      "status": "fail",
+      "check": "/games/g-partial displays the exact text '7', '16', '25' and '34' in the elements with data-testid total-1 through total-4, the exact text '34' in the element with data-testid game-total, and the elements with data-testid total-5 and total-6 contain no text at all",
+      "session": 2,
+      "test": "verify/test_ui_game.py::test_c_2_6_partial_game_score_column_runs_out_into_two_empty_cells",
+      "message": "AssertionError: Locator expected to have count '1'\nActual value: 0 \nCall log:\n  - Expect \"to_have_count\" with timeout 20000ms\n  - waiting for get_by_test_id(\"total-1\")\n    43 \u00d7 locator resolved to 0 elements\n       - unexpected value \"0\""
+    }
+  },
+  "pytest_returncode": 1,
+  "stdout_tail": "nders the frame's own score instead of the cumulative one, fails\n        here.\" The four numbers are cumulative and not per-frame - the frames are\n        [3,4], [7,2], [9,0], [8,1], whose own sums are 7, 9, 9, 9 - so 16, 25 and 34\n        are only reachable by carrying the running total forward.\n    \n        The two pending cells are read with `raw_text_of`, which does not collapse\n        whitespace, and are required to be exactly the empty string. spec.md: \"It is\n        not a placeholder character, not `&nbsp;`, not an em dash and not the `-`\n        gutter glyph.\" Each is required to exist first, because an element that is\n        absent is not an element holding no text.\n    \n        `game-total` reads '34' and not '300', '133', '-1' or the last array entry:\n        the last two frames are `null`, so the total is the fourth frame's score.\n        `-1` is `cut-game-total`'s declared fallback, so the number asserted here is\n        not one an unwritten block produces - and neither is an empty cell, because\n        with `cut-pending-frame` open those two cells hold `NaN` or a number. This\n        is the only criterion that drives all three session-2 cuts through the page.\n        \"\"\"\n        open_game(page, \"g-partial\")\n    \n        for number, expected in PARTIAL_TOTAL_TEXTS.items():\n            cell = by_testid(page, f\"total-{number}\")\n>           expect(cell).to_have_count(1, timeout=LOAD_TIMEOUT)\nE           AssertionError: Locator expected to have count '1'\nE           Actual value: 0 \nE           Call log:\nE             - Expect \"to_have_count\" with timeout 20000ms\nE             - waiting for get_by_test_id(\"total-1\")\nE               43 \u00d7 locator resolved to 0 elements\nE                  - unexpected value \"0\"\n\nskeleton\\verify\\test_ui_game.py:184: AssertionError\n=========================== short test summary info ===========================\nFAILED skeleton/verify/test_api_games.py::test_c_1_2_mixed_game_splits_into_ten_frames_with_a_three_roll_tenth\nFAILED skeleton/verify/test_api_games.py::test_c_1_3_partial_game_stops_after_six_frames_when_the_rolls_run_out\nFAILED skeleton/verify/test_api_score.py::test_c_2_1_perfect_game_scores_thirty_a_frame_to_three_hundred\nFAILED skeleton/verify/test_api_score.py::test_c_2_2_mixed_game_cumulative_array_that_thirty_a_frame_cannot_fake\nFAILED skeleton/verify/test_api_score.py::test_c_2_3_partial_game_leaves_its_last_two_frames_null\nFAILED skeleton/verify/test_api_score.py::test_c_2_4_total_is_the_last_scored_frame_for_partial_and_zero_for_gutter\nFAILED skeleton/verify/test_api_score.py::test_c_2_5_bad_rolls_and_bad_json_are_the_same_four_hundred_and_empty_is_a_game\nFAILED skeleton/verify/test_ui_game.py::test_c_1_4_perfect_game_draws_ten_frame_boxes_ending_in_x_x_x\nFAILED skeleton/verify/test_ui_game.py::test_c_1_5_mixed_game_boxes_read_their_roll_symbols\nFAILED skeleton/verify/test_ui_game.py::test_c_2_6_partial_game_score_column_runs_out_into_two_empty_cells\n10 failed, 2 passed in 71.59s (0:01:11)\n",
+  "stderr_tail": ""
+}

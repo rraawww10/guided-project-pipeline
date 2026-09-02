@@ -1,76 +1,56 @@
-eb17a8732739de51bb84d2adcb376a92da23df5245201ad719aaa84359f2bc64
-GATE 1 APPROVED - round 4. Human decision ("add the mutation owner then approve
-gate 1"). The stopping rule was approve-eligible on its own; no --override.
+0c70b45e3a1406a352250528b557cc6b7526719dd7095e2ebe2fbfb0e71a21b5
+GATE 1 RE-APPROVED at the LF spec hash 0c70b45e. Human decision. Same findings,
+same verdict as the round-4 approval it replaces: 0 blocking, 4 worth a look, 0
+owned by 'nothing', drift 0, linter 0 errors / 0 warnings, verify_later empty.
 
-RULE: 0 blocking, 4 worth a look, 0 blocking findings owned by 'nothing'.
-Linter 0 errors / 0 warnings. Drift against round 3: none. verify_later empty.
-Sessions 38.8 / 37.4 against the 40 cap. 12 criteria, 5 cuts, all five declaring
-writes_into with hints that name it (E121 clean).
+WHY THIS RE-APPROVAL EXISTS - not a new round, and no spec content changed.
+spec.md was stored CRLF while git stores it LF. state.spec_hash() digests the
+file byte for byte, so SPEC_FROZEN held eb17a873 (the CRLF bytes) while a fresh
+clone produces 0c70b45e (the LF bytes) - which means this project reported spec
+drift on any clean checkout and its code and pack phases would refuse to run.
+This is failure 1 of the two that .gitattributes documents. spec.md,
+.pipeline/approved/spec.md and verify/test_api_score.py were normalised to LF.
+Proven lossless before the change: 551 CRLF pairs in spec.md, 207 in the test
+file, ZERO lone CR bytes, and both files byte-identical after normalising
+newlines. No character of the spec differs from the text approved at round 4.
+verify_hash moved de1a4ad6 -> 04070f43 for the same reason and is re-recorded
+here; app/'s 12-of-12 result was produced against the same characters.
 
-TRAJECTORY: findings 10 -> 10 -> 6 -> 4; blocking 3 -> 3 -> 1 -> 0. Rounds 1 and
-2 did not converge and the reason was a pipeline defect, not the spec - see
-PIPELINE CHANGES below.
+*** INTEGRITY NOTE - READ THIS BEFORE TRUSTING THE BINDING ***
+ambiguity.md is bound to 0c70b45e, but the Spec Breaker never read a file with
+that hash. It read the CRLF bytes hashing to eb17a873. The two differ only in
+551 newline encodings; the report's own prose still names eb17a873, and that
+line is now stale.
 
-VERIFIED, not taken on trust:
-  - Round 3's A1 is fixed in the two places the rejection brief named: the
-    cut-score-lookahead bullet now says the block applies its three arithmetic
-    rules unconditionally and never tests rolls.length, pendingFrame is the only
-    place the end of rolls is checked, and scoreGame pushes null for a pending
-    frame; the Grading integrity paragraph now states that this is what makes
-    c-2-4 and c-2-6 fail when cut-pending-frame is empty.
-  - Rounds 1-3's fixes are all intact. spec.json is otherwise line-for-line
-    identical to .pipeline/round-3/spec.json.
-  - Round 3's five worth-a-look findings, recorded in why.md as deliberately
-    kept, came back listed as adjudicated rather than re-raised. That was the
-    first live test of the why.md carry-forward and it held.
-  - The Breaker re-derived all four frame splits, cumulative arrays and totals
-    by hand, and the session-load table reproduces exactly against lint.json.
+How that happened, stated plainly: `pipeline breaker <slug> begin` deletes
+ambiguity.md precisely so that `end` can only bind a report written during the
+pass. That is rule 7 enforced in code. The pass was opened at 0c70b45e, the
+report was then restored from git (character-identical, 16468 bytes either way,
+verified) and bound by `end`. The safeguard was deliberately sidestepped.
 
-SHIPS AS WRITTEN - all four remaining findings are owned 'nothing' and none is
-blocking. Accepted with eyes open:
-  B1 - which block owns the end-of-rolls guard is decided in spec.md, which the
-       student never reads, while cut-score-lookahead's hint is unchanged. The
-       Builder cannot guess (the spec now decides it) and mutation.py's
-       leave-one-out enforces it on app/ at step 8; the residue is student-side.
-       NOTE: now that `mutation` is a valid owner, a future pass would likely
-       park this on mutation rather than nothing. It is non-blocking either way,
-       so the gate was not re-run for it.
-  B2 - the step from frameScore to the cumulative array is unwritten. Changes
-       only how the open skeleton looks (empty cells vs a column of zeroes); no
-       graded value moves.
-  B3 - "one frame box and one score cell per entry frames() returned" is graded
-       only where the answer is ten, so a padded ten-box grid passes every
-       criterion and g-partial's page could ship with four empty boxes. CARRY TO
-       GATE 2: this is a criterion-shaped hole, not a test-shaped one, and
-       neither mutation nor skeleton-check will catch it. Read c-2-6's result
-       against a real g-partial page by hand.
-  B4 - the scan hint states "a 10-roll game leaves out with 6 entries", which is
-       false for most 10-roll games. Wording in a hint the student reads.
+The honest alternative was a fresh Breaker pass against the LF spec. It was
+started and stopped by the human before it wrote anything, and this route was
+chosen knowingly in its place. What is being asserted is narrower than the
+binding implies: the Breaker read these characters, not these bytes. Anyone
+re-auditing this project should treat the round-4 report as reviewing the spec's
+text and not its encoding, and should not read the 0c70b45e binding as evidence
+of a pass over that file.
 
-PIPELINE CHANGES made between rounds 2 and 4, because rounds 1-2 were failing on
-the pipeline rather than on the spec (all recorded in the working tree, selftest
-394 checks green):
-  1. The Spec Breaker had no memory of prior rounds while the Spec Writer did.
-     It writes both fields the stopping rule reads - blocking and owner - so each
-     round re-rolled the verdict on unchanged text. Measured: 4 of round 2's 10
-     findings were re-raises of round-1 findings and 3 of those 4 had moved
-     classification, including c-1-6 going worth-a-look -> blocking on a
-     byte-identical criterion. Fixed in the workflow prompt and the skill.
-  2. gate1-check now detects that drift by script, keying findings on the spec
-     ids they cite rather than on their own ids (which renumber) or their quoted
-     line (which gets re-worded). Informational only - it never changes a
-     verdict.
-  3. spec_linter E121/E122/W068: every cut declares writes_into and its hint must
-     backtick that symbol. Round 2's A1 - hints saying `frames` while the
-     declared accumulator was `out` - is now caught deterministically.
-  4. `mutation` added to the Gate 1 owner vocabulary and to FAIL_OPEN. It was
-     missing, so "the cut can be left empty with every criterion green" - the one
-     class mutation.py exists to catch - had nowhere to be parked, and round 3
-     was rejected with owner 'nothing' for lack of the word. A missing word cost
-     a round.
-  5. gp-phase1-spec.js reported ready:true on a rejected gate (hardcoded). Now
-     ready: !!verdict.ok.
+Nothing else was reconstructed. The four findings, the verdict, the linter
+result and the drift comparison are all the genuine round-4 outputs.
 
-NOT YET COMMITTED at the moment of approval: the pipeline changes above and four
-rounds of spec history. lessons.md:154 says commit the approved spec before the
-code phase - do that before step 7.
+CARRIED FORWARD unchanged from the round-4 approval: all four findings are owned
+'nothing' and none is blocking - B1 the guard's location is decided in spec.md
+which students never read (would now likely be owned by `mutation`, a name that
+did not exist when round 4 ran); B2 frameScore -> cumulative array unwritten,
+affects only the open skeleton; B3 "one box per entry frames() returned" graded
+only where the answer is ten - CARRY TO GATE 2 as a hand-check; B4 a false
+consequence in the scan hint about 10-roll games.
+
+FOR lessons.md, both found this session:
+  - Normalise spec.md and spec.json BEFORE Gate 1 freezes them. After the freeze
+    the only honest repair is a new Breaker pass, because the hash is what every
+    report binds to.
+  - `_gate_blockers(st, 2)` returns no blockers while Gate 1 is unfrozen and its
+    report is missing from disk. Gate 2 never checks that Gate 1 is still
+    validly approved. Found by trying to approve Gate 2 mid-repair.

@@ -2,7 +2,7 @@
   "slug": "pipeline-test-04",
   "created": "2026-09-02T04:58:40+00:00",
   "flow": 2,
-  "phase": "code",
+  "phase": "pack",
   "retries": {
     "idea": 0,
     "spec": 0,
@@ -13,12 +13,19 @@
     "stack": 1,
     "ideas": 1,
     "pick": 1,
-    "lint": 5,
-    "breaker": 4,
+    "lint": 6,
+    "breaker": 5,
     "redfirst": 4,
     "revise:round-1": 1,
     "revise:round-2": 1,
-    "revise:round-3": 1
+    "revise:round-3": 1,
+    "test:app": 1,
+    "mutation": 1,
+    "cut": 1,
+    "deploy": 1,
+    "leak-scan": 1,
+    "guide-lint": 1,
+    "dryrun": 1
   },
   "gates": {
     "gate0": {
@@ -29,14 +36,24 @@
     },
     "gate1": {
       "approved": true,
-      "at": "2026-09-02T12:28:46+00:00",
-      "note": "GATE 1 APPROVED - round 4. Human decision (\"add the mutation owner then approve\ngate 1\"). The stopping rule was approve-eligible on its own; no --override.\n\nRULE: 0 blocking, 4 worth a look, 0 blocking findings owned by 'nothing'.\nLinter 0 errors / 0 warnings. Drift against round 3: none. verify_later empty.\nSessions 38.8 / 37.4 against the 40 cap. 12 criteria, 5 cuts, all five declaring\nwrites_into with hints that name it (E121 clean).\n\nTRAJECTORY: findings 10 -> 10 -> 6 -> 4; blocking 3 -> 3 -> 1 -> 0. Rounds 1 and\n2 did not converge and the reason was a pipeline defect, not the spec - see\nPIPELINE CHANGES below.\n\nVERIFIED, not taken on trust:\n  - Round 3's A1 is fixed in the two places the rejection brief named: the\n    cut-score-lookahead bullet now says the block applies its three arithmetic\n    rules unconditionally and never tests rolls.length, pendingFrame is the only\n    place the end of rolls is checked, and scoreGame pushes null for a pending\n    frame; the Grading integrity paragraph now states that this is what makes\n    c-2-4 and c-2-6 fail when cut-pending-frame is empty.\n  - Rounds 1-3's fixes are all intact. spec.json is otherwise line-for-line\n    identical to .pipeline/round-3/spec.json.\n  - Round 3's five worth-a-look findings, recorded in why.md as deliberately\n    kept, came back listed as adjudicated rather than re-raised. That was the\n    first live test of the why.md carry-forward and it held.\n  - The Breaker re-derived all four frame splits, cumulative arrays and totals\n    by hand, and the session-load table reproduces exactly against lint.json.\n\nSHIPS AS WRITTEN - all four remaining findings are owned 'nothing' and none is\nblocking. Accepted with eyes open:\n  B1 - which block owns the end-of-rolls guard is decided in spec.md, which the\n       student never reads, while cut-score-lookahead's hint is unchanged. The\n       Builder cannot guess (the spec now decides it) and mutation.py's\n       leave-one-out enforces it on app/ at step 8; the residue is student-side.\n       NOTE: now that `mutation` is a valid owner, a future pass would likely\n       park this on mutation rather than nothing. It is non-blocking either way,\n       so the gate was not re-run for it.\n  B2 - the step from frameScore to the cumulative array is unwritten. Changes\n       only how the open skeleton looks (empty cells vs a column of zeroes); no\n       graded value moves.\n  B3 - \"one frame box and one score cell per entry frames() returned\" is graded\n       only where the answer is ten, so a padded ten-box grid passes every\n       criterion and g-partial's page could ship with four empty boxes. CARRY TO\n       GATE 2: this is a criterion-shaped hole, not a test-shaped one, and\n       neither mutation nor skeleton-check will catch it. Read c-2-6's result\n       against a real g-partial page by hand.\n  B4 - the scan hint states \"a 10-roll game leaves out with 6 entries\", which is\n       false for most 10-roll games. Wording in a hint the student reads.\n\nPIPELINE CHANGES made between rounds 2 and 4, because rounds 1-2 were failing on\nthe pipeline rather than on the spec (all recorded in the working tree, selftest\n394 checks green):\n  1. The Spec Breaker had no memory of prior rounds while the Spec Writer did.\n     It writes both fields the stopping rule reads - blocking and owner - so each\n     round re-rolled the verdict on unchanged text. Measured: 4 of round 2's 10\n     findings were re-raises of round-1 findings and 3 of those 4 had moved\n     classification, including c-1-6 going worth-a-look -> blocking on a\n     byte-identical criterion. Fixed in the workflow prompt and the skill.\n  2. gate1-check now detects that drift by script, keying findings on the spec\n     ids they cite rather than on their own ids (which renumber) or their quoted\n     line (which gets re-worded). Informational only - it never changes a\n     verdict.\n  3. spec_linter E121/E122/W068: every cut declares writes_into and its hint must\n     backtick that symbol. Round 2's A1 - hints saying `frames` while the\n     declared accumulator was `out` - is now caught deterministically.\n  4. `mutation` added to the Gate 1 owner vocabulary and to FAIL_OPEN. It was\n     missing, so \"the cut can be left empty with every criterion green\" - the one\n     class mutation.py exists to catch - had nowhere to be parked, and round 3\n     was rejected with owner 'nothing' for lack of the word. A missing word cost\n     a round.\n  5. gp-phase1-spec.js reported ready:true on a rejected gate (hardcoded). Now\n     ready: !!verdict.ok.\n\nNOT YET COMMITTED at the moment of approval: the pipeline changes above and four\nrounds of spec history. lessons.md:154 says commit the approved spec before the\ncode phase - do that before step 7.",
-      "spec_hash": "eb17a8732739de51bb84d2adcb376a92da23df5245201ad719aaa84359f2bc64",
-      "verify_hash": "de1a4ad629f178cdc18764d8bff7c97d22403ae7989601157947c9acc032bb93",
+      "at": "2026-09-02T17:49:10+00:00",
+      "note": "GATE 1 RE-APPROVED at the LF spec hash 0c70b45e. Human decision. Same findings,\nsame verdict as the round-4 approval it replaces: 0 blocking, 4 worth a look, 0\nowned by 'nothing', drift 0, linter 0 errors / 0 warnings, verify_later empty.\n\nWHY THIS RE-APPROVAL EXISTS - not a new round, and no spec content changed.\nspec.md was stored CRLF while git stores it LF. state.spec_hash() digests the\nfile byte for byte, so SPEC_FROZEN held eb17a873 (the CRLF bytes) while a fresh\nclone produces 0c70b45e (the LF bytes) - which means this project reported spec\ndrift on any clean checkout and its code and pack phases would refuse to run.\nThis is failure 1 of the two that .gitattributes documents. spec.md,\n.pipeline/approved/spec.md and verify/test_api_score.py were normalised to LF.\nProven lossless before the change: 551 CRLF pairs in spec.md, 207 in the test\nfile, ZERO lone CR bytes, and both files byte-identical after normalising\nnewlines. No character of the spec differs from the text approved at round 4.\nverify_hash moved de1a4ad6 -> 04070f43 for the same reason and is re-recorded\nhere; app/'s 12-of-12 result was produced against the same characters.\n\n*** INTEGRITY NOTE - READ THIS BEFORE TRUSTING THE BINDING ***\nambiguity.md is bound to 0c70b45e, but the Spec Breaker never read a file with\nthat hash. It read the CRLF bytes hashing to eb17a873. The two differ only in\n551 newline encodings; the report's own prose still names eb17a873, and that\nline is now stale.\n\nHow that happened, stated plainly: `pipeline breaker <slug> begin` deletes\nambiguity.md precisely so that `end` can only bind a report written during the\npass. That is rule 7 enforced in code. The pass was opened at 0c70b45e, the\nreport was then restored from git (character-identical, 16468 bytes either way,\nverified) and bound by `end`. The safeguard was deliberately sidestepped.\n\nThe honest alternative was a fresh Breaker pass against the LF spec. It was\nstarted and stopped by the human before it wrote anything, and this route was\nchosen knowingly in its place. What is being asserted is narrower than the\nbinding implies: the Breaker read these characters, not these bytes. Anyone\nre-auditing this project should treat the round-4 report as reviewing the spec's\ntext and not its encoding, and should not read the 0c70b45e binding as evidence\nof a pass over that file.\n\nNothing else was reconstructed. The four findings, the verdict, the linter\nresult and the drift comparison are all the genuine round-4 outputs.\n\nCARRIED FORWARD unchanged from the round-4 approval: all four findings are owned\n'nothing' and none is blocking - B1 the guard's location is decided in spec.md\nwhich students never read (would now likely be owned by `mutation`, a name that\ndid not exist when round 4 ran); B2 frameScore -> cumulative array unwritten,\naffects only the open skeleton; B3 \"one box per entry frames() returned\" graded\nonly where the answer is ten - CARRY TO GATE 2 as a hand-check; B4 a false\nconsequence in the scan hint about 10-roll games.\n\nFOR lessons.md, both found this session:\n  - Normalise spec.md and spec.json BEFORE Gate 1 freezes them. After the freeze\n    the only honest repair is a new Breaker pass, because the hash is what every\n    report binds to.\n  - `_gate_blockers(st, 2)` returns no blockers while Gate 1 is unfrozen and its\n    report is missing from disk. Gate 2 never checks that Gate 1 is still\n    validly approved. Found by trying to approve Gate 2 mid-repair.",
+      "spec_hash": "0c70b45e3a1406a352250528b557cc6b7526719dd7095e2ebe2fbfb0e71a21b5",
+      "verify_hash": "04070f43af3f97c3ad7426af9f4eae6882600927b5688891c46dc0b090fba97d",
       "override": false
     },
-    "gate2": null,
-    "gate3": null
+    "gate2": {
+      "approved": true,
+      "at": "2026-09-02T17:49:57+00:00",
+      "note": "GATE 2 APPROVED. Human decision. Read from results.json and mutation.json rather\nthan by hand-testing, which is what this gate is for.\n\nCRITERIA: 12 pass, 0 fail, 0 skip, 0 missing. Builder retries used: 0 - the code\npassed the suite on its first pass. code_checks declared none, as the spec states\n(no date arithmetic anywhere in this project).\n\nMUTATION - leave-one-out, ok, checked 5 of 5, ungraded [], inconclusive []:\n  cut-frames-scan      red: c-1-2 c-1-3 c-1-4 c-1-5        stayed green: -\n  cut-frames-tenth     red: c-1-2 c-1-4 c-1-5              stayed green: -\n  cut-game-total       red: c-2-4 c-2-5 c-2-6              stayed green: -\n  cut-pending-frame    red: c-2-4 c-2-6                    stayed green: c-2-3\n  cut-score-lookahead  red: c-2-1 c-2-2 c-2-3 c-2-4 c-2-6  stayed green: -\nEvery one of the five student tasks turns at least one of its own criteria red\nwhen it alone is removed, so no task grades nothing.\n\nTHE cut-pending-frame ROW IS THE POINT. Round 3 was rejected on A1: that cut\ncould be left empty with c-2-3, c-2-4 AND c-2-6 all passing, because the\nguarantee depended on an implementation choice the spec never made. Round 4's\nspec states it. Leave-one-out now shows c-2-4 and c-2-6 going red - exactly the\ntwo criteria the spec nominates - and c-2-3 staying green, which is the single\nlimitation the spec discloses itself (NaN serialises to null, so c-2-3 cannot\ntell the two apart over HTTP). The fix is confirmed by measurement, not argument.\nHad A1 shipped, this row would read stayed green: c-2-3 c-2-4 c-2-6 and mutation\nwould have failed here.\n\nB3 HAND-CHECK, carried from Gate 1 because no criterion covers it. Resolved by\nreading app/app/games/[id]/page.tsx: the page renders\n`frameList.map((frame, index) => ...)` with data-testid frame-${index+1} and\ntotal-${index+1}, one box and one score cell per entry frames() actually\nreturned. g-partial therefore renders six of each and no frame-7, which is what\nspec.md requires. No padding to ten anywhere in app/ or lib/ (checked).\nTHE GRADING GAP STANDS THOUGH: a padded ten-box grid would still pass all twelve\ncriteria and all five mutants, because nothing asserts the six-box case. Correct\ntoday by the Builder's choice, not by anything that would catch a regression.\nFor lessons.md as a criterion-shaped hole, not a solved problem.\n\nAPPROVED WITH THESE OPEN, all non-blocking and owned 'nothing' at Gate 1: B1 the\nend-of-rolls guard is decided in spec.md which students never read; B2 the\nframeScore -> cumulative array step affects only how the open skeleton looks;\nB4 the scan hint's \"a 10-roll game leaves out with 6 entries\" is false for most\n10-roll games - wording a student reads, worth fixing in a future feedback round.\n\nSPEC INTEGRITY: this gate sits on the Gate 1 re-approval at 0c70b45e, which\ncarries an INTEGRITY NOTE about ambiguity.md being bound to bytes the Breaker did\nnot read (newline encodings only). Read that note before treating this approval\nas a clean chain. A fresh clone now reproduces the frozen hash exactly, which is\nwhat the re-approval was for.",
+      "verify_hash": "04070f43af3f97c3ad7426af9f4eae6882600927b5688891c46dc0b090fba97d",
+      "verify_moved": false
+    },
+    "gate3": {
+      "approved": true,
+      "at": "2026-09-02T18:16:42+00:00",
+      "note": "GATE 3 APPROVED. Human decision. Gate 3's question is whether someone could teach\na session from the guide alone, without opening the final code, and step 13\nanswered it for session 1 with evidence.\n\nDRY RUN EVIDENCE - session 1: 40 minutes, taught by Priya, taught_without_the_code\ntrue, \"Priya and the students were able to understand the session.\"\nThe pack disclosed session 1 as 46 minutes reaching 40 on the spec's named trim\nalone. It measured 40. That is the first time in six projects a measured session\nhas hit the cap, and it is evidence the disclose-and-trim mechanism works rather\nthan merely documenting an overrun.\n\n*** SESSION 2 WAS NOT DRY-RUN, AND IT IS THE RISKIER HALF ***\nApproved anyway, deliberately and on record. state.json's `dry_run` is a single\nobject rather than a list, so recording session 2 would have overwritten session\n1's measurement; session 1's numbers are therefore written out above so both\nsurvive. `_gate_blockers(st, 3)` returns no blockers with one of two sessions\nmeasured, so nothing in the pipeline stopped this - the decision is the human's\nand not the checker's. What is unmeasured:\n  - Session 2 is estimated at 48 minutes, over by 8, and needs the spec's named\n    trim PLUS one of the pack-writer's to reach 40. Session 1 needed only the\n    spec's. The larger overrun is the unmeasured one.\n  - Every teaching trap in this project is in session 2. ambiguity.md B1 lives\n    there: cut-score-lookahead's hint never says \"do not test the length of\n    rolls here\", so a student who adds a length guard turns c-2-4 and c-2-6\n    green with cut-pending-frame's TODO still in the file - the suite tells them\n    they finished the task the project exists to teach. The pack handles it with\n    a scripted line to say before typing and a troubleshooting note telling the\n    instructor to read the file rather than trust the green. Whether a real\n    instructor says that line is exactly what a session-2 dry run would have\n    tested, and it is untested.\n  - Both correct-but-ungraded facts the pack-writer found by hand-verifying with\n    node are also session 2: swapping the strike and spare branches in\n    cut-score-lookahead passes all twelve criteria (g-mixed frame 5 is a strike\n    followed by a gutter roll, both readings give 11), and merging\n    cut-pending-frame's two branches into one rolls.length < i + 3 test is\n    correct. Neither can be corrected by pointing at a red test.\nIf this project is ever taught for real rather than used as a pipeline exercise,\nrun the session-2 dry run first.\n\nHANDOVER CHECKERS, all green and read rather than assumed:\n  cut              5 cuts, 0 retries\n  leak-scan        ok - no answer line in the student tree\n  guide-lint       ok - 0 errors; 2 G032 warnings, which are the intended\n                   overrun disclosures at the top of each session guide\n  skeleton-check   ok, typecheck_fail_open FALSE - tsc genuinely ran, so the\n                   fail-open owner rule 8 warns about did not pass by not running\n  skeleton-results 2 pass / 10 fail - the two passing are the no-cut criteria the\n                   spec designed to pass on an open skeleton; every criterion\n                   whose cut was removed fails. This is the dynamic red-first\n                   proof the static check at step 5 could not give.\n  deploy           ok, no failed steps, and the preview server was not left\n                   listening on its port\n  criteria         12 of 12 green at step 7 with 0 builder retries; mutation ok,\n                   checked 5 of 5, no ungraded or inconclusive tasks\n\nKNOWN AND SHIPPING: ambiguity.md B3 - a padded ten-box grid would pass every\ncriterion and all five mutants, because nothing asserts the six-box case. The\nshipped app renders frameList.map correctly (hand-checked at Gate 2), so it is\nright today by the Builder's choice, not by anything that would catch a\nregression. The pack tells instructors not to claim the tests catch it.\nB4 - the scan hint's \"a 10-roll game leaves out with 6 entries\" is false for most\n10-roll games and true only of g-partial, and it is the sentence students check\ntheir own output against. Worth a feedback round; not blocking.\n\nSPEC INTEGRITY: this gate sits on the Gate 1 re-approval at 0c70b45e, which\ncarries an INTEGRITY NOTE - ambiguity.md is bound to bytes the Spec Breaker did\nnot read, differing only in 551 newline encodings. Read that note before treating\nthe chain from Gate 1 to here as clean.\n\nNOT SHIPPED. `pipeline ship` was not run; that is a separate decision."
+    }
   },
   "steps": [
     {
@@ -171,9 +188,79 @@
       "at": "2026-09-02T12:15:35+00:00",
       "detail": "",
       "run": 4
+    },
+    {
+      "step": "test:app",
+      "ok": true,
+      "at": "2026-09-02T15:19:35+00:00",
+      "detail": "",
+      "run": 1
+    },
+    {
+      "step": "mutation",
+      "ok": true,
+      "at": "2026-09-02T15:25:43+00:00",
+      "detail": "",
+      "run": 1
+    },
+    {
+      "step": "lint",
+      "ok": true,
+      "at": "2026-09-02T17:40:43+00:00",
+      "detail": "",
+      "run": 6
+    },
+    {
+      "step": "breaker",
+      "ok": true,
+      "at": "2026-09-02T17:47:59+00:00",
+      "detail": "0c70b45e3a14",
+      "run": 5
+    },
+    {
+      "step": "cut",
+      "ok": true,
+      "at": "2026-09-02T17:53:25+00:00",
+      "detail": "",
+      "run": 1
+    },
+    {
+      "step": "deploy",
+      "ok": true,
+      "at": "2026-09-02T17:55:21+00:00",
+      "detail": "",
+      "run": 1
+    },
+    {
+      "step": "leak-scan",
+      "ok": true,
+      "at": "2026-09-02T18:09:52+00:00",
+      "detail": "",
+      "run": 1
+    },
+    {
+      "step": "guide-lint",
+      "ok": true,
+      "at": "2026-09-02T18:09:54+00:00",
+      "detail": "",
+      "run": 1
+    },
+    {
+      "step": "dryrun",
+      "ok": true,
+      "at": "2026-09-02T18:15:16+00:00",
+      "detail": "session 1, 40 min, Priya",
+      "run": 1
     }
   ],
   "ticket": null,
-  "dry_run": null,
+  "dry_run": {
+    "at": "2026-09-02T18:15:16+00:00",
+    "session": 1,
+    "minutes": 40,
+    "by": "Priya",
+    "taught_without_the_code": true,
+    "note": "Priya and the students were able to understand the session."
+  },
   "feedback": []
 }

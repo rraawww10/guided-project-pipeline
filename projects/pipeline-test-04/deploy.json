@@ -1,0 +1,35 @@
+{
+  "ok": true,
+  "target": "app",
+  "preview": "http://127.0.0.1:59567",
+  "advisories": [],
+  "advisories_allowed": false,
+  "seconds": 84.6,
+  "steps": [
+    {
+      "step": "fresh copy",
+      "ok": true,
+      "detail": "C:\\Users\\Hp\\AppData\\Local\\Temp\\gp-deploy-pipeline-test-04-t1bqratk\\app"
+    },
+    {
+      "step": "install",
+      "ok": true,
+      "detail": "\nadded 58 packages in 27s\n"
+    },
+    {
+      "step": "install advisories",
+      "ok": true,
+      "detail": "none"
+    },
+    {
+      "step": "build",
+      "ok": true,
+      "detail": "\n> pipeline-test-04@0.0.0 build\n> next build\n\n   \u00e2\u2013\u00b2 Next.js 15.5.24\n\n   Creating an optimized production build ...\n \u00e2\u0153\u201c Compiled successfully in 13.5s\n   Linting and checking validity of types ...\n   Collecting page data ...\n   Generating static pages (0/3) ...\n \u00e2\u0153\u201c Generating static pages (3/3)\n   Finalizing page optimization ...\n   Collecting build traces ...\n\nRoute (app)                                 Size  First Load JS\n\u00e2\u201d\u0152 \u00e2\u2014\u2039 /_not-found                            995 B         104 kB\n\u00e2\u201d\u0153 \u00c6\u2019 /api/games                             130 B         103 kB\n\u00e2\u201d\u0153 \u00c6\u2019 /api/games/score                       130 B         103 kB\n\u00e2\u201d\u201d \u00c6\u2019 /games/[id]                            130 B         103 kB\n+ First Load JS shared by all             103 kB\n  \u00e2\u201d\u0153 chunks/255-c5a697ddbf82d774.js       46.4 kB\n  \u00e2\u201d\u0153 chunks/4bd1b696-c023c6e3521b1417.js  54.2 kB\n  \u00e2\u201d\u201d other shared chunks (total)          1.97 kB\n\n\n\u00e2\u2014\u2039  (Static)   prerendered as static content\n\u00c6\u2019  (Dynamic)  server-rendered on demand\n\n"
+    },
+    {
+      "step": "preview",
+      "ok": true,
+      "detail": "http://127.0.0.1:59567"
+    }
+  ]
+}

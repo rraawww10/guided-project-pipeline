@@ -1,7 +1,7 @@
 {
   "ok": true,
   "verdict": "approve-eligible",
-  "spec_hash": "eb17a8732739de51bb84d2adcb376a92da23df5245201ad719aaa84359f2bc64",
+  "spec_hash": "0c70b45e3a1406a352250528b557cc6b7526719dd7095e2ebe2fbfb0e71a21b5",
   "findings": [
     {
       "id": "B1",
@@ -102,7 +102,7 @@
     "0 blocking finding(s), all owned by a downstream checker; 4 worth a look. Nothing here escapes to the shipped project."
   ],
   "rule": "reject when any blocking finding is owned by 'nothing'; approve when every remaining finding sits in a column a downstream checker owns. An owner that can pass by not running is owned only conditionally: it approves, and the confirmation it actually ran is listed in verify_later",
-  "reviewed_spec_hash": "eb17a8732739de51bb84d2adcb376a92da23df5245201ad719aaa84359f2bc64",
+  "reviewed_spec_hash": "0c70b45e3a1406a352250528b557cc6b7526719dd7095e2ebe2fbfb0e71a21b5",
   "drift": [],
   "verify_later": []
 }

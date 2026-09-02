@@ -1,0 +1,350 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="10" skipped="0" tests="12" time="71.425" timestamp="2026-09-02T23:22:12.311646+05:30" hostname="HERO"><testcase classname="skeleton.verify.test_api_games" name="test_c_1_1_games_are_the_four_seeded_games_in_seed_order" time="0.467" /><testcase classname="skeleton.verify.test_api_games" name="test_c_1_2_mixed_game_splits_into_ten_frames_with_a_three_roll_tenth" time="0.310"><failure message="AssertionError: g-mixed split into 0 frames, expected 10: []&#10;assert 0 == 10&#10; +  where 0 = len([])">api = &lt;httpx.Client object at 0x000001DD023274D0&gt;
+
+    def test_c_1_2_mixed_game_splits_into_ten_frames_with_a_three_roll_tenth(api):
+        """c-1-2: GET /api/games returns the g-mixed game with frames equal to
+        [[1,4],[4,5],[6,4],[5,5],[10],[0,1],[7,3],[6,4],[10],[2,8,6]].
+    
+        Compared whole, in one equality, so a frame boundary that is off anywhere in
+        the list fails: the single-roll strike frames at 5 and 9, the nine two-roll
+        frames and the three-roll tenth are all inside the same assertion. The
+        length is asserted first so a nine-frame answer names itself.
+    
+        Neither state of an unwritten block satisfies this. With `cut-frames-scan`
+        open, `out` is empty and `frames` is `[]`. With only `cut-frames-tenth`
+        filled, `i` is still 0, so the tenth block appends every roll as one frame
+        and `frames` is `[[1,4,4,5,...,6]]`. Ten frames needs both cuts, which is
+        what spec.md's Grading integrity table claims for this criterion.
+        """
+        game = one_game(get_games(api), "g-mixed")
+        frames = game["frames"]
+    
+&gt;       assert len(frames) == 10, (
+            f"g-mixed split into {len(frames)} frames, expected 10: {frames}"
+        )
+E       AssertionError: g-mixed split into 0 frames, expected 10: []
+E       assert 0 == 10
+E        +  where 0 = len([])
+
+skeleton\verify\test_api_games.py:93: AssertionError</failure></testcase><testcase classname="skeleton.verify.test_api_games" name="test_c_1_3_partial_game_stops_after_six_frames_when_the_rolls_run_out" time="0.315"><failure message="AssertionError: g-partial split into 0 frames, expected 6: []&#10;assert 0 == 6&#10; +  where 0 = len([])">api = &lt;httpx.Client object at 0x000001DD02575E50&gt;
+
+    def test_c_1_3_partial_game_stops_after_six_frames_when_the_rolls_run_out(api):
+        """c-1-3: GET /api/games returns the g-partial game with frames equal to
+        [[3,4],[7,2],[9,0],[8,1],[10],[10]].
+    
+        Six entries, not five. g-partial closes on two strikes, each a one-roll
+        frame, and its ten rolls run out before a tenth frame exists; a naive
+        pair-chunking scan pairs those two strikes into `[10,10]` and answers five.
+        spec.md names this "the criterion that grades the scan on its own". The
+        length is asserted before the contents so a failure says which of the two
+        went wrong.
+    
+        `cut-frames-tenth` contributes nothing here - the rolls run out earlier, so
+        that block appends nothing - and this test is not satisfied by that block
+        alone: with `cut-frames-scan` open and `cut-frames-tenth` filled, `i` is 0
+        and the tenth block appends the whole roll list as a single frame, giving
+        one entry where this wants six.
+        """
+        game = one_game(get_games(api), "g-partial")
+        frames = game["frames"]
+    
+&gt;       assert len(frames) == 6, (
+            f"g-partial split into {len(frames)} frames, expected 6: {frames}"
+        )
+E       AssertionError: g-partial split into 0 frames, expected 6: []
+E       assert 0 == 6
+E        +  where 0 = len([])
+
+skeleton\verify\test_api_games.py:121: AssertionError</failure></testcase><testcase classname="skeleton.verify.test_api_score" name="test_c_2_1_perfect_game_scores_thirty_a_frame_to_three_hundred" time="0.300"><failure message="AssertionError: g-perfect frames are [], expected [30, 60, 90, 120, 150, 180, 210, 240, 270, 300]&#10;assert [] == [30, 60, 90, ...150, 180, ...]&#10;  &#10;  Right contains 10 more items, first extra item: 30&#10;  Use -v to get more diff">api = &lt;httpx.Client object at 0x000001DD0255CFC0&gt;
+
+    def test_c_2_1_perfect_game_scores_thirty_a_frame_to_three_hundred(api):
+        """c-2-1: POST /api/games/score returns 200 with frames equal to
+        [30,60,90,120,150,180,210,240,270,300] for the 12 rolls of g-perfect.
+    
+        The declared 200 is asserted in `score_ok`. The array is compared whole, so
+        the tenth frame - the one whose bonus rolls are its own second and third
+        rolls, which is the reframing session 2 exists to teach - is graded in the
+        same assertion as the first nine.
+    
+        Not a value an unwritten block produces: spec.md declares
+        `cut-score-lookahead`'s fallback as `null`, so with that block open every
+        frame scores `null`, the array is ten nulls and not one entry of this list
+        appears. Twelve rolls in, ten frames out, so a suite that only counted
+        entries would not catch a lookahead that scored the wrong two rolls - the
+        equality does.
+        """
+        body = score_ok(api, PERFECT_ROLLS)
+&gt;       assert body["frames"] == PERFECT_SCORES, (
+            f"g-perfect frames are {body['frames']}, expected {PERFECT_SCORES}"
+        )
+E       AssertionError: g-perfect frames are [], expected [30, 60, 90, 120, 150, 180, 210, 240, 270, 300]
+E       assert [] == [30, 60, 90, ...150, 180, ...]
+E         
+E         Right contains 10 more items, first extra item: 30
+E         Use -v to get more diff
+
+skeleton\verify\test_api_score.py:56: AssertionError</failure></testcase><testcase classname="skeleton.verify.test_api_score" name="test_c_2_2_mixed_game_cumulative_array_that_thirty_a_frame_cannot_fake" time="0.373"><failure message="AssertionError: g-mixed frames are [], expected [5, 14, 29, 49, 60, 61, 77, 97, 117, 133]&#10;assert [] == [5, 14, 29, 49, 60, 61, ...]&#10;  &#10;  Right contains 10 more items, first extra item: 5&#10;  Use -v to get more diff">api = &lt;httpx.Client object at 0x000001DD0255F950&gt;
+
+    def test_c_2_2_mixed_game_cumulative_array_that_thirty_a_frame_cannot_fake(api):
+        """c-2-2: POST /api/games/score returns frames equal to
+        [5,14,29,49,60,61,77,97,117,133] for the 19 rolls of g-mixed.
+    
+        spec.md calls this "the array that `30 * frame` cannot fake and the one to
+        read first when session 2 goes red". It mixes open frames, four spares, a
+        strike at frame 5, a strike at frame 9 and a spare-closing tenth, so two
+        errors that cancel cannot go green against it. Compared whole and in order,
+        which makes the per-frame steps - 5, 9, 15, 20, 11, 1, 16, 20, 20, 16 - part
+        of the assertion rather than just the 133 at the end.
+    
+        Not a value an unwritten block produces: with `cut-score-lookahead` open the
+        array is ten nulls.
+        """
+        body = score_ok(api, MIXED_ROLLS)
+&gt;       assert body["frames"] == MIXED_SCORES, (
+            f"g-mixed frames are {body['frames']}, expected {MIXED_SCORES}"
+        )
+E       AssertionError: g-mixed frames are [], expected [5, 14, 29, 49, 60, 61, 77, 97, 117, 133]
+E       assert [] == [5, 14, 29, 49, 60, 61, ...]
+E         
+E         Right contains 10 more items, first extra item: 5
+E         Use -v to get more diff
+
+skeleton\verify\test_api_score.py:76: AssertionError</failure></testcase><testcase classname="skeleton.verify.test_api_score" name="test_c_2_3_partial_game_leaves_its_last_two_frames_null" time="0.305"><failure message="AssertionError: g-partial scored 0 frames, expected 6: []&#10;assert 0 == 6&#10; +  where 0 = len([])">api = &lt;httpx.Client object at 0x000001DD024F3BF0&gt;
+
+    def test_c_2_3_partial_game_leaves_its_last_two_frames_null(api):
+        """c-2-3: POST /api/games/score returns frames equal to [7,16,25,34,null,null]
+        for the 10 rolls of g-partial.
+    
+        Asserted exactly as the criterion words it: six entries, the first four
+        numbers and the last two JSON `null`, which arrive as Python `None`. The
+        equality distinguishes `None` from 0, from "" and from the string "null",
+        which is the distinction the project exists to teach. The four numbers are
+        cumulative rather than per-frame - the frames are [3,4], [7,2], [9,0],
+        [8,1], whose own sums are 7, 9, 9, 9 - so 16, 25 and 34 are only reachable
+        by carrying a running total forward.
+    
+        **What this test does not prove**, said here because spec.md says it in
+        Grading integrity rather than leaving it to be discovered: an unguarded
+        lookahead past the end of `rolls` yields `NaN`, `JSON.stringify(NaN)` is
+        `null`, so this exact body comes back with `cut-pending-frame` still empty.
+        c-2-4 (a total, where `NaN` is not 34) and c-2-6 (a page, where `NaN` is not
+        an empty cell) are the two that catch that, and each has its own test. Over
+        HTTP this suite cannot see the difference, and it does not pretend to:
+        ambiguity.md B1 is about which block owns the end-of-`rolls` guard, spec.md
+        decides it (`pendingFrame` owns it, `cut-score-lookahead` never tests the
+        length of `rolls`), and `mutation.py`'s leave-one-out rule is what enforces
+        it on `app/`. Nothing a test can assert here changes that.
+        """
+        body = score_ok(api, PARTIAL_ROLLS)
+        frames = body["frames"]
+    
+&gt;       assert len(frames) == 6, (
+            f"g-partial scored {len(frames)} frames, expected 6: {frames}"
+        )
+E       AssertionError: g-partial scored 0 frames, expected 6: []
+E       assert 0 == 6
+E        +  where 0 = len([])
+
+skeleton\verify\test_api_score.py:108: AssertionError</failure></testcase><testcase classname="skeleton.verify.test_api_score" name="test_c_2_4_total_is_the_last_scored_frame_for_partial_and_zero_for_gutter" time="0.300"><failure message="AssertionError: g-partial total is -1, expected 34&#10;assert -1 == 34">api = &lt;httpx.Client object at 0x000001DD02546F10&gt;
+
+    def test_c_2_4_total_is_the_last_scored_frame_for_partial_and_zero_for_gutter(api):
+        """c-2-4: POST /api/games/score returns total 34 for the 10 rolls of
+        g-partial and total 0 for the 20 rolls of g-gutter.
+    
+        Two inputs, because one cannot tell a real "the last frame that has a score"
+        from a constant. 34 is g-partial's *fourth* frame and not the last entry of
+        its array - frames 5 and 6 are `null` - and 0 is a whole game of gutter
+        balls, so a `total` that returns the final array entry, or the array length,
+        or the sum of the array, or a hardcoded number, fails on one of the two.
+    
+        Neither number is a value an unwritten block produces. `gameTotal`'s
+        declared fallback is `-1`, which spec.md requires to be `-1` and not 0
+        precisely so this criterion's g-gutter half cannot pass on an empty
+        skeleton; and with `cut-pending-frame` open, g-partial's frames 5 and 6
+        score `NaN`, so `total` is `NaN` rather than 34. This is the criterion
+        spec.md's integrity table names as the one that fails when
+        `cut-pending-frame` alone is left empty.
+        """
+        partial = score_ok(api, PARTIAL_ROLLS)
+&gt;       assert partial["total"] == PARTIAL_TOTAL, (
+            f"g-partial total is {partial['total']!r}, expected {PARTIAL_TOTAL}"
+        )
+E       AssertionError: g-partial total is -1, expected 34
+E       assert -1 == 34
+
+skeleton\verify\test_api_score.py:135: AssertionError</failure></testcase><testcase classname="skeleton.verify.test_api_score" name="test_c_2_5_bad_rolls_and_bad_json_are_the_same_four_hundred_and_empty_is_a_game" time="0.328"><failure message="AssertionError: an empty game totalled -1, expected 0&#10;assert -1 == 0&#10; +  where -1 = number(-1, &quot;the empty game's total&quot;)">api = &lt;httpx.Client object at 0x000001DD035C5260&gt;
+
+    def test_c_2_5_bad_rolls_and_bad_json_are_the_same_four_hundred_and_empty_is_a_game(api):
+        """c-2-5: POST /api/games/score rejects a body whose rolls is not an array of
+        numbers with 400 and the JSON body {"error": "rolls must be an array of
+        numbers"}, rejects a request whose body is not valid JSON with that same 400
+        body, and returns 200 with frames [] and total 0 for an empty rolls array.
+    
+        All three halves the criterion words, in the one test the criterion is.
+    
+        The rejected bodies are four: `rolls` absent, `rolls` a string, `rolls` an
+        array holding a non-number, and a body that is not JSON at all. spec.md's
+        endpoint section covers the first three with "`rolls` is absent, or is not
+        an array of numbers" and the fourth with "The body is absent, empty, or not
+        valid JSON: treated the same as an absent `rolls`". Each response is
+        compared as a whole-body equality, not a substring, so an extra key or a
+        reworded message fails - and the two paths are asserted to answer the *same*
+        body, which is what "that same 400 body" asks for. spec.md also says the
+        handler wraps the parse "so no input reaches the 500 the endpoint does not
+        declare", which is why the unparseable body is asserted at 400 and not
+        merely at "not 200".
+    
+        The empty-array half is what ties this criterion to `cut-game-total`:
+        `gameTotal([])` is 0 while the declared fallback is `-1`, so the 0 asserted
+        here is not a value an unwritten block produces. The `frames == []` half
+        alone would be - an empty roll list yields no frames whatever the scoring
+        block does - which is why the total is asserted beside it rather than
+        instead of it.
+        """
+        bad_bodies = [
+            ({}, "rolls absent"),
+            ({"rolls": "1,2,3"}, "rolls is a string"),
+            ({"rolls": [1, 4, "seven"]}, "rolls holds a non-number"),
+        ]
+        for payload, what in bad_bodies:
+            response = post_score(api, json=payload)
+            assert response.status_code == 400, (
+                f"{what}: answered {response.status_code}, expected 400 "
+                f"({response.text[:200]})"
+            )
+            assert response.json() == ERROR_BODY, (
+                f"{what}: body is {response.json()!r}, expected {ERROR_BODY!r}"
+            )
+    
+        unparseable = post_score(
+            api,
+            content="{this is not json",
+            headers={"Content-Type": "application/json"},
+        )
+        assert unparseable.status_code == 400, (
+            f"an unparseable body answered {unparseable.status_code}, expected 400 "
+            f"({unparseable.text[:200]})"
+        )
+        assert unparseable.json() == ERROR_BODY, (
+            f"an unparseable body returned {unparseable.json()!r}, "
+            f"expected {ERROR_BODY!r}"
+        )
+    
+        empty = score_ok(api, [])
+        assert empty["frames"] == [], (
+            f"an empty game scored {empty['frames']!r}, expected []"
+        )
+&gt;       assert number(empty["total"], "the empty game's total") == EMPTY_GAME_TOTAL, (
+            f"an empty game totalled {empty['total']!r}, expected {EMPTY_GAME_TOTAL}"
+        )
+E       AssertionError: an empty game totalled -1, expected 0
+E       assert -1 == 0
+E        +  where -1 = number(-1, "the empty game's total")
+
+skeleton\verify\test_api_score.py:205: AssertionError</failure></testcase><testcase classname="skeleton.verify.test_ui_game" name="test_c_1_4_perfect_game_draws_ten_frame_boxes_ending_in_x_x_x" time="26.584"><failure message="AssertionError: Locator expected to have count '10'&#10;Actual value: 0 &#10;Call log:&#10;  - Expect &quot;to_have_count&quot; with timeout 20000ms&#10;  - waiting for locator(&quot;[data-testid^=\&quot;frame-\&quot;]&quot;)&#10;    43 × locator resolved to 0 elements&#10;       - unexpected value &quot;0&quot;">page = &lt;Page url='http://127.0.0.1:61294/games/g-perfect'&gt;
+
+    def test_c_1_4_perfect_game_draws_ten_frame_boxes_ending_in_x_x_x(page):
+        """c-1-4: /games/g-perfect renders 10 elements with data-testid frame-1
+        through frame-10 and displays the exact text 'X X X' in the element with
+        data-testid frame-10.
+    
+        The boxes are enumerated on the `frame-` prefix, which spec.md's element
+        table leaves to the frame boxes alone, and the suffixes are compared as one
+        ordered list ['1'..'10'] - so a grid of nine boxes, a grid of eleven, a grid
+        numbered from 0 and a `frame-10` rendered before `frame-9` each fail.
+        spec.json's element list pins the numbering as "frame-1 upwards", which is
+        what makes the order part of the requirement rather than an extra.
+    
+        The tenth box is the three-roll tenth `[10,10,10]`, whose first two rolls
+        add to 20 rather than 10, so no `/` appears and the text is three X glyphs
+        joined by single spaces. Equality, not containment: 'X X X X' is not
+        'X X X'. With either frame cut open the box does not exist at all, so no
+        value an unwritten block produces reads this way.
+        """
+        open_game(page, "g-perfect")
+    
+        boxes = family(page, "frame-")
+&gt;       expect(boxes).to_have_count(10, timeout=LOAD_TIMEOUT)
+E       AssertionError: Locator expected to have count '10'
+E       Actual value: 0 
+E       Call log:
+E         - Expect "to_have_count" with timeout 20000ms
+E         - waiting for locator("[data-testid^=\"frame-\"]")
+E           43 × locator resolved to 0 elements
+E              - unexpected value "0"
+
+skeleton\verify\test_ui_game.py:85: AssertionError</failure></testcase><testcase classname="skeleton.verify.test_ui_game" name="test_c_1_5_mixed_game_boxes_read_their_roll_symbols" time="20.160"><failure message="AssertionError: Locator expected to have count '1'&#10;Actual value: 0 &#10;Call log:&#10;  - Expect &quot;to_have_count&quot; with timeout 20000ms&#10;  - waiting for get_by_test_id(&quot;frame-1&quot;)&#10;    43 × locator resolved to 0 elements&#10;       - unexpected value &quot;0&quot;">page = &lt;Page url='http://127.0.0.1:61294/games/g-mixed'&gt;
+
+    def test_c_1_5_mixed_game_boxes_read_their_roll_symbols(page):
+        """c-1-5: /games/g-mixed displays the exact text '1 4' in the element with
+        data-testid frame-1, '6 /' in frame-3, 'X' in frame-5, '- 1' in frame-6 and
+        '2 / 6' in frame-10.
+    
+        Five boxes, one per symbol rule, each asserted by equality: two digits for
+        an open frame; a `/` for the second roll of a spare in frame-3 (`[6,4]`); a
+        lone `X` for the strike frame at 5, which holds one roll and not two; the
+        `-` gutter glyph in frame-6 (`[0,1]`, which spec.md says "is what grades the
+        `-` glyph for a gutter roll"); and the three-roll tenth `[2,8,6]`, where a
+        spare `/` and a bonus digit share one box.
+    
+        All five use `==` rather than `in`, so '1 4 5' does not satisfy frame-1 and
+        'X X' does not satisfy frame-5. Each box is required to exist before its
+        text is read. None of the five is a value an unwritten block produces: with
+        `cut-frames-scan` open there are no boxes at all, and with only
+        `cut-frames-tenth` filled there is a single box holding the whole roll list.
+        """
+        open_game(page, "g-mixed")
+    
+        for number, expected in MIXED_FRAME_TEXTS.items():
+            box = by_testid(page, f"frame-{number}")
+&gt;           expect(box).to_have_count(1, timeout=LOAD_TIMEOUT)
+E           AssertionError: Locator expected to have count '1'
+E           Actual value: 0 
+E           Call log:
+E             - Expect "to_have_count" with timeout 20000ms
+E             - waiting for get_by_test_id("frame-1")
+E               43 × locator resolved to 0 elements
+E                  - unexpected value "0"
+
+skeleton\verify\test_ui_game.py:120: AssertionError</failure></testcase><testcase classname="skeleton.verify.test_ui_game" name="test_c_1_6_unknown_id_says_so_and_draws_no_grid" time="0.216" /><testcase classname="skeleton.verify.test_ui_game" name="test_c_2_6_partial_game_score_column_runs_out_into_two_empty_cells" time="21.420"><failure message="AssertionError: Locator expected to have count '1'&#10;Actual value: 0 &#10;Call log:&#10;  - Expect &quot;to_have_count&quot; with timeout 20000ms&#10;  - waiting for get_by_test_id(&quot;total-1&quot;)&#10;    43 × locator resolved to 0 elements&#10;       - unexpected value &quot;0&quot;">page = &lt;Page url='http://127.0.0.1:61294/games/g-partial'&gt;
+
+    def test_c_2_6_partial_game_score_column_runs_out_into_two_empty_cells(page):
+        """c-2-6: /games/g-partial displays the exact text '7', '16', '25' and '34'
+        in the elements with data-testid total-1 through total-4, the exact text '34'
+        in the element with data-testid game-total, and the elements with data-testid
+        total-5 and total-6 contain no text at all.
+    
+        The populated column and the empty column in one test, which is what the
+        criterion is and what spec.md's Grading integrity argument leans on twice:
+        "a page that renders every score cell empty, or renders `null`, or renders
+        `NaN`, or renders the frame's own score instead of the cumulative one, fails
+        here." The four numbers are cumulative and not per-frame - the frames are
+        [3,4], [7,2], [9,0], [8,1], whose own sums are 7, 9, 9, 9 - so 16, 25 and 34
+        are only reachable by carrying the running total forward.
+    
+        The two pending cells are read with `raw_text_of`, which does not collapse
+        whitespace, and are required to be exactly the empty string. spec.md: "It is
+        not a placeholder character, not `&amp;nbsp;`, not an em dash and not the `-`
+        gutter glyph." Each is required to exist first, because an element that is
+        absent is not an element holding no text.
+    
+        `game-total` reads '34' and not '300', '133', '-1' or the last array entry:
+        the last two frames are `null`, so the total is the fourth frame's score.
+        `-1` is `cut-game-total`'s declared fallback, so the number asserted here is
+        not one an unwritten block produces - and neither is an empty cell, because
+        with `cut-pending-frame` open those two cells hold `NaN` or a number. This
+        is the only criterion that drives all three session-2 cuts through the page.
+        """
+        open_game(page, "g-partial")
+    
+        for number, expected in PARTIAL_TOTAL_TEXTS.items():
+            cell = by_testid(page, f"total-{number}")
+&gt;           expect(cell).to_have_count(1, timeout=LOAD_TIMEOUT)
+E           AssertionError: Locator expected to have count '1'
+E           Actual value: 0 
+E           Call log:
+E             - Expect "to_have_count" with timeout 20000ms
+E             - waiting for get_by_test_id("total-1")
+E               43 × locator resolved to 0 elements
+E                  - unexpected value "0"
+
+skeleton\verify\test_ui_game.py:184: AssertionError</failure></testcase></testsuite></testsuites>
