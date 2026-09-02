@@ -25,7 +25,8 @@
     "deploy": 1,
     "leak-scan": 1,
     "guide-lint": 1,
-    "dryrun": 1
+    "dryrun": 1,
+    "ship": 1
   },
   "gates": {
     "gate0": {
@@ -250,6 +251,13 @@
       "ok": true,
       "at": "2026-09-02T18:15:16+00:00",
       "detail": "session 1, 40 min, Priya",
+      "run": 1
+    },
+    {
+      "step": "ship",
+      "ok": true,
+      "at": "2026-09-02T18:18:53+00:00",
+      "detail": "",
       "run": 1
     }
   ],
