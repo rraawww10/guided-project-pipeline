@@ -19,8 +19,8 @@
     "revise:round-1": 1,
     "revise:round-2": 1,
     "revise:round-3": 1,
-    "test:app": 1,
-    "mutation": 1,
+    "test:app": 2,
+    "mutation": 2,
     "cut": 1,
     "deploy": 1,
     "leak-scan": 1,
@@ -259,6 +259,20 @@
       "at": "2026-09-02T18:18:53+00:00",
       "detail": "",
       "run": 1
+    },
+    {
+      "step": "test:app",
+      "ok": true,
+      "at": "2026-09-02T18:28:46+00:00",
+      "detail": "",
+      "run": 2
+    },
+    {
+      "step": "mutation",
+      "ok": true,
+      "at": "2026-09-02T20:31:14+00:00",
+      "detail": "",
+      "run": 2
     }
   ],
   "ticket": null,

@@ -547,7 +547,8 @@ def test_mutation_run_control(tmp: Path) -> None:
     mutation._apply_run_control(rs)
     check("a reclassified mutant with nothing red is NOT GRADED, not ok",
           state(rs), [("a", False, False), ("b", True, False)])
-    check("and it says so", rs[0]["why"].startswith("NOT GRADED"), True)
+    check("and it says so, in the one place that sentence is defined",
+          rs[0]["why"], mutation.NOT_GRADED)
 
     # a single-task run has no other mutant, so it can never self-rescue
     rs = [R("only", True, True, ["c-1-1"])]
@@ -556,6 +557,48 @@ def test_mutation_run_control(tmp: Path) -> None:
 
     check("the internal outcome flag never reaches the report",
           any("_outcomes" in r for r in rs), False)
+
+    # --- basic_needs_v1 §9.3: "the mutation check catches a fake browser test
+    # (one that only checks the page loads)".
+    #
+    # That is this decision and not a separate feature. A test which only
+    # asserts the page loaded keeps passing once the task it nominally grades is
+    # removed, so the mutant goes 0 red with the harness plainly alive - and the
+    # task must come back as grading nothing. Driven through classify_run, which
+    # is the code path `run` itself uses, so this is the real verdict and not a
+    # restatement of it. The end-to-end half is covered at step 5: redfirst
+    # catches `page.goto('/')` with no assertion before any code exists.
+    fake = [R("cut-ui-rows", False, True, []),          # graded only by a page-loads test
+            R("cut-api-list", False, True, ["c-1-1"])]  # honestly graded, proves the harness
+    v = mutation.classify_run(fake)
+    check("a task whose only test just loads the page is reported ungraded",
+          (v["ok"], v["ungraded_tasks"], v["inconclusive_tasks"]),
+          (False, ["cut-ui-rows"], []))
+    check("the run fails rather than passing with a vacuous task in it", v["ok"], False)
+
+    # the same shape must NOT be excused as "the harness never ran" - that would
+    # turn a caught fake test into an inconclusive one and the run would be
+    # retried instead of rejected
+    check("a vacuous task is ungraded, never merely inconclusive",
+          fake[0]["inconclusive"], False)
+    # the sentence a person acts on, defined once and reached from both the
+    # per-mutant path in run() and the reclassifying path above
+    check("the ungraded verdict tells a reader a student can leave it empty",
+          ("NOT GRADED" in mutation.NOT_GRADED,
+           "leave it empty" in mutation.NOT_GRADED), (True, True))
+
+    # a fake test in EVERY task is the worst case: nothing anywhere goes red
+    allfake = [R("a", False, True, []), R("b", False, True, [])]
+    v = mutation.classify_run(allfake)
+    check("a suite of fake tests fails the whole run, naming every task",
+          (v["ok"], v["ungraded_tasks"]), (False, ["a", "b"]))
+
+    # and the honest case still passes, or the check above proves nothing
+    good = [R("a", False, True, ["c-1-1"]), R("b", False, True, ["c-1-2"])]
+    v = mutation.classify_run(good)
+    check("a properly graded run still passes", (v["ok"], v["ungraded_tasks"]),
+          (True, []))
+    check("an empty run is not a pass", mutation.classify_run([])["ok"], False)
 
 
 # ----------------------------------------------------- server teardown ----
@@ -1816,6 +1859,45 @@ def test_new_checkers(tmp: Path) -> None:
           [("README.md", "cut-api-list")])
     (proj / "skeleton" / "README.md").write_text("# Starter\n\nreturn\n}\n")
     check("structural lines are not leaks", leak_scan.run(proj, check_history=False)["ok"], True)
+
+    # --- basic_needs_v1 §9.4: "the leak scan catches an answer left in git
+    # history". Deleting a leak does not remove it, and the tree scan above
+    # cannot see that - so this plants the answer line, commits it, deletes it
+    # from the working tree, and commits the deletion. The tree is then clean and
+    # the repo is not. Every other leak check ran with check_history False, so
+    # scan_git_history had no coverage at all before this.
+    proj = make_project(tmp / "leakhist")
+    cutter.cut(proj)
+    git = ["git", "-c", "user.email=selftest@example.com", "-c", "user.name=selftest",
+           "-c", "commit.gpgsign=false"]
+
+    def git_run(*a):
+        return subprocess.run([*git, *a], cwd=proj, capture_output=True, text=True)
+
+    git_run("init", "-q")
+    hint = proj / "skeleton" / "HINTS.md"
+    hint.write_text(f"# Hints\n\n    {leaked}\n")
+    git_run("add", "-A")
+    committed = git_run("commit", "-q", "-m", "starter with a hint")
+    hist_ready = committed.returncode == 0
+    check("the fixture repo committed the planted answer", hist_ready, True)
+
+    r = leak_scan.run(proj, check_history=True)
+    check("a leak still in the tree is caught with history on too", r["ok"], False)
+
+    hint.unlink()                       # the fix a person would make
+    git_run("add", "-A")
+    git_run("commit", "-q", "-m", "remove the hint")
+    r = leak_scan.run(proj, check_history=True)
+    check("deleting the leaked file leaves the tree clean", r["leaks"], [])
+    check("but the answer is still in git history, and is reported",
+          [(h["where"], h["task"]) for h in r["history_leaks"]],
+          [("git history", "cut-api-list")])
+    check("so the run fails on history alone", r["ok"], False)
+    check("and the finding names the commit that carries it",
+          bool(r["history_leaks"][0]["commit"]), True)
+    check("history is not scanned when it is not asked for",
+          leak_scan.run(proj, check_history=False)["ok"], True)
 
     # --- step 11's checker
     proj = make_project(tmp / "guide")

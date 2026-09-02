@@ -37,6 +37,14 @@ from .cutter import (CLOSE, OPEN, SKIP_DIRS, link_dir, load_hints, todo_line,
 MUTANT_ROOT = Path(".pipeline") / "mutants"
 
 
+# The verdict a reader acts on, and the one basic_needs_v1 §9.3 is about: a
+# task nothing turns red is a task a student can skip. One definition, because
+# it is reached from two places - the per-mutant path in `run` and the
+# reclassifying path in `_apply_run_control`.
+NOT_GRADED = ("NOT GRADED: every requirement that declares this task still "
+              "passes with it removed, so a student can leave it empty")
+
+
 def mutate_one(app: Path, out: Path, task_id: str, hints: dict) -> int:
     """Write a copy of `app` with only `task_id` unwritten.
 
@@ -132,10 +140,33 @@ def _apply_run_control(results: list[dict]) -> None:
                 "a passing criterion, which proves it, and this mutant reported "
                 "real per-test outcomes rather than the all-missing shape"
                 if r["went_red"] else
-                "NOT GRADED: every requirement that declares this task still "
-                "passes with it removed, so a student can leave it empty")
+                NOT_GRADED)
     for r in results:
         r.pop("_outcomes", None)
+
+
+def classify_run(results: list[dict]) -> dict:
+    """The run-level verdict: which tasks grade nothing, and whether the run passed.
+
+    Factored out of `run` so the decision can be exercised without booting and
+    building once per mutant. That matters for basic_needs_v1 acceptance
+    criterion 3 - "the mutation check catches a fake browser test (one that only
+    checks the page loads)" - because that is precisely this decision. A test
+    which only asserts the page loaded still passes once the task it nominally
+    grades is removed, so nothing goes red, and the task has to come back
+    reported as grading nothing rather than as a pass.
+
+    Applies the run-level harness control first, exactly as `run` does, so a
+    caller testing this is testing the whole decision and not half of it.
+    """
+    _apply_run_control(results)
+    ungraded = [r["task"] for r in results if not r["ok"] and not r.get("inconclusive")]
+    inconclusive = [r["task"] for r in results if r.get("inconclusive")]
+    return {
+        "ok": not ungraded and not inconclusive and bool(results),
+        "ungraded_tasks": ungraded,
+        "inconclusive_tasks": inconclusive,
+    }
 
 
 def run(project: Path, only: list[str] | None = None, max_tasks: int | None = None,
@@ -201,23 +232,17 @@ def run(project: Path, only: list[str] | None = None, max_tasks: int | None = No
                     "never ran - this proves nothing about whether the task is graded"
                     if not ran else
                     "removing it turns its requirements red" if red else
-                    "NOT GRADED: every requirement that declares this task still "
-                    "passes with it removed, so a student can leave it empty"),
+                    NOT_GRADED),
         })
         shutil.rmtree(mdir, ignore_errors=True)
 
-    _apply_run_control(results)
-
-    ungraded = [r["task"] for r in results if not r["ok"] and not r.get("inconclusive")]
-    inconclusive = [r["task"] for r in results if r.get("inconclusive")]
+    verdict = classify_run(results)
     return {
-        "ok": not ungraded and not inconclusive and bool(results),
+        **verdict,
         "target": target,
         "checked": len(results),
         "of_total": len(hints),
         "seconds": round(time.time() - started, 1),
-        "ungraded_tasks": ungraded,
-        "inconclusive_tasks": inconclusive,
         "results": results,
         "rule": ("every student task must turn at least one of its requirements red "
                  "when it alone is removed"),
