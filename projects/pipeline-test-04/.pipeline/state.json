@@ -1,0 +1,179 @@
+{
+  "slug": "pipeline-test-04",
+  "created": "2026-09-02T04:58:40+00:00",
+  "flow": 2,
+  "phase": "code",
+  "retries": {
+    "idea": 0,
+    "spec": 0,
+    "code": 0,
+    "pack": 0
+  },
+  "step_runs": {
+    "stack": 1,
+    "ideas": 1,
+    "pick": 1,
+    "lint": 5,
+    "breaker": 4,
+    "redfirst": 4,
+    "revise:round-1": 1,
+    "revise:round-2": 1,
+    "revise:round-3": 1
+  },
+  "gates": {
+    "gate0": {
+      "approved": true,
+      "at": "2026-09-02T05:31:55+00:00",
+      "note": "GATE 0: idea-02 Tenpin. Human decision, stated as 'Go with 2 - Tenpin'. No rationale was given beyond the choice, and none is invented here.\n\nCARRY TO GATE 1 - the idea's own two stated risks:\n  1. The perfect game and the all-gutters game are both satisfied by wrong code\n     (3*frame and 0 respectively), so the spare-heavy mixed game is the\n     load-bearing fixture. Criteria must pin the whole cumulative array, not the\n     final total, or two errors that cancel go green.\n  2. The tenth frame is three rules in one place and is where this overruns.\n     It should be its own cut inside session 2, with the frame-box styling\n     shipped rather than cut.\n\nBUDGET: five consecutive projects have overrun their session cap; pipeline-test-03\nsession 1 measured 47 minutes against 40. This idea is 2 x 40.",
+      "picked": "idea-02.md"
+    },
+    "gate1": {
+      "approved": true,
+      "at": "2026-09-02T12:28:46+00:00",
+      "note": "GATE 1 APPROVED - round 4. Human decision (\"add the mutation owner then approve\ngate 1\"). The stopping rule was approve-eligible on its own; no --override.\n\nRULE: 0 blocking, 4 worth a look, 0 blocking findings owned by 'nothing'.\nLinter 0 errors / 0 warnings. Drift against round 3: none. verify_later empty.\nSessions 38.8 / 37.4 against the 40 cap. 12 criteria, 5 cuts, all five declaring\nwrites_into with hints that name it (E121 clean).\n\nTRAJECTORY: findings 10 -> 10 -> 6 -> 4; blocking 3 -> 3 -> 1 -> 0. Rounds 1 and\n2 did not converge and the reason was a pipeline defect, not the spec - see\nPIPELINE CHANGES below.\n\nVERIFIED, not taken on trust:\n  - Round 3's A1 is fixed in the two places the rejection brief named: the\n    cut-score-lookahead bullet now says the block applies its three arithmetic\n    rules unconditionally and never tests rolls.length, pendingFrame is the only\n    place the end of rolls is checked, and scoreGame pushes null for a pending\n    frame; the Grading integrity paragraph now states that this is what makes\n    c-2-4 and c-2-6 fail when cut-pending-frame is empty.\n  - Rounds 1-3's fixes are all intact. spec.json is otherwise line-for-line\n    identical to .pipeline/round-3/spec.json.\n  - Round 3's five worth-a-look findings, recorded in why.md as deliberately\n    kept, came back listed as adjudicated rather than re-raised. That was the\n    first live test of the why.md carry-forward and it held.\n  - The Breaker re-derived all four frame splits, cumulative arrays and totals\n    by hand, and the session-load table reproduces exactly against lint.json.\n\nSHIPS AS WRITTEN - all four remaining findings are owned 'nothing' and none is\nblocking. Accepted with eyes open:\n  B1 - which block owns the end-of-rolls guard is decided in spec.md, which the\n       student never reads, while cut-score-lookahead's hint is unchanged. The\n       Builder cannot guess (the spec now decides it) and mutation.py's\n       leave-one-out enforces it on app/ at step 8; the residue is student-side.\n       NOTE: now that `mutation` is a valid owner, a future pass would likely\n       park this on mutation rather than nothing. It is non-blocking either way,\n       so the gate was not re-run for it.\n  B2 - the step from frameScore to the cumulative array is unwritten. Changes\n       only how the open skeleton looks (empty cells vs a column of zeroes); no\n       graded value moves.\n  B3 - \"one frame box and one score cell per entry frames() returned\" is graded\n       only where the answer is ten, so a padded ten-box grid passes every\n       criterion and g-partial's page could ship with four empty boxes. CARRY TO\n       GATE 2: this is a criterion-shaped hole, not a test-shaped one, and\n       neither mutation nor skeleton-check will catch it. Read c-2-6's result\n       against a real g-partial page by hand.\n  B4 - the scan hint states \"a 10-roll game leaves out with 6 entries\", which is\n       false for most 10-roll games. Wording in a hint the student reads.\n\nPIPELINE CHANGES made between rounds 2 and 4, because rounds 1-2 were failing on\nthe pipeline rather than on the spec (all recorded in the working tree, selftest\n394 checks green):\n  1. The Spec Breaker had no memory of prior rounds while the Spec Writer did.\n     It writes both fields the stopping rule reads - blocking and owner - so each\n     round re-rolled the verdict on unchanged text. Measured: 4 of round 2's 10\n     findings were re-raises of round-1 findings and 3 of those 4 had moved\n     classification, including c-1-6 going worth-a-look -> blocking on a\n     byte-identical criterion. Fixed in the workflow prompt and the skill.\n  2. gate1-check now detects that drift by script, keying findings on the spec\n     ids they cite rather than on their own ids (which renumber) or their quoted\n     line (which gets re-worded). Informational only - it never changes a\n     verdict.\n  3. spec_linter E121/E122/W068: every cut declares writes_into and its hint must\n     backtick that symbol. Round 2's A1 - hints saying `frames` while the\n     declared accumulator was `out` - is now caught deterministically.\n  4. `mutation` added to the Gate 1 owner vocabulary and to FAIL_OPEN. It was\n     missing, so \"the cut can be left empty with every criterion green\" - the one\n     class mutation.py exists to catch - had nowhere to be parked, and round 3\n     was rejected with owner 'nothing' for lack of the word. A missing word cost\n     a round.\n  5. gp-phase1-spec.js reported ready:true on a rejected gate (hardcoded). Now\n     ready: !!verdict.ok.\n\nNOT YET COMMITTED at the moment of approval: the pipeline changes above and four\nrounds of spec history. lessons.md:154 says commit the approved spec before the\ncode phase - do that before step 7.",
+      "spec_hash": "eb17a8732739de51bb84d2adcb376a92da23df5245201ad719aaa84359f2bc64",
+      "verify_hash": "de1a4ad629f178cdc18764d8bff7c97d22403ae7989601157947c9acc032bb93",
+      "override": false
+    },
+    "gate2": null,
+    "gate3": null
+  },
+  "steps": [
+    {
+      "step": "stack",
+      "ok": true,
+      "at": "2026-09-02T04:58:47+00:00",
+      "detail": "next, react, typescript",
+      "run": 1
+    },
+    {
+      "step": "ideas",
+      "ok": true,
+      "at": "2026-09-02T05:06:40+00:00",
+      "detail": "5 ideas",
+      "run": 1
+    },
+    {
+      "step": "pick",
+      "ok": true,
+      "at": "2026-09-02T05:31:55+00:00",
+      "detail": "idea-02.md",
+      "run": 1
+    },
+    {
+      "step": "lint",
+      "ok": true,
+      "at": "2026-09-02T05:46:01+00:00",
+      "detail": "",
+      "run": 1
+    },
+    {
+      "step": "breaker",
+      "ok": true,
+      "at": "2026-09-02T05:57:58+00:00",
+      "detail": "b91e8b8d1114",
+      "run": 1
+    },
+    {
+      "step": "redfirst",
+      "ok": true,
+      "at": "2026-09-02T06:07:04+00:00",
+      "detail": "",
+      "run": 1
+    },
+    {
+      "step": "revise:round-1",
+      "ok": true,
+      "at": "2026-09-02T09:09:26+00:00",
+      "detail": "spec.md, spec.json, lint.json, ambiguity.md, gate1.json, redfirst.json, verify",
+      "run": 1
+    },
+    {
+      "step": "lint",
+      "ok": true,
+      "at": "2026-09-02T09:13:35+00:00",
+      "detail": "",
+      "run": 2
+    },
+    {
+      "step": "breaker",
+      "ok": true,
+      "at": "2026-09-02T09:25:18+00:00",
+      "detail": "af315e33e81a",
+      "run": 2
+    },
+    {
+      "step": "redfirst",
+      "ok": true,
+      "at": "2026-09-02T09:34:25+00:00",
+      "detail": "",
+      "run": 2
+    },
+    {
+      "step": "lint",
+      "ok": true,
+      "at": "2026-09-02T09:43:54+00:00",
+      "detail": "",
+      "run": 3
+    },
+    {
+      "step": "revise:round-2",
+      "ok": true,
+      "at": "2026-09-02T09:46:27+00:00",
+      "detail": "spec.md, spec.json, lint.json, ambiguity.md, gate1.json, redfirst.json, verify",
+      "run": 1
+    },
+    {
+      "step": "lint",
+      "ok": true,
+      "at": "2026-09-02T10:23:01+00:00",
+      "detail": "",
+      "run": 4
+    },
+    {
+      "step": "breaker",
+      "ok": true,
+      "at": "2026-09-02T10:34:34+00:00",
+      "detail": "338b6dde4abc",
+      "run": 3
+    },
+    {
+      "step": "redfirst",
+      "ok": true,
+      "at": "2026-09-02T10:43:56+00:00",
+      "detail": "",
+      "run": 3
+    },
+    {
+      "step": "revise:round-3",
+      "ok": true,
+      "at": "2026-09-02T11:46:25+00:00",
+      "detail": "spec.md, spec.json, lint.json, ambiguity.md, gate1.json, redfirst.json, verify",
+      "run": 1
+    },
+    {
+      "step": "lint",
+      "ok": true,
+      "at": "2026-09-02T11:51:23+00:00",
+      "detail": "",
+      "run": 5
+    },
+    {
+      "step": "breaker",
+      "ok": true,
+      "at": "2026-09-02T12:05:44+00:00",
+      "detail": "eb17a8732739",
+      "run": 4
+    },
+    {
+      "step": "redfirst",
+      "ok": true,
+      "at": "2026-09-02T12:15:35+00:00",
+      "detail": "",
+      "run": 4
+    }
+  ],
+  "ticket": null,
+  "dry_run": null,
+  "feedback": []
+}

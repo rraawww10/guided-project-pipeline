@@ -1,0 +1,94 @@
+{
+  "ok": true,
+  "errors": [],
+  "warnings": [
+    {
+      "code": "W068",
+      "where": "session 1.cut cut-frames-scan",
+      "message": "cut does not declare writes_into, the symbol the block assigns to. Nothing then compares the hint's symbols to the value declared above the markers, so a hint naming the wrong one reaches the student as a type error and is frozen at Gate 1. Declare it and this becomes E121."
+    },
+    {
+      "code": "W068",
+      "where": "session 1.cut cut-frames-tenth",
+      "message": "cut does not declare writes_into, the symbol the block assigns to. Nothing then compares the hint's symbols to the value declared above the markers, so a hint naming the wrong one reaches the student as a type error and is frozen at Gate 1. Declare it and this becomes E121."
+    },
+    {
+      "code": "W068",
+      "where": "session 2.cut cut-score-lookahead",
+      "message": "cut does not declare writes_into, the symbol the block assigns to. Nothing then compares the hint's symbols to the value declared above the markers, so a hint naming the wrong one reaches the student as a type error and is frozen at Gate 1. Declare it and this becomes E121."
+    },
+    {
+      "code": "W068",
+      "where": "session 2.cut cut-pending-frame",
+      "message": "cut does not declare writes_into, the symbol the block assigns to. Nothing then compares the hint's symbols to the value declared above the markers, so a hint naming the wrong one reaches the student as a type error and is frozen at Gate 1. Declare it and this becomes E121."
+    },
+    {
+      "code": "W068",
+      "where": "session 2.cut cut-game-total",
+      "message": "cut does not declare writes_into, the symbol the block assigns to. Nothing then compares the hint's symbols to the value declared above the markers, so a hint naming the wrong one reaches the student as a type error and is frozen at Gate 1. Declare it and this becomes E121."
+    }
+  ],
+  "counts": {
+    "errors": 0,
+    "warnings": 5
+  },
+  "session_minutes": [
+    {
+      "n": 1,
+      "minutes": 38.7,
+      "cuts": 2,
+      "builds": 2,
+      "concepts": 2,
+      "carries_setup": true,
+      "over_cap": false,
+      "weighted": true,
+      "cut_minutes": [
+        {
+          "id": "cut-frames-scan",
+          "minutes": 7.7,
+          "decisions": 1,
+          "hint_words": 56
+        },
+        {
+          "id": "cut-frames-tenth",
+          "minutes": 6.0,
+          "decisions": 0,
+          "hint_words": 48
+        }
+      ],
+      "largest_cut_share": 0.56
+    },
+    {
+      "n": 2,
+      "minutes": 37.4,
+      "cuts": 3,
+      "builds": 1,
+      "concepts": 3,
+      "carries_setup": false,
+      "over_cap": false,
+      "weighted": true,
+      "cut_minutes": [
+        {
+          "id": "cut-score-lookahead",
+          "minutes": 7.9,
+          "decisions": 1,
+          "hint_words": 60
+        },
+        {
+          "id": "cut-pending-frame",
+          "minutes": 6.0,
+          "decisions": 0,
+          "hint_words": 53
+        },
+        {
+          "id": "cut-game-total",
+          "minutes": 6.0,
+          "decisions": 0,
+          "hint_words": 34
+        }
+      ],
+      "largest_cut_share": 0.4
+    }
+  ],
+  "spec_hash": "af315e33e81aefc4b281268441b8a33d22de2f025a84a9c562e54deaf20f782c"
+}

@@ -1,0 +1,13 @@
+{
+  "stack": [
+    "next",
+    "react",
+    "typescript"
+  ],
+  "sessions": 2,
+  "minutes_per_session": 40,
+  "track": "fullstack",
+  "limits": "",
+  "given_by": "ai-fullstack-curriculum",
+  "at": "2026-09-02T04:58:40+00:00"
+}

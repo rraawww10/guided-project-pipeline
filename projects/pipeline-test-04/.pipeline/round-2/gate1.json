@@ -1,0 +1,149 @@
+{
+  "ok": false,
+  "verdict": "reject",
+  "spec_hash": "af315e33e81aefc4b281268441b8a33d22de2f025a84a9c562e54deaf20f782c",
+  "findings": [
+    {
+      "id": "A1",
+      "title": "the hints tell the student to append to `frames`; the declared variable is `out`",
+      "section": "blocking",
+      "owner": "nothing",
+      "blocking": true,
+      "owner_declared": "nothing",
+      "owner_valid": true,
+      "owner_downgraded": null,
+      "fail_open": false,
+      "caught_by": "NO downstream checker sees this - it ships as written",
+      "must_fix_now": true
+    },
+    {
+      "id": "A2",
+      "title": "nothing says how `scoreGame` gets its frames, and one reading ships the answer to `cut-frames-scan` inside `lib/score.ts`",
+      "section": "blocking",
+      "owner": "nothing",
+      "blocking": true,
+      "owner_declared": "nothing",
+      "owner_valid": true,
+      "owner_downgraded": null,
+      "fail_open": false,
+      "caught_by": "NO downstream checker sees this - it ships as written",
+      "must_fix_now": true
+    },
+    {
+      "id": "A3",
+      "title": "c-1-6 asks a server component for a 404 status and an id-interpolated message at the same time",
+      "section": "blocking",
+      "owner": "test-runner",
+      "blocking": true,
+      "owner_declared": "test-runner",
+      "owner_valid": true,
+      "owner_downgraded": null,
+      "fail_open": false,
+      "caught_by": "step 6 - the Builder/test-runner loop fixes this for free",
+      "must_fix_now": false
+    },
+    {
+      "id": "B1",
+      "title": "`pendingFrame` is promised in the Outcome with no signature, no criterion and a hint that names something else",
+      "section": "worth a look",
+      "owner": "nothing",
+      "blocking": false,
+      "owner_declared": "nothing",
+      "owner_valid": true,
+      "owner_downgraded": null,
+      "fail_open": false,
+      "caught_by": "NO downstream checker sees this - it ships as written",
+      "must_fix_now": false
+    },
+    {
+      "id": "B2",
+      "title": "`cut-frames-tenth` needs to know where the scan stopped, and no symbol for that is declared",
+      "section": "worth a look",
+      "owner": "nothing",
+      "blocking": false,
+      "owner_declared": "nothing",
+      "owner_valid": true,
+      "owner_downgraded": null,
+      "fail_open": false,
+      "caught_by": "NO downstream checker sees this - it ships as written",
+      "must_fix_now": false
+    },
+    {
+      "id": "B3",
+      "title": "session 1's declared end state cannot exist, because only one skeleton is generated",
+      "section": "worth a look",
+      "owner": "pack-writer",
+      "blocking": false,
+      "owner_declared": "pack-writer",
+      "owner_valid": true,
+      "owner_downgraded": null,
+      "fail_open": false,
+      "caught_by": "step 9 - a person reads the guide at Gate 3",
+      "must_fix_now": false
+    },
+    {
+      "id": "B4",
+      "title": "two rules the spec states that no criterion grades",
+      "section": "worth a look",
+      "owner": "nothing",
+      "blocking": false,
+      "owner_declared": "nothing",
+      "owner_valid": true,
+      "owner_downgraded": null,
+      "fail_open": false,
+      "caught_by": "NO downstream checker sees this - it ships as written",
+      "must_fix_now": false
+    },
+    {
+      "id": "B5",
+      "title": "session 2 is over the cap once the spec's own two adjustments are applied",
+      "section": "worth a look",
+      "owner": "nothing",
+      "blocking": false,
+      "owner_declared": "nothing",
+      "owner_valid": true,
+      "owner_downgraded": null,
+      "fail_open": false,
+      "caught_by": "NO downstream checker sees this - it ships as written",
+      "must_fix_now": false
+    },
+    {
+      "id": "B6",
+      "title": "\"empty\" is not pinned against the markup, and c-2-6's empty cells are load-bearing for grading",
+      "section": "worth a look",
+      "owner": "test-runner",
+      "blocking": false,
+      "owner_declared": "test-runner",
+      "owner_valid": true,
+      "owner_downgraded": null,
+      "fail_open": false,
+      "caught_by": "step 6 - the Builder/test-runner loop fixes this for free",
+      "must_fix_now": false
+    },
+    {
+      "id": "B7",
+      "title": "a POST body that is not JSON at all has no declared status",
+      "section": "worth a look",
+      "owner": "nothing",
+      "blocking": false,
+      "owner_declared": "nothing",
+      "owner_valid": true,
+      "owner_downgraded": null,
+      "fail_open": false,
+      "caught_by": "NO downstream checker sees this - it ships as written",
+      "must_fix_now": false
+    }
+  ],
+  "counts": {
+    "blocking": 3,
+    "worth_a_look": 7,
+    "unowned_blocking": 2
+  },
+  "reasons": [
+    "A1 (the hints tell the student to append to `frames`; the declared variabl) is blocking and nothing downstream catches it",
+    "A2 (nothing says how `scoreGame` gets its frames, and one reading ships th) is blocking and nothing downstream catches it"
+  ],
+  "rule": "reject when any blocking finding is owned by 'nothing'; approve when every remaining finding sits in a column a downstream checker owns. An owner that can pass by not running is owned only conditionally: it approves, and the confirmation it actually ran is listed in verify_later",
+  "reviewed_spec_hash": "af315e33e81aefc4b281268441b8a33d22de2f025a84a9c562e54deaf20f782c",
+  "verify_later": []
+}

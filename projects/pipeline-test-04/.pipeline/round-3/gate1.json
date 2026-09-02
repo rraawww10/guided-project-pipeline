@@ -1,0 +1,140 @@
+{
+  "ok": false,
+  "verdict": "reject",
+  "spec_hash": "338b6dde4abc403b864d1378e5eda30d5c34479b145dc26c76d874c38ed9db4a",
+  "findings": [
+    {
+      "id": "A1",
+      "title": "`cut-pending-frame` can be left empty with every criterion green, because nothing says the lookahead block must not guard the end of `rolls`",
+      "section": "blocking",
+      "owner": "nothing",
+      "line": "\"It fails c-2-3 only when the lookahead guards the end of `rolls`; an unguarded one yields `NaN`, which serialises to `null` and matches c-2-3's expected body.\" And, in Grading integrity: \"Grading integrity does not depend on c-2-3: c-2-4 compares `total`, where `NaN` is not 34, and c-2-6 reads the page, where `NaN` is not an empty cell.\"",
+      "where": "spec.md, Session 2 cut points (`cut-score-lookahead`, `cut-pending-frame`) and Grading integrity; spec.json `cuts[cut-score-lookahead].hint`, criteria c-2-3, c-2-4, c-2-6",
+      "line_key": "04057ffc9e65e2df",
+      "subject": [
+        "c-2-3",
+        "c-2-4",
+        "c-2-6",
+        "cut-pending-frame",
+        "cut-score-lookahead"
+      ],
+      "blocking": true,
+      "owner_declared": "nothing",
+      "owner_valid": true,
+      "owner_downgraded": null,
+      "fail_open": false,
+      "caught_by": "NO downstream checker sees this - it ships as written",
+      "must_fix_now": true
+    },
+    {
+      "id": "B1",
+      "title": "`i` is passed to two different functions and its convention is stated in neither",
+      "section": "worth a look",
+      "owner": "test-runner",
+      "line": "\"keeps a parallel index `i` into `rolls`, and advances `i` by the length of each frame\" - against \"Index into `rolls` at `i`, never into `frameList`\" and \"a frame that opens with a 10 needs the two entries after it\"",
+      "where": "spec.md, Outcome (`pendingFrame(rolls: number[], i: number, frame: number[]): boolean`) and Session 2 Builds; spec.json `cuts[cut-score-lookahead].hint`, `cuts[cut-pending-frame].hint`",
+      "line_key": "f3ef4ee2a75c64e8",
+      "subject": [
+        "cut-pending-frame",
+        "cut-score-lookahead"
+      ],
+      "blocking": false,
+      "owner_declared": "test-runner",
+      "owner_valid": true,
+      "owner_downgraded": null,
+      "fail_open": false,
+      "caught_by": "step 6 - the Builder/test-runner loop fixes this for free",
+      "must_fix_now": false
+    },
+    {
+      "id": "B2",
+      "title": "an in-progress game whose last frame is short is undefined behaviour behind a declared 200",
+      "section": "worth a look",
+      "owner": "nothing",
+      "line": "\"`rolls` is an array of numbers: 200 with `{ \"frames\": FrameScore[], \"total\": number }`\" and \"The seed is legal and the POST body is trusted once it is an array of numbers.\"",
+      "where": "spec.md, Endpoints `ep-games-score`; Out of scope; spec.json `cuts[cut-pending-frame].hint`",
+      "line_key": "6e65037769c0a6ce",
+      "subject": [
+        "cut-pending-frame",
+        "ep-games-score"
+      ],
+      "blocking": false,
+      "owner_declared": "nothing",
+      "owner_valid": true,
+      "owner_downgraded": null,
+      "fail_open": false,
+      "caught_by": "NO downstream checker sees this - it ships as written",
+      "must_fix_now": false
+    },
+    {
+      "id": "B3",
+      "title": "the unknown-id page does not say what happens to the score cells and `game-total`",
+      "section": "worth a look",
+      "owner": "nothing",
+      "line": "\"the page answers 200 and renders the `no-game` element with the interpolated text and no frame boxes\"",
+      "where": "spec.md, Screens, state \"unknown game id\"; spec.json `screens[sc-game].elements`, criterion c-1-6",
+      "line_key": "bd77275c29cbc40e",
+      "subject": [
+        "c-1-6",
+        "sc-game"
+      ],
+      "blocking": false,
+      "owner_declared": "nothing",
+      "owner_valid": true,
+      "owner_downgraded": null,
+      "fail_open": false,
+      "caught_by": "NO downstream checker sees this - it ships as written",
+      "must_fix_now": false
+    },
+    {
+      "id": "B4",
+      "title": "the minute model reads zero decisions on two more cuts than the spec admits, and both sessions sit inside its known error of the cap",
+      "section": "worth a look",
+      "owner": "pack-writer",
+      "line": "\"It under-reads `cut-score-lookahead` in particular: three mutually exclusive rules live in that block and the regex sees one stated decision.\"",
+      "where": "spec.md, Session load",
+      "line_key": "c94739968cbf104c",
+      "subject": [
+        "cut-score-lookahead"
+      ],
+      "blocking": false,
+      "owner_declared": "pack-writer",
+      "owner_valid": true,
+      "owner_downgraded": null,
+      "fail_open": false,
+      "caught_by": "step 9 - a person reads the guide at Gate 3",
+      "must_fix_now": false
+    },
+    {
+      "id": "B5",
+      "title": "\"scores not yet computed\" is a state of the skeleton, and spec.json lists it as a state of the screen",
+      "section": "worth a look",
+      "owner": "pack-writer",
+      "line": "\"**scores not yet computed** - `lib/score.ts` unfilled: boxes and symbols render, every score cell is empty, and `game-total` reads `-1`.\"",
+      "where": "spec.md, Screens, States; spec.json `screens[sc-game].states[0]`",
+      "line_key": "f3d38d689db5dd8d",
+      "subject": [
+        "sc-game"
+      ],
+      "blocking": false,
+      "owner_declared": "pack-writer",
+      "owner_valid": true,
+      "owner_downgraded": null,
+      "fail_open": false,
+      "caught_by": "step 9 - a person reads the guide at Gate 3",
+      "must_fix_now": false
+    }
+  ],
+  "counts": {
+    "blocking": 1,
+    "worth_a_look": 5,
+    "unowned_blocking": 1
+  },
+  "reasons": [
+    "A1 (`cut-pending-frame` can be left empty with every criterion green, beca) is blocking and nothing downstream catches it"
+  ],
+  "rule": "reject when any blocking finding is owned by 'nothing'; approve when every remaining finding sits in a column a downstream checker owns. An owner that can pass by not running is owned only conditionally: it approves, and the confirmation it actually ran is listed in verify_later",
+  "reviewed_spec_hash": "338b6dde4abc403b864d1378e5eda30d5c34479b145dc26c76d874c38ed9db4a",
+  "drift": [],
+  "verify_later": []
+}

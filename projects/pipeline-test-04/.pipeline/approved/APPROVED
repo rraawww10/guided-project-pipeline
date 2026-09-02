@@ -1,0 +1,76 @@
+eb17a8732739de51bb84d2adcb376a92da23df5245201ad719aaa84359f2bc64
+GATE 1 APPROVED - round 4. Human decision ("add the mutation owner then approve
+gate 1"). The stopping rule was approve-eligible on its own; no --override.
+
+RULE: 0 blocking, 4 worth a look, 0 blocking findings owned by 'nothing'.
+Linter 0 errors / 0 warnings. Drift against round 3: none. verify_later empty.
+Sessions 38.8 / 37.4 against the 40 cap. 12 criteria, 5 cuts, all five declaring
+writes_into with hints that name it (E121 clean).
+
+TRAJECTORY: findings 10 -> 10 -> 6 -> 4; blocking 3 -> 3 -> 1 -> 0. Rounds 1 and
+2 did not converge and the reason was a pipeline defect, not the spec - see
+PIPELINE CHANGES below.
+
+VERIFIED, not taken on trust:
+  - Round 3's A1 is fixed in the two places the rejection brief named: the
+    cut-score-lookahead bullet now says the block applies its three arithmetic
+    rules unconditionally and never tests rolls.length, pendingFrame is the only
+    place the end of rolls is checked, and scoreGame pushes null for a pending
+    frame; the Grading integrity paragraph now states that this is what makes
+    c-2-4 and c-2-6 fail when cut-pending-frame is empty.
+  - Rounds 1-3's fixes are all intact. spec.json is otherwise line-for-line
+    identical to .pipeline/round-3/spec.json.
+  - Round 3's five worth-a-look findings, recorded in why.md as deliberately
+    kept, came back listed as adjudicated rather than re-raised. That was the
+    first live test of the why.md carry-forward and it held.
+  - The Breaker re-derived all four frame splits, cumulative arrays and totals
+    by hand, and the session-load table reproduces exactly against lint.json.
+
+SHIPS AS WRITTEN - all four remaining findings are owned 'nothing' and none is
+blocking. Accepted with eyes open:
+  B1 - which block owns the end-of-rolls guard is decided in spec.md, which the
+       student never reads, while cut-score-lookahead's hint is unchanged. The
+       Builder cannot guess (the spec now decides it) and mutation.py's
+       leave-one-out enforces it on app/ at step 8; the residue is student-side.
+       NOTE: now that `mutation` is a valid owner, a future pass would likely
+       park this on mutation rather than nothing. It is non-blocking either way,
+       so the gate was not re-run for it.
+  B2 - the step from frameScore to the cumulative array is unwritten. Changes
+       only how the open skeleton looks (empty cells vs a column of zeroes); no
+       graded value moves.
+  B3 - "one frame box and one score cell per entry frames() returned" is graded
+       only where the answer is ten, so a padded ten-box grid passes every
+       criterion and g-partial's page could ship with four empty boxes. CARRY TO
+       GATE 2: this is a criterion-shaped hole, not a test-shaped one, and
+       neither mutation nor skeleton-check will catch it. Read c-2-6's result
+       against a real g-partial page by hand.
+  B4 - the scan hint states "a 10-roll game leaves out with 6 entries", which is
+       false for most 10-roll games. Wording in a hint the student reads.
+
+PIPELINE CHANGES made between rounds 2 and 4, because rounds 1-2 were failing on
+the pipeline rather than on the spec (all recorded in the working tree, selftest
+394 checks green):
+  1. The Spec Breaker had no memory of prior rounds while the Spec Writer did.
+     It writes both fields the stopping rule reads - blocking and owner - so each
+     round re-rolled the verdict on unchanged text. Measured: 4 of round 2's 10
+     findings were re-raises of round-1 findings and 3 of those 4 had moved
+     classification, including c-1-6 going worth-a-look -> blocking on a
+     byte-identical criterion. Fixed in the workflow prompt and the skill.
+  2. gate1-check now detects that drift by script, keying findings on the spec
+     ids they cite rather than on their own ids (which renumber) or their quoted
+     line (which gets re-worded). Informational only - it never changes a
+     verdict.
+  3. spec_linter E121/E122/W068: every cut declares writes_into and its hint must
+     backtick that symbol. Round 2's A1 - hints saying `frames` while the
+     declared accumulator was `out` - is now caught deterministically.
+  4. `mutation` added to the Gate 1 owner vocabulary and to FAIL_OPEN. It was
+     missing, so "the cut can be left empty with every criterion green" - the one
+     class mutation.py exists to catch - had nowhere to be parked, and round 3
+     was rejected with owner 'nothing' for lack of the word. A missing word cost
+     a round.
+  5. gp-phase1-spec.js reported ready:true on a rejected gate (hardcoded). Now
+     ready: !!verdict.ok.
+
+NOT YET COMMITTED at the moment of approval: the pipeline changes above and four
+rounds of spec history. lessons.md:154 says commit the approved spec before the
+code phase - do that before step 7.

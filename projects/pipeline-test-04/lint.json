@@ -1,0 +1,68 @@
+{
+  "ok": true,
+  "errors": [],
+  "warnings": [],
+  "counts": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "session_minutes": [
+    {
+      "n": 1,
+      "minutes": 38.8,
+      "cuts": 2,
+      "builds": 2,
+      "concepts": 2,
+      "carries_setup": true,
+      "over_cap": false,
+      "weighted": true,
+      "cut_minutes": [
+        {
+          "id": "cut-frames-scan",
+          "minutes": 7.8,
+          "decisions": 1,
+          "hint_words": 57
+        },
+        {
+          "id": "cut-frames-tenth",
+          "minutes": 6.0,
+          "decisions": 0,
+          "hint_words": 47
+        }
+      ],
+      "largest_cut_share": 0.56
+    },
+    {
+      "n": 2,
+      "minutes": 37.4,
+      "cuts": 3,
+      "builds": 1,
+      "concepts": 3,
+      "carries_setup": false,
+      "over_cap": false,
+      "weighted": true,
+      "cut_minutes": [
+        {
+          "id": "cut-score-lookahead",
+          "minutes": 7.9,
+          "decisions": 1,
+          "hint_words": 60
+        },
+        {
+          "id": "cut-pending-frame",
+          "minutes": 6.0,
+          "decisions": 0,
+          "hint_words": 53
+        },
+        {
+          "id": "cut-game-total",
+          "minutes": 6.0,
+          "decisions": 0,
+          "hint_words": 34
+        }
+      ],
+      "largest_cut_share": 0.4
+    }
+  ],
+  "spec_hash": "eb17a8732739de51bb84d2adcb376a92da23df5245201ad719aaa84359f2bc64"
+}

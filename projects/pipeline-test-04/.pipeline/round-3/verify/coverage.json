@@ -1,0 +1,38 @@
+{
+  "c-1-1": {
+    "test": "verify/test_api_games.py::test_c_1_1_games_are_the_four_seeded_games_in_seed_order"
+  },
+  "c-1-2": {
+    "test": "verify/test_api_games.py::test_c_1_2_mixed_game_splits_into_ten_frames_with_a_three_roll_tenth"
+  },
+  "c-1-3": {
+    "test": "verify/test_api_games.py::test_c_1_3_partial_game_stops_after_six_frames_when_the_rolls_run_out"
+  },
+  "c-1-4": {
+    "test": "verify/test_ui_game.py::test_c_1_4_perfect_game_draws_ten_frame_boxes_ending_in_x_x_x"
+  },
+  "c-1-5": {
+    "test": "verify/test_ui_game.py::test_c_1_5_mixed_game_boxes_read_their_roll_symbols"
+  },
+  "c-1-6": {
+    "test": "verify/test_ui_game.py::test_c_1_6_unknown_id_says_so_and_draws_no_grid"
+  },
+  "c-2-1": {
+    "test": "verify/test_api_score.py::test_c_2_1_perfect_game_scores_thirty_a_frame_to_three_hundred"
+  },
+  "c-2-2": {
+    "test": "verify/test_api_score.py::test_c_2_2_mixed_game_cumulative_array_that_thirty_a_frame_cannot_fake"
+  },
+  "c-2-3": {
+    "test": "verify/test_api_score.py::test_c_2_3_partial_game_leaves_its_last_two_frames_null"
+  },
+  "c-2-4": {
+    "test": "verify/test_api_score.py::test_c_2_4_total_is_the_last_scored_frame_for_partial_and_zero_for_gutter"
+  },
+  "c-2-5": {
+    "test": "verify/test_api_score.py::test_c_2_5_bad_rolls_and_bad_json_are_the_same_four_hundred_and_empty_is_a_game"
+  },
+  "c-2-6": {
+    "test": "verify/test_ui_game.py::test_c_2_6_partial_game_score_column_runs_out_into_two_empty_cells"
+  }
+}

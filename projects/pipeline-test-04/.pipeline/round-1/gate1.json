@@ -1,0 +1,148 @@
+{
+  "ok": false,
+  "verdict": "reject",
+  "spec_hash": "b91e8b8d11143b7338b5f52d9227ac086af436744c392ca580db83b1ed93265d",
+  "findings": [
+    {
+      "id": "A1",
+      "title": "No criterion ever reads a score cell that has a number in it",
+      "section": "blocking",
+      "owner": "nothing",
+      "blocking": true,
+      "owner_declared": "nothing",
+      "owner_valid": true,
+      "owner_downgraded": null,
+      "fail_open": false,
+      "caught_by": "NO downstream checker sees this - it ships as written",
+      "must_fix_now": true
+    },
+    {
+      "id": "A2",
+      "title": "Session 2's score cells have no declared data source",
+      "section": "blocking",
+      "owner": "test-runner",
+      "blocking": true,
+      "owner_declared": "test-runner",
+      "owner_valid": true,
+      "owner_downgraded": null,
+      "fail_open": false,
+      "caught_by": "step 6 - the Builder/test-runner loop fixes this for free",
+      "must_fix_now": false
+    },
+    {
+      "id": "A3",
+      "title": "\"each carrying `frames`\" has to mean key-presence, and only the prose says so",
+      "section": "blocking",
+      "owner": "skeleton-check",
+      "blocking": true,
+      "owner_declared": "skeleton-check",
+      "owner_valid": true,
+      "owner_downgraded": null,
+      "fail_open": false,
+      "caught_by": "step 8 - the skeleton must fail exactly the cut criteria",
+      "must_fix_now": false
+    },
+    {
+      "id": "B1",
+      "title": "`pendingFrame` is a function in two places and a local variable in a third",
+      "section": "worth a look",
+      "owner": "return-safety",
+      "blocking": false,
+      "owner_declared": "return-safety",
+      "owner_valid": true,
+      "owner_downgraded": null,
+      "fail_open": false,
+      "caught_by": "step 8 - the cutter's static scan, no toolchain needed",
+      "must_fix_now": false
+    },
+    {
+      "id": "B2",
+      "title": "\"fails alone on c-2-3\" is not true under the literal reading of the sibling hint",
+      "section": "worth a look",
+      "owner": "nothing",
+      "blocking": false,
+      "owner_declared": "nothing",
+      "owner_valid": true,
+      "owner_downgraded": null,
+      "fail_open": false,
+      "caught_by": "NO downstream checker sees this - it ships as written",
+      "must_fix_now": false
+    },
+    {
+      "id": "B3",
+      "title": "c-1-6 wants a 404 status and the id in the message, and App Router puts those in two different files",
+      "section": "worth a look",
+      "owner": "test-runner",
+      "blocking": false,
+      "owner_declared": "test-runner",
+      "owner_valid": true,
+      "owner_downgraded": null,
+      "fail_open": false,
+      "caught_by": "step 6 - the Builder/test-runner loop fixes this for free",
+      "must_fix_now": false
+    },
+    {
+      "id": "B4",
+      "title": "`frames()` is undefined for a roll list that stops in the middle of a frame",
+      "section": "worth a look",
+      "owner": "nothing",
+      "blocking": false,
+      "owner_declared": "nothing",
+      "owner_valid": true,
+      "owner_downgraded": null,
+      "fail_open": false,
+      "caught_by": "NO downstream checker sees this - it ships as written",
+      "must_fix_now": false
+    },
+    {
+      "id": "B5",
+      "title": "Session 2 modifies `sc-game` without declaring it, and the three minutes are invisible to the linter",
+      "section": "worth a look",
+      "owner": "pack-writer",
+      "blocking": false,
+      "owner_declared": "pack-writer",
+      "owner_valid": true,
+      "owner_downgraded": null,
+      "fail_open": false,
+      "caught_by": "step 9 - a person reads the guide at Gate 3",
+      "must_fix_now": false
+    },
+    {
+      "id": "B6",
+      "title": "The `-` glyph, and `g-gutter`'s page, are graded nowhere",
+      "section": "worth a look",
+      "owner": "nothing",
+      "blocking": false,
+      "owner_declared": "nothing",
+      "owner_valid": true,
+      "owner_downgraded": null,
+      "fail_open": false,
+      "caught_by": "NO downstream checker sees this - it ships as written",
+      "must_fix_now": false
+    },
+    {
+      "id": "B7",
+      "title": "\"frames without scores\" is a state the finished app never renders",
+      "section": "worth a look",
+      "owner": "test-runner",
+      "blocking": false,
+      "owner_declared": "test-runner",
+      "owner_valid": true,
+      "owner_downgraded": null,
+      "fail_open": false,
+      "caught_by": "step 6 - the Builder/test-runner loop fixes this for free",
+      "must_fix_now": false
+    }
+  ],
+  "counts": {
+    "blocking": 3,
+    "worth_a_look": 7,
+    "unowned_blocking": 1
+  },
+  "reasons": [
+    "A1 (No criterion ever reads a score cell that has a number in it) is blocking and nothing downstream catches it"
+  ],
+  "rule": "reject when any blocking finding is owned by 'nothing'; approve when every remaining finding sits in a column a downstream checker owns. An owner that can pass by not running is owned only conditionally: it approves, and the confirmation it actually ran is listed in verify_later",
+  "reviewed_spec_hash": "b91e8b8d11143b7338b5f52d9227ac086af436744c392ca580db83b1ed93265d",
+  "verify_later": []
+}

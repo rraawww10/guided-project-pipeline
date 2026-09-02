@@ -1,0 +1,219 @@
+{
+  "slug": "pipeline-test-04",
+  "title": "Tenpin",
+  "track": "fullstack",
+  "sessions_planned": 2,
+  "stack": [
+    "next",
+    "react",
+    "typescript"
+  ],
+  "source": null,
+  "endpoints": [
+    {
+      "id": "ep-games-list",
+      "method": "GET",
+      "path": "/api/games",
+      "request": null,
+      "response": "Array of { id: string, name: string, rolls: number[], frames: number[][] }",
+      "status": [
+        200
+      ]
+    },
+    {
+      "id": "ep-games-score",
+      "method": "POST",
+      "path": "/api/games/score",
+      "request": "{ rolls: number[] }",
+      "response": "{ frames: (number | null)[], total: number } or { error: string }",
+      "status": [
+        200,
+        400
+      ]
+    }
+  ],
+  "screens": [
+    {
+      "id": "sc-game",
+      "route": "/games/[id]",
+      "elements": [
+        "one frame box per frame returned by frames(), with data-testid frame-1 upwards",
+        "the roll symbols of that frame inside the box, joined by one space",
+        "one cumulative score cell per frame box, with data-testid total-1 upwards",
+        "the game total, with data-testid game-total",
+        "the text No game with id <id> when the id is not in the seed"
+      ],
+      "states": [
+        "frames without scores",
+        "fully scored",
+        "trailing frames pending",
+        "unknown game id"
+      ]
+    }
+  ],
+  "sessions": [
+    {
+      "n": 1,
+      "id": "S01",
+      "setup": true,
+      "title": "Setup, the games, and the frames",
+      "goal": "Split each seeded game's flat roll list into frames and render the four games as frame grids with no scores yet.",
+      "teaches": [
+        "scanning an array with a step that changes each iteration",
+        "a server component reading a JSON seed through one store module"
+      ],
+      "builds": [
+        "ep-games-list",
+        "sc-game"
+      ],
+      "criteria": [
+        {
+          "id": "c-1-1",
+          "check": "GET /api/games returns 200 with a JSON array of 4 games, each carrying id, name, rolls and frames",
+          "target": "ep-games-list",
+          "cuts": []
+        },
+        {
+          "id": "c-1-2",
+          "check": "GET /api/games returns the g-mixed game with frames equal to [[1,4],[4,5],[6,4],[5,5],[10],[0,1],[7,3],[6,4],[10],[2,8,6]]",
+          "target": "ep-games-list",
+          "cuts": [
+            "cut-frames-scan",
+            "cut-frames-tenth"
+          ]
+        },
+        {
+          "id": "c-1-3",
+          "check": "GET /api/games returns the g-partial game with frames equal to [[3,4],[7,2],[9,0],[8,1],[10],[10]]",
+          "target": "ep-games-list",
+          "cuts": [
+            "cut-frames-scan"
+          ]
+        },
+        {
+          "id": "c-1-4",
+          "check": "/games/g-perfect renders 10 elements with data-testid frame-1 through frame-10 and displays the exact text 'X X X' in the element with data-testid frame-10",
+          "target": "sc-game",
+          "cuts": [
+            "cut-frames-scan",
+            "cut-frames-tenth"
+          ]
+        },
+        {
+          "id": "c-1-5",
+          "check": "/games/g-mixed displays the exact text '1 4' in the element with data-testid frame-1, '6 /' in frame-3, 'X' in frame-5 and '2 / 6' in frame-10",
+          "target": "sc-game",
+          "cuts": [
+            "cut-frames-scan",
+            "cut-frames-tenth"
+          ]
+        },
+        {
+          "id": "c-1-6",
+          "check": "/games/no-such-game responds 404 and displays the exact text 'No game with id no-such-game'",
+          "target": "sc-game",
+          "cuts": []
+        }
+      ],
+      "cuts": [
+        {
+          "id": "cut-frames-scan",
+          "file": "lib/frames.ts",
+          "hint": "Walk `rolls` from index 0 and append the first nine frames to `frames`, taking two rolls per frame unless the first of them is 10, in which case the frame holds that one roll and the index advances by one. Stop as soon as `rolls` runs out, so a 10-roll game leaves `frames` with 6 entries."
+        },
+        {
+          "id": "cut-frames-tenth",
+          "file": "lib/frames.ts",
+          "hint": "Append one last entry to `frames` holding every roll still left in `rolls` after those nine frames - two rolls for an open tenth frame and three for a tenth that earned bonus rolls - and append nothing at all for a game whose rolls ran out earlier."
+        }
+      ]
+    },
+    {
+      "n": 2,
+      "id": "S02",
+      "setup": false,
+      "title": "Scoring and the running total",
+      "goal": "Score every frame from the rolls that follow it, leave a frame blank while its bonus rolls do not exist, and answer the running total over HTTP and on the page.",
+      "teaches": [
+        "lookahead into the roll list instead of the frame list",
+        "null as a value distinct from 0 in a TypeScript union",
+        "reading and validating a JSON POST body in a route handler"
+      ],
+      "builds": [
+        "ep-games-score"
+      ],
+      "criteria": [
+        {
+          "id": "c-2-1",
+          "check": "POST /api/games/score returns 200 with frames equal to [30,60,90,120,150,180,210,240,270,300] for the 12 rolls of g-perfect",
+          "target": "ep-games-score",
+          "cuts": [
+            "cut-score-lookahead"
+          ]
+        },
+        {
+          "id": "c-2-2",
+          "check": "POST /api/games/score returns frames equal to [5,14,29,49,60,61,77,97,117,133] for the 19 rolls of g-mixed",
+          "target": "ep-games-score",
+          "cuts": [
+            "cut-score-lookahead"
+          ]
+        },
+        {
+          "id": "c-2-3",
+          "check": "POST /api/games/score returns frames equal to [7,16,25,34,null,null] for the 10 rolls of g-partial",
+          "target": "ep-games-score",
+          "cuts": [
+            "cut-score-lookahead",
+            "cut-pending-frame"
+          ]
+        },
+        {
+          "id": "c-2-4",
+          "check": "POST /api/games/score returns total 34 for the 10 rolls of g-partial and total 0 for the 20 rolls of g-gutter",
+          "target": "ep-games-score",
+          "cuts": [
+            "cut-score-lookahead",
+            "cut-pending-frame",
+            "cut-game-total"
+          ]
+        },
+        {
+          "id": "c-2-5",
+          "check": "POST /api/games/score rejects a body whose rolls is not an array of numbers with 400 and the JSON body {\"error\": \"rolls must be an array of numbers\"}, and returns 200 with frames [] and total 0 for an empty rolls array",
+          "target": "ep-games-score",
+          "cuts": [
+            "cut-game-total"
+          ]
+        },
+        {
+          "id": "c-2-6",
+          "check": "/games/g-partial displays the exact text '34' in the element with data-testid game-total and leaves the elements with data-testid total-5 and total-6 empty",
+          "target": "sc-game",
+          "cuts": [
+            "cut-score-lookahead",
+            "cut-pending-frame",
+            "cut-game-total"
+          ]
+        }
+      ],
+      "cuts": [
+        {
+          "id": "cut-score-lookahead",
+          "file": "lib/score.ts",
+          "hint": "Set `frameScore` to what this frame is worth: 10 plus the next two entries of `rolls` for a frame that opens with a 10, 10 plus the single entry after the pair for a frame whose two rolls add to 10, and the frame's own two rolls added together for anything else. Index into `rolls` at `i`, never into `frames`."
+        },
+        {
+          "id": "cut-pending-frame",
+          "file": "lib/score.ts",
+          "hint": "Set `pending` to true while the rolls this frame needs are still missing from `rolls`: a frame that opens with a 10 needs the two entries after it, a frame whose two rolls add to 10 needs the one entry after them, and an open frame needs nothing beyond its own two rolls."
+        },
+        {
+          "id": "cut-game-total",
+          "file": "lib/score.ts",
+          "hint": "Set `total` to the score of the last frame that has one: the final entry of `frameScores` that is not null, and 0 for a game where not one frame has a score yet."
+        }
+      ]
+    }
+  ]
+}
