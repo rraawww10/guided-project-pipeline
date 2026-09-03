@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="3" skipped="0" tests="12" time="6.243" timestamp="2026-09-03T04:23:27.023587+05:30" hostname="HERO"><testcase classname="verify.test_api_scenarios" name="test_c_1_1_scenarios_are_the_five_seeded_lifts_in_seed_order" time="0.425" /><testcase classname="verify.test_api_simulate" name="test_c_2_1_both_sides_runs_nine_ticks_serving_the_lower_call_first" time="0.345"><failure message="AssertionError: both-sides answered 100 rows, expected 9: [{'tick': 0, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 1, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 2, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 3, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 4, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 5, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 6, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 7, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 8, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 9, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 10, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 11, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 12, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 13, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 14, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 15, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 16, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 17, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 18, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 19, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 20, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 21, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 22, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 23, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 24, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 25, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 26, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 27, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 28, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 29, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 30, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 31, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 32, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 33, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 34, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 35, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 36, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 37, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 38, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 39, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 40, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 41, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 42, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 43, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 44, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 45, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 46, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 47, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 48, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 49, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 50, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 51, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 52, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 53, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 54, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 55, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 56, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 57, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 58, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 59, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 60, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 61, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 62, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 63, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 64, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 65, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 66, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 67, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 68, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 69, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 70, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 71, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 72, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 73, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 74, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 75, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 76, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 77, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 78, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 79, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 80, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 81, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 82, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 83, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 84, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 85, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 86, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 87, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 88, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 89, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 90, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 91, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 92, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 93, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 94, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 95, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 96, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 97, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 98, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 99, 'floor': 4, 'mode': 'idle', 'direction': None}]&#10;assert 100 == 9&#10; +  where 100 = len([{'tick': 0, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 1, 'floor': 4, 'mode': 'idle', 'direction': None...k': 4, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 5, 'floor': 4, 'mode': 'idle', 'direction': None}, ...])">api = &lt;httpx.Client object at 0x000001E24301AE90&gt;
+
+    def test_c_2_1_both_sides_runs_nine_ticks_serving_the_lower_call_first(api):
+        """c-2-1: POST /api/scenarios/simulate returns 200 for the both-sides
+        scenario with rows holding 9 entries and served naming floor 2 at servedAt 2
+        and floor 6 at servedAt 7.
+    
+        `both-sides` starts on a distance tie - floors 2 and 6 are both two floors
+        from the car at floor 4 - and the policy's tie rule takes the lower floor,
+        so the car goes down first and floor 2 is served at tick 2 while floor 6
+        waits until tick 7. A student who breaks the tie the other way serves floor
+        6 at tick 2 and floor 2 at tick 7: the same two floors, the same two ticks,
+        swapped. Reading each entry by its floor and asserting its own `servedAt` is
+        what makes that swap fail; a test that only checked that the ticks 2 and 7
+        appear somewhere would pass it. The seed lists floor 6 first, so insertion
+        order and the tie rule give different answers here - which is what turns
+        this criterion into a grade of the tie rule rather than a grade of the array.
+    
+        The row count is 9, asserted exactly, so an extra doors tick or a run that
+        stops one row early fails here.
+    
+        Two cuts named in spec.json, and spec.md's leave-one-out table says neither
+        alone satisfies this: with `cut-dispatch-target` open the car idles for ever
+        and nothing is served, and with `cut-run-until` open `rows` is `[]` and
+        `served` is `[]`. Neither answers 9 rows, and neither produces a `served`
+        entry at all, so no value asserted here is one an unwritten block also
+        produces.
+    
+        ambiguity.md W3 (worth a look, owner `nothing`) adds a third cut this test
+        in fact holds and spec.json does not record: `both-sides` at tick 0 is the
+        only state in any fixture where `ahead` holds two calls, so dropping the
+        distance *ordering* half of `cut-calls-ahead` while keeping its direction
+        filter moves this criterion's two `servedAt` values and moves nothing on
+        `overtake`. Trimming this criterion on the strength of the spec's "graded by
+        c-2-2 alone" sentence would leave the ordering rule ungraded.
+        """
+        trace = simulate(api, scenario("both-sides"))
+    
+&gt;       assert len(trace["rows"]) == 9, (
+            f"both-sides answered {len(trace['rows'])} rows, expected 9: {trace['rows']}"
+        )
+E       AssertionError: both-sides answered 100 rows, expected 9: [{'tick': 0, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 1, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 2, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 3, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 4, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 5, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 6, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 7, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 8, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 9, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 10, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 11, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 12, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 13, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 14, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 15, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 16, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 17, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 18, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 19, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 20, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 21, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 22, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 23, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 24, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 25, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 26, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 27, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 28, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 29, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 30, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 31, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 32, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 33, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 34, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 35, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 36, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 37, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 38, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 39, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 40, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 41, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 42, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 43, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 44, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 45, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 46, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 47, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 48, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 49, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 50, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 51, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 52, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 53, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 54, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 55, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 56, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 57, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 58, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 59, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 60, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 61, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 62, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 63, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 64, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 65, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 66, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 67, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 68, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 69, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 70, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 71, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 72, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 73, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 74, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 75, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 76, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 77, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 78, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 79, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 80, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 81, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 82, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 83, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 84, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 85, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 86, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 87, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 88, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 89, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 90, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 91, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 92, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 93, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 94, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 95, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 96, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 97, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 98, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 99, 'floor': 4, 'mode': 'idle', 'direction': None}]
+E       assert 100 == 9
+E        +  where 100 = len([{'tick': 0, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 1, 'floor': 4, 'mode': 'idle', 'direction': None...k': 4, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 5, 'floor': 4, 'mode': 'idle', 'direction': None}, ...])
+
+verify\test_api_simulate.py:83: AssertionError</failure></testcase><testcase classname="verify.test_api_simulate" name="test_c_2_2_overtake_carries_on_up_past_the_nearer_call_behind_it" time="0.331"><failure message="AssertionError: expected exactly 1 served entry for floor 8, found 0 in []">api = &lt;httpx.Client object at 0x000001E243291F90&gt;
+
+    def test_c_2_2_overtake_carries_on_up_past_the_nearer_call_behind_it(api):
+        """c-2-2: POST /api/scenarios/simulate returns 200 for the overtake scenario
+        with served naming floor 8 at servedAt 4 and floor 5 at servedAt 8, the rows
+        entry for tick 2 holding floor 6 with direction up, and the rows entry for
+        tick 5 holding floor 8 with direction down.
+    
+        This is `cut-calls-ahead`'s fixture and the one where "the nearest call
+        ahead" and "the nearest call anywhere" disagree. The floor-5 call arrives at
+        tick 2, when the car is at floor 6 heading up - one floor *behind* it - so a
+        policy that keeps to its direction carries on to floor 8, serves it at tick
+        4, and comes back for floor 5 at tick 8. A policy that chases the closest
+        caller turns round at tick 2 and serves floor 5 at tick 3 instead, which
+        fails on floor 5's `servedAt` and on tick 2's row. The seed lists the
+        floor-5 call first, so `ahead = live` - no filter, no ordering - targets
+        floor 5 from floor 6 at tick 2 and the tick-2 row reads `down`: that is the
+        reading the seed order exists to catch.
+    
+        Both named rows are looked up by their `tick` field rather than as `rows[n]`,
+        and both fields the criterion names on each are asserted:
+    
+        * tick 2 - floor 6, `direction` exactly the string "up".
+        * tick 5 - floor 8, `direction` exactly the string "down". This is the only
+          downward-moving car any criterion in the spec observes, and it is what
+          holds `cut-dispatch-target`'s direction rule to something: `direction:
+          'up'` unconditionally fails here, and since `step` moves on
+          `car.direction` such a car also leaves the shaft.
+    
+        `None` is not "up" and not "down", so a row that omits the direction fails
+        either way.
+    
+        Three cuts, and no proper subset satisfies this. `cut-run-until` open leaves
+        `rows` empty, so there is no tick-2 row; `cut-dispatch-target` open leaves
+        the car idle for ever, so nothing is served; `cut-calls-ahead` open leaves
+        `ahead` empty, which sends `cut-dispatch-target` down its reversing branch
+        at tick 2 and serves floor 5 at tick 3.
+    
+        ambiguity.md W4 (worth a look, owner `nothing`) records what these rows do
+        not separate: a `cut-step-move` that moves by `Math.sign(car.target -
+        car.floor)` instead of by `car.direction` reproduces every value asserted
+        here, tick-5 row included. The prohibition is stated in spec.md and no
+        criterion grades the mechanism; grading it would need a fixture whose
+        `direction` and `target` disagree, which the spec does not have.
+        """
+        trace = simulate(api, scenario("overtake"))
+    
+&gt;       top = served_for(trace, 8)
+              ^^^^^^^^^^^^^^^^^^^^
+
+verify\test_api_simulate.py:144: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+trace = {'rows': [{'tick': 0, 'floor': 4, 'mode': 'idle', 'direction': None}, {'tick': 1, 'floor': 4, 'mode': 'idle', 'directi... 'direction': None}, {'tick': 5, 'floor': 4, 'mode': 'idle', 'direction': None}, ...], 'served': [], 'complete': False}
+floor = 8
+
+    def served_for(trace: dict, floor: int) -&gt; dict:
+        """The single `served` entry naming this floor, found by floor, never index.
+    
+        spec.md: "No scenario calls the same floor twice", so exactly one entry per
+        floor is the requirement - a duplicate or a miss fails here rather than
+        silently reading a wrong object.
+        """
+        found = [
+            entry for entry in trace["served"]
+            if isinstance(entry, dict) and entry.get("floor") == floor
+        ]
+&gt;       assert len(found) == 1, (
+               ^^^^^^^^^^^^^^^
+            f"expected exactly 1 served entry for floor {floor}, found {len(found)} "
+            f"in {trace['served']}"
+        )
+E       AssertionError: expected exactly 1 served entry for floor 8, found 0 in []
+
+verify\helpers.py:256: AssertionError</failure></testcase><testcase classname="verify.test_api_simulate" name="test_c_2_3_passing_picks_up_the_call_on_the_floor_it_is_standing_on" time="0.319"><failure message="AssertionError: expected exactly 1 served entry for floor 3, found 0 in []">api = &lt;httpx.Client object at 0x000001E24319F820&gt;
+
+    def test_c_2_3_passing_picks_up_the_call_on_the_floor_it_is_standing_on(api):
+        """c-2-3: POST /api/scenarios/simulate returns 200 for the passing scenario
+        with served naming floor 3 at calledAt 2 and servedAt 2, and floor 5 at
+        servedAt 5.
+    
+        The floor-3 call is registered for tick 2, which is the tick the car is
+        standing on floor 3, and the policy's rule 2 picks it up on that same tick
+        rather than skipping it. So `calledAt` and `servedAt` are both 2 - the one
+        entry in the whole spec where they are equal, and the reason this criterion
+        pins `calledAt` as well as `servedAt`. An implementation that took
+        `calledAt` from the current tick rather than "the call's own tick" would
+        pass here and fail on floor 5, whose call is registered at tick 0 and served
+        at tick 5; an implementation that served the passing call one tick late
+        fails on `servedAt`.
+    
+        Floor 5 is the car's original target, delayed to tick 5 by the stop, so its
+        `servedAt` also grades that the passing stop cost exactly one doors tick.
+    
+        Two cuts, and neither alone satisfies this: `cut-dispatch-target` open idles
+        the car and serves nothing, `cut-run-until` open answers an empty `served`.
+        A missing entry fails in `served_for`, so no assertion below reads a value
+        an unwritten block produces.
+        """
+        trace = simulate(api, scenario("passing"))
+    
+&gt;       passing_call = served_for(trace, 3)
+                       ^^^^^^^^^^^^^^^^^^^^
+
+verify\test_api_simulate.py:199: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+trace = {'rows': [{'tick': 0, 'floor': 1, 'mode': 'idle', 'direction': None}, {'tick': 1, 'floor': 1, 'mode': 'idle', 'directi... 'direction': None}, {'tick': 5, 'floor': 1, 'mode': 'idle', 'direction': None}, ...], 'served': [], 'complete': False}
+floor = 3
+
+    def served_for(trace: dict, floor: int) -&gt; dict:
+        """The single `served` entry naming this floor, found by floor, never index.
+    
+        spec.md: "No scenario calls the same floor twice", so exactly one entry per
+        floor is the requirement - a duplicate or a miss fails here rather than
+        silently reading a wrong object.
+        """
+        found = [
+            entry for entry in trace["served"]
+            if isinstance(entry, dict) and entry.get("floor") == floor
+        ]
+&gt;       assert len(found) == 1, (
+               ^^^^^^^^^^^^^^^
+            f"expected exactly 1 served entry for floor {floor}, found {len(found)} "
+            f"in {trace['served']}"
+        )
+E       AssertionError: expected exactly 1 served entry for floor 3, found 0 in []
+
+verify\helpers.py:256: AssertionError</failure></testcase><testcase classname="verify.test_api_simulate" name="test_c_2_4_max_ticks_four_stops_both_sides_short_and_incomplete" time="0.300" /><testcase classname="verify.test_api_simulate" name="test_c_2_5_a_missing_scenario_a_bad_floor_and_bad_json_are_one_four_hundred" time="0.320" /><testcase classname="verify.test_api_simulate" name="test_c_2_6_quiet_completes_in_one_idle_row_with_nothing_served" time="0.306" /><testcase classname="verify.test_ui_shaft" name="test_c_1_2_above_draws_eight_floors_at_tick_zero_and_an_unknown_id_says_so" time="1.259" /><testcase classname="verify.test_ui_shaft" name="test_c_1_3_above_opens_its_doors_on_floor_six_after_four_presses" time="0.891" /><testcase classname="verify.test_ui_shaft" name="test_c_1_4_passing_car_is_still_moving_at_floor_three_after_two_presses" time="0.350" /><testcase classname="verify.test_ui_shaft" name="test_c_1_5_above_serves_floor_six_at_tick_four_and_goes_idle" time="0.504" /><testcase classname="verify.test_ui_shaft" name="test_c_1_6_quiet_car_stays_idle_on_floor_five_with_nothing_served" time="0.639" /></testsuite></testsuites>

@@ -1,0 +1,170 @@
+{
+  "slug": "pipeline-test-05",
+  "title": "Lift",
+  "track": "fullstack",
+  "sessions_planned": 2,
+  "stack": ["next", "react", "typescript"],
+  "source": null,
+  "code_checks": ["utc-dates"],
+  "endpoints": [
+    {
+      "id": "ep-scenarios",
+      "method": "GET",
+      "path": "/api/scenarios",
+      "request": null,
+      "response": "Array of { id: string, name: string, floors: number, start: number, calls: Array<{ floor: number, tick: number }> }",
+      "status": [200]
+    },
+    {
+      "id": "ep-simulate",
+      "method": "POST",
+      "path": "/api/scenarios/simulate",
+      "request": "{ scenario: Scenario, maxTicks?: number }, with maxTicks defaulting to 100",
+      "response": "{ rows: Array<{ tick: number, floor: number, mode: 'moving' | 'doors' | 'idle', direction: 'up' | 'down' | null }>, served: Array<{ floor: number, calledAt: number, servedAt: number }>, complete: boolean } or { error: string }",
+      "status": [200, 400]
+    }
+  ],
+  "screens": [
+    {
+      "id": "sc-shaft",
+      "route": "/scenarios/[id]",
+      "elements": [
+        "one row per floor of the building, highest floor first, with data-testid floor-1 upwards",
+        "the car's floor number, with data-testid car-floor",
+        "the car's mode as the exact text moving, doors or idle, with data-testid car-mode",
+        "the tick number, with data-testid tick",
+        "the step button, with data-testid step-button",
+        "one line per served call holding the tick it was served, with data-testid served-<floor>",
+        "the count of calls served so far, with data-testid served-count",
+        "the message element, with data-testid no-scenario, holding the text No scenario with id <id> for an id that is not in the seed"
+      ],
+      "states": ["tick 0", "car moving", "doors open", "no calls at all", "unknown scenario id"]
+    }
+  ],
+  "sessions": [
+    {
+      "n": 1,
+      "title": "Setup, the shaft, and one tick",
+      "goal": "Seed five scenarios, draw the shaft, and write the one-tick transition so the car climbs a floor per tick and picks up the caller it stops for.",
+      "teaches": ["a discriminated union for the car's mode", "one pure transition per tick"],
+      "builds": ["ep-scenarios", "sc-shaft"],
+      "criteria": [
+        {
+          "id": "c-1-1",
+          "check": "GET /api/scenarios returns 200 with a JSON array of 5 scenarios whose id values are above, both-sides, overtake, passing and quiet in that order, each carrying id, name, floors, start and calls",
+          "target": "ep-scenarios",
+          "cuts": []
+        },
+        {
+          "id": "c-1-2",
+          "check": "/scenarios/above renders 8 elements with data-testid floor-1 through floor-8, the exact text 2 in the element with data-testid car-floor and the exact text 0 in the element with data-testid tick, and /scenarios/no-such-lift displays the exact text No scenario with id no-such-lift in the element with data-testid no-scenario",
+          "target": "sc-shaft",
+          "cuts": []
+        },
+        {
+          "id": "c-1-3",
+          "check": "/scenarios/above displays the exact text 6 in the element with data-testid car-floor and the exact text doors in the element with data-testid car-mode after the element with data-testid step-button is clicked 4 times",
+          "target": "sc-shaft",
+          "cuts": ["cut-step-move"]
+        },
+        {
+          "id": "c-1-4",
+          "check": "/scenarios/passing displays the exact text 3 in the element with data-testid car-floor and the exact text moving in the element with data-testid car-mode after the element with data-testid step-button is clicked 2 times",
+          "target": "sc-shaft",
+          "cuts": ["cut-step-move"]
+        },
+        {
+          "id": "c-1-5",
+          "check": "/scenarios/above displays the exact text 4 in the element with data-testid served-6, the exact text 1 in the element with data-testid served-count and the exact text idle in the element with data-testid car-mode after the element with data-testid step-button is clicked 5 times",
+          "target": "sc-shaft",
+          "cuts": ["cut-step-move", "cut-step-doors"]
+        },
+        {
+          "id": "c-1-6",
+          "check": "/scenarios/quiet displays the exact text idle in the element with data-testid car-mode, the exact text 5 in the element with data-testid car-floor and the exact text 0 in the element with data-testid served-count after the element with data-testid step-button is clicked 3 times",
+          "target": "sc-shaft",
+          "cuts": []
+        }
+      ],
+      "cuts": [
+        {
+          "id": "cut-step-move",
+          "file": "lib/step.ts",
+          "writes_into": "next",
+          "hint": "The car is `moving`, so put into `next` a car one floor closer to `car.target` in its `car.direction`: the pair `{ mode: 'doors', floor: car.target }` on the tick that lands the car on `car.target`, and otherwise a `moving` car at the new floor keeping the same `direction` and `target`. Leave `pending` and `served` as they are."
+        },
+        {
+          "id": "cut-step-doors",
+          "file": "lib/step.ts",
+          "writes_into": "next",
+          "hint": "The doors are open at `car.floor`, so put into `next` the state one tick on: each call in `state.pending` for that floor with a `tick` at or below `state.tick` joins `served` as `{ floor, calledAt: the call's own tick, servedAt: state.tick }` and leaves `pending`, and the car becomes `{ mode: 'idle', floor: car.floor }`."
+        }
+      ]
+    },
+    {
+      "n": 2,
+      "title": "Dispatch and the trace",
+      "goal": "Write the dispatch policy and the fold that turns a scenario into a trace naming the tick each caller got in.",
+      "teaches": ["a closed dispatch policy", "folding a transition into a bounded trace"],
+      "builds": ["ep-simulate"],
+      "criteria": [
+        {
+          "id": "c-2-1",
+          "check": "POST /api/scenarios/simulate returns 200 for the both-sides scenario with rows holding 9 entries and served naming floor 2 at servedAt 2 and floor 6 at servedAt 7",
+          "target": "ep-simulate",
+          "cuts": ["cut-dispatch-target", "cut-run-until"]
+        },
+        {
+          "id": "c-2-2",
+          "check": "POST /api/scenarios/simulate returns 200 for the overtake scenario with served naming floor 8 at servedAt 4 and floor 5 at servedAt 8, and the rows entry for tick 2 holding floor 6 with direction up",
+          "target": "ep-simulate",
+          "cuts": ["cut-calls-ahead", "cut-dispatch-target", "cut-run-until"]
+        },
+        {
+          "id": "c-2-3",
+          "check": "POST /api/scenarios/simulate returns 200 for the passing scenario with served naming floor 3 at calledAt 2 and servedAt 2, and floor 5 at servedAt 5",
+          "target": "ep-simulate",
+          "cuts": ["cut-dispatch-target", "cut-run-until"]
+        },
+        {
+          "id": "c-2-4",
+          "check": "POST /api/scenarios/simulate returns 200 for the both-sides scenario sent with maxTicks 4 and answers with rows holding 4 entries and complete false",
+          "target": "ep-simulate",
+          "cuts": ["cut-run-until"]
+        },
+        {
+          "id": "c-2-5",
+          "check": "POST /api/scenarios/simulate rejects a body carrying no scenario object with 400 and the JSON body {\"error\": \"scenario must carry floors, start and calls\"}, rejects a scenario whose call names a floor outside 1 to floors with that same 400 body, and rejects a body that is not valid JSON with that same 400 body",
+          "target": "ep-simulate",
+          "cuts": []
+        },
+        {
+          "id": "c-2-6",
+          "check": "POST /api/scenarios/simulate returns 200 for the quiet scenario with rows holding one entry of tick 0, floor 5, mode idle and direction null, served empty and complete true",
+          "target": "ep-simulate",
+          "cuts": ["cut-run-until"]
+        }
+      ],
+      "cuts": [
+        {
+          "id": "cut-calls-ahead",
+          "file": "lib/dispatch.ts",
+          "writes_into": "ahead",
+          "hint": "Put into `ahead` every call in `live` the car reaches without turning round: floors above `state.car.floor` for a `dir` of `'up'`, floors below it for a `dir` of `'down'`, and all of `live` for a `dir` of `null`. Order them by distance from the car, closest first, a tie taken by the lower floor."
+        },
+        {
+          "id": "cut-dispatch-target",
+          "file": "lib/dispatch.ts",
+          "writes_into": "next",
+          "hint": "Set `next` to a `moving` car standing at `state.car.floor`, its `target` taken from `ahead[0].floor` and falling back to the floor in `live` closest to the car - the lower floor on a tie - when `ahead` is empty, and its `direction` set to `'up'` for a target above the car and `'down'` for one below it."
+        },
+        {
+          "id": "cut-run-until",
+          "file": "lib/run.ts",
+          "writes_into": "trace",
+          "hint": "Fold the run from `seed(scenario)` into `trace`: on each tick give the state to `nextTarget`, append the row `{ tick, floor, mode, direction }` of that dispatched car to `trace.rows`, and carry the dispatched state on through `step`. A dispatched car that is `idle` with `pending` empty ends the run with its row appended and `trace.complete` true; reaching `maxTicks` rows ends it with `trace.complete` false. The `served` list of the last state is `trace.served`."
+        }
+      ]
+    }
+  ]
+}

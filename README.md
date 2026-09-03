@@ -331,7 +331,7 @@ way. The live-session key is the part still to decide.
 python3 -m pipeline.selftest
 ```
 
-408 checks on the deterministic core - linter rules and their false positives,
+414 checks on the deterministic core - linter rules and their false positives,
 cutter comment styles and every malformed-marker case, the skeleton check, the
 write guard, and the gate and retry logic. No agents, no network, about a
 second. Run it before trusting a change to any script.

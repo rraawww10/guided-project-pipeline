@@ -1,0 +1,230 @@
+{
+  "slug": "pipeline-test-05",
+  "created": "2026-09-02T20:41:02+00:00",
+  "flow": 2,
+  "phase": "pack",
+  "retries": {
+    "idea": 0,
+    "spec": 0,
+    "code": 0,
+    "pack": 0
+  },
+  "step_runs": {
+    "stack": 1,
+    "ideas": 1,
+    "pick": 1,
+    "lint": 2,
+    "breaker": 2,
+    "redfirst": 2,
+    "revise:round-1": 1,
+    "test:app": 1,
+    "mutation": 1,
+    "cut": 1,
+    "deploy": 1,
+    "guide-lint": 6,
+    "leak-scan": 1,
+    "dryrun": 1,
+    "ship": 1
+  },
+  "gates": {
+    "gate0": {
+      "approved": true,
+      "at": "2026-09-02T20:55:23+00:00",
+      "note": "GATE 0: idea-04 Lift. Human decision, stated as 'pick 4'. No rationale was given beyond the choice, and none is invented here.\n\nCARRY TO GATE 1 - the idea's own three stated risks, in its words:\n  1. POLICY SPRAWL IS WHAT KILLS THIS. 'Serve calls in passing order' has at\n     least three readings, and unless the spec fixes one as an ordered\n     procedure the Builder and the Verifier will produce two plausible traces\n     and grade different ones. This is the one to watch at Gate 1.\n  2. A trace invites over-pinning. Criteria should name the served tick per\n     call and the floor at two or three named ticks - NOT assert the whole\n     array, or one extra doors tick fails every criterion at once.\n  3. nextTarget is the heavy cut. Split it inside session 2 (direction choice\n     separate from the pending-ahead test) rather than moving part of it into\n     session 1, which already carries the project setup.\n\nBUDGET: 2 x 40 minutes. Six consecutive projects have overrun their session cap;\npipeline-test-04 measured 47 minutes on a 40-minute session in an earlier round\nand only reached 40 after a disclosed trim. Session 1 here carries setup plus\nstep(); session 2 carries nextTarget plus runUntil plus an endpoint.\n\nNEW GROUND: first discrete-time simulation in the track, and the first loop whose\ntermination is part of the specification (runUntil's guard). Also the first\ndiscriminated union modelling a mode - moving / doors / idle - rather than a\nsuccess/failure result.",
+      "picked": "idea-04.md"
+    },
+    "gate1": {
+      "approved": true,
+      "at": "2026-09-02T22:28:15+00:00",
+      "note": "GATE 1 APPROVED - round 2. Human decision. The stopping rule was approve-eligible\non its own; no --override.\n\nRULE: 1 blocking finding, owned by test-runner; 12 worth a look; 0 blocking\nfindings owned by 'nothing'. Linter 0 errors / 0 warnings, first try both rounds.\nDrift against round 1: none. Sessions 39.3 / 36.5 against the 40 cap. 12\ncriteria, 5 cuts, pairwise distinct signatures.\n\nROUND 1's TWO MUST-FIX ITEMS ARE FIXED, AND THE FIXES WERE VERIFIED TO BITE\nrather than taken on trust - the Breaker re-derived the wrong implementation's\noutput by hand:\n  - B1: with `overtake` seeded floor 5 before floor 8, `ahead = live` targets\n    floor 5 from floor 6 at tick 2, so c-2-2's tick-2 row reads `down` and goes\n    red. With `both-sides` seeded floor 6 before floor 2, the same reading swaps\n    c-2-1's servedAt values and goes red.\n  - B2: c-2-2's new tick-5 floor-8 `direction: down` row is the only\n    downward-moving car any criterion observes, so `direction: 'up'`\n    unconditionally is now red.\nAll four runUntil traces and the five-click `above` walk were re-derived against\nthe new seed order; every pinned row, servedAt and row count reproduces.\n\nTHE ONE BLOCKING FINDING: B1 (round 2) - sc-shaft is specified as a client\ncomponent seeding useState from manualStart while reading its scenario from an\nasync GET. Owned by test-runner: c-1-2 goes red at step 6 on the async reading\nand the Builder cannot edit the test, so the loop closes it. The residual the\nloop misses is the first-frame flash, which no testid is reserved for.\n\n*** THE ONE THING TO EYEBALL AT STEP 6 - W2 ***\nThe grading value of the B1 fix now rests on the ELEMENT ORDER INSIDE `calls` in\ndata/scenarios.json - floor 6 before floor 2 in both-sides, floor 5 before floor\n8 in overtake. That order lives in spec.md prose only; c-1-1 pins the scenario\norder and the keys, not the call order. Tidying the seed file back into\nregistration order leaves all twelve criteria green BY CONSTRUCTION and silently\nreopens B1. The fix relocated the fragility rather than removing it. Filed worth\na look, not blocking, because the Builder is not guessing - the spec states and\ndefends the order - but read the seed file at Gate 2 and do not let anyone\nnormalise it.\n\nSHIPS AS WRITTEN unless a later round changes it - 12 worth-a-look findings,\nmost owned by 'nothing'. The ones with teeth:\n  W4 - spec.md forbids `step` deriving movement from Math.sign(target - floor),\n       and a cut written that way passes all twelve criteria including the tick-5\n       down row. The prohibition is ungraded. The Breaker looked for an owner and\n       declined to name code-check, which is a fixed registry that cannot see it.\n  W3 - the cut-calls-ahead note claims the tick-2 row grades both halves of the\n       cut; it grades one. The ordering half is graded only by c-2-1, whose cuts\n       list does not name cut-calls-ahead.\n  W6 - cut-dispatch-target's `ahead`-empty reversal branch is unreachable on all\n       five fixtures, so a third of a 7.7-minute cut is dead ungraded code.\n  W7 - three skeleton locals are unused once the cuts are open. Owner typecheck,\n       which is FAIL-OPEN. It is worth-a-look rather than blocking, so the gate\n       correctly did not add a verify_later entry - but someone should still read\n       typecheck_fail_open in skeleton-check.json at step 8.\n  W1 - the seed reorder made /scenarios/overtake open its doors on an empty\n       landing on the manual walk. Ungraded, live session-1 route, pack-writer.\n  W11 - the idea's payoff was a visible trace; the spec ships JSON only.\n  W12 - session 1's largest cut is 58% of its cut minutes, which the share check\n        structurally skips at two cuts. Six consecutive projects have overrun.\n\nWHY 12 WORTH-A-LOOK AND NOT 7: the Breaker deliberately restated round 1's seven\nkept findings so the approved record does not lose them. That is the round-memory\nfix working, and gate1-check confirms drift 0 - nothing re-raised more harshly,\nno owner moved to 'nothing'.",
+      "spec_hash": "2779e2855142364fec0ed1c5c2306a7312d2d83120ae108e0a55ed581e626816",
+      "verify_hash": "688a90ca27ea053f078bfcf2a8788add7a7f2a1d45c0ca7657a8181dcb07bbcb",
+      "override": false
+    },
+    "gate2": {
+      "approved": true,
+      "at": "2026-09-03T04:41:04+00:00",
+      "note": "GATE 2 APPROVED. Human decision, read from results.json and mutation.json rather\nthan by hand-testing - which is what this gate exists to replace.\n\nCRITERIA: 12 pass, 0 fail, 0 skip, 0 missing, in 45.2 seconds. Builder retries\nused: ZERO - the code passed the whole suite on its first attempt, against tests\nit could not edit. code_checks declared none, as the spec states (nothing in this\nproject reads a clock; a tick is a tick, never a second).\n\nMUTATION - leave-one-out, ok, checked 5 of 5, ungraded [], inconclusive []:\n  cut-calls-ahead      red: c-2-2                              stayed green: -\n  cut-dispatch-target  red: c-2-1 c-2-2 c-2-3                  stayed green: -\n  cut-run-until        red: c-2-1 c-2-2 c-2-3 c-2-4 c-2-6      stayed green: -\n  cut-step-doors       red: c-1-5                              stayed green: -\n  cut-step-move        red: c-1-3 c-1-4 c-1-5                  stayed green: -\nNothing stayed green anywhere. Every one of the five student tasks turns at least\none of its own criteria red when it alone is removed, so no task can be skipped\nwhile the suite still reads green. `checked 5 of 5` is recorded deliberately: the\ncheck is narrowable with --only/--max, so ok:true over a subset would prove\nnothing about a task that was skipped.\n\n*** W2 HAND-CHECK - the item Gate 1 carried here, and the one no script can do ***\nRead app/data/scenarios.json directly:\n  both-sides  calls in file order: [(6,0), (2,0)]   spec requires 6 before 2  OK\n  overtake    calls in file order: [(5,2), (8,0)]   spec requires 5 before 8  OK\nThe seed order survived the build, so round 1's B1 fix is still biting. THE\nFRAGILITY IS UNCHANGED: no criterion pins that element order, so anyone tidying\nthe file into registration order would keep all twelve criteria green and\nsilently un-grade both the direction filter and the tie rule. Carry this to\nGate 3 and into any feedback round. Do not let the seed file be normalised.\n\nROUND-2 B1, the only blocking finding at Gate 1, was owned by test-runner and the\nloop closed it as predicted: the shaft page is built and c-1-2 passes. The\nresidual the loop cannot reach is the first-frame flash, for which no testid is\nreserved - unchanged, still ungraded, still not blocking.\n\nSTILL OPEN, all recorded at Gate 1 as worth-a-look and none of them fixed here:\n  W4  spec.md forbids `step` deriving movement from Math.sign(target - floor);\n      a cut written that way passes all twelve criteria including the tick-5\n      down row, so the prohibition remains ungraded by anything.\n  W7  three skeleton locals are unused once the cuts are open. Owner typecheck,\n      which is FAIL-OPEN - read typecheck_fail_open in skeleton-check.json at\n      step 10 and require it false. It is not in verify_later because W7 is\n      worth-a-look, not blocking, and only blocking findings carry that\n      obligation.\n  W6  cut-dispatch-target's `ahead`-empty reversal branch is unreachable on all\n      five fixtures - dead, ungraded code inside a 7.7-minute cut.\n  W1  /scenarios/overtake now opens its doors on an empty landing on the manual\n      walk, after the seed reorder. Live session-1 route, ungraded, pack-writer.\n  W10 shaft DOM order is unpinned, so an upside-down shaft satisfies c-1-2.\n  W11 the idea's payoff was a visible trace; the spec ships JSON only.\n  W12 session 1's largest cut is 58% of its cut minutes, which the share check\n      structurally skips at two cuts. Six consecutive projects have overrun, so\n      expect the pack to disclose an overrun and name real trims.",
+      "verify_hash": "1d0721ce786ead96a81547a0a475ec9f98f2f538f1c46397fc130ae27e4bd69f",
+      "verify_moved": true
+    },
+    "gate3": {
+      "approved": true,
+      "at": "2026-09-03T05:47:16+00:00",
+      "note": "GATE 3 APPROVED. Human decision. Gate 3's question is whether someone could teach\na session from the guide alone, without opening the finished code - and step 13\nanswered it for session 1 with evidence rather than opinion.\n\nDRY RUN: session 1, 40 minutes, taught by Priya, taught_without_the_code TRUE,\n\"Priya and the students were able to understand the session.\"\n\n*** CORRECTION TO THE GATE 2 NOTE - read this instead of that ***\nMy Gate 2 note said \"code_checks declared none, as the spec states\". That is\nFALSE and the reasoning was inverted. spec.json declares code_checks\n[\"utc-dates\"], and results.json records it ran with ok true, 0 violations. The\nspec's rule that nothing in this project reads a clock is the REASON the check\nexists, not a reason none was needed. The Gate 2 record is left as written rather\nthan rewritten, so the audit trail stays honest; this is the correction.\nFound by the Pack Writer, which checked the claim against results.json instead of\nbelieving the note it was given.\n\nWHAT THE 40 MINUTES DOES NOT SETTLE. The pack timed session 1 at 47 and said it\nreaches 40 ONLY by taking spec.md's own drop candidate - handing cut-step-doors\nover already written, which saves 11 and costs c-1-5, the only session-1\ncriterion grading that cut. Priya measured 40 and the note does not say which\nhappened:\n  (a) the trim was taken, so students did not type cut-step-doors in session 1\n      (still graded by session 2's folds, per W8), or\n  (b) it fit without the trim, and the pack's estimate was 7 minutes pessimistic.\nThose have different consequences for the next instructor. Whoever teaches it\nnext should record which.\n\nSESSION 2 WAS NOT DRY-RUN, and it is the harder half: timed at 48 against 36.5\nestimated, needing three trims to reach 40.5, and its heavy cut (cut-run-until)\ntimed at 12 minutes against 6.8 charged. _gate_blockers(st, 3) does not require\nboth sessions, and state.json's dry_run is a single object, so recording session 2\nwould have overwritten session 1's measurement - which is why session 1's numbers\nare written out above. Approved on one session deliberately; run session 2 before\nthis is taught for real.\n\nHANDOVER CHECKERS, read rather than assumed:\n  cut              5 cuts, 0 retries\n  leak-scan        ok - leaks [] AND history_leaks [] - both halves clean\n  guide-lint       ok - 0 errors, 2 G032 warnings, the intended overrun disclosures\n  skeleton-check   ok, typecheck_fail_open FALSE - tsc genuinely ran, so W7's\n                   fail-open owner did not pass by not running\n  skeleton-results 4 pass / 8 fail - the 4 passes are the no-cut criteria the spec\n                   designed to survive an open skeleton; the 8 failures are every\n                   criterion whose cut was removed\n  deploy           ok, fresh copy + install + build + real HTTP answer, no failed\n                   steps, preview server not left listening\n  criteria         12 of 12 green at step 7 with ZERO builder retries; mutation ok,\n                   checked 5 of 5, nothing ungraded, nothing inconclusive, nothing\n                   stayed green on any of the five leave-one-out runs\n\nTHE TIMING PREDICTION CAME TRUE, AND NAMED ITS OWN CAUSE. Both sessions overrun -\n47 and 48 - the seventh consecutive project. ambiguity.md W12 predicted this at\nGate 1 before any code existed and gave the structural reason: spec_linter's\n45%-largest-cut rule (W114) cannot fire on a two-cut session, so cut-step-move at\n58% of session 1's cut minutes raised no warning. It then timed at 12 live minutes\nagainst 8.3 charged. The ambiguity check found a hole in the linter's coverage by\nreading the spec.\n\nPIPELINE DEFECT FOUND AND FIXED THIS ROUND: guide_linter took max() over every\n\"N minutes\" in a session file, so any larger duration mentioned anywhere became\nthe session's stated time. tip-split reads \"40 minutes as planned below. The\nhonest total for the material is 45\" and was scored 45; test-05's Guide Writer had\nto reword a sentence to work around it. Now read from the `**Time:**` line - the\nfirst duration on it, since the line reads \"the plan runs to 47 minutes against a\n40-minute cap\". Falls back to the old guess with a new G033 warning when there is\nno Time line, so the guess is visible. Verified across all five packs: 47, 46, 40,\n40, 40 - tip-split corrected from 45 to 40. selftest 408 -> 414.\n\nSTILL OPEN AND SHIPPING, all recorded at Gate 1:\n  W2  the element order inside each `calls` array in data/scenarios.json is\n      load-bearing and pinned by no criterion. Hand-checked at Gate 2 and intact\n      (both-sides 6 then 2; overtake 5 then 8). Normalising that file into\n      registration order leaves all twelve criteria green and silently stops\n      grading both the direction filter and the tie rule. In the pack README under\n      its own heading and repeated in troubleshooting.md. DO NOT NORMALISE IT.\n  W4  the prohibition on `step` deriving movement from Math.sign(target - floor)\n      passes all twelve criteria. Owned by nothing; the guide teaches it and says\n      plainly that no test catches it.\n  W6  cut-dispatch-target's ahead-empty reversal branch never executes on any of\n      the five fixtures - the guide says to write it and not to spend minutes\n      justifying it.\n  W1  /scenarios/overtake opens its doors on an empty landing on the manual walk\n      after the seed reorder. Explained in README, session-1.md and troubleshooting.\n  W10 shaft DOM order and the tick readout past 0 are ungraded.\n  W11 the idea's payoff was a visible trace; the spec ships JSON only - the pack\n      writes out the devtools fetch and console.table with both expected tables."
+    }
+  },
+  "steps": [
+    {
+      "step": "stack",
+      "ok": true,
+      "at": "2026-09-02T20:41:03+00:00",
+      "detail": "next, react, typescript",
+      "run": 1
+    },
+    {
+      "step": "ideas",
+      "ok": true,
+      "at": "2026-09-02T20:48:09+00:00",
+      "detail": "5 ideas",
+      "run": 1
+    },
+    {
+      "step": "pick",
+      "ok": true,
+      "at": "2026-09-02T20:55:23+00:00",
+      "detail": "idea-04.md",
+      "run": 1
+    },
+    {
+      "step": "lint",
+      "ok": true,
+      "at": "2026-09-02T21:13:21+00:00",
+      "detail": "",
+      "run": 1
+    },
+    {
+      "step": "breaker",
+      "ok": true,
+      "at": "2026-09-02T21:28:03+00:00",
+      "detail": "9466cbb44b2b",
+      "run": 1
+    },
+    {
+      "step": "redfirst",
+      "ok": true,
+      "at": "2026-09-02T21:39:51+00:00",
+      "detail": "",
+      "run": 1
+    },
+    {
+      "step": "revise:round-1",
+      "ok": true,
+      "at": "2026-09-02T21:45:41+00:00",
+      "detail": "spec.md, spec.json, lint.json, ambiguity.md, gate1.json, redfirst.json, verify",
+      "run": 1
+    },
+    {
+      "step": "lint",
+      "ok": true,
+      "at": "2026-09-02T21:52:20+00:00",
+      "detail": "",
+      "run": 2
+    },
+    {
+      "step": "breaker",
+      "ok": true,
+      "at": "2026-09-02T22:06:25+00:00",
+      "detail": "2779e2855142",
+      "run": 2
+    },
+    {
+      "step": "redfirst",
+      "ok": true,
+      "at": "2026-09-02T22:16:35+00:00",
+      "detail": "",
+      "run": 2
+    },
+    {
+      "step": "test:app",
+      "ok": true,
+      "at": "2026-09-02T22:52:10+00:00",
+      "detail": "",
+      "run": 1
+    },
+    {
+      "step": "mutation",
+      "ok": true,
+      "at": "2026-09-02T22:55:55+00:00",
+      "detail": "",
+      "run": 1
+    },
+    {
+      "step": "cut",
+      "ok": true,
+      "at": "2026-09-03T04:45:17+00:00",
+      "detail": "",
+      "run": 1
+    },
+    {
+      "step": "deploy",
+      "ok": true,
+      "at": "2026-09-03T04:48:27+00:00",
+      "detail": "",
+      "run": 1
+    },
+    {
+      "step": "guide-lint",
+      "ok": false,
+      "at": "2026-09-03T05:00:55+00:00",
+      "detail": "",
+      "run": 1
+    },
+    {
+      "step": "guide-lint",
+      "ok": true,
+      "at": "2026-09-03T05:01:53+00:00",
+      "detail": "",
+      "run": 2
+    },
+    {
+      "step": "guide-lint",
+      "ok": true,
+      "at": "2026-09-03T05:02:40+00:00",
+      "detail": "",
+      "run": 3
+    },
+    {
+      "step": "guide-lint",
+      "ok": true,
+      "at": "2026-09-03T05:03:20+00:00",
+      "detail": "",
+      "run": 4
+    },
+    {
+      "step": "leak-scan",
+      "ok": true,
+      "at": "2026-09-03T05:04:43+00:00",
+      "detail": "",
+      "run": 1
+    },
+    {
+      "step": "guide-lint",
+      "ok": true,
+      "at": "2026-09-03T05:04:48+00:00",
+      "detail": "",
+      "run": 5
+    },
+    {
+      "step": "dryrun",
+      "ok": true,
+      "at": "2026-09-03T05:41:10+00:00",
+      "detail": "session 1, 40 min, Priya",
+      "run": 1
+    },
+    {
+      "step": "guide-lint",
+      "ok": true,
+      "at": "2026-09-03T05:45:10+00:00",
+      "detail": "",
+      "run": 6
+    },
+    {
+      "step": "ship",
+      "ok": true,
+      "at": "2026-09-03T05:49:45+00:00",
+      "detail": "",
+      "run": 1
+    }
+  ],
+  "ticket": null,
+  "dry_run": {
+    "at": "2026-09-03T05:41:10+00:00",
+    "session": 1,
+    "minutes": 40,
+    "by": "Priya",
+    "taught_without_the_code": true,
+    "note": "Priya and the students were able to understand the session."
+  },
+  "feedback": []
+}

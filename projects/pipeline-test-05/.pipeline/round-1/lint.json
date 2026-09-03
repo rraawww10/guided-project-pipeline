@@ -1,0 +1,68 @@
+{
+  "ok": true,
+  "errors": [],
+  "warnings": [],
+  "counts": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "session_minutes": [
+    {
+      "n": 1,
+      "minutes": 38.8,
+      "cuts": 2,
+      "builds": 2,
+      "concepts": 2,
+      "carries_setup": true,
+      "over_cap": false,
+      "weighted": true,
+      "cut_minutes": [
+        {
+          "id": "cut-step-move",
+          "minutes": 7.8,
+          "decisions": 1,
+          "hint_words": 57
+        },
+        {
+          "id": "cut-step-doors",
+          "minutes": 6.0,
+          "decisions": 0,
+          "hint_words": 55
+        }
+      ],
+      "largest_cut_share": 0.56
+    },
+    {
+      "n": 2,
+      "minutes": 36.5,
+      "cuts": 3,
+      "builds": 1,
+      "concepts": 2,
+      "carries_setup": false,
+      "over_cap": false,
+      "weighted": true,
+      "cut_minutes": [
+        {
+          "id": "cut-dispatch-target",
+          "minutes": 7.7,
+          "decisions": 1,
+          "hint_words": 56
+        },
+        {
+          "id": "cut-run-until",
+          "minutes": 6.8,
+          "decisions": 0,
+          "hint_words": 74
+        },
+        {
+          "id": "cut-calls-ahead",
+          "minutes": 6.0,
+          "decisions": 0,
+          "hint_words": 54
+        }
+      ],
+      "largest_cut_share": 0.38
+    }
+  ],
+  "spec_hash": "9466cbb44b2be79267fbd8a21780f56d33a2c15c800a191fb6a8e98555c7bf32"
+}

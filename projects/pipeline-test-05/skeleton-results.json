@@ -1,0 +1,104 @@
+{
+  "ok": false,
+  "target": "skeleton",
+  "code_checks": {
+    "ok": true,
+    "checks": {}
+  },
+  "seconds": 199.4,
+  "counts": {
+    "pass": 4,
+    "fail": 8,
+    "skip": 0,
+    "missing": 0
+  },
+  "criteria": {
+    "c-1-1": {
+      "status": "pass",
+      "check": "GET /api/scenarios returns 200 with a JSON array of 5 scenarios whose id values are above, both-sides, overtake, passing and quiet in that order, each carrying id, name, floors, start and calls",
+      "session": 1,
+      "test": "verify/test_api_scenarios.py::test_c_1_1_scenarios_are_the_five_seeded_lifts_in_seed_order",
+      "message": ""
+    },
+    "c-1-2": {
+      "status": "pass",
+      "check": "/scenarios/above renders 8 elements with data-testid floor-1 through floor-8, the exact text 2 in the element with data-testid car-floor and the exact text 0 in the element with data-testid tick, and /scenarios/no-such-lift displays the exact text No scenario with id no-such-lift in the element with data-testid no-scenario",
+      "session": 1,
+      "test": "verify/test_ui_shaft.py::test_c_1_2_above_draws_eight_floors_at_tick_zero_and_an_unknown_id_says_so",
+      "message": ""
+    },
+    "c-1-3": {
+      "status": "fail",
+      "check": "/scenarios/above displays the exact text 6 in the element with data-testid car-floor and the exact text doors in the element with data-testid car-mode after the element with data-testid step-button is clicked 4 times",
+      "session": 1,
+      "test": "verify/test_ui_shaft.py::test_c_1_3_above_opens_its_doors_on_floor_six_after_four_presses",
+      "message": "AssertionError: car-floor reads '2' after 4 presses, expected '6'\nassert '2' == '6'\n  \n  - 6\n  + 2"
+    },
+    "c-1-4": {
+      "status": "fail",
+      "check": "/scenarios/passing displays the exact text 3 in the element with data-testid car-floor and the exact text moving in the element with data-testid car-mode after the element with data-testid step-button is clicked 2 times",
+      "session": 1,
+      "test": "verify/test_ui_shaft.py::test_c_1_4_passing_car_is_still_moving_at_floor_three_after_two_presses",
+      "message": "AssertionError: car-floor reads '1' after 2 presses, expected '3'\nassert '1' == '3'\n  \n  - 3\n  + 1"
+    },
+    "c-1-5": {
+      "status": "fail",
+      "check": "/scenarios/above displays the exact text 4 in the element with data-testid served-6, the exact text 1 in the element with data-testid served-count and the exact text idle in the element with data-testid car-mode after the element with data-testid step-button is clicked 5 times",
+      "session": 1,
+      "test": "verify/test_ui_shaft.py::test_c_1_5_above_serves_floor_six_at_tick_four_and_goes_idle",
+      "message": "AssertionError: Locator expected to have count '1'\nActual value: 0 \nCall log:\n  - Expect \"to_have_count\" with timeout 20000ms\n  - waiting for get_by_test_id(\"served-6\")\n    43 \u00d7 locator resolved to 0 elements\n       - unexpected value \"0\""
+    },
+    "c-1-6": {
+      "status": "pass",
+      "check": "/scenarios/quiet displays the exact text idle in the element with data-testid car-mode, the exact text 5 in the element with data-testid car-floor and the exact text 0 in the element with data-testid served-count after the element with data-testid step-button is clicked 3 times",
+      "session": 1,
+      "test": "verify/test_ui_shaft.py::test_c_1_6_quiet_car_stays_idle_on_floor_five_with_nothing_served",
+      "message": ""
+    },
+    "c-2-1": {
+      "status": "fail",
+      "check": "POST /api/scenarios/simulate returns 200 for the both-sides scenario with rows holding 9 entries and served naming floor 2 at servedAt 2 and floor 6 at servedAt 7",
+      "session": 2,
+      "test": "verify/test_api_simulate.py::test_c_2_1_both_sides_runs_nine_ticks_serving_the_lower_call_first",
+      "message": "AssertionError: both-sides answered 0 rows, expected 9: []\nassert 0 == 9\n +  where 0 = len([])"
+    },
+    "c-2-2": {
+      "status": "fail",
+      "check": "POST /api/scenarios/simulate returns 200 for the overtake scenario with served naming floor 8 at servedAt 4 and floor 5 at servedAt 8, the rows entry for tick 2 holding floor 6 with direction up, and the rows entry for tick 5 holding floor 8 with direction down",
+      "session": 2,
+      "test": "verify/test_api_simulate.py::test_c_2_2_overtake_carries_on_up_past_the_nearer_call_behind_it",
+      "message": "AssertionError: expected exactly 1 served entry for floor 8, found 0 in []"
+    },
+    "c-2-3": {
+      "status": "fail",
+      "check": "POST /api/scenarios/simulate returns 200 for the passing scenario with served naming floor 3 at calledAt 2 and servedAt 2, and floor 5 at servedAt 5",
+      "session": 2,
+      "test": "verify/test_api_simulate.py::test_c_2_3_passing_picks_up_the_call_on_the_floor_it_is_standing_on",
+      "message": "AssertionError: expected exactly 1 served entry for floor 3, found 0 in []"
+    },
+    "c-2-4": {
+      "status": "fail",
+      "check": "POST /api/scenarios/simulate returns 200 for the both-sides scenario sent with maxTicks 4 and answers with rows holding 4 entries and complete false",
+      "session": 2,
+      "test": "verify/test_api_simulate.py::test_c_2_4_max_ticks_four_stops_both_sides_short_and_incomplete",
+      "message": "AssertionError: both-sides with maxTicks 4 answered 0 rows, expected 4: []\nassert 0 == 4\n +  where 0 = len([])"
+    },
+    "c-2-5": {
+      "status": "pass",
+      "check": "POST /api/scenarios/simulate rejects a body carrying no scenario object with 400 and the JSON body {\"error\": \"scenario must carry floors, start and calls\"}, rejects a scenario whose call names a floor outside 1 to floors with that same 400 body, and rejects a body that is not valid JSON with that same 400 body",
+      "session": 2,
+      "test": "verify/test_api_simulate.py::test_c_2_5_a_missing_scenario_a_bad_floor_and_bad_json_are_one_four_hundred",
+      "message": ""
+    },
+    "c-2-6": {
+      "status": "fail",
+      "check": "POST /api/scenarios/simulate returns 200 for the quiet scenario with rows holding one entry of tick 0, floor 5, mode idle and direction null, served empty and complete true",
+      "session": 2,
+      "test": "verify/test_api_simulate.py::test_c_2_6_quiet_completes_in_one_idle_row_with_nothing_served",
+      "message": "AssertionError: quiet answered 0 rows, expected 1: []\nassert 0 == 1\n +  where 0 = len([])"
+    }
+  },
+  "pytest_returncode": 1,
+  "stdout_tail": "is no `served-6` element at all and `served-count`\n        reads 0; with `cut-step-doors` open the car reaches the doors on press 4 and\n        then nothing is ever served, so `served-6` is still absent, `served-count`\n        is still 0 and `car-mode` still reads doors. `served-count` is required to\n        read 1 rather than \"at least one\", so an empty page cannot answer it.\n    \n        ambiguity.md W8 (worth a look, owner `nothing`) records what this test\n        cannot separate: a `cut-step-doors` filled with the literal `served: [{floor:\n        6, calledAt: 0, servedAt: 4}]` satisfies every assertion below, because all\n        three numbers are printed in the criterion. The fixtures that do separate it\n        are session 2's folds - c-2-1, c-2-2, c-2-3 and c-2-6 - and adding a second\n        observation to this criterion is a spec change, not a test change.\n        \"\"\"\n        open_shaft(page, \"above\")\n        click_step(page, 5)\n    \n>       served_six = read_testid(page, \"served-6\")\n                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n\nskeleton\\verify\\test_ui_shaft.py:219: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _\n\npage = <Page url='http://127.0.0.1:50836/scenarios/above'>, value = 'served-6'\n\n    def read_testid(page: Page, value: str) -> str:\n        \"\"\"Require exactly one element with this testid, then read its text.\n    \n        Existence is asserted before the text, because an element that is absent is\n        not an element holding the wrong text, and the failure should say which.\n        \"\"\"\n        locator = by_testid(page, value)\n>       expect(locator).to_have_count(1, timeout=LOAD_TIMEOUT)\nE       AssertionError: Locator expected to have count '1'\nE       Actual value: 0 \nE       Call log:\nE         - Expect \"to_have_count\" with timeout 20000ms\nE         - waiting for get_by_test_id(\"served-6\")\nE           43 \u00d7 locator resolved to 0 elements\nE              - unexpected value \"0\"\n\nskeleton\\verify\\helpers.py:340: AssertionError\n=========================== short test summary info ===========================\nFAILED skeleton/verify/test_api_simulate.py::test_c_2_1_both_sides_runs_nine_ticks_serving_the_lower_call_first\nFAILED skeleton/verify/test_api_simulate.py::test_c_2_2_overtake_carries_on_up_past_the_nearer_call_behind_it\nFAILED skeleton/verify/test_api_simulate.py::test_c_2_3_passing_picks_up_the_call_on_the_floor_it_is_standing_on\nFAILED skeleton/verify/test_api_simulate.py::test_c_2_4_max_ticks_four_stops_both_sides_short_and_incomplete\nFAILED skeleton/verify/test_api_simulate.py::test_c_2_6_quiet_completes_in_one_idle_row_with_nothing_served\nFAILED skeleton/verify/test_ui_shaft.py::test_c_1_3_above_opens_its_doors_on_floor_six_after_four_presses\nFAILED skeleton/verify/test_ui_shaft.py::test_c_1_4_passing_car_is_still_moving_at_floor_three_after_two_presses\nFAILED skeleton/verify/test_ui_shaft.py::test_c_1_5_above_serves_floor_six_at_tick_four_and_goes_idle\n8 failed, 4 passed in 36.30s\n",
+  "stderr_tail": ""
+}

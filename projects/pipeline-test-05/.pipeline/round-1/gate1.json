@@ -1,0 +1,223 @@
+{
+  "ok": false,
+  "verdict": "reject",
+  "spec_hash": "9466cbb44b2be79267fbd8a21780f56d33a2c15c800a191fb6a8e98555c7bf32",
+  "findings": [
+    {
+      "id": "B1",
+      "title": "`overtake`'s call order lets `cut-calls-ahead` be `ahead = live` and stay green",
+      "section": "blocking",
+      "owner": "nothing",
+      "line": "\"`overtake` is the fifth and it is not decoration: it is the only fixture on which \"the nearest call ahead\" and \"the nearest call anywhere\" disagree, so without it `cut-calls-ahead` cannot be told apart from a car that always chases the closest caller.\"",
+      "where": "spec.md, the seed table for `overtake` and `both-sides`; `cut-calls-ahead`; c-2-2",
+      "line_key": "7883c0bdf997c55a",
+      "subject": [
+        "c-2-2",
+        "cut-calls-ahead"
+      ],
+      "blocking": true,
+      "owner_declared": "nothing",
+      "owner_valid": true,
+      "owner_downgraded": null,
+      "fail_open": false,
+      "caught_by": "NO downstream checker sees this - it ships as written",
+      "must_fix_now": true
+    },
+    {
+      "id": "B2",
+      "title": "no criterion in the suite pins a `direction` of `down`",
+      "section": "blocking",
+      "owner": "nothing",
+      "line": "\"`direction` is `'up'` for a target above the car and `'down'` for one below.\"",
+      "where": "spec.md, c-2-1 / c-2-2 / c-2-6 and `cut-dispatch-target`; also `cut-step-move`",
+      "line_key": "fcf99ae21793d924",
+      "subject": [
+        "c-2-1",
+        "c-2-2",
+        "c-2-6",
+        "cut-dispatch-target",
+        "cut-step-move"
+      ],
+      "blocking": true,
+      "owner_declared": "nothing",
+      "owner_valid": true,
+      "owner_downgraded": null,
+      "fail_open": false,
+      "caught_by": "NO downstream checker sees this - it ships as written",
+      "must_fix_now": true
+    },
+    {
+      "id": "B3",
+      "title": "`sc-shaft` seeds `useState` from `manualStart` but gets its scenario asynchronously",
+      "section": "blocking",
+      "owner": "test-runner",
+      "line": "\"`sc-shaft` at `/scenarios/[id]`, built in session 1, a client component holding one `SimState` in `useState` seeded from `manualStart`.\" and \"The page reads its scenario from `GET /api/scenarios` and picks the matching `id`.\"",
+      "where": "spec.md, Screens, `sc-shaft`; c-1-2; spec.json screens[0].states",
+      "line_key": "17743ba7ac7bb0f3",
+      "subject": [
+        "c-1-2",
+        "sc-shaft"
+      ],
+      "blocking": true,
+      "owner_declared": "test-runner",
+      "owner_valid": true,
+      "owner_downgraded": null,
+      "fail_open": false,
+      "caught_by": "step 6 - the Builder/test-runner loop fixes this for free",
+      "must_fix_now": false
+    },
+    {
+      "id": "W1",
+      "title": "`cut-dispatch-target`'s `ahead`-empty branch is unreachable",
+      "section": "worth a look",
+      "owner": "nothing",
+      "line": "\"With `ahead` empty it reverses: `target` is the floor in `live` closest to the car, again lower floor on a tie.\"",
+      "where": "spec.md, the policy rule 4, and `cut-dispatch-target`'s hint",
+      "line_key": "ce02ad6ed8b920e5",
+      "subject": [
+        "cut-dispatch-target"
+      ],
+      "blocking": false,
+      "owner_declared": "nothing",
+      "owner_valid": true,
+      "owner_downgraded": null,
+      "fail_open": false,
+      "caught_by": "NO downstream checker sees this - it ships as written",
+      "must_fix_now": false
+    },
+    {
+      "id": "W2",
+      "title": "`cut-step-doors` is graded by one criterion on one served call",
+      "section": "worth a look",
+      "owner": "nothing",
+      "line": "\"Graded by `c-1-5` alone - the only criterion that reads `served-6` and `served-count`.\"",
+      "where": "spec.md, Session 1, `cut-step-doors`, c-1-5",
+      "line_key": "81ee4493e7e5b9ee",
+      "subject": [
+        "c-1-5",
+        "cut-step-doors"
+      ],
+      "blocking": false,
+      "owner_declared": "nothing",
+      "owner_valid": true,
+      "owner_downgraded": null,
+      "fail_open": false,
+      "caught_by": "NO downstream checker sees this - it ships as written",
+      "must_fix_now": false
+    },
+    {
+      "id": "W3",
+      "title": "`maxTicks` reached and the run completing on the same row",
+      "section": "worth a look",
+      "owner": "nothing",
+      "line": "\"The run ends **complete** on a dispatched car that is `idle` with `pending` empty, with that final row appended. It ends **incomplete** the moment `trace.rows` reaches `maxTicks`.\"",
+      "where": "spec.md, `runUntil`, and `cut-run-until`'s hint; c-2-4, c-2-6",
+      "line_key": "6bbb55fb963da111",
+      "subject": [
+        "c-2-4",
+        "c-2-6",
+        "cut-run-until"
+      ],
+      "blocking": false,
+      "owner_declared": "nothing",
+      "owner_valid": true,
+      "owner_downgraded": null,
+      "fail_open": false,
+      "caught_by": "NO downstream checker sees this - it ships as written",
+      "must_fix_now": false
+    },
+    {
+      "id": "W4",
+      "title": "two stated display rules that no criterion grades",
+      "section": "worth a look",
+      "owner": "nothing",
+      "line": "\"one row per floor, floor 8 at the top down to floor 1 | `floor-1` .. `floor-8` | the floor number\"",
+      "where": "spec.md, Screens table (`floor-1` .. `floor-8`, `tick`); c-1-2, c-1-6",
+      "line_key": "771865dcec4294fb",
+      "subject": [
+        "c-1-2",
+        "c-1-6"
+      ],
+      "blocking": false,
+      "owner_declared": "nothing",
+      "owner_valid": true,
+      "owner_downgraded": null,
+      "fail_open": false,
+      "caught_by": "NO downstream checker sees this - it ships as written",
+      "must_fix_now": false
+    },
+    {
+      "id": "W5",
+      "title": "the skeleton keeps three locals whose only readers are inside the cuts",
+      "section": "worth a look",
+      "owner": "typecheck",
+      "line": "\"if (state.car.mode === 'moving') { const car = state.car; <cut-step-move> }\"",
+      "where": "spec.md, both Marker placement blocks; `cut-step-move`, `cut-step-doors`, `cut-calls-ahead`, `cut-dispatch-target`",
+      "line_key": "025dc047f7e15c6e",
+      "subject": [
+        "cut-calls-ahead",
+        "cut-dispatch-target",
+        "cut-step-doors",
+        "cut-step-move"
+      ],
+      "blocking": false,
+      "owner_declared": "typecheck",
+      "owner_valid": true,
+      "owner_downgraded": null,
+      "fail_open": true,
+      "caught_by": "step 8 - tsc over the generated skeleton",
+      "must_fix_now": false
+    },
+    {
+      "id": "W6",
+      "title": "the idea's payoff is a visible trace; the spec ships JSON only",
+      "section": "worth a look",
+      "owner": "pack-writer",
+      "line": "\"A trace screen. The session-2 trace is JSON from `POST /api/scenarios/simulate`; rendering it would cost a second screen build that session 2 has no minutes for.\"",
+      "where": "idea.md Theme and session 2 \"Runs\"; spec.md Out of scope, `ep-simulate`",
+      "line_key": "9aec528051b7ff18",
+      "subject": [
+        "ep-simulate"
+      ],
+      "blocking": false,
+      "owner_declared": "pack-writer",
+      "owner_valid": true,
+      "owner_downgraded": null,
+      "fail_open": false,
+      "caught_by": "step 9 - a person reads the guide at Gate 3",
+      "must_fix_now": false
+    },
+    {
+      "id": "W7",
+      "title": "session load: the estimate is low on exactly this shape, and session 1 is outside W114's reach",
+      "section": "worth a look",
+      "owner": "pack-writer",
+      "line": "\"The heaviest cut in session 2 takes 38% of its cut minutes, under the 45% cap.\"",
+      "where": "spec.md, Session load; `cut-step-move`; lint.json session_minutes",
+      "line_key": "6f5a00db45d58965",
+      "subject": [
+        "cut-step-move"
+      ],
+      "blocking": false,
+      "owner_declared": "pack-writer",
+      "owner_valid": true,
+      "owner_downgraded": null,
+      "fail_open": false,
+      "caught_by": "step 9 - a person reads the guide at Gate 3",
+      "must_fix_now": false
+    }
+  ],
+  "counts": {
+    "blocking": 3,
+    "worth_a_look": 7,
+    "unowned_blocking": 2
+  },
+  "reasons": [
+    "B1 (`overtake`'s call order lets `cut-calls-ahead` be `ahead = live` and s) is blocking and nothing downstream catches it",
+    "B2 (no criterion in the suite pins a `direction` of `down`) is blocking and nothing downstream catches it"
+  ],
+  "rule": "reject when any blocking finding is owned by 'nothing'; approve when every remaining finding sits in a column a downstream checker owns. An owner that can pass by not running is owned only conditionally: it approves, and the confirmation it actually ran is listed in verify_later",
+  "reviewed_spec_hash": "9466cbb44b2be79267fbd8a21780f56d33a2c15c800a191fb6a8e98555c7bf32",
+  "drift": [],
+  "verify_later": []
+}

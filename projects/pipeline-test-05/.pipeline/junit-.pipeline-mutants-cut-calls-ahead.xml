@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="12" time="7.381" timestamp="2026-09-03T04:22:54.948900+05:30" hostname="HERO"><testcase classname="verify.test_api_scenarios" name="test_c_1_1_scenarios_are_the_five_seeded_lifts_in_seed_order" time="0.484" /><testcase classname="verify.test_api_simulate" name="test_c_2_1_both_sides_runs_nine_ticks_serving_the_lower_call_first" time="0.319" /><testcase classname="verify.test_api_simulate" name="test_c_2_2_overtake_carries_on_up_past_the_nearer_call_behind_it" time="0.307"><failure message="AssertionError: floor 8 was served at 7, expected 4: [{'floor': 5, 'calledAt': 2, 'servedAt': 3}, {'floor': 8, 'calledAt': 0, 'servedAt': 7}]&#10;assert 7 == 4&#10; +  where 7 = number(7, 'floor 8 servedAt')">api = &lt;httpx.Client object at 0x0000021FED26AE90&gt;
+
+    def test_c_2_2_overtake_carries_on_up_past_the_nearer_call_behind_it(api):
+        """c-2-2: POST /api/scenarios/simulate returns 200 for the overtake scenario
+        with served naming floor 8 at servedAt 4 and floor 5 at servedAt 8, the rows
+        entry for tick 2 holding floor 6 with direction up, and the rows entry for
+        tick 5 holding floor 8 with direction down.
+    
+        This is `cut-calls-ahead`'s fixture and the one where "the nearest call
+        ahead" and "the nearest call anywhere" disagree. The floor-5 call arrives at
+        tick 2, when the car is at floor 6 heading up - one floor *behind* it - so a
+        policy that keeps to its direction carries on to floor 8, serves it at tick
+        4, and comes back for floor 5 at tick 8. A policy that chases the closest
+        caller turns round at tick 2 and serves floor 5 at tick 3 instead, which
+        fails on floor 5's `servedAt` and on tick 2's row. The seed lists the
+        floor-5 call first, so `ahead = live` - no filter, no ordering - targets
+        floor 5 from floor 6 at tick 2 and the tick-2 row reads `down`: that is the
+        reading the seed order exists to catch.
+    
+        Both named rows are looked up by their `tick` field rather than as `rows[n]`,
+        and both fields the criterion names on each are asserted:
+    
+        * tick 2 - floor 6, `direction` exactly the string "up".
+        * tick 5 - floor 8, `direction` exactly the string "down". This is the only
+          downward-moving car any criterion in the spec observes, and it is what
+          holds `cut-dispatch-target`'s direction rule to something: `direction:
+          'up'` unconditionally fails here, and since `step` moves on
+          `car.direction` such a car also leaves the shaft.
+    
+        `None` is not "up" and not "down", so a row that omits the direction fails
+        either way.
+    
+        Three cuts, and no proper subset satisfies this. `cut-run-until` open leaves
+        `rows` empty, so there is no tick-2 row; `cut-dispatch-target` open leaves
+        the car idle for ever, so nothing is served; `cut-calls-ahead` open leaves
+        `ahead` empty, which sends `cut-dispatch-target` down its reversing branch
+        at tick 2 and serves floor 5 at tick 3.
+    
+        ambiguity.md W4 (worth a look, owner `nothing`) records what these rows do
+        not separate: a `cut-step-move` that moves by `Math.sign(car.target -
+        car.floor)` instead of by `car.direction` reproduces every value asserted
+        here, tick-5 row included. The prohibition is stated in spec.md and no
+        criterion grades the mechanism; grading it would need a fixture whose
+        `direction` and `target` disagree, which the spec does not have.
+        """
+        trace = simulate(api, scenario("overtake"))
+    
+        top = served_for(trace, 8)
+&gt;       assert number(top["servedAt"], "floor 8 servedAt") == 4, (
+            f"floor 8 was served at {top['servedAt']!r}, expected 4: {trace['served']}"
+        )
+E       AssertionError: floor 8 was served at 7, expected 4: [{'floor': 5, 'calledAt': 2, 'servedAt': 3}, {'floor': 8, 'calledAt': 0, 'servedAt': 7}]
+E       assert 7 == 4
+E        +  where 7 = number(7, 'floor 8 servedAt')
+
+verify\test_api_simulate.py:145: AssertionError</failure></testcase><testcase classname="verify.test_api_simulate" name="test_c_2_3_passing_picks_up_the_call_on_the_floor_it_is_standing_on" time="0.300" /><testcase classname="verify.test_api_simulate" name="test_c_2_4_max_ticks_four_stops_both_sides_short_and_incomplete" time="0.343" /><testcase classname="verify.test_api_simulate" name="test_c_2_5_a_missing_scenario_a_bad_floor_and_bad_json_are_one_four_hundred" time="0.306" /><testcase classname="verify.test_api_simulate" name="test_c_2_6_quiet_completes_in_one_idle_row_with_nothing_served" time="0.349" /><testcase classname="verify.test_ui_shaft" name="test_c_1_2_above_draws_eight_floors_at_tick_zero_and_an_unknown_id_says_so" time="2.037" /><testcase classname="verify.test_ui_shaft" name="test_c_1_3_above_opens_its_doors_on_floor_six_after_four_presses" time="1.037" /><testcase classname="verify.test_ui_shaft" name="test_c_1_4_passing_car_is_still_moving_at_floor_three_after_two_presses" time="0.357" /><testcase classname="verify.test_ui_shaft" name="test_c_1_5_above_serves_floor_six_at_tick_four_and_goes_idle" time="0.542" /><testcase classname="verify.test_ui_shaft" name="test_c_1_6_quiet_car_stays_idle_on_floor_five_with_nothing_served" time="0.764" /></testsuite></testsuites>

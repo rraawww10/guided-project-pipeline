@@ -1,0 +1,38 @@
+{
+  "c-1-1": {
+    "test": "verify/test_api_scenarios.py::test_c_1_1_scenarios_are_the_five_seeded_lifts_in_seed_order"
+  },
+  "c-1-2": {
+    "test": "verify/test_ui_shaft.py::test_c_1_2_above_draws_eight_floors_at_tick_zero_and_an_unknown_id_says_so"
+  },
+  "c-1-3": {
+    "test": "verify/test_ui_shaft.py::test_c_1_3_above_opens_its_doors_on_floor_six_after_four_presses"
+  },
+  "c-1-4": {
+    "test": "verify/test_ui_shaft.py::test_c_1_4_passing_car_is_still_moving_at_floor_three_after_two_presses"
+  },
+  "c-1-5": {
+    "test": "verify/test_ui_shaft.py::test_c_1_5_above_serves_floor_six_at_tick_four_and_goes_idle"
+  },
+  "c-1-6": {
+    "test": "verify/test_ui_shaft.py::test_c_1_6_quiet_car_stays_idle_on_floor_five_with_nothing_served"
+  },
+  "c-2-1": {
+    "test": "verify/test_api_simulate.py::test_c_2_1_both_sides_runs_nine_ticks_serving_the_lower_call_first"
+  },
+  "c-2-2": {
+    "test": "verify/test_api_simulate.py::test_c_2_2_overtake_carries_on_up_past_the_nearer_call_behind_it"
+  },
+  "c-2-3": {
+    "test": "verify/test_api_simulate.py::test_c_2_3_passing_picks_up_the_call_on_the_floor_it_is_standing_on"
+  },
+  "c-2-4": {
+    "test": "verify/test_api_simulate.py::test_c_2_4_max_ticks_four_stops_both_sides_short_and_incomplete"
+  },
+  "c-2-5": {
+    "test": "verify/test_api_simulate.py::test_c_2_5_a_missing_scenario_a_bad_floor_and_bad_json_are_one_four_hundred"
+  },
+  "c-2-6": {
+    "test": "verify/test_api_simulate.py::test_c_2_6_quiet_completes_in_one_idle_row_with_nothing_served"
+  }
+}

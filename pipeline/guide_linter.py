@@ -28,6 +28,33 @@ from .spec_linter import SESSION_MINUTES_CAP
 FENCE = re.compile(r"^```(\w+)?\s*$")
 CODE_LANGS = {"ts", "tsx", "js", "jsx", "json", "typescript", "javascript"}
 RE_MINUTES = re.compile(r"\b(\d{1,3})\s*(?:min|minute|minutes)\b", re.IGNORECASE)
+# Every pack states the plan's total on a `**Time:**` line and then discusses
+# other durations around it - the cap, an honest total, a worse alternative, how
+# long a step costs in class. Taking max() over the whole file read those as the
+# plan: tip-split says "40 minutes as planned below. The honest total for the
+# material is 45" and was scored 45, and pipeline-test-05's Guide Writer had to
+# reword a sentence about a hypothetical to stop it being read as the plan.
+RE_TIME_LINE = re.compile(r"^\s*\*\*Time:\*\*\s*(.+)$", re.IGNORECASE | re.MULTILINE)
+
+
+def stated_minutes(text: str) -> tuple[int | None, bool]:
+    """The session's planned total, and whether it came from the `**Time:**` line.
+
+    The first duration on that line, because the line reads "the plan below runs
+    to 47 minutes against a 40-minute cap" - the plan is the first number and the
+    cap is the second. Falls back to the largest duration in the file when there
+    is no Time line, which is the old behaviour and is reported as a warning so
+    the guess is visible rather than silent.
+    """
+    m = RE_TIME_LINE.search(text)
+    if m:
+        on_line = RE_MINUTES.findall(m.group(1))
+        if on_line:
+            return int(on_line[0]), True
+    anywhere = RE_MINUTES.findall(text)
+    if anywhere:
+        return max(int(x) for x in anywhere), False
+    return None, False
 # an elision the author marked on purpose
 ELIDED = re.compile(r"\.\.\.|…|/\* *\.\.\. *\*/")
 NOISE = re.compile(r"^[\s{}()\[\];,]*$")
@@ -120,8 +147,13 @@ def lint(project: Path, guide: str = "pack", cap: float = SESSION_MINUTES_CAP) -
         if not name:
             continue
         text = files[name]
-        mins = [int(x) for x in RE_MINUTES.findall(text)]
-        stated = max(mins) if mins else None
+        stated, from_time_line = stated_minutes(text)
+        if stated is not None and not from_time_line:
+            warnings.append({"code": "G033", "where": name,
+                             "message": f"session {n} has no '**Time:**' line, so its "
+                                        f"planned total was guessed as {stated} - the "
+                                        f"largest duration mentioned anywhere in the "
+                                        f"file. State the plan's total on a Time line"})
         if stated is None:
             errors.append({"code": "G030", "where": name,
                            "message": f"session {n} states no time - an instructor "

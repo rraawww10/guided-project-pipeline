@@ -1,0 +1,116 @@
+{
+  "ok": true,
+  "target": "app",
+  "code_checks": {
+    "ok": true,
+    "target": "app",
+    "declared": [
+      "utc-dates"
+    ],
+    "unknown": [],
+    "checks": {
+      "utc-dates": {
+        "ok": true,
+        "rule": "date arithmetic gives the same answer in every timezone: no local-time Date accessors, and no reading the real clock",
+        "violations": [],
+        "count": 0
+      }
+    }
+  },
+  "seconds": 45.2,
+  "counts": {
+    "pass": 12,
+    "fail": 0,
+    "skip": 0,
+    "missing": 0
+  },
+  "criteria": {
+    "c-1-1": {
+      "status": "pass",
+      "check": "GET /api/scenarios returns 200 with a JSON array of 5 scenarios whose id values are above, both-sides, overtake, passing and quiet in that order, each carrying id, name, floors, start and calls",
+      "session": 1,
+      "test": "verify/test_api_scenarios.py::test_c_1_1_scenarios_are_the_five_seeded_lifts_in_seed_order",
+      "message": ""
+    },
+    "c-1-2": {
+      "status": "pass",
+      "check": "/scenarios/above renders 8 elements with data-testid floor-1 through floor-8, the exact text 2 in the element with data-testid car-floor and the exact text 0 in the element with data-testid tick, and /scenarios/no-such-lift displays the exact text No scenario with id no-such-lift in the element with data-testid no-scenario",
+      "session": 1,
+      "test": "verify/test_ui_shaft.py::test_c_1_2_above_draws_eight_floors_at_tick_zero_and_an_unknown_id_says_so",
+      "message": ""
+    },
+    "c-1-3": {
+      "status": "pass",
+      "check": "/scenarios/above displays the exact text 6 in the element with data-testid car-floor and the exact text doors in the element with data-testid car-mode after the element with data-testid step-button is clicked 4 times",
+      "session": 1,
+      "test": "verify/test_ui_shaft.py::test_c_1_3_above_opens_its_doors_on_floor_six_after_four_presses",
+      "message": ""
+    },
+    "c-1-4": {
+      "status": "pass",
+      "check": "/scenarios/passing displays the exact text 3 in the element with data-testid car-floor and the exact text moving in the element with data-testid car-mode after the element with data-testid step-button is clicked 2 times",
+      "session": 1,
+      "test": "verify/test_ui_shaft.py::test_c_1_4_passing_car_is_still_moving_at_floor_three_after_two_presses",
+      "message": ""
+    },
+    "c-1-5": {
+      "status": "pass",
+      "check": "/scenarios/above displays the exact text 4 in the element with data-testid served-6, the exact text 1 in the element with data-testid served-count and the exact text idle in the element with data-testid car-mode after the element with data-testid step-button is clicked 5 times",
+      "session": 1,
+      "test": "verify/test_ui_shaft.py::test_c_1_5_above_serves_floor_six_at_tick_four_and_goes_idle",
+      "message": ""
+    },
+    "c-1-6": {
+      "status": "pass",
+      "check": "/scenarios/quiet displays the exact text idle in the element with data-testid car-mode, the exact text 5 in the element with data-testid car-floor and the exact text 0 in the element with data-testid served-count after the element with data-testid step-button is clicked 3 times",
+      "session": 1,
+      "test": "verify/test_ui_shaft.py::test_c_1_6_quiet_car_stays_idle_on_floor_five_with_nothing_served",
+      "message": ""
+    },
+    "c-2-1": {
+      "status": "pass",
+      "check": "POST /api/scenarios/simulate returns 200 for the both-sides scenario with rows holding 9 entries and served naming floor 2 at servedAt 2 and floor 6 at servedAt 7",
+      "session": 2,
+      "test": "verify/test_api_simulate.py::test_c_2_1_both_sides_runs_nine_ticks_serving_the_lower_call_first",
+      "message": ""
+    },
+    "c-2-2": {
+      "status": "pass",
+      "check": "POST /api/scenarios/simulate returns 200 for the overtake scenario with served naming floor 8 at servedAt 4 and floor 5 at servedAt 8, the rows entry for tick 2 holding floor 6 with direction up, and the rows entry for tick 5 holding floor 8 with direction down",
+      "session": 2,
+      "test": "verify/test_api_simulate.py::test_c_2_2_overtake_carries_on_up_past_the_nearer_call_behind_it",
+      "message": ""
+    },
+    "c-2-3": {
+      "status": "pass",
+      "check": "POST /api/scenarios/simulate returns 200 for the passing scenario with served naming floor 3 at calledAt 2 and servedAt 2, and floor 5 at servedAt 5",
+      "session": 2,
+      "test": "verify/test_api_simulate.py::test_c_2_3_passing_picks_up_the_call_on_the_floor_it_is_standing_on",
+      "message": ""
+    },
+    "c-2-4": {
+      "status": "pass",
+      "check": "POST /api/scenarios/simulate returns 200 for the both-sides scenario sent with maxTicks 4 and answers with rows holding 4 entries and complete false",
+      "session": 2,
+      "test": "verify/test_api_simulate.py::test_c_2_4_max_ticks_four_stops_both_sides_short_and_incomplete",
+      "message": ""
+    },
+    "c-2-5": {
+      "status": "pass",
+      "check": "POST /api/scenarios/simulate rejects a body carrying no scenario object with 400 and the JSON body {\"error\": \"scenario must carry floors, start and calls\"}, rejects a scenario whose call names a floor outside 1 to floors with that same 400 body, and rejects a body that is not valid JSON with that same 400 body",
+      "session": 2,
+      "test": "verify/test_api_simulate.py::test_c_2_5_a_missing_scenario_a_bad_floor_and_bad_json_are_one_four_hundred",
+      "message": ""
+    },
+    "c-2-6": {
+      "status": "pass",
+      "check": "POST /api/scenarios/simulate returns 200 for the quiet scenario with rows holding one entry of tick 0, floor 5, mode idle and direction null, served empty and complete true",
+      "session": 2,
+      "test": "verify/test_api_simulate.py::test_c_2_6_quiet_completes_in_one_idle_row_with_nothing_served",
+      "message": ""
+    }
+  },
+  "pytest_returncode": 0,
+  "stdout_tail": "............                                                             [100%]\n12 passed in 7.47s\n",
+  "stderr_tail": ""
+}

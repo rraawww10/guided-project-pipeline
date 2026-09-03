@@ -1,0 +1,42 @@
+{
+  "ok": true,
+  "errors": [],
+  "warnings": [
+    {
+      "code": "G032",
+      "where": "session-1.md",
+      "message": "session 1 is 47 minutes against the 40 cap, disclosed with trims"
+    },
+    {
+      "code": "G032",
+      "where": "session-2.md",
+      "message": "session 2 is 48 minutes against the 40 cap, disclosed with trims"
+    }
+  ],
+  "counts": {
+    "errors": 0,
+    "warnings": 2
+  },
+  "files": [
+    "README.md",
+    "session-1.md",
+    "session-2.md",
+    "troubleshooting.md"
+  ],
+  "sessions": [
+    {
+      "n": 1,
+      "file": "session-1.md",
+      "minutes": 47,
+      "over_cap": true,
+      "disclosed": true
+    },
+    {
+      "n": 2,
+      "file": "session-2.md",
+      "minutes": 48,
+      "over_cap": true,
+      "disclosed": true
+    }
+  ]
+}

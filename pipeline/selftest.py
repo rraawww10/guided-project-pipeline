@@ -1937,6 +1937,41 @@ def test_new_checkers(tmp: Path) -> None:
     check("a snippet that is in no source file is an error",
           "G040" in {e["code"] for e in guide_linter.lint(proj)["errors"]}, True)
 
+    # --- the session's time is what its **Time:** line says, not the biggest
+    # number in the file. tip-split's guide says "40 minutes as planned below.
+    # The honest total for the material is 45" and was scored 45; pipeline-test-05's
+    # Guide Writer had to reword a sentence about a hypothetical worse plan to
+    # stop max() reading it as the plan.
+    check("the plan is the first duration on the Time line, not the largest anywhere",
+          guide_linter.stated_minutes(
+              "**Time:** 40 minutes as planned below. The honest total is 45 minutes.\n"
+              "Doing it live costs 8 minutes and teaches nothing.\n"),
+          (40, True))
+    check("the cap named after the plan on the same line is not the plan",
+          guide_linter.stated_minutes(
+              "**Time:** the plan below runs to **47 minutes** against a "
+              "40-minute cap.\n"),
+          (47, True))
+    check("with no Time line it still guesses, and says that it guessed",
+          guide_linter.stated_minutes("This step costs 8 minutes. That one 12 minutes.\n"),
+          (12, False))
+    check("a guide with no duration at all has no stated time",
+          guide_linter.stated_minutes("# Session 1\n\nNo timings here.\n"), (None, False))
+
+    (g / "session-1.md").write_text(
+        "# Session 1\n\n**Time:** 35 minutes\n\nA worse plan would run 55 minutes.\n\n"
+        "cut-api-list, cut-ui-rows\n")
+    r = guide_linter.lint(proj)
+    check("a mentioned worse plan no longer overruns the session",
+          (r["sessions"][0]["minutes"],
+           "G031" in {e["code"] for e in r["errors"]},
+           "G032" in {w["code"] for w in r["warnings"]}), (35, False, False))
+
+    (g / "session-1.md").write_text(
+        "# Session 1\n\nRuns to 35 minutes.\n\ncut-api-list, cut-ui-rows\n")
+    check("a guide with no Time line warns that its total was guessed",
+          "G033" in {w["code"] for w in guide_linter.lint(proj)["warnings"]}, True)
+
 
 def test_doc_vocabulary(tmp: Path) -> None:
     """requirements_doc.md's ids and marker form, alongside the existing ones."""

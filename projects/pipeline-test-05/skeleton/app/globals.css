@@ -1,0 +1,127 @@
+:root {
+  --ink: #1b1d22;
+  --paper: #f6f6f4;
+  --line: #cbc9c2;
+  --car: #2f6f4f;
+  --muted: #6b6a66;
+  color-scheme: light;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+.page {
+  margin: 0 auto;
+  max-width: 44rem;
+  padding: 2rem 1.5rem 4rem;
+}
+
+h1 {
+  margin: 0 0 0.25rem;
+  font-size: 1.5rem;
+  letter-spacing: 0.01em;
+}
+
+h2 {
+  margin: 2rem 0 0.75rem;
+  font-size: 1rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+p.lede {
+  margin: 0 0 1.5rem;
+  color: var(--muted);
+}
+
+p.missing {
+  margin: 0;
+  padding: 1rem 1.25rem;
+  border: 1px solid var(--line);
+  border-radius: 0.5rem;
+  background: #fff;
+}
+
+ol.plain,
+ul.plain {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.shaft {
+  border: 1px solid var(--line);
+  border-radius: 0.5rem;
+  overflow: hidden;
+  background: #fff;
+}
+
+.shaft li {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.4rem 0.9rem;
+  border-bottom: 1px solid var(--line);
+  font-variant-numeric: tabular-nums;
+}
+
+.shaft li:last-child {
+  border-bottom: 0;
+}
+
+.shaft li.here {
+  background: #eef5f0;
+  font-weight: 600;
+}
+
+.shaft .marker {
+  color: var(--car);
+  min-width: 4.5rem;
+}
+
+.readouts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  margin: 1.25rem 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.readouts .label {
+  display: block;
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.readouts .value {
+  font-size: 1.25rem;
+}
+
+button {
+  font: inherit;
+  padding: 0.5rem 1.1rem;
+  border: 1px solid var(--ink);
+  border-radius: 0.4rem;
+  background: var(--ink);
+  color: var(--paper);
+  cursor: pointer;
+}
+
+.served li {
+  padding: 0.3rem 0;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}

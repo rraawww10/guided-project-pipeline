@@ -1,0 +1,64 @@
+2779e2855142364fec0ed1c5c2306a7312d2d83120ae108e0a55ed581e626816
+GATE 1 APPROVED - round 2. Human decision. The stopping rule was approve-eligible
+on its own; no --override.
+
+RULE: 1 blocking finding, owned by test-runner; 12 worth a look; 0 blocking
+findings owned by 'nothing'. Linter 0 errors / 0 warnings, first try both rounds.
+Drift against round 1: none. Sessions 39.3 / 36.5 against the 40 cap. 12
+criteria, 5 cuts, pairwise distinct signatures.
+
+ROUND 1's TWO MUST-FIX ITEMS ARE FIXED, AND THE FIXES WERE VERIFIED TO BITE
+rather than taken on trust - the Breaker re-derived the wrong implementation's
+output by hand:
+  - B1: with `overtake` seeded floor 5 before floor 8, `ahead = live` targets
+    floor 5 from floor 6 at tick 2, so c-2-2's tick-2 row reads `down` and goes
+    red. With `both-sides` seeded floor 6 before floor 2, the same reading swaps
+    c-2-1's servedAt values and goes red.
+  - B2: c-2-2's new tick-5 floor-8 `direction: down` row is the only
+    downward-moving car any criterion observes, so `direction: 'up'`
+    unconditionally is now red.
+All four runUntil traces and the five-click `above` walk were re-derived against
+the new seed order; every pinned row, servedAt and row count reproduces.
+
+THE ONE BLOCKING FINDING: B1 (round 2) - sc-shaft is specified as a client
+component seeding useState from manualStart while reading its scenario from an
+async GET. Owned by test-runner: c-1-2 goes red at step 6 on the async reading
+and the Builder cannot edit the test, so the loop closes it. The residual the
+loop misses is the first-frame flash, which no testid is reserved for.
+
+*** THE ONE THING TO EYEBALL AT STEP 6 - W2 ***
+The grading value of the B1 fix now rests on the ELEMENT ORDER INSIDE `calls` in
+data/scenarios.json - floor 6 before floor 2 in both-sides, floor 5 before floor
+8 in overtake. That order lives in spec.md prose only; c-1-1 pins the scenario
+order and the keys, not the call order. Tidying the seed file back into
+registration order leaves all twelve criteria green BY CONSTRUCTION and silently
+reopens B1. The fix relocated the fragility rather than removing it. Filed worth
+a look, not blocking, because the Builder is not guessing - the spec states and
+defends the order - but read the seed file at Gate 2 and do not let anyone
+normalise it.
+
+SHIPS AS WRITTEN unless a later round changes it - 12 worth-a-look findings,
+most owned by 'nothing'. The ones with teeth:
+  W4 - spec.md forbids `step` deriving movement from Math.sign(target - floor),
+       and a cut written that way passes all twelve criteria including the tick-5
+       down row. The prohibition is ungraded. The Breaker looked for an owner and
+       declined to name code-check, which is a fixed registry that cannot see it.
+  W3 - the cut-calls-ahead note claims the tick-2 row grades both halves of the
+       cut; it grades one. The ordering half is graded only by c-2-1, whose cuts
+       list does not name cut-calls-ahead.
+  W6 - cut-dispatch-target's `ahead`-empty reversal branch is unreachable on all
+       five fixtures, so a third of a 7.7-minute cut is dead ungraded code.
+  W7 - three skeleton locals are unused once the cuts are open. Owner typecheck,
+       which is FAIL-OPEN. It is worth-a-look rather than blocking, so the gate
+       correctly did not add a verify_later entry - but someone should still read
+       typecheck_fail_open in skeleton-check.json at step 8.
+  W1 - the seed reorder made /scenarios/overtake open its doors on an empty
+       landing on the manual walk. Ungraded, live session-1 route, pack-writer.
+  W11 - the idea's payoff was a visible trace; the spec ships JSON only.
+  W12 - session 1's largest cut is 58% of its cut minutes, which the share check
+        structurally skips at two cuts. Six consecutive projects have overrun.
+
+WHY 12 WORTH-A-LOOK AND NOT 7: the Breaker deliberately restated round 1's seven
+kept findings so the approved record does not lose them. That is the round-memory
+fix working, and gate1-check confirms drift 0 - nothing re-raised more harshly,
+no owner moved to 'nothing'.
