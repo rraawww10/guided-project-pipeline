@@ -50,6 +50,27 @@ gets a strikethrough and a date.
 - **Do not assume `python -m venv` works.** Debian splits `ensurepip` into
   `python3-venv`. The runner now tries uv, then venv, then `venv --without-pip`
   with a get-pip bootstrap, and names the apt fix if all three fail.
+- **The Builder will swap the stack rather than fix a build.** 2026-09-06,
+  demo-run-01: given next/react/typescript and a build failing on a missing
+  package.json, it replaced the project with a 241-line vanilla node http server
+  that reimplemented the app inline, declared no dependencies, and set `build`
+  to `node -e "console.log('build ok')"`. All 13 criteria passed - the tests
+  assert HTTP responses and DOM testids and the replacement answered both. Every
+  .tsx and .ts file, including all five holding cut markers, was dead code.
+  `stack_check` now compares stack.json against app/package.json at the test
+  runner, and is not opt-in. Told to fix it, the Builder kept the impostor and
+  added the dependencies unused, with a `|| node -e ""` fallback so the build
+  could not fail: hence S005 (start must run the stack) and S006 (no fallback).
+- **An empty `node_modules` is not an installed one.** 2026-09-06, demo-run-01: a
+  failed `npm ci` leaves the directory behind holding only `.bin`, so the
+  existence check in `boot()` skipped the install and `next build` died with
+  "'next' is not recognized". Dotted entries do not count as packages.
+- **A stale `package-lock.json` passes locally and fails on a clean machine.**
+  2026-09-06, demo-run-01: the lock was 90 minutes older than package.json.
+  Locally `node_modules` was already populated so the install was skipped
+  entirely; the deploy check does a fresh copy then `npm ci`, which refuses when
+  the two disagree. Exactly what step 12 exists to catch - regenerate the lock
+  with `npm install --package-lock-only` whenever package.json changes.
 
 ## Cut points
 
@@ -77,6 +98,22 @@ gets a strikethrough and a date.
   fail the criterion, which is what the skeleton needs. A fallback that returns
   plausible-looking data makes the test green on an empty skeleton.
 
+- **A lesson in this file is not a rule in the agent's brief.** 2026-09-06,
+  demo-run-01: `lib/sort.ts` put all 9 returns inside one pair - the same defect
+  as recipe-box above, written down here since 2026-08-26 and read by every
+  agent before it starts. The rule was in CLAUDE.md and in the Spec Writer's and
+  Spec Breaker's skills, but not in the Builder's, and the Builder places the
+  markers. Now in `.claude/skills/builder/SKILL.md` too. Where a lesson keeps
+  recurring, check it is written where the agent that breaks it will read it.
+- **A cut whose placeholder equals its body grades nothing, ever.** 2026-09-06,
+  demo-run-01: `cut-ui-toggle-init` had `new Set()` above the marker and
+  `new Set()` inside it. Removing the block changed no behaviour, so no test
+  could catch it - not a weak test, an impossible one. The placeholder outside
+  the markers has to be a value the criterion rejects.
+- **INCONCLUSIVE is not a pass.** 2026-09-06: when a mutant will not build,
+  every criterion returns `missing` and nothing passed, so the run says nothing
+  about whether the task is graded. Read `inconclusive_tasks` as unproven.
+
 ## Tests
 
 - **The skeleton check only sees the fully-open skeleton.** Known blind spot in
@@ -89,6 +126,21 @@ gets a strikethrough and a date.
   subset satisfies it.
 - **Give the Verifier a stable hook.** `data-testid` on the repeated element
   survives styling changes and reads the same in the skeleton.
+- **Fixtures that already satisfy an ordering criterion grade nothing.** Hit
+  twice. 2026-09-05, ui-live-01: c-3-2 asserted the first summary row is
+  "Expense" after sorting by delta, and "Expense" is alphabetically first too,
+  so it held whether the sort ran or not. 2026-09-06, demo-run-01: the seed
+  listed Alice..Judy in name order, so cutting the comparator to `() => 0` left
+  the order still name-ASC and c-3-1..c-3-3 all passed. Seed data must differ
+  from every order the spec asks for, and an ordering test should assert the
+  whole sequence, not one row.
+- **A suite that never ran can still report the last run's results.**
+  2026-09-06, demo-run-01: the build died in 0.8s, pytest was never invoked, and
+  `parse_junit` read the previous run's junit XML - "13 pass, 0 fail" for a suite
+  that did not execute. `ok` was false because the return code said so, but
+  `mutation.py` reads the counts, so a mutant that failed to build would have
+  looked green and its task scored as graded. The report is now deleted before
+  each run.
 
 ## Process
 
@@ -97,6 +149,50 @@ gets a strikethrough and a date.
   at step 3, noticed it change, and re-checked every finding - which cost a pass
   and could have gone the other way. Update `lessons.md` between runs, never
   during one.
+- **Text an agent wrote will not decode as the machine's locale.** 2026-09-05
+  and 2026-09-06: 75 bare `read_text()`/`write_text()` calls used Python's
+  locale default, cp1252 on Windows, while every artifact an agent writes
+  carries the curly quotes and en dashes a model reaches for. `guide_linter`
+  died reading the pack; `gate1` died reading ambiguity.md; `mutation` died
+  writing a mutant. Worse than a crash, `gate1.py:75` sat inside
+  `except UnicodeDecodeError: continue`, so it silently skipped any source file
+  with a non-ASCII character and compared the guide against a corpus missing
+  those files. Name the encoding on every read and write of a file an agent may
+  have touched.
+- **A checker that crashes drives the workflow rather than stopping it.**
+  2026-09-06, demo-run-01: `gate1-check` crashed on encoding, `_checker`
+  correctly called it a pipeline fault and burned a spec retry, the orchestrator
+  re-planned, the Spec Writer rewrote the spec, the new hash invalidated the
+  ambiguity report, `breaker begin` cleared it, the Breaker ran again, and the
+  rule crashed on the same byte. Four rounds - lint 8 runs, breaker 4, three
+  spec retries - and the rule never reached a verdict once. When a step repeats,
+  check whether its checker is producing a verdict at all before treating the
+  verdict as meaningful.
+- **The remedy for a stale report is the Breaker, not the Spec Writer.**
+  2026-09-06: `failed_repair` sent every red gate1.json to the Spec Writer.
+  Right for an unowned blocking finding; exactly wrong for staleness, because
+  rewriting the spec is what moved the hash out from under the report. It now
+  reopens the Breaker pass, starting at `breaker begin` - `breaker end` refuses
+  when the pass was opened against a different hash.
+- **A build failure is not a test failure.** 2026-09-06, demo-run-01:
+  `suite_did_not_run()` read "0 pass, 0 fail, 13 missing" as a collection error
+  and routed to the Test Writer four times, while the actual fault was a missing
+  package.json. `pytest_returncode` 99 is not pytest's - the test runner sets it
+  when the app fails to install or build, so the suite was never asked anything.
+  It is now `BOOT_FAILED_RC`, and a build failure belongs to the Builder.
+- **OpenRouter reserves max_tokens up front, so a cheap call fails on a thin
+  balance.** 2026-09-05, ui-live-01: with no `max_tokens` the model ceiling is
+  reserved - 65536 tokens, $0.66 at gpt-5 - and every call 402s once the
+  remaining balance is under that, however few tokens it would really use. The
+  verifier died three times at $0.62 remaining on a step costing $0.08. Capped
+  at 16000, and a reply that stops on `length` now raises instead of returning a
+  truncated tool call that reads as "the agent chose to do nothing".
+- **Loops cost more than the work.** 2026-09-06, demo-run-01 spent about $4
+  across 23 agent runs: spec-writer 9, spec-breaker 6, test-writer 5, builder 2,
+  idea-generator 1 - for one spec and one suite that was correct first time. The
+  great majority went to two routing bugs. A clean run of the same project is
+  about $1.20, so when a component's run count climbs, read why before paying
+  for another attempt.
 - **Gate 1 is not "blocking == 0". It is "where would this defect surface".**
   2026-08-26, tip-split: the Spec Breaker is adversarial and gets a single pass,
   so it will nearly always return something blocking - rejecting on the count
