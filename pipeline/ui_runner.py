@@ -62,6 +62,13 @@ AGENT_TIMEOUT = int(os.environ.get("UI_AGENT_HTTP_TIMEOUT", "300"))
 # output too, and a turn cut off at the cap is a truncated tool call, so the
 # ceiling is checked below rather than trusted.
 MAX_OUTPUT_TOKENS = int(os.environ.get("UI_AGENT_MAX_OUTPUT_TOKENS", "16000"))
+# A dropped connection is not a verdict about the work. demo-run-02's pack
+# writer "failed" three times at 16:52:37, :38 and :39 - one second apart, all
+# three `getaddrinfo failed`, because the orchestrator re-planned instantly into
+# the same dead resolver. DNS was back a few minutes later and the same step
+# succeeded untouched. Retry the transport, with room for it to recover.
+NETWORK_RETRIES = int(os.environ.get("UI_AGENT_NETWORK_RETRIES", "3"))
+NETWORK_BACKOFF = float(os.environ.get("UI_AGENT_NETWORK_BACKOFF", "4"))
 
 
 def pipeline_env() -> dict[str, str]:
@@ -414,14 +421,31 @@ def openrouter_chat(model: str, key: str, messages: list[dict]) -> dict:
                  "http-referer": "http://localhost",
                  "x-title": "Guided Project Pipeline UI"},
         method="POST")
-    try:
-        with request.urlopen(req, timeout=AGENT_TIMEOUT) as resp:
-            body = json.loads(resp.read().decode("utf-8"))
-    except HTTPError as exc:
-        raise RuntimeError(f"OpenRouter HTTP {exc.code}: "
-                           f"{exc.read().decode('utf-8', errors='replace')[:1500]}") from exc
-    except URLError as exc:
-        raise RuntimeError(f"OpenRouter request failed: {exc}") from exc
+    # Only the transport is retried, and only where the request cannot have been
+    # served: a URLError never reached OpenRouter, and a 429 is OpenRouter saying
+    # "not now". An HTTP 5xx is left alone deliberately - the server may have
+    # done the work and billed for it, and a silent second call would pay twice.
+    body = None
+    for attempt in range(NETWORK_RETRIES + 1):
+        try:
+            with request.urlopen(req, timeout=AGENT_TIMEOUT) as resp:
+                body = json.loads(resp.read().decode("utf-8"))
+            break
+        except HTTPError as exc:
+            detail = exc.read().decode("utf-8", errors="replace")[:1500]
+            if exc.code == 429 and attempt < NETWORK_RETRIES:
+                time.sleep(NETWORK_BACKOFF * (2 ** attempt))
+                continue
+            raise RuntimeError(f"OpenRouter HTTP {exc.code}: {detail}") from exc
+        except URLError as exc:
+            if attempt < NETWORK_RETRIES:
+                time.sleep(NETWORK_BACKOFF * (2 ** attempt))
+                continue
+            raise RuntimeError(
+                f"OpenRouter request failed after {NETWORK_RETRIES + 1} attempts "
+                f"over {int(NETWORK_BACKOFF * (2 ** NETWORK_RETRIES))}s: {exc}. "
+                f"The request never reached OpenRouter, so this says nothing "
+                f"about the step - check the network and run it again.") from exc
     if body.get("error"):
         raise RuntimeError(f"OpenRouter error: {json.dumps(body['error'])[:1000]}")
     if not body.get("choices"):
