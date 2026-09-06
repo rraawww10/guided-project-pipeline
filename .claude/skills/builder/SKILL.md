@@ -44,6 +44,11 @@ stack, the AI does not choose it.**
   hand-written server, do not make `build` print a string, and never add a `||`
   fallback so that the build cannot fail. A build that cannot fail is not a
   build.
+- Pin versions npm does not flag. `next@15.1.6` carries CVE-2025-66478 and
+  `npm install` prints a deprecation warning for it, which fails the step 12
+  deploy check outright - see `learning/lessons.md`. Choose the newest patch of
+  the line you want (15.5.x for Next 15) rather than a release you happen to
+  remember.
 - If you cannot make the stack work, **stop and say so**, naming the exact
   error. Do not substitute something adjacent that happens to pass the tests.
 
@@ -83,6 +88,13 @@ YAML use `#`.
 - Markers must be balanced and must never nest.
 - What is left after the cut must still parse. Do not cut a closing brace, half
   a function signature, or an import.
+- **Never put a function's only `return` inside a pair.** Cut it and the
+  signature stays behind returning nothing, which does not compile - so the
+  mutant cannot be built, every criterion reports `missing`, and the mutation
+  check can only say INCONCLUSIVE: it proves nothing either way and the task
+  stays ungraded. Declare the value above the marker, assign inside it, and
+  return below it - or put the whole function expression inside the pair, so
+  the cut takes the signature and its returns away together.
 - What is left must not silently pass the test. If the criterion is "the list
   renders one row per todo", do not leave a hard-coded row behind.
 - Never cut imports, types, config, or styling. Those are given to the student.
