@@ -271,9 +271,14 @@ def cmd_cut(a) -> int:
 def cmd_deploy(a) -> int:
     st = State(a.slug)
     _guard(st, "pack")
-    rc = _checker(st, "deploy", "pack",
-                  lambda: deploy_check.main([str(st.dir), "--target", a.target,
-                                            "--hold", str(a.hold)]))
+    argv = [str(st.dir), "--target", a.target, "--hold", str(a.hold)]
+    # deploy_check names --allow-advisories in the failure it prints, so the
+    # orchestrator has to be able to pass it. Without this the only way to take
+    # the escape hatch was to call the module directly, which skips the retry
+    # accounting and the step log this function exists to keep.
+    if getattr(a, "allow_advisories", False):
+        argv.append("--allow-advisories")
+    rc = _checker(st, "deploy", "pack", lambda: deploy_check.main(argv))
     st.log_step("deploy", rc == 0)
     return rc
 
@@ -990,6 +995,9 @@ def build_parser() -> argparse.ArgumentParser:
     dp = slug_cmd("deploy", cmd_deploy)
     dp.add_argument("--target", default="app", choices=["app", "skeleton"])
     dp.add_argument("--hold", type=int, default=0)
+    dp.add_argument("--allow-advisories", action="store_true",
+                    help="ship a known install advisory deliberately - it is "
+                         "recorded in deploy.json either way")
     stk = slug_cmd("stack", cmd_stack)
     stk.add_argument("--stack", required=True,
                      help="comma-separated, e.g. 'next,react,typescript'")

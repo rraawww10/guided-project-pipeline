@@ -72,7 +72,7 @@ def code_corpus(project: Path, trees=("app", "skeleton")) -> set[str]:
             continue
         for p in walk_source(root, respect_gitignore=False):
             try:
-                text = p.read_text()
+                text = p.read_text(encoding="utf-8")
             except (UnicodeDecodeError, OSError):
                 continue
             for line in text.splitlines():
@@ -108,12 +108,12 @@ def lint(project: Path, guide: str = "pack", cap: float = SESSION_MINUTES_CAP) -
                                          "message": f"{guide}/ does not exist"}],
                 "warnings": [], "sessions": []}
 
-    spec = json.loads((project / "spec.json").read_text())
+    spec = json.loads((project / "spec.json").read_text(encoding="utf-8"))
     sessions = spec.get("sessions") or []
     task_ids = [c["id"] for s in sessions for c in s.get("cuts", [])]
     req_ids = [c["id"] for s in sessions for c in s.get("criteria", [])]
 
-    files = {p.name: p.read_text() for p in sorted(gdir.glob("*.md"))}
+    files = {p.name: p.read_text(encoding="utf-8") for p in sorted(gdir.glob("*.md"))}
     whole = "\n".join(files.values())
 
     # one file per session
