@@ -288,6 +288,71 @@ test run per subset, which is why the report names the risk instead.
 
 ---
 
+## The UI
+
+```bash
+python3 -m pipeline.ui            # then open http://127.0.0.1:8765
+```
+
+A local control and monitoring page over the pipeline that already exists. It
+does not reimplement anything: a script step shells out to `python -m pipeline
+<subcommand> <slug>` and reports its real exit code, an agent step runs that
+agent's own `.claude/agents/<name>.md` and `.claude/skills/<name>/SKILL.md`
+against OpenRouter, and a gate runs `pipeline gate`. Every number on the page is
+read from `projects/<slug>/`. Nothing on it is simulated - no fake progress bar,
+no placeholder output, no timer that advances a status on its own.
+
+| File | What it is |
+|---|---|
+| `pipeline/ui_core.py` | the read model - what the pipeline's files mean, plus the event log and run ledger |
+| `pipeline/ui_runner.py` | runs one script or one agent, and records it |
+| `pipeline/orchestrator.py` | decides which runs next, and where it must stop |
+| `pipeline/ui.py` | HTTP and the page shell |
+| `pipeline/ui_static/` | the page itself |
+
+**Start Workflow** hands the project to `orchestrator.py`, which walks the flow
+and stops exactly where the pipeline says a person decides:
+
+```
+  agent or script -> its checker -> next action ...
+        |                  |
+        |                  +-- red report? back to the component that owns it,
+        |                      and the CLI burns the retry, not the UI
+        |
+        +-- a GATE      -> WAITING_FOR_REVIEW   only `pipeline gate` moves it
+        +-- a PERSON    -> WAITING_FOR_INPUT    the stack, the timed dry run
+        +-- a ticket, an exhausted phase, a churning step -> BLOCKED (rules 6, 7)
+```
+
+The one thing the orchestrator adds on top of the pipeline is a loop guard.
+`lint`, `test` and `mutation` burn a retry when they reject, and rule 6 stops
+those at fifteen. The Gate 1 stopping rule does not: it sends the spec back to
+the writer without touching the counter, so spec-writer -> lint -> breaker ->
+gate1-check -> reject would cycle forever on somebody's OpenRouter bill. An
+action therefore also stops after three runs in which neither the plan nor the
+retry counter moved. It is not a second retry rule - rule 6 is still the
+authority, and the page shows both numbers - and Start Workflow runs it again.
+
+Two rules the UI enforces that `guard.py` cannot, because `guard.py` is a Claude
+Code hook and never sees this runner: each agent may write only its own outputs
+(the Builder cannot touch `verify/`, nothing may hand-edit `skeleton/`,
+rule 3 and rule 4), and no agent may run a gate command.
+
+State the UI writes lives beside the pipeline's own, under
+`projects/<slug>/.pipeline/`: `ui-events.jsonl` (the event log, back-filled from
+`state.json` so a project that predates the UI still has a history and a run made
+from the terminal still shows up), `ui-runs.jsonl` and `ui-logs/` (what was run
+and its full output), and `ui-workflow.json` (whether an auto-run is in flight).
+None of it is read by the pipeline; deleting it loses history and nothing else.
+
+Agent steps need `OPENROUTER_API_KEY` in `.env`; `OPENROUTER_MODEL` picks the
+model. Without a key the page still shows everything and still runs every script
+and gate - it says plainly that the agent steps cannot start from there, and the
+`/workflow` command for that phase is on the page to run from Claude Code
+instead.
+
+---
+
 ## Nightly watchdog
 
 ```bash

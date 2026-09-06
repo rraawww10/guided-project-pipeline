@@ -20,3 +20,13 @@ build/
 *.tsbuildinfo
 # Packaged snapshots - too large for GitHub (100MB file limit)
 *.zip
+
+# Local UI state. The pipeline never reads it: ui-events.jsonl is the event log
+# (back-filled from state.json), ui-runs.jsonl and ui-logs/ are what the UI ran
+# and its output, ui-workflow.json is whether an auto-run is in flight. Deleting
+# any of it loses history on the page and nothing else.
+projects/*/.pipeline/ui-events.jsonl
+projects/*/.pipeline/ui-events-meta.json
+projects/*/.pipeline/ui-runs.jsonl
+projects/*/.pipeline/ui-workflow.json
+projects/*/.pipeline/ui-logs/
