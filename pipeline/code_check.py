@@ -73,7 +73,7 @@ def check_utc_dates(root: Path) -> list[dict]:
     out: list[dict] = []
     for path in _sources(root):
         try:
-            text = path.read_text()
+            text = path.read_text(encoding="utf-8")
         except (UnicodeDecodeError, OSError):
             continue
         for n, raw in enumerate(text.splitlines(), start=1):
@@ -116,7 +116,7 @@ CHECKS = {
 def run(project: Path, target: str = "app") -> dict:
     """Run every check the spec declares. A spec that declares none passes."""
     try:
-        spec = json.loads((project / "spec.json").read_text())
+        spec = json.loads((project / "spec.json").read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError) as e:
         return {"ok": False, "error": f"cannot read spec.json: {e}", "checks": {}}
 

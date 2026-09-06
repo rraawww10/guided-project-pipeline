@@ -24,7 +24,7 @@ import urllib.request
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
-from . import code_check
+from . import code_check, stack_check
 
 BOOT_TIMEOUT = 180        # seconds to wait for the dev server to answer
 TEST_TIMEOUT = 900        # seconds for the whole pytest run
@@ -126,7 +126,7 @@ def ensure_venv(project: Path) -> Path:
     # chromium is ~150MB and only needed once per machine
     subprocess.run([str(venv_bin(venv, "playwright")), "install", "chromium"],
                    capture_output=True, timeout=1800)
-    stamp.write_text("ok\n")
+    stamp.write_text("ok\n", encoding="utf-8")
     return py
 
 
@@ -170,14 +170,30 @@ def npm() -> str:
     return shutil.which("npm") or "npm"
 
 
+# Not one of pytest's exit codes. boot() raising means npm install or npm run
+# build failed and the app never started, so the suite was never asked anything
+# - a different outcome from pytest running and collecting nothing.
+BOOT_FAILED_RC = 99
+
+
 def boot(target: Path, port: int, log: Path) -> subprocess.Popen:
     env = {**os.environ, "PORT": str(port), "NODE_ENV": "production", "CI": "1"}
-    if not (target / "node_modules").exists():
+    # An EMPTY node_modules is not an installed one. demo-run-01 had the
+    # directory - left behind by an `npm ci` that failed against a stub lockfile
+    # - so the install was skipped, and `next build` then died with "'next' is
+    # not recognized". Ask whether anything is in it, not whether it exists.
+    mods = target / "node_modules"
+    # Dotted entries do not count. A failed install still leaves `.bin` and
+    # `.package-lock.json` behind, so "is there anything in it" was true for a
+    # node_modules holding no packages at all.
+    installed = mods.is_dir() and any(
+        not child.name.startswith(".") for child in mods.iterdir())
+    if not installed:
         lock = target / "package-lock.json"
         run([npm(), "ci" if lock.exists() else "install", "--no-audit", "--no-fund"],
             target, timeout=900)
     build = run([npm(), "run", "build"], target, timeout=900)
-    log.write_text(f"$ npm run build\n{build.stdout}\n{build.stderr}\n")
+    log.write_text(f"$ npm run build\n{build.stdout}\n{build.stderr}\n", encoding="utf-8")
     if build.returncode != 0:
         raise RuntimeError(f"npm run build failed - see {log}")
     handle = log.open("a")
@@ -294,17 +310,17 @@ def main(argv: list[str] | None = None) -> int:
     default_out = {"app": "results.json", "skeleton": "skeleton-results.json"}.get(
         a.target, f"results-{Path(a.target).name}.json")
     out_path = project / (a.out or default_out)
-    spec = json.loads((project / "spec.json").read_text())
+    spec = json.loads((project / "spec.json").read_text(encoding="utf-8"))
 
     verify_dir = target / "verify" if (target / "verify").exists() else project / "verify"
     coverage_path = verify_dir / "coverage.json"
     if not coverage_path.exists():
         out_path.write_text(json.dumps(
             {"ok": False, "error": f"{coverage_path} is missing - the Verifier has not run"},
-            indent=2) + "\n")
+            indent=2) + "\n", encoding="utf-8")
         print(f"coverage.json missing at {coverage_path}", file=sys.stderr)
         return 1
-    coverage = json.loads(coverage_path.read_text())
+    coverage = json.loads(coverage_path.read_text(encoding="utf-8"))
 
     py = ensure_venv(project)
     port = free_port()
@@ -313,6 +329,13 @@ def main(argv: list[str] | None = None) -> int:
     logs.mkdir(parents=True, exist_ok=True)
     slug = target_slug(a.target)
     xml = logs / f"junit-{slug}.xml"
+    # Delete last run's report before this one. If the build fails, pytest never
+    # runs and never writes a new file - and parse_junit would then read the
+    # PREVIOUS run's results as if they were this one's. demo-run-01 reported
+    # "13 pass, 0 fail" for a run whose build died in 0.8s and whose suite was
+    # never invoked. `ok` was still false because rc said so, but mutation.py
+    # reads the counts, and a mutant that fails to build would look green.
+    xml.unlink(missing_ok=True)
     server = None
     started = time.time()
 
@@ -334,7 +357,7 @@ def main(argv: list[str] | None = None) -> int:
                  "PYTHONDONTWRITEBYTECODE": "1"})
         stdout, stderr, rc = proc.stdout, proc.stderr, proc.returncode
     except Exception as e:
-        stdout, stderr, rc = "", str(e), 99
+        stdout, stderr, rc = "", str(e), BOOT_FAILED_RC
     finally:
         stop_server(server)
 
@@ -350,11 +373,19 @@ def main(argv: list[str] | None = None) -> int:
     code = code_check.run(project, a.target) if a.target == "app" else {"ok": True,
                                                                         "checks": {}}
 
+    # The stack the human gave, against what app/ actually declares. Unlike
+    # code_check this is not opt-in: a spec that declares no code_checks still
+    # cannot be allowed to ship something built on a stack nobody asked for,
+    # and demo-run-01 declared none.
+    stack = (stack_check.check(project, a.target) if a.target == "app"
+             else {"ok": True, "violations": []})
+
     report = {
         "ok": (rc == 0 and counts["fail"] == 0 and counts["missing"] == 0
-               and code.get("ok", True)),
+               and code.get("ok", True) and stack.get("ok", True)),
         "target": a.target,
         "code_checks": code,
+        "stack_check": stack,
         "seconds": round(time.time() - started, 1),
         "counts": counts,
         "criteria": criteria,
@@ -362,8 +393,10 @@ def main(argv: list[str] | None = None) -> int:
         "stdout_tail": stdout[-3000:],
         "stderr_tail": stderr[-3000:],
     }
-    out_path.write_text(json.dumps(report, indent=2) + "\n")
+    out_path.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
     print(json.dumps({k: report[k] for k in ("ok", "target", "counts", "seconds")}, indent=2))
+    for bad in (stack.get("violations") or []):
+        print(f"\nstack check {bad['code']}: {bad['message']}", file=sys.stderr)
     for name, res in (code.get("checks") or {}).items():
         if not res["ok"]:
             print(f"\ncode check '{name}' failed - {res['count']} violation(s):",

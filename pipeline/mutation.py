@@ -60,7 +60,7 @@ def mutate_one(app: Path, out: Path, task_id: str, hints: dict) -> int:
         dst = out / rel
         dst.parent.mkdir(parents=True, exist_ok=True)
         try:
-            text = src.read_text()
+            text = src.read_text(encoding="utf-8")
         except UnicodeDecodeError:
             shutil.copy2(src, dst)
             continue
@@ -86,7 +86,7 @@ def mutate_one(app: Path, out: Path, task_id: str, hints: dict) -> int:
                 removed += 1
                 continue                      # this is the block being removed
             lines_out.append(line)
-        dst.write_text("\n".join(lines_out) + ("\n" if text.endswith("\n") else ""))
+        dst.write_text("\n".join(lines_out) + ("\n" if text.endswith("\n") else ""), encoding="utf-8")
     # the mutant needs the app's modules to build
     nm = out / "node_modules"
     if not nm.exists() and (app / "node_modules").exists():
@@ -171,7 +171,7 @@ def classify_run(results: list[dict]) -> dict:
 
 def run(project: Path, only: list[str] | None = None, max_tasks: int | None = None,
         target: str = "app") -> dict:
-    spec = json.loads((project / "spec.json").read_text())
+    spec = json.loads((project / "spec.json").read_text(encoding="utf-8"))
     hints = load_hints(spec)
     tasks = [t for t in sorted(hints) if not only or t in only]
     if max_tasks:
@@ -190,7 +190,7 @@ def run(project: Path, only: list[str] | None = None, max_tasks: int | None = No
             rc = test_runner.main([str(project), "--target", rel_target,
                                    "--out", f".pipeline/mutants/{task}-results.json"])
             crit = json.loads(
-                (project / ".pipeline" / "mutants" / f"{task}-results.json").read_text()
+                (project / ".pipeline" / "mutants" / f"{task}-results.json").read_text(encoding="utf-8")
             ).get("criteria", {})
         except Exception as e:                       # a mutant that will not boot
             results.append({"task": task, "ok": False, "error": f"{type(e).__name__}: {e}",
@@ -259,7 +259,7 @@ def main(argv: list[str] | None = None) -> int:
     project = Path(a.project).resolve()
     only = [x.strip() for x in a.only.split(",") if x.strip()] or None
     report = run(project, only, a.max, a.target)
-    (project / "mutation.json").write_text(json.dumps(report, indent=2) + "\n")
+    (project / "mutation.json").write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
     print(json.dumps({k: report[k] for k in
                       ("ok", "checked", "of_total", "seconds", "ungraded_tasks")},
                      indent=2))

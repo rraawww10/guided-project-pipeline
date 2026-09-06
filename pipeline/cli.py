@@ -173,7 +173,7 @@ def cmd_lint(a) -> int:
     _guard(st, "spec")
     rc = _checker(st, "lint", "spec", lambda: spec_linter.main(["", str(st.dir)]))
     if rc != 0:
-        report = json.loads((st.dir / "lint.json").read_text())
+        report = json.loads((st.dir / "lint.json").read_text(encoding="utf-8"))
         first = report["errors"][0] if report["errors"] else {}
         n = st.burn_retry("spec", f"{first.get('code')} {first.get('where')}: {first.get('message')}")
         print(f"\nspec retry {n}/{RETRY_LIMIT} - send lint.json back to the spec-writer")
@@ -195,10 +195,10 @@ def _open_breaker_pass(st: State) -> None:
     if h is None:
         return
     began = st.dir / ".pipeline" / "breaker-begin.json"
-    if began.exists() and json.loads(began.read_text()).get("spec_hash") == h:
+    if began.exists() and json.loads(began.read_text(encoding="utf-8")).get("spec_hash") == h:
         return
     began.parent.mkdir(parents=True, exist_ok=True)
-    began.write_text(json.dumps({"spec_hash": h}, indent=2) + "\n")
+    began.write_text(json.dumps({"spec_hash": h}, indent=2) + "\n", encoding="utf-8")
     # fail closed: a report written against the previous spec is not this one's
     for stale in ((st.dir / "ambiguity.md"), (st.dir / ".pipeline" / "ambiguity-meta.json")):
         stale.unlink(missing_ok=True)
@@ -229,7 +229,7 @@ def cmd_test(a) -> int:
               f"builder's; fix the runner rather than the app", file=sys.stderr)
         return 1
     if a.target == "app" and rc != 0:
-        res = json.loads((st.dir / "results.json").read_text())
+        res = json.loads((st.dir / "results.json").read_text(encoding="utf-8"))
         failed = [c for c, v in res.get("criteria", {}).items() if v["status"] != "pass"]
         bad_checks = [n for n, r in ((res.get("code_checks") or {}).get("checks")
                                      or {}).items() if not r["ok"]]
@@ -395,8 +395,8 @@ def _approve_spec(st: State, a) -> dict:
         if src.exists():
             shutil.copy2(src, archive / name)
             kept.append(name)
-    (archive / "APPROVED").write_text(f"{h}\n{a.note}\n")
-    (d / ".pipeline" / "SPEC_FROZEN").write_text(h + "\n")
+    (archive / "APPROVED").write_text(f"{h}\n{a.note}\n", encoding="utf-8")
+    (d / ".pipeline" / "SPEC_FROZEN").write_text(h + "\n", encoding="utf-8")
     print(f"spec frozen at {h[:12]} and archived to {archive} ({', '.join(kept)})")
     print("the write guard now refuses edits to spec.md and spec.json; "
           "`pipeline revise` is the only way to reopen them")
@@ -463,7 +463,7 @@ def _gate_blockers(st: State, n: int, override: bool = False) -> list[str]:
 
     if n == 1:
         lint = d / "lint.json"
-        if not lint.exists() or not json.loads(lint.read_text())["ok"]:
+        if not lint.exists() or not json.loads(lint.read_text(encoding="utf-8"))["ok"]:
             out.append("spec linter has not passed (run: pipeline lint)")
         if not (d / "ambiguity.md").exists():
             out.append("spec-breaker has not run (ambiguity.md missing)")
@@ -471,7 +471,7 @@ def _gate_blockers(st: State, n: int, override: bool = False) -> list[str]:
             # The stopping rule, enforced. Not "blocking == 0" - that never
             # terminates - but "nothing is left that no downstream checker owns".
             g1 = gate1.check(d)
-            (d / "gate1.json").write_text(json.dumps(g1, indent=2) + "\n")
+            (d / "gate1.json").write_text(json.dumps(g1, indent=2) + "\n", encoding="utf-8")
             if not g1["ok"]:
                 if override:
                     print("WARNING: --override used. The gate 1 stopping rule said "
@@ -485,16 +485,16 @@ def _gate_blockers(st: State, n: int, override: bool = False) -> list[str]:
                                f" to overrule deliberately: --override -m \"<why>\")")
     if n == 2:
         res = d / "results.json"
-        if not res.exists() or not json.loads(res.read_text())["ok"]:
+        if not res.exists() or not json.loads(res.read_text(encoding="utf-8"))["ok"]:
             out.append("test runner has not passed (run: pipeline test)")
     if n == 3:
         chk = d / "skeleton-check.json"
-        if not chk.exists() or not json.loads(chk.read_text())["ok"]:
+        if not chk.exists() or not json.loads(chk.read_text(encoding="utf-8"))["ok"]:
             out.append("skeleton does not fail the right tests (run: pipeline cut)")
         if not (d / "pack").exists():
             out.append("pack-writer has not run (pack/ missing)")
         dep = d / "deploy.json"
-        if not dep.exists() or not json.loads(dep.read_text())["ok"]:
+        if not dep.exists() or not json.loads(dep.read_text(encoding="utf-8"))["ok"]:
             out.append("deploy check has not passed (run: pipeline deploy)")
     return out
 
@@ -503,7 +503,7 @@ def cmd_ship(a) -> int:
     st = State(a.slug)
     if not st.gate_passed("gate3"):
         sys.exit("blocked: gate3 has not been approved")
-    (st.dir / ".pipeline" / "SHIPPED").write_text(st.data["gates"]["gate3"]["at"] + "\n")
+    (st.dir / ".pipeline" / "SHIPPED").write_text(st.data["gates"]["gate3"]["at"] + "\n", encoding="utf-8")
     st.log_step("ship", True)
     # basic_needs_v1.md section 10 keeps nightly checks out of scope until
     # something is actually live, and nothing is. This used to hand over a cron
@@ -538,7 +538,7 @@ def cmd_status(a) -> int:
 
 def _ok_json(path: Path, key: str = "ok") -> bool:
     try:
-        return bool(json.loads(path.read_text()).get(key))
+        return bool(json.loads(path.read_text(encoding="utf-8")).get(key))
     except (OSError, json.JSONDecodeError):
         return False
 
@@ -593,8 +593,8 @@ def cmd_next(a) -> int:
         return 0
 
     checks = [
-        (1, (d / "idea.md").exists() and "<Project title>" not in (d / "idea.md").read_text()),
-        (2, (d / "lint.json").exists() and json.loads((d / "lint.json").read_text())["ok"]),
+        (1, (d / "idea.md").exists() and "<Project title>" not in (d / "idea.md").read_text(encoding="utf-8")),
+        (2, (d / "lint.json").exists() and json.loads((d / "lint.json").read_text(encoding="utf-8"))["ok"]),
         # B-04: a report on disk is not evidence it reviewed the spec on disk.
         # This is the check whose absence made `next` report "Gate 1" for a
         # round-3 spec the Spec Breaker had never read.
@@ -608,11 +608,11 @@ def cmd_next(a) -> int:
                  or gate1.check(d).get("reviewed_spec_hash") == spec_hash(d))),
         (4, st.gate_passed("gate1")),
         (5, (d / "app").exists()),
-        (6, (d / "results.json").exists() and json.loads((d / "results.json").read_text())["ok"]),
+        (6, (d / "results.json").exists() and json.loads((d / "results.json").read_text(encoding="utf-8"))["ok"]),
         (7, st.gate_passed("gate2")),
-        (8, (d / "skeleton-check.json").exists() and json.loads((d / "skeleton-check.json").read_text())["ok"]),
+        (8, (d / "skeleton-check.json").exists() and json.loads((d / "skeleton-check.json").read_text(encoding="utf-8"))["ok"]),
         (9, (d / "pack").exists()),
-        (10, (d / "deploy.json").exists() and json.loads((d / "deploy.json").read_text())["ok"]),
+        (10, (d / "deploy.json").exists() and json.loads((d / "deploy.json").read_text(encoding="utf-8"))["ok"]),
         (11, st.gate_passed("gate3")),
         (12, (d / ".pipeline" / "SHIPPED").exists()),
     ]
@@ -666,7 +666,7 @@ def cmd_revise(a) -> int:
     gate = st.data["gates"].get("gate1") or {}
     (dest / "why.md").write_text(
         f"# Round {n}\n\nGate 1: {'rejected' if gate and not gate.get('approved') else 'not decided'}\n"
-        f"Note: {gate.get('note', '')}\n")
+        f"Note: {gate.get('note', '')}\n", encoding="utf-8")
     st.data["gates"]["gate1"] = None          # the next round faces a fresh gate
     # Reopen the spec: the freeze belongs to the approval that was just undone,
     # and the report and its binding belong to the spec that was just archived.
@@ -690,7 +690,7 @@ def cmd_stack(a) -> int:
         "stack": stack, "sessions": a.sessions, "minutes_per_session": a.minutes,
         "track": a.track, "limits": a.limits, "given_by": a.by, "at": st.data["created"],
     }
-    (st.dir / "stack.json").write_text(json.dumps(payload, indent=2) + "\n")
+    (st.dir / "stack.json").write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
     (st.dir / "ideas").mkdir(exist_ok=True)
     st.log_step("stack", True, ", ".join(stack))
     print(json.dumps(payload, indent=2))
@@ -708,7 +708,7 @@ def cmd_ideas(a) -> int:
     if len(files) < IDEAS_WANTED:
         problems.append(f"{len(files)} ideas, need {IDEAS_WANTED}")
     for f in files:
-        text = f.read_text()
+        text = f.read_text(encoding="utf-8")
         if len(text.split()) < 80:
             problems.append(f"{f.name} is {len(text.split())} words - not a page")
         for marker in ("TODO", "TBD", "FIXME", "???", "<insert"):
@@ -717,7 +717,7 @@ def cmd_ideas(a) -> int:
     report = {"ok": not problems, "count": len(files),
               "wanted": IDEAS_WANTED,
               "files": [f.name for f in files], "problems": problems}
-    (st.dir / "ideas.json").write_text(json.dumps(report, indent=2) + "\n")
+    (st.dir / "ideas.json").write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
     st.log_step("ideas", report["ok"], f"{len(files)} ideas")
     print(json.dumps(report, indent=2))
     return 0 if report["ok"] else 1
@@ -793,7 +793,7 @@ def cmd_mutation(a) -> int:
               f"spec's; no conclusion can be drawn about ungraded tasks", file=sys.stderr)
         return 1
     if rc != 0:
-        rep = json.loads((st.dir / "mutation.json").read_text())
+        rep = json.loads((st.dir / "mutation.json").read_text(encoding="utf-8"))
         n = st.burn_retry("code", "ungraded student tasks: "
                           + ", ".join(rep.get("ungraded_tasks", [])[:8]),
                           kind="spec problem")
@@ -916,7 +916,7 @@ def cmd_breaker(a) -> int:
         sys.exit("spec.json or spec.md is missing - nothing to review")
 
     if a.mode == "begin":
-        began.write_text(json.dumps({"spec_hash": h}, indent=2) + "\n")
+        began.write_text(json.dumps({"spec_hash": h}, indent=2) + "\n", encoding="utf-8")
         # fail closed: this pass must produce the report, not inherit one
         (st.dir / "ambiguity.md").unlink(missing_ok=True)
         (meta_dir / "ambiguity-meta.json").unlink(missing_ok=True)
@@ -925,7 +925,7 @@ def cmd_breaker(a) -> int:
 
     if not began.exists():
         sys.exit("no breaker pass was opened - run `pipeline breaker <slug> begin` first")
-    want = json.loads(began.read_text())["spec_hash"]
+    want = json.loads(began.read_text(encoding="utf-8"))["spec_hash"]
     if want != h:
         sys.exit(f"the spec changed during the spec-breaker pass "
                  f"({want[:12]} -> {h[:12]}). The report reviewed neither version "
@@ -933,7 +933,7 @@ def cmd_breaker(a) -> int:
     if not (st.dir / "ambiguity.md").exists():
         sys.exit("the spec-breaker did not write ambiguity.md")
     (meta_dir / "ambiguity-meta.json").write_text(
-        json.dumps({"spec_hash": h, "at": State(a.slug).data.get("created")}, indent=2) + "\n")
+        json.dumps({"spec_hash": h, "at": State(a.slug).data.get("created")}, indent=2) + "\n", encoding="utf-8")
     st.log_step("breaker", True, h[:12])
     print(f"ambiguity.md bound to spec {h[:12]}")
     return 0
@@ -959,7 +959,7 @@ def cmd_lock(a) -> int:
     st = State(a.slug)
     _guard(st, LOCK_PHASE_BY_FLOW[st.flow][a.tree])
     (st.dir / ".pipeline").mkdir(parents=True, exist_ok=True)
-    (st.dir / ".pipeline" / "LOCK").write_text(a.tree + "\n")
+    (st.dir / ".pipeline" / "LOCK").write_text(a.tree + "\n", encoding="utf-8")
     print(f"{a.slug}: writes restricted to {a.tree}/")
     return 0
 

@@ -11,12 +11,13 @@ The spec is approved and settled. You implement it. You do not improve it.
 
 ## Read first
 
-1. `projects/<slug>/spec.json` - the contract. This is what you build.
-2. `projects/<slug>/spec.md` - the prose, for intent.
-3. `projects/<slug>/ambiguity.md` - what a reader already found unclear, and how
+1. `projects/<slug>/stack.json` - the stack the human gave. Not negotiable.
+2. `projects/<slug>/spec.json` - the contract. This is what you build.
+3. `projects/<slug>/spec.md` - the prose, for intent.
+4. `projects/<slug>/ambiguity.md` - what a reader already found unclear, and how
    Gate 1 resolved it.
-4. `learning/lessons.md` - bugs already shipped once. Do not ship them again.
-5. `projects/<slug>/results.json` - **only on a retry**. Fix the criteria listed
+5. `learning/lessons.md` - bugs already shipped once. Do not ship them again.
+6. `projects/<slug>/results.json` - **only on a retry**. Fix the criteria listed
    as `fail` or `missing`. Change nothing else.
 
 ## You cannot edit `verify/`
@@ -25,6 +26,30 @@ Rule 3. The tests are not yours. If a test looks wrong, say so in your summary
 and fix the code anyway. A build that passes because the test was changed is
 worth nothing. A hook blocks writes to `verify/` - if it fires, that is the rule
 working, not a problem to route around.
+
+## The stack is given, not chosen
+
+`projects/<slug>/stack.json` records the stack the human gave. requirements_doc
+names this as one of two rules that never change: **the human gives the tech
+stack, the AI does not choose it.**
+
+- `app/package.json` must exist from your first milestone and must declare every
+  package the stack names. Without it npm can neither install nor build, nothing
+  runs, and every criterion comes back `missing` - which reads downstream as a
+  broken test suite rather than a missing file.
+- The app must be **built and served by** that stack. `build` runs the stack's
+  build command (`next build`); `start` runs the stack's server (`next start`).
+  A dependency that is installed and never executed is not the stack.
+- Never route around a failing build. Do not replace the framework with a
+  hand-written server, do not make `build` print a string, and never add a `||`
+  fallback so that the build cannot fail. A build that cannot fail is not a
+  build.
+- If you cannot make the stack work, **stop and say so**, naming the exact
+  error. Do not substitute something adjacent that happens to pass the tests.
+
+`stack_check` enforces every line of this at the test runner and fails the step.
+The suite passing does not save you: answering the assertions is not the same as
+building the thing that was asked for.
 
 ## Build one session at a time
 

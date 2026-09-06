@@ -120,7 +120,7 @@ def frozen_hash(project: Path) -> str | None:
     marker = project / ".pipeline" / "SPEC_FROZEN"
     if not marker.exists():
         return None
-    return marker.read_text().strip() or None
+    return marker.read_text(encoding="utf-8").strip() or None
 
 
 def spec_drift(project: Path) -> str | None:
@@ -156,7 +156,7 @@ class State:
 
     def _load(self) -> dict:
         if self.path.exists():
-            d = json.loads(self.path.read_text())
+            d = json.loads(self.path.read_text(encoding="utf-8"))
             d.setdefault("step_runs", {})
             d.setdefault("flow", 1)          # written before the flow was versioned
             d.setdefault("dry_run", None)
@@ -180,7 +180,7 @@ class State:
 
     def save(self) -> None:
         self.path.parent.mkdir(parents=True, exist_ok=True)
-        self.path.write_text(json.dumps(self.data, indent=2) + "\n")
+        self.path.write_text(json.dumps(self.data, indent=2) + "\n", encoding="utf-8")
 
     # -- retries ----------------------------------------------------------
     def burn_retry(self, phase: str, last_error: str,

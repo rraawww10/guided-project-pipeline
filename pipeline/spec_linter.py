@@ -284,7 +284,7 @@ def _flow(project: Path) -> int:
     keeps the behaviour it was written against."""
     try:
         return int(json.loads(
-            (project / ".pipeline" / "state.json").read_text()).get("flow", 1))
+            (project / ".pipeline" / "state.json").read_text(encoding="utf-8")).get("flow", 1))
     except (OSError, json.JSONDecodeError, TypeError, ValueError):
         return 1
 
@@ -431,7 +431,7 @@ def lint_spec(project: Path) -> Lint:
         lint.err("E001", "spec.json", "spec.json is missing")
         return lint
     try:
-        spec = json.loads(sj.read_text())
+        spec = json.loads(sj.read_text(encoding="utf-8"))
     except json.JSONDecodeError as e:
         lint.err("E002", "spec.json", f"spec.json is not valid JSON: {e}")
         return lint
@@ -658,7 +658,7 @@ def lint_spec(project: Path) -> Lint:
     if not sm.exists():
         lint.err("E100", "spec.md", "spec.md is missing - Gate 1 has nothing to read")
         return lint
-    md = sm.read_text()
+    md = sm.read_text(encoding="utf-8")
     for h in REQUIRED_MD_HEADINGS:
         if h not in md:
             lint.err("E101", "spec.md", f"missing required heading {h!r}")
@@ -680,7 +680,7 @@ def minute_estimates(project: Path) -> list[dict]:
     """Always reported, pass or fail - before this, nothing told anyone the
     teaching load of a session until the Pack Writer timed it at step 9."""
     try:
-        spec = json.loads((project / "spec.json").read_text())
+        spec = json.loads((project / "spec.json").read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError):
         return []
     sessions = spec.get("sessions") or []
@@ -727,7 +727,7 @@ def main(argv: list[str]) -> int:
         "session_minutes": minute_estimates(project),
         "spec_hash": spec_hash(project),
     }
-    (project / "lint.json").write_text(json.dumps(report, indent=2) + "\n")
+    (project / "lint.json").write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
     print(json.dumps(report, indent=2))
     return 0 if report["ok"] else 1
 

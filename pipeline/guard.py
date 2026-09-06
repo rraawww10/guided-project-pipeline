@@ -224,7 +224,7 @@ def locked_tree(path: Path) -> tuple[Path, str] | None:
     for parent in [path, *path.parents]:
         lock = parent / ".pipeline" / "LOCK"
         if lock.exists() and parent.parent.name == "projects":
-            return parent, lock.read_text().strip()
+            return parent, lock.read_text(encoding="utf-8").strip()
     return None
 
 
@@ -287,7 +287,7 @@ def check_path(target: Path) -> str | None:
     if target.name in SPEC_FILES:
         project = frozen_project(target.parent)
         if project is not None:
-            h = (project / ".pipeline" / FROZEN_MARKER).read_text().strip()[:12]
+            h = (project / ".pipeline" / FROZEN_MARKER).read_text(encoding="utf-8").strip()[:12]
             return (f"blocked by the pipeline write guard: {project.name}/{target.name} was "
                     f"approved at Gate 1 (spec {h}) and is frozen.\n"
                     f"app/, verify/ and skeleton/ were built against it, so editing it now "

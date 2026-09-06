@@ -44,7 +44,7 @@ def scan_assertions(project: Path, target: str = "app") -> list[dict]:
     """A test with no real assertion cannot go red. Needs no code to run."""
     out: list[dict] = []
     for path in _test_files(project, target):
-        text = path.read_text()
+        text = path.read_text(encoding="utf-8")
         try:
             tree = ast.parse(text)
         except SyntaxError as e:
@@ -81,7 +81,7 @@ def check_all_red(project: Path, target: str = "app") -> dict:
     """Every requirement's test must fail while its block is unwritten."""
     rc = test_runner.main([str(project), "--target", target,
                            "--out", "redfirst-results.json"])
-    res = json.loads((project / "redfirst-results.json").read_text())
+    res = json.loads((project / "redfirst-results.json").read_text(encoding="utf-8"))
     crit = res.get("criteria", {})
     green = [{"criterion": cid, "test": c.get("test")}
              for cid, c in sorted(crit.items()) if c.get("status") == "pass"]
@@ -137,7 +137,7 @@ def main(argv: list[str] | None = None) -> int:
     project = Path(a.project).resolve()
     report = run(project, a.target, a.static_only)
     if not a.no_report:
-        (project / "redfirst.json").write_text(json.dumps(report, indent=2) + "\n")
+        (project / "redfirst.json").write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
     print(json.dumps(report, indent=2))
     return 0 if report["ok"] else 1
 

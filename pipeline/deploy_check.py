@@ -167,7 +167,7 @@ def main(argv: list[str] | None = None) -> int:
         "seconds": round(time.time() - started, 1),
         "steps": steps,
     }
-    (project / "deploy.json").write_text(json.dumps(report, indent=2) + "\n")
+    (project / "deploy.json").write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
     print(json.dumps({k: report[k] for k in ("ok", "target", "preview", "seconds")}, indent=2))
     return 0 if report["ok"] else 1
 

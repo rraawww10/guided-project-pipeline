@@ -42,7 +42,7 @@ def answer_lines(solution: Path) -> tuple[dict[str, set[str]], set[str]]:
     outside: set[str] = set()
     for src in walk_source(solution, respect_gitignore=False):
         try:
-            text = src.read_text()
+            text = src.read_text(encoding="utf-8")
         except (UnicodeDecodeError, OSError):
             continue
         open_id = None
@@ -81,7 +81,7 @@ def scan_tree(student: Path, answers: dict[str, set[str]]) -> list[dict]:
         if any(part in {"node_modules", ".next", ".git", "__pycache__"} for part in rel.parts):
             continue
         try:
-            text = path.read_text()
+            text = path.read_text(encoding="utf-8")
         except (UnicodeDecodeError, OSError):
             continue
         for n, raw in enumerate(text.splitlines(), start=1):
@@ -173,7 +173,7 @@ def main(argv: list[str] | None = None) -> int:
     a = ap.parse_args(argv)
     project = Path(a.project).resolve()
     report = run(project, a.solution, a.student, not a.no_history)
-    (project / "leak-scan.json").write_text(json.dumps(report, indent=2) + "\n")
+    (project / "leak-scan.json").write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
     print(json.dumps({k: v for k, v in report.items()
                       if k not in ("leaks", "history_leaks")}, indent=2))
     for h in report.get("leaks", [])[:20]:

@@ -64,7 +64,7 @@ def gitignore_matcher(root: Path):
     rules: list[tuple[bool, str, bool]] = []
     gi = root / ".gitignore"
     if gi.exists():
-        for raw in gi.read_text().splitlines():
+        for raw in gi.read_text(encoding="utf-8").splitlines():
             line = raw.strip()
             if not line or line.startswith("#"):
                 continue
@@ -190,7 +190,7 @@ def cut_file(path: Path, text: str, hints: dict[str, dict]) -> tuple[str, list[d
 
 
 def cut(project: Path) -> dict:
-    spec = json.loads((project / "spec.json").read_text())
+    spec = json.loads((project / "spec.json").read_text(encoding="utf-8"))
     hints = load_hints(spec)
     app, skel = project / "app", project / "skeleton"
     if not app.exists():
@@ -218,7 +218,7 @@ def cut(project: Path) -> dict:
         dst = skel / rel
         dst.parent.mkdir(parents=True, exist_ok=True)
         try:
-            text = src.read_text()
+            text = src.read_text(encoding="utf-8")
         except UnicodeDecodeError:
             shutil.copy2(src, dst)
             continue
@@ -226,7 +226,7 @@ def cut(project: Path) -> dict:
             shutil.copy2(src, dst)
             continue
         new_text, applied = cut_file(rel, text, hints)
-        dst.write_text(new_text)
+        dst.write_text(new_text, encoding="utf-8")
         manifest.extend(applied)
 
     found = {m["id"] for m in manifest}
@@ -264,7 +264,7 @@ def cut(project: Path) -> dict:
     # that could not run no longer means the check passed. It is recorded as
     # fail_open so Gate 3 can see the difference between "clean" and "not run".
     out["ok"] = tc["ok"]
-    (skel / ".cut-manifest.json").write_text(json.dumps(out, indent=2) + "\n")
+    (skel / ".cut-manifest.json").write_text(json.dumps(out, indent=2) + "\n", encoding="utf-8")
     if not tc["ok"]:
         raise CutError(
             f"the skeleton does not compile - {tc['error_count']} typescript errors:\n  "
@@ -465,7 +465,7 @@ def scan_return_safety(root: Path, hints: dict[str, dict]) -> list[dict]:
         if src_path.suffix not in CODE_EXT:
             continue
         try:
-            text = src_path.read_text()
+            text = src_path.read_text(encoding="utf-8")
         except (UnicodeDecodeError, OSError):
             continue
         if not MARKER_HINT.search(text):
@@ -575,12 +575,12 @@ def expected_skeleton_results(spec: dict) -> dict[str, str]:
 
 def verify(project: Path) -> dict:
     """Step 8's check: the skeleton fails the right tests, and only those."""
-    spec = json.loads((project / "spec.json").read_text())
+    spec = json.loads((project / "spec.json").read_text(encoding="utf-8"))
     results_path = project / "skeleton-results.json"
     if not results_path.exists():
         raise CutError("skeleton-results.json is missing - run the test runner "
                        "against skeleton/ first")
-    actual = json.loads(results_path.read_text()).get("criteria", {})
+    actual = json.loads(results_path.read_text(encoding="utf-8")).get("criteria", {})
     expect = expected_skeleton_results(spec)
 
     wrong = []
@@ -593,7 +593,7 @@ def verify(project: Path) -> dict:
     manifest = project / "skeleton" / ".cut-manifest.json"
     fail_open = False
     if manifest.exists():
-        tc = json.loads(manifest.read_text()).get("typecheck") or {}
+        tc = json.loads(manifest.read_text(encoding="utf-8")).get("typecheck") or {}
         fail_open = bool(tc.get("fail_open"))
 
     report = {
@@ -610,7 +610,7 @@ def verify(project: Path) -> dict:
             "those by hand, or fix the spec (linter E110)." if risks else ""),
         "typecheck_fail_open": fail_open,
     }
-    (project / "skeleton-check.json").write_text(json.dumps(report, indent=2) + "\n")
+    (project / "skeleton-check.json").write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
     return report
 
 

@@ -52,7 +52,7 @@ def run_one(p: Path) -> dict:
         entry["error"] = "the test runner wrote no watchdog-results.json"
         return entry
     try:
-        res = json.loads(out.read_text())
+        res = json.loads(out.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError) as e:
         entry["error"] = f"watchdog-results.json is unreadable: {e}"
         return entry
@@ -88,7 +88,7 @@ def main(argv: list[str] | None = None) -> int:
         "runs": runs,
     }
     out = root / "projects" / "watchdog-latest.json"
-    out.write_text(json.dumps(report, indent=2) + "\n")
+    out.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
     print(json.dumps({k: report[k] for k in
                       ("at", "ok", "shipped_total", "checked", "skipped",
                        "unknown_slugs")}, indent=2))

@@ -205,7 +205,7 @@ def main(argv: list[str] | None = None) -> int:
     a = ap.parse_args(argv)
     project = Path(a.project).resolve()
     report = lint(project, a.guide, a.cap)
-    (project / "guide-lint.json").write_text(json.dumps(report, indent=2) + "\n")
+    (project / "guide-lint.json").write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
     print(json.dumps({k: report[k] for k in ("ok", "counts", "files", "sessions")},
                      indent=2))
     for e in report["errors"][:25]:
