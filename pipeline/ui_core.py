@@ -693,7 +693,10 @@ def ensure_ledger_read(slug: str) -> None:
     if slug in LEDGERS_READ:
         return
     LEDGERS_READ.add(slug)
-    absorb_runs(slug, runs_file(slug))
+    # Built by hand rather than through runs_file(): pipeline_dir() mkdirs, and
+    # asking "has this agent run" must not bring a project directory into being
+    # for a slug that does not exist.
+    absorb_runs(slug, project_path(slug) / ".pipeline" / "ui-runs.jsonl")
 
 
 def load_persisted_runs() -> None:

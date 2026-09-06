@@ -272,6 +272,39 @@ def parse_junit(xml_path: Path) -> dict[str, dict]:
     return out
 
 
+def parametrised_hit(node: str, by_node: dict) -> dict | None:
+    """Match a coverage entry against the cases pytest actually emitted.
+
+    A @pytest.mark.parametrize test is reported per case - `...::test_x[a-1]` -
+    and never under its bare name, so an exact lookup finds nothing and the
+    criterion reads "missing". Missing counts as red and the Builder cannot fix
+    it, because rule 3 forbids it touching verify/: demo-run-02's c-1-1 could
+    never have gone green, and the loop would have burned all 15 retries before
+    a person saw why.
+
+    Every case counts. One red case means the criterion is not met, however many
+    others passed.
+    """
+    # parse_junit files every case twice - under its full node id and under its
+    # bare name - so match on the full id first and only fall back to the bare
+    # one, or every case is counted twice in the message.
+    prefix = node + "["
+    hits = [v for k, v in by_node.items() if k.startswith(prefix)]
+    if not hits:
+        bare = node.split("::")[-1] + "["
+        hits = [v for k, v in by_node.items() if k.startswith(bare)]
+    if not hits:
+        return None
+    for status in ("fail", "skip"):
+        bad = [h for h in hits if h["status"] == status]
+        if bad:
+            return {"status": status,
+                    "message": f"{len(bad)} of {len(hits)} parametrised case(s) "
+                               f"{status}: {bad[0]['message']}"}
+    return {"status": "pass",
+            "message": f"{len(hits)} parametrised case(s) passed"}
+
+
 def map_to_criteria(spec: dict, coverage: dict, by_node: dict) -> dict[str, dict]:
     criteria: dict[str, dict] = {}
     for s in spec.get("sessions", []):
@@ -285,6 +318,8 @@ def map_to_criteria(spec: dict, coverage: dict, by_node: dict) -> dict[str, dict
                 continue
             node = entry["test"]
             hit = by_node.get(node) or by_node.get(node.split("::")[-1])
+            if hit is None:
+                hit = parametrised_hit(node, by_node)
             criteria[cid] = {
                 "status": hit["status"] if hit else "missing",
                 "check": c["check"], "session": s["n"], "test": node,
