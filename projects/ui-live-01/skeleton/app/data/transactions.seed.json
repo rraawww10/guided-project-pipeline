@@ -1,0 +1,12 @@
+[
+  { "id": "t1", "memo": "Uber trip downtown", "merchant": "UBER", "amount": -35.0 },
+  { "id": "t2", "memo": "Groceries - FreshFarm", "merchant": "FreshFarm", "amount": -60.0 },
+  { "id": "t3", "memo": "ACME paper", "merchant": "ACME", "amount": -25.0 },
+  { "id": "t4", "memo": "Refund - FreshFarm", "merchant": "FreshFarm", "amount": 10.0 },
+  { "id": "t5", "memo": "Uber refund", "merchant": "UBER", "amount": 15.0 },
+  { "id": "t6", "memo": "Coffee", "merchant": "Blue Bottle", "amount": -5.0 },
+  { "id": "t7", "memo": "Office chair", "merchant": "OfficeCo", "amount": -120.0 },
+  { "id": "t8", "memo": "Book purchase", "merchant": "Books&Co", "amount": -18.0 },
+  { "id": "t9", "memo": "Stationery", "merchant": "ACME", "amount": -7.5 },
+  { "id": "t10", "memo": "Misc income", "merchant": "Gift", "amount": 20.0 }
+]

@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="8" skipped="0" tests="14" time="62.890" timestamp="2026-09-05T13:50:36.063309+05:30" hostname="HERO"><testcase classname="verify.test_api_transactions" name="test_c_1_1_get_transactions_returns_array_with_required_fields" time="0.637" /><testcase classname="verify.test_ui_session1" name="test_c_1_2_ui_renders_one_row_per_transaction" time="2.631" /><testcase classname="verify.test_ui_session1" name="test_c_1_3_ui_renders_each_row_memo" time="2.004" /><testcase classname="verify.test_ui_session2" name="test_c_2_1_category_transport_for_uber_trip_downtown" time="6.729"><failure message="AssertionError: Locator expected to have text 'Transport'&#10;Actual value: Other &#10;Call log:&#10;  - Expect &quot;to_have_text&quot; with timeout 5000ms&#10;  - waiting for locator(&quot;[data-testid=\&quot;tx-row\&quot;]&quot;).filter(has=get_by_test_id(&quot;tx-memo&quot;).filter(has_text=&quot;Uber trip downtown&quot;)).get_by_test_id(&quot;tx-category&quot;)&#10;    14 × locator resolved to &lt;td data-testid=&quot;tx-category&quot;&gt;Other&lt;/td&gt;&#10;       - unexpected value &quot;Other&quot;&#10;&#10;Aria snapshot:&#10;- cell &quot;Other&quot;">page = &lt;Page url='http://127.0.0.1:50031/'&gt;, base_url = 'http://127.0.0.1:50031'
+
+    def test_c_2_1_category_transport_for_uber_trip_downtown(page, base_url):
+        page.goto(base_url)
+        page.wait_for_selector('[data-testid="tx-row"]')
+        row = find_row_by_memo(page, "Uber trip downtown")
+        expect(row).to_have_count(1)
+        cat = row.get_by_test_id('tx-category')
+&gt;       expect(cat).to_have_text("Transport")
+E       AssertionError: Locator expected to have text 'Transport'
+E       Actual value: Other 
+E       Call log:
+E         - Expect "to_have_text" with timeout 5000ms
+E         - waiting for locator("[data-testid=\"tx-row\"]").filter(has=get_by_test_id("tx-memo").filter(has_text="Uber trip downtown")).get_by_test_id("tx-category")
+E           14 × locator resolved to &lt;td data-testid="tx-category"&gt;Other&lt;/td&gt;
+E              - unexpected value "Other"
+E       
+E       Aria snapshot:
+E       - cell "Other"
+
+verify\test_ui_session2.py:29: AssertionError</failure></testcase><testcase classname="verify.test_ui_session2" name="test_c_2_2_rule_label_for_uber_trip_downtown" time="1.143" /><testcase classname="verify.test_ui_session2" name="test_c_2_3_summary_has_supplies_total_25" time="6.876"><failure message="AssertionError: Locator expected to have count '1'&#10;Actual value: 0 &#10;Call log:&#10;  - Expect &quot;to_have_count&quot; with timeout 5000ms&#10;  - waiting for locator(&quot;[data-testid=\&quot;summary-row\&quot;]&quot;).filter(has=get_by_test_id(&quot;summary-cat&quot;).filter(has_text=&quot;Supplies&quot;))&#10;    14 × locator resolved to 0 elements&#10;       - unexpected value &quot;0&quot;">page = &lt;Page url='http://127.0.0.1:50031/'&gt;, base_url = 'http://127.0.0.1:50031'
+
+    def test_c_2_3_summary_has_supplies_total_25(page, base_url):
+        page.goto(base_url)
+        # Summary is present in session 2
+        page.wait_for_selector('[data-testid="summary"]')
+        row = get_summary_row(page, "Supplies")
+&gt;       expect(row).to_have_count(1)
+E       AssertionError: Locator expected to have count '1'
+E       Actual value: 0 
+E       Call log:
+E         - Expect "to_have_count" with timeout 5000ms
+E         - waiting for locator("[data-testid=\"summary-row\"]").filter(has=get_by_test_id("summary-cat").filter(has_text="Supplies"))
+E           14 × locator resolved to 0 elements
+E              - unexpected value "0"
+
+verify\test_ui_session2.py:46: AssertionError</failure></testcase><testcase classname="verify.test_ui_session2" name="test_c_2_4_category_transport_for_uber_refund_not_income" time="6.741"><failure message="AssertionError: Locator expected to have text 'Transport'&#10;Actual value: Other &#10;Call log:&#10;  - Expect &quot;to_have_text&quot; with timeout 5000ms&#10;  - waiting for locator(&quot;[data-testid=\&quot;tx-row\&quot;]&quot;).filter(has=get_by_test_id(&quot;tx-memo&quot;).filter(has_text=&quot;Uber refund&quot;)).get_by_test_id(&quot;tx-category&quot;)&#10;    14 × locator resolved to &lt;td data-testid=&quot;tx-category&quot;&gt;Other&lt;/td&gt;&#10;       - unexpected value &quot;Other&quot;&#10;&#10;Aria snapshot:&#10;- cell &quot;Other&quot;">page = &lt;Page url='http://127.0.0.1:50031/'&gt;, base_url = 'http://127.0.0.1:50031'
+
+    def test_c_2_4_category_transport_for_uber_refund_not_income(page, base_url):
+        page.goto(base_url)
+        page.wait_for_selector('[data-testid="tx-row"]')
+        row = find_row_by_memo(page, "Uber refund")
+        expect(row).to_have_count(1)
+        cat = row.get_by_test_id('tx-category')
+&gt;       expect(cat).to_have_text("Transport")
+E       AssertionError: Locator expected to have text 'Transport'
+E       Actual value: Other 
+E       Call log:
+E         - Expect "to_have_text" with timeout 5000ms
+E         - waiting for locator("[data-testid=\"tx-row\"]").filter(has=get_by_test_id("tx-memo").filter(has_text="Uber refund")).get_by_test_id("tx-category")
+E           14 × locator resolved to &lt;td data-testid="tx-category"&gt;Other&lt;/td&gt;
+E              - unexpected value "Other"
+E       
+E       Aria snapshot:
+E       - cell "Other"
+
+verify\test_ui_session2.py:57: AssertionError</failure></testcase><testcase classname="verify.test_ui_session2" name="test_c_2_5_summary_heading_visible_once" time="1.053" /><testcase classname="verify.test_ui_session2" name="test_c_2_6_summary_transport_total_20" time="6.816"><failure message="AssertionError: Locator expected to have count '1'&#10;Actual value: 0 &#10;Call log:&#10;  - Expect &quot;to_have_count&quot; with timeout 5000ms&#10;  - waiting for locator(&quot;[data-testid=\&quot;summary-row\&quot;]&quot;).filter(has=get_by_test_id(&quot;summary-cat&quot;).filter(has_text=&quot;Transport&quot;))&#10;    14 × locator resolved to 0 elements&#10;       - unexpected value &quot;0&quot;">page = &lt;Page url='http://127.0.0.1:50031/'&gt;, base_url = 'http://127.0.0.1:50031'
+
+    def test_c_2_6_summary_transport_total_20(page, base_url):
+        page.goto(base_url)
+        page.wait_for_selector('[data-testid="summary"]')
+        row = get_summary_row(page, "Transport")
+&gt;       expect(row).to_have_count(1)
+E       AssertionError: Locator expected to have count '1'
+E       Actual value: 0 
+E       Call log:
+E         - Expect "to_have_count" with timeout 5000ms
+E         - waiting for locator("[data-testid=\"summary-row\"]").filter(has=get_by_test_id("summary-cat").filter(has_text="Transport"))
+E           14 × locator resolved to 0 elements
+E              - unexpected value "0"
+
+verify\test_ui_session2.py:72: AssertionError</failure></testcase><testcase classname="verify.test_ui_session3" name="test_c_3_1_delta_updates_after_setting_transport_budget_30" time="6.627"><failure message="AssertionError: Locator expected to have count '1'&#10;Actual value: 0 &#10;Call log:&#10;  - Expect &quot;to_have_count&quot; with timeout 5000ms&#10;  - waiting for get_by_test_id(&quot;budget-Transport&quot;)&#10;    14 × locator resolved to 0 elements&#10;       - unexpected value &quot;0&quot;">page = &lt;Page url='http://127.0.0.1:50031/'&gt;, base_url = 'http://127.0.0.1:50031'
+
+    def test_c_3_1_delta_updates_after_setting_transport_budget_30(page, base_url):
+        page.goto(base_url)
+        page.wait_for_selector('[data-testid="summary"]')
+&gt;       set_budget(page, "Transport", "30")
+
+verify\test_ui_session3.py:28: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+page = &lt;Page url='http://127.0.0.1:50031/'&gt;, category = 'Transport'
+value = '30'
+
+    def set_budget(page, category: str, value: str):
+        inp = page.get_by_test_id(f"budget-{category}")
+&gt;       expect(inp).to_have_count(1)
+E       AssertionError: Locator expected to have count '1'
+E       Actual value: 0 
+E       Call log:
+E         - Expect "to_have_count" with timeout 5000ms
+E         - waiting for get_by_test_id("budget-Transport")
+E           14 × locator resolved to 0 elements
+E              - unexpected value "0"
+
+verify\test_ui_session3.py:19: AssertionError</failure></testcase><testcase classname="verify.test_ui_session3" name="test_c_3_2_sort_by_delta_places_expense_first_after_budget" time="6.622"><failure message="AssertionError: Locator expected to have count '1'&#10;Actual value: 0 &#10;Call log:&#10;  - Expect &quot;to_have_count&quot; with timeout 5000ms&#10;  - waiting for get_by_test_id(&quot;budget-Transport&quot;)&#10;    14 × locator resolved to 0 elements&#10;       - unexpected value &quot;0&quot;">page = &lt;Page url='http://127.0.0.1:50031/'&gt;, base_url = 'http://127.0.0.1:50031'
+
+    def test_c_3_2_sort_by_delta_places_expense_first_after_budget(page, base_url):
+        page.goto(base_url)
+        page.wait_for_selector('[data-testid="summary"]')
+&gt;       set_budget(page, "Transport", "30")
+
+verify\test_ui_session3.py:43: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+page = &lt;Page url='http://127.0.0.1:50031/'&gt;, category = 'Transport'
+value = '30'
+
+    def set_budget(page, category: str, value: str):
+        inp = page.get_by_test_id(f"budget-{category}")
+&gt;       expect(inp).to_have_count(1)
+E       AssertionError: Locator expected to have count '1'
+E       Actual value: 0 
+E       Call log:
+E         - Expect "to_have_count" with timeout 5000ms
+E         - waiting for get_by_test_id("budget-Transport")
+E           14 × locator resolved to 0 elements
+E              - unexpected value "0"
+
+verify\test_ui_session3.py:19: AssertionError</failure></testcase><testcase classname="verify.test_ui_session3" name="test_c_3_3_toggle_overbudget_hides_transport_and_keeps_expense" time="6.775"><failure message="AssertionError: Locator expected to have count '1'&#10;Actual value: 0 &#10;Call log:&#10;  - Expect &quot;to_have_count&quot; with timeout 5000ms&#10;  - waiting for get_by_test_id(&quot;budget-Transport&quot;)&#10;    14 × locator resolved to 0 elements&#10;       - unexpected value &quot;0&quot;">page = &lt;Page url='http://127.0.0.1:50031/'&gt;, base_url = 'http://127.0.0.1:50031'
+
+    def test_c_3_3_toggle_overbudget_hides_transport_and_keeps_expense(page, base_url):
+        page.goto(base_url)
+        page.wait_for_selector('[data-testid="summary"]')
+&gt;       set_budget(page, "Transport", "30")
+
+verify\test_ui_session3.py:66: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+page = &lt;Page url='http://127.0.0.1:50031/'&gt;, category = 'Transport'
+value = '30'
+
+    def set_budget(page, category: str, value: str):
+        inp = page.get_by_test_id(f"budget-{category}")
+&gt;       expect(inp).to_have_count(1)
+E       AssertionError: Locator expected to have count '1'
+E       Actual value: 0 
+E       Call log:
+E         - Expect "to_have_count" with timeout 5000ms
+E         - waiting for get_by_test_id("budget-Transport")
+E           14 × locator resolved to 0 elements
+E              - unexpected value "0"
+
+verify\test_ui_session3.py:19: AssertionError</failure></testcase><testcase classname="verify.test_ui_session3" name="test_c_3_4_percent_shows_one_decimal_transport_66_7" time="6.619"><failure message="AssertionError: Locator expected to have count '1'&#10;Actual value: 0 &#10;Call log:&#10;  - Expect &quot;to_have_count&quot; with timeout 5000ms&#10;  - waiting for get_by_test_id(&quot;budget-Transport&quot;)&#10;    14 × locator resolved to 0 elements&#10;       - unexpected value &quot;0&quot;">page = &lt;Page url='http://127.0.0.1:50031/'&gt;, base_url = 'http://127.0.0.1:50031'
+
+    def test_c_3_4_percent_shows_one_decimal_transport_66_7(page, base_url):
+        page.goto(base_url)
+        page.wait_for_selector('[data-testid="summary"]')
+&gt;       set_budget(page, "Transport", "30")
+
+verify\test_ui_session3.py:79: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+page = &lt;Page url='http://127.0.0.1:50031/'&gt;, category = 'Transport'
+value = '30'
+
+    def set_budget(page, category: str, value: str):
+        inp = page.get_by_test_id(f"budget-{category}")
+&gt;       expect(inp).to_have_count(1)
+E       AssertionError: Locator expected to have count '1'
+E       Actual value: 0 
+E       Call log:
+E         - Expect "to_have_count" with timeout 5000ms
+E         - waiting for get_by_test_id("budget-Transport")
+E           14 × locator resolved to 0 elements
+E              - unexpected value "0"
+
+verify\test_ui_session3.py:19: AssertionError</failure></testcase><testcase classname="verify.test_ui_session3" name="test_c_3_5_delta_header_visible_once" time="1.014" /></testsuite></testsuites>

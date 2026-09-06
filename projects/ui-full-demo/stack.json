@@ -1,0 +1,13 @@
+{
+  "stack": [
+    "next",
+    "react",
+    "typescript"
+  ],
+  "sessions": 3,
+  "minutes_per_session": 35,
+  "track": "fullstack",
+  "limits": "Keep the project tiny: one main screen, one simple API endpoint, local JSON or in-memory data only, no auth, no database, no external services.",
+  "given_by": "none",
+  "at": "2026-09-04T09:12:02+00:00"
+}

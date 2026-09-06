@@ -1,0 +1,12 @@
+[
+  {"id":"t1","memo":"Uber trip downtown","merchant":"UBER","amount":-35.00},
+  {"id":"t2","memo":"Groceries - FreshFarm","merchant":"FreshFarm","amount":-60.00},
+  {"id":"t3","memo":"ACME paper","merchant":"ACME","amount":-25.00},
+  {"id":"t4","memo":"Refund - FreshFarm","merchant":"FreshFarm","amount":10.00},
+  {"id":"t5","memo":"Uber refund","merchant":"UBER","amount":15.00},
+  {"id":"t6","memo":"Coffee","merchant":"Blue Bottle","amount":-5.00},
+  {"id":"t7","memo":"Office chair","merchant":"OfficeCo","amount":-120.00},
+  {"id":"t8","memo":"Snacks","merchant":"FreshFarm","amount":-12.50},
+  {"id":"t9","memo":"Train to office","merchant":"TransitCorp","amount":-3.25},
+  {"id":"t10","memo":"Tea","merchant":"Blue Bottle","amount":-3.50}
+]

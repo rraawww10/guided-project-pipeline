@@ -1,0 +1,128 @@
+{
+  "ok": true,
+  "target": "app",
+  "code_checks": {
+    "ok": true,
+    "target": "app",
+    "declared": [],
+    "unknown": [],
+    "checks": {}
+  },
+  "stack_check": {
+    "ok": true,
+    "target": "app",
+    "stack": [
+      "next",
+      "react",
+      "typescript"
+    ],
+    "declared": [
+      "@types/node",
+      "@types/react",
+      "@types/react-dom",
+      "next",
+      "react",
+      "react-dom",
+      "typescript"
+    ],
+    "build": "next build",
+    "start": "next start",
+    "violations": []
+  },
+  "seconds": 39.3,
+  "counts": {
+    "pass": 12,
+    "fail": 0,
+    "skip": 0,
+    "missing": 0
+  },
+  "criteria": {
+    "c-1-1": {
+      "status": "pass",
+      "check": "GET /api/expenses returns 200 with a JSON array of 4 Expense",
+      "session": 1,
+      "test": "verify/test_api.py::test_c_1_1_get_expenses_returns_4_items",
+      "message": "1 parametrised case(s) passed"
+    },
+    "c-1-2": {
+      "status": "pass",
+      "check": "sc-home renders 4 elements with data-testid=expense-row after load",
+      "session": 1,
+      "test": "verify/test_ui_session1.py::test_c_1_2_home_renders_4_expense_rows",
+      "message": ""
+    },
+    "c-1-3": {
+      "status": "pass",
+      "check": "sc-home shows a per-person totals-paid summary with 5 rows and exact amounts: Alice $52.00, Bob $30.00, Cara $40.00, Dan $15.00, Eve $0.00",
+      "session": 1,
+      "test": "verify/test_ui_session1.py::test_c_1_3_totals_paid_summary_5_rows_with_exact_amounts",
+      "message": ""
+    },
+    "c-2-1": {
+      "status": "pass",
+      "check": "sc-home renders 5 elements with data-testid=balance-row in name-ASC order, with exact texts: Alice +$26.00; Bob -$6.00; Cara +$4.00; Dan -$11.00; Eve -$13.00",
+      "session": 2,
+      "test": "verify/test_ui_session2.py::test_c_2_1_balances_name_order_and_exact_texts",
+      "message": ""
+    },
+    "c-2-2": {
+      "status": "pass",
+      "check": "sc-home renders a Proposed transfers list with 4 elements with data-testid=transfer-row and the first item reads \"Eve pays Alice $13.00\"",
+      "session": 2,
+      "test": "verify/test_ui_session2.py::test_c_2_2_transfers_first_item_text",
+      "message": ""
+    },
+    "c-2-3": {
+      "status": "pass",
+      "check": "sc-home shows a total transfers amount element [data-testid=transfers-total] equal to \"$30.00\"",
+      "session": 2,
+      "test": "verify/test_ui_session2.py::test_c_2_3_transfers_total_amount",
+      "message": ""
+    },
+    "c-2-4": {
+      "status": "pass",
+      "check": "GET /api/settlement/naive returns 200 with a JSON array of 4 Transfer; the first element equals {\"from\":\"Eve\",\"to\":\"Alice\",\"amountCents\":1300}",
+      "session": 2,
+      "test": "verify/test_api.py::test_c_2_4_naive_settlement_api_first_item",
+      "message": ""
+    },
+    "c-3-1": {
+      "status": "pass",
+      "check": "sc-home renders [data-testid=money-sample] equal to \"-$6.15\"",
+      "session": 3,
+      "test": "verify/test_ui_session3.py::test_c_3_1_money_sample_shows_negative_format",
+      "message": ""
+    },
+    "c-3-2": {
+      "status": "pass",
+      "check": "With [data-testid=toggle-minimal] set ON, sc-home renders the transfers in amount-descending order then payer then payee; the sequence reads exactly: \"Eve pays Alice $13.00\", \"Dan pays Alice $11.00\", \"Bob pays Cara $4.00\", \"Bob pays Alice $2.00\"",
+      "session": 3,
+      "test": "verify/test_ui_session3.py::test_c_3_2_minimal_on_orders_transfers_by_amount_then_payer_payee",
+      "message": ""
+    },
+    "c-3-3": {
+      "status": "pass",
+      "check": "Unchecking [data-testid=include-Eve] removes Eve from balances and no [data-testid=transfer-row] contains \"Eve\"",
+      "session": 3,
+      "test": "verify/test_ui_session3.py::test_c_3_3_unchecking_eve_excludes_from_balances_and_transfers",
+      "message": ""
+    },
+    "c-3-4": {
+      "status": "pass",
+      "check": "With [data-testid=toggle-minimal] set ON, sc-home renders 4 elements with data-testid=transfer-row",
+      "session": 3,
+      "test": "verify/test_ui_session3.py::test_c_3_4_minimal_on_renders_4_transfer_rows",
+      "message": ""
+    },
+    "c-3-5": {
+      "status": "pass",
+      "check": "With [data-testid=toggle-minimal] set OFF, sc-home renders the last [data-testid=transfer-row] item as \"Bob pays Cara $4.00\"",
+      "session": 3,
+      "test": "verify/test_ui_session3.py::test_c_3_5_minimal_off_last_item_is_bob_pays_cara",
+      "message": ""
+    }
+  },
+  "pytest_returncode": 0,
+  "stdout_tail": "............                                                             [100%]\n12 passed in 11.41s\n",
+  "stderr_tail": ""
+}

@@ -1,0 +1,116 @@
+{
+  "ok": true,
+  "errors": [],
+  "warnings": [
+    {
+      "code": "W112",
+      "where": "session 1",
+      "message": "estimated 44.5 teaching minutes against a 40 minute cap. Nothing before step 9 measures this, so decide it here: 3 cuts, 2 builds, 3 concepts plus the project setup."
+    },
+    {
+      "code": "W112",
+      "where": "session 2",
+      "message": "estimated 46.5 teaching minutes against a 40 minute cap. Nothing before step 9 measures this, so decide it here: 4 cuts, 1 builds, 4 concepts."
+    }
+  ],
+  "counts": {
+    "errors": 0,
+    "warnings": 2
+  },
+  "session_minutes": [
+    {
+      "n": 1,
+      "minutes": 44.5,
+      "cuts": 3,
+      "builds": 2,
+      "concepts": 3,
+      "carries_setup": true,
+      "over_cap": true,
+      "weighted": true,
+      "cut_minutes": [
+        {
+          "id": "cut-ui-toggle-init",
+          "minutes": 6.0,
+          "decisions": 0,
+          "hint_words": 14
+        },
+        {
+          "id": "cut-ui-load-candidates",
+          "minutes": 6.0,
+          "decisions": 0,
+          "hint_words": 14
+        },
+        {
+          "id": "cut-api-candidates-list",
+          "minutes": 6.0,
+          "decisions": 0,
+          "hint_words": 13
+        }
+      ],
+      "largest_cut_share": 0.33
+    },
+    {
+      "n": 2,
+      "minutes": 46.5,
+      "cuts": 4,
+      "builds": 1,
+      "concepts": 4,
+      "carries_setup": false,
+      "over_cap": true,
+      "weighted": true,
+      "cut_minutes": [
+        {
+          "id": "cut-api-rank-build",
+          "minutes": 7.8,
+          "decisions": 1,
+          "hint_words": 57
+        },
+        {
+          "id": "cut-ui-rank-fetch",
+          "minutes": 7.7,
+          "decisions": 1,
+          "hint_words": 17
+        },
+        {
+          "id": "cut-score-apply",
+          "minutes": 6.0,
+          "decisions": 0,
+          "hint_words": 24
+        },
+        {
+          "id": "cut-api-rank-parse-query",
+          "minutes": 6.0,
+          "decisions": 0,
+          "hint_words": 33
+        }
+      ],
+      "largest_cut_share": 0.28
+    },
+    {
+      "n": 3,
+      "minutes": 31.6,
+      "cuts": 2,
+      "builds": 0,
+      "concepts": 3,
+      "carries_setup": false,
+      "over_cap": false,
+      "weighted": true,
+      "cut_minutes": [
+        {
+          "id": "cut-api-rank-apply-min",
+          "minutes": 9.4,
+          "decisions": 2,
+          "hint_words": 24
+        },
+        {
+          "id": "cut-sort-cmp",
+          "minutes": 7.7,
+          "decisions": 1,
+          "hint_words": 50
+        }
+      ],
+      "largest_cut_share": 0.55
+    }
+  ],
+  "spec_hash": "e566d6427a29fc88aed3153ff1be96fc0743ff5d938d56804e2ecf0469c71bad"
+}

@@ -1,0 +1,139 @@
+{
+  "ok": true,
+  "errors": [],
+  "warnings": [
+    {
+      "code": "W112",
+      "where": "session 1",
+      "message": "estimated 44.5 teaching minutes against a 40 minute cap. Nothing before step 9 measures this, so decide it here: 3 cuts, 2 builds, 3 concepts plus the project setup."
+    },
+    {
+      "code": "W112",
+      "where": "session 2",
+      "message": "estimated 49 teaching minutes against a 40 minute cap. Nothing before step 9 measures this, so decide it here: 5 cuts, 1 builds, 4 concepts."
+    },
+    {
+      "code": "W112",
+      "where": "session 3",
+      "message": "estimated 45.3 teaching minutes against a 40 minute cap. Nothing before step 9 measures this, so decide it here: 4 cuts, 0 builds, 3 concepts."
+    }
+  ],
+  "counts": {
+    "errors": 0,
+    "warnings": 3
+  },
+  "session_minutes": [
+    {
+      "n": 1,
+      "minutes": 44.5,
+      "cuts": 3,
+      "builds": 2,
+      "concepts": 3,
+      "carries_setup": true,
+      "over_cap": true,
+      "weighted": true,
+      "cut_minutes": [
+        {
+          "id": "cut-ui-load-expenses",
+          "minutes": 6.0,
+          "decisions": 0,
+          "hint_words": 19
+        },
+        {
+          "id": "cut-ui-compute-paid-totals",
+          "minutes": 6.0,
+          "decisions": 0,
+          "hint_words": 21
+        },
+        {
+          "id": "cut-api-expenses-list",
+          "minutes": 6.0,
+          "decisions": 0,
+          "hint_words": 14
+        }
+      ],
+      "largest_cut_share": 0.33
+    },
+    {
+      "n": 2,
+      "minutes": 49.0,
+      "cuts": 5,
+      "builds": 1,
+      "concepts": 4,
+      "carries_setup": false,
+      "over_cap": true,
+      "weighted": true,
+      "cut_minutes": [
+        {
+          "id": "cut-ui-set-transfers",
+          "minutes": 6.0,
+          "decisions": 0,
+          "hint_words": 17
+        },
+        {
+          "id": "cut-ui-set-balances",
+          "minutes": 6.0,
+          "decisions": 0,
+          "hint_words": 16
+        },
+        {
+          "id": "cut-lib-settle-naive",
+          "minutes": 6.0,
+          "decisions": 0,
+          "hint_words": 36
+        },
+        {
+          "id": "cut-lib-compute-balances",
+          "minutes": 6.0,
+          "decisions": 0,
+          "hint_words": 38
+        },
+        {
+          "id": "cut-api-naive-settlement",
+          "minutes": 6.0,
+          "decisions": 0,
+          "hint_words": 17
+        }
+      ],
+      "largest_cut_share": 0.2
+    },
+    {
+      "n": 3,
+      "minutes": 45.3,
+      "cuts": 4,
+      "builds": 0,
+      "concepts": 3,
+      "carries_setup": false,
+      "over_cap": true,
+      "weighted": true,
+      "cut_minutes": [
+        {
+          "id": "cut-ui-use-minimal",
+          "minutes": 9.4,
+          "decisions": 2,
+          "hint_words": 26
+        },
+        {
+          "id": "cut-lib-settle-minimal",
+          "minutes": 9.4,
+          "decisions": 2,
+          "hint_words": 31
+        },
+        {
+          "id": "cut-ui-toggle-include",
+          "minutes": 6.0,
+          "decisions": 0,
+          "hint_words": 24
+        },
+        {
+          "id": "cut-lib-format-money",
+          "minutes": 6.0,
+          "decisions": 0,
+          "hint_words": 21
+        }
+      ],
+      "largest_cut_share": 0.31
+    }
+  ],
+  "spec_hash": "05a2438f4f7bb2d80b385291be1071bee59ec90eb0b6c97e4b5bd1a1c1817fc4"
+}

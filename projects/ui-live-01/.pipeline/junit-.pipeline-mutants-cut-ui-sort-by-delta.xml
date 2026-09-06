@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="14" time="18.045" timestamp="2026-09-05T14:09:28.098105+05:30" hostname="HERO"><testcase classname="verify.test_api_transactions" name="test_c_1_1_get_transactions_returns_array_with_required_fields" time="0.537" /><testcase classname="verify.test_ui_session1" name="test_c_1_2_ui_renders_one_row_per_transaction" time="2.108" /><testcase classname="verify.test_ui_session1" name="test_c_1_3_ui_renders_each_row_memo" time="1.719" /><testcase classname="verify.test_ui_session2" name="test_c_2_1_category_transport_for_uber_trip_downtown" time="1.143" /><testcase classname="verify.test_ui_session2" name="test_c_2_2_rule_label_for_uber_trip_downtown" time="1.195" /><testcase classname="verify.test_ui_session2" name="test_c_2_3_summary_has_supplies_total_25" time="1.171" /><testcase classname="verify.test_ui_session2" name="test_c_2_4_category_transport_for_uber_refund_not_income" time="1.268" /><testcase classname="verify.test_ui_session2" name="test_c_2_5_summary_heading_visible_once" time="1.112" /><testcase classname="verify.test_ui_session2" name="test_c_2_6_summary_transport_total_20" time="1.270" /><testcase classname="verify.test_ui_session3" name="test_c_3_1_delta_updates_after_setting_transport_budget_30" time="1.315" /><testcase classname="verify.test_ui_session3" name="test_c_3_2_sort_by_delta_places_expense_first_after_budget" time="1.332"><failure message="AssertionError: rows are not sorted by delta descending: [204.25, -10.0, 25.0, -10.0]&#10;assert [204.25, -10.0, 25.0, -10.0] == [204.25, 25.0, -10.0, -10.0]&#10;  &#10;  At index 1 diff: -10.0 != 25.0&#10;  Use -v to get more diff">page = &lt;Page url='http://127.0.0.1:51303/'&gt;, base_url = 'http://127.0.0.1:51303'
+
+    def test_c_3_2_sort_by_delta_places_expense_first_after_budget(page, base_url):
+        page.goto(base_url)
+        page.wait_for_selector('[data-testid="summary"]')
+        set_budget(page, "Transport", "30")
+        # summarizeByCategory already orders by category name, and "Expense" is both
+        # alphabetically first and largest by delta - so asserting only the first row
+        # passes whether the sort ran or not. Check the deltas themselves, in DOM
+        # order, and refuse to run at all against fixtures that start sorted.
+        before = read_deltas(page)
+        assert before != sorted(before, reverse=True), (
+            f"the fixtures start in delta order ({before}), so this test could not "
+            f"tell a working sort from a missing one")
+        sort_btn = page.get_by_test_id('sort-delta')
+        expect(sort_btn).to_have_count(1)
+        sort_btn.click()
+        after = read_deltas(page)
+&gt;       assert after == sorted(after, reverse=True), (
+            f"rows are not sorted by delta descending: {after}")
+E       AssertionError: rows are not sorted by delta descending: [204.25, -10.0, 25.0, -10.0]
+E       assert [204.25, -10.0, 25.0, -10.0] == [204.25, 25.0, -10.0, -10.0]
+E         
+E         At index 1 diff: -10.0 != 25.0
+E         Use -v to get more diff
+
+verify\test_ui_session3.py:56: AssertionError</failure></testcase><testcase classname="verify.test_ui_session3" name="test_c_3_3_toggle_overbudget_hides_transport_and_keeps_expense" time="1.261" /><testcase classname="verify.test_ui_session3" name="test_c_3_4_percent_shows_one_decimal_transport_66_7" time="1.163" /><testcase classname="verify.test_ui_session3" name="test_c_3_5_delta_header_visible_once" time="1.103" /></testsuite></testsuites>

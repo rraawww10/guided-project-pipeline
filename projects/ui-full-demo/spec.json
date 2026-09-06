@@ -1,0 +1,71 @@
+{
+  "slug": "ui-full-demo",
+  "title": "League Standings: Deterministic Tie-Breaker Table",
+  "track": "fullstack",
+  "sessions_planned": 3,
+  "stack": ["next", "react", "typescript"],
+  "source": null,
+  "code_checks": [],
+  "endpoints": [
+    {"id": "ep-standings-list", "method": "GET", "path": "/api/standings", "request": null, "response": "StandingRow[]", "status": [200]}
+  ],
+  "screens": [
+    {"id": "sc-standings", "route": "/", "elements": ["table[data-testid=standings-table]", "tr[data-testid=row-<TEAM>]", "[data-testid=toggle-<TEAM>]", "[data-testid=panel-<TEAM>]", "[data-testid=sum-<TEAM>]"] , "states": ["loaded", "expanded"]}
+  ],
+  "sessions": [
+    {
+      "n": 1,
+      "title": "Seed and totals on a table",
+      "goal": "Read seeded matches and fold them into per-team totals, then render a basic standings table at \"/\" from local data, unsorted. No Rank column yet in this session.",
+      "teaches": ["array reduce", "mapping to rows", "JSX table rendering"],
+      "builds": ["sc-standings"],
+      "criteria": [
+        {"id": "c-1-1", "check": "Screen sc-standings at / renders a table with data-testid standings-table and one <tr data-testid=\"row-<TEAM>\"> per team in data/matches.seed.json (4 teams)", "target": "sc-standings", "cuts": ["cut-stats-from-matches", "cut-page-rows-render"]},
+        {"id": "c-1-2", "check": "The row for team \"Lions\" shows P, W, D, L, GF, GA and Pts equal to totals computed from data/matches.seed.json", "target": "sc-standings", "cuts": ["cut-stats-from-matches", "cut-page-rows-render"]},
+        {"id": "c-1-3", "check": "Screen sc-standings renders exactly 4 rows with data-testid row-<TEAM> (one per distinct team in data/matches.seed.json)", "target": "sc-standings", "cuts": ["cut-stats-from-matches"]}
+      ],
+      "cuts": [
+        {"id": "cut-stats-from-matches", "file": "app/lib/stats.ts", "writes_into": "table", "hint": "For every match in the input, ensure both teams have a row in `table`, add goals for and against to their rows, update W/D/L, and add 3/1/0 to points, leaving the updated entries in `table`."},
+        {"id": "cut-page-rows-render", "file": "app/app/page.tsx", "writes_into": "rowsEl", "hint": "Build per-team totals from the seed and put one <tr data-testid=\"row-<TEAM>\"> per team into `rowsEl`, with columns Team, P, W, D, L, GF, GA, GD and Pts taken from the computed totals."}
+      ]
+    },
+    {
+      "n": 2,
+      "title": "Deterministic ranking and API",
+      "goal": "Implement a pure rankTeams(stats) that sorts by points desc, goal difference desc, goals for desc, then team name asc, assigns shared rank numbers to exact numeric ties (skipping k−1 ranks for a tie block of size k), and serve the ranked rows from GET /api/standings; the page reads and renders it.",
+      "teaches": ["multi-key comparator", "tie-block rank assignment", "Next.js route handler", "client/server data flow"],
+      "builds": ["ep-standings-list"],
+      "criteria": [
+        {"id": "c-2-1", "check": "GET /api/standings returns 200 with a JSON array of StandingRow where each row includes a correct rank per the tie rules and the array is sorted by points desc, goal difference desc, goals for desc, then team name asc", "target": "ep-standings-list", "cuts": ["cut-rank-sort", "cut-rank-assign", "cut-api-standings"]},
+        {"id": "c-2-2", "check": "Screen sc-standings renders teams tied on points and goal difference with the higher goals-for team first, and shows consecutive rank numbers for those two rows", "target": "sc-standings", "cuts": ["cut-rank-sort", "cut-rank-assign"]},
+        {"id": "c-2-3", "check": "Screen sc-standings reads from /api/standings and renders a Rank column with 1 in the first row and non-decreasing rank numbers down the table", "target": "sc-standings", "cuts": ["cut-page-load-from-api", "cut-api-standings"]},
+        {"id": "c-2-4", "check": "Screen sc-standings renders teams tied on points, goal difference and goals for in alphabetical order by team name, and shows the same rank number for both while the next row's Rank skips the following number", "target": "sc-standings", "cuts": ["cut-rank-sort"]},
+        {"id": "c-2-5", "check": "GET /api/standings returns 200 with a JSON array of StandingRow where any tie block of size k>1 shares one rank number across the block and the first following row's rank increases by k (e.g. 1,1,3 or 1,1,1,4)", "target": "ep-standings-list", "cuts": ["cut-rank-assign", "cut-api-standings"]}
+      ],
+      "cuts": [
+        {"id": "cut-rank-sort", "file": "app/lib/rank.ts", "writes_into": "sorted", "hint": "Sort the given per-team stats into `sorted` by points descending, then goal difference descending, then goals for descending, and finally by team name ascending."},
+        {"id": "cut-rank-assign", "file": "app/lib/rank.ts", "writes_into": "withRanks", "hint": "Walk the sorted rows and fill `withRanks` so exact numeric ties (points, GD and GF all equal) share the same rank number and the following ranks skip k−1 positions where k is the size of the tie block (e.g. 1,1,1,4); otherwise the rank increases by one per position."},
+        {"id": "cut-api-standings", "file": "app/app/api/standings/route.ts", "writes_into": "body", "hint": "Put the ranked standings rows into `body` as JSON and set `status` to 200."},
+        {"id": "cut-page-load-from-api", "file": "app/app/page.tsx", "writes_into": "rows", "hint": "Read /api/standings and assign the parsed array into `rows` so the table renders the API result."}
+      ]
+    },
+    {
+      "n": 3,
+      "title": "Rationale on demand",
+      "goal": "Clicking a team opens a panel listing the matches that contributed its totals with per-match deltas; clicking again closes it. The rationale derives client-side from the same seeded matches (no new endpoint).",
+      "teaches": ["deriving a per-item detail list from aggregate data", "UI toggle state", "mapping a derived list to JSX"],
+      "builds": [],
+      "criteria": [
+        {"id": "c-3-1", "check": "On sc-standings, after clicking data-testid toggle-Lions, panel-Lions is displayed and shows one line per match for that team; each line names the opponent and includes a points delta exactly formatted as '+3 pts' (win), '+1 pt' (draw) or '+0 pts' (loss), and a goal-difference delta exactly formatted as 'GD +k' (win), 'GD 0' (draw) or 'GD -k' (loss)", "target": "sc-standings", "cuts": ["cut-build-rationale", "cut-render-rationale", "cut-toggle-expand"]},
+        {"id": "c-3-2", "check": "The open panel for a team shows a summary with data-testid sum-<TEAM> whose points total equals that row's Pts value", "target": "sc-standings", "cuts": ["cut-build-rationale", "cut-render-rationale"]},
+        {"id": "c-3-3", "check": "On sc-standings, clicking data-testid toggle-<TEAM> twice hides the panel; data-testid panel-<TEAM> is not rendered after the second click", "target": "sc-standings", "cuts": ["cut-toggle-expand"]},
+        {"id": "c-3-4", "check": "buildTeamRationale(team, matches) returns one entry per match that team appears in, each entry carrying the match id, opponent name, points delta (3/1/0) and goal-difference delta", "target": "sc-standings", "cuts": ["cut-build-rationale"]}
+      ],
+      "cuts": [
+        {"id": "cut-build-rationale", "file": "app/lib/rationale.ts", "writes_into": "out", "hint": "From the seeded match list loaded on the client, select only the matches that involve the given team and fill `out` with one entry per match carrying the opponent, a points delta of 3/1/0 from the result, and the goal-difference delta for that match."},
+        {"id": "cut-toggle-expand", "file": "app/app/page.tsx", "writes_into": "open", "hint": "Toggle the boolean `open` for the clicked team id so the panel appears on first click and disappears on second click."},
+        {"id": "cut-render-rationale", "file": "app/app/page.tsx", "writes_into": "panelEl", "hint": "When a row is open, put a list into `panelEl` (data-testid=\"panel-<TEAM>\") with one item per entry from buildTeamRationale, showing the opponent name plus the points and GD deltas, and include a summary element data-testid=\"sum-<TEAM>\" with the total points from those entries."}
+      ]
+    }
+  ]
+}

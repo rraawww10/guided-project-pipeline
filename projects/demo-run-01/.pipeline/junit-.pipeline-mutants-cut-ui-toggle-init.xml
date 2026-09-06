@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="13" time="10.533" timestamp="2026-09-06T17:40:16.213551+05:30" hostname="HERO"><testcase classname="verify.test_api_candidates" name="test_c_1_1_candidates_list_has_10_items" time="0.457" /><testcase classname="verify.test_api_candidates" name="test_c_1_4_candidates_list_has_duplicate_years" time="0.343" /><testcase classname="verify.test_api_candidates" name="test_c_1_5_candidates_list_has_typescript_tag" time="0.333" /><testcase classname="verify.test_api_rank" name="test_c_2_1_rank_years_returns_10_items_with_shape" time="0.420" /><testcase classname="verify.test_api_rank" name="test_c_2_2_rank_years_orders_by_unrounded_score_desc" time="0.347" /><testcase classname="verify.test_api_rank" name="test_c_3_4_rank_years_min_100_returns_empty_array" time="0.325" /><testcase classname="verify.test_sort_and_filter" name="test_c_3_1_no_active_orders_by_name_ascii" time="0.664" /><testcase classname="verify.test_sort_and_filter" name="test_c_3_2_tag_active_same_years_same_tag_break_ties_by_name" time="0.640" /><testcase classname="verify.test_sort_and_filter" name="test_c_3_3_tag_active_one_tagged_comes_first" time="0.675" /><testcase classname="verify.test_ui_main" name="test_c_1_2_renders_10_cards" time="1.851" /><testcase classname="verify.test_ui_main" name="test_c_1_3_renders_both_toggles" time="1.293"><failure message="assert True is False&#10; +  where True = is_checked()&#10; +    where is_checked = &lt;Locator frame=&lt;Frame name= url='http://127.0.0.1:53442/'&gt; selector='internal:testid=[data-testid=&quot;toggle-years&quot;s]'&gt;.is_checked">@pytest.mark.sync
+    def test_c_1_3_renders_both_toggles():
+        """
+        c-1-3: sc-main renders checkboxes with data-testids "toggle-years" and "toggle-tag"
+        """
+        with sync_playwright() as p:
+            browser = p.chromium.launch()
+            try:
+                page = browser.new_page()
+                page.goto(BASE_URL + "/", wait_until="load")
+                years = page.get_by_test_id("toggle-years")
+                tag = page.get_by_test_id("toggle-tag")
+                years.wait_for(timeout=5000)
+                tag.wait_for(timeout=5000)
+                assert years.is_visible()
+                assert tag.is_visible()
+                # Also assert they are rendered as unchecked inputs on first load
+                # (initial state: no active tokens). This remains an assertion on what the user sees.
+&gt;               assert years.is_checked() is False
+E               assert True is False
+E                +  where True = is_checked()
+E                +    where is_checked = &lt;Locator frame=&lt;Frame name= url='http://127.0.0.1:53442/'&gt; selector='internal:testid=[data-testid="toggle-years"s]'&gt;.is_checked
+
+verify\test_ui_main.py:48: AssertionError</failure></testcase><testcase classname="verify.test_ui_rank" name="test_c_2_3_years_toggle_shows_two_decimal_scores" time="1.342" /><testcase classname="verify.test_ui_rank" name="test_c_2_4_years_toggle_reasons_contains_years" time="1.292" /></testsuite></testsuites>

@@ -1,0 +1,118 @@
+{
+  "ok": false,
+  "target": "skeleton",
+  "code_checks": {
+    "ok": true,
+    "checks": {}
+  },
+  "seconds": 162.0,
+  "counts": {
+    "pass": 0,
+    "fail": 14,
+    "skip": 0,
+    "missing": 0
+  },
+  "criteria": {
+    "c-1-1": {
+      "status": "fail",
+      "check": "GET /api/transactions returns 200 with a JSON array where each item has id, memo, merchant and amount",
+      "session": 1,
+      "test": "verify/test_api_transactions.py::test_c_1_1_get_transactions_returns_array_with_required_fields",
+      "message": "AssertionError: Expected 200 from http://127.0.0.1:59583/api/transactions, got 500\nassert 500 == 200\n +  where 500 = <Response [500 Internal Server Error]>.status_code"
+    },
+    "c-1-2": {
+      "status": "fail",
+      "check": "Screen sc-dashboard renders one row per transaction (counts elements with data-testid 'tx-row')",
+      "session": 1,
+      "test": "verify/test_ui_session1.py::test_c_1_2_ui_renders_one_row_per_transaction",
+      "message": "assert 500 == 200\n +  where 500 = <Response [500 Internal Server Error]>.status_code"
+    },
+    "c-1-3": {
+      "status": "fail",
+      "check": "Screen sc-dashboard renders each row's memo (reads data-testid 'tx-memo')",
+      "session": 1,
+      "test": "verify/test_ui_session1.py::test_c_1_3_ui_renders_each_row_memo",
+      "message": "assert 500 == 200\n +  where 500 = <Response [500 Internal Server Error]>.status_code"
+    },
+    "c-2-1": {
+      "status": "fail",
+      "check": "Screen sc-dashboard shows category 'Transport' for the seeded 'Uber trip downtown' row (reads data-testid 'tx-category')",
+      "session": 2,
+      "test": "verify/test_ui_session2.py::test_c_2_1_category_transport_for_uber_trip_downtown",
+      "message": "playwright._impl._errors.TimeoutError: Page.wait_for_selector: Timeout 5000ms exceeded.\nCall log:\n  - waiting for locator(\"[data-testid=\\\"tx-row\\\"]\") to be visible"
+    },
+    "c-2-2": {
+      "status": "fail",
+      "check": "Screen sc-dashboard shows the matched rule label for the seeded 'Uber trip downtown' row as \"memo contains 'uber'\" (reads data-testid 'tx-rule')",
+      "session": 2,
+      "test": "verify/test_ui_session2.py::test_c_2_2_rule_label_for_uber_trip_downtown",
+      "message": "playwright._impl._errors.TimeoutError: Page.wait_for_selector: Timeout 5000ms exceeded.\nCall log:\n  - waiting for locator(\"[data-testid=\\\"tx-row\\\"]\") to be visible"
+    },
+    "c-2-3": {
+      "status": "fail",
+      "check": "Screen sc-dashboard Summary lists one row per category (data-testid 'summary-row') and shows the total for Supplies as 25",
+      "session": 2,
+      "test": "verify/test_ui_session2.py::test_c_2_3_summary_has_supplies_total_25",
+      "message": "playwright._impl._errors.TimeoutError: Page.wait_for_selector: Timeout 5000ms exceeded.\nCall log:\n  - waiting for locator(\"[data-testid=\\\"summary\\\"]\") to be visible"
+    },
+    "c-2-4": {
+      "status": "fail",
+      "check": "Screen sc-dashboard renders category 'Transport' (not 'Income') for the seeded 'Uber refund' row (amount 15) in data-testid 'tx-category'",
+      "session": 2,
+      "test": "verify/test_ui_session2.py::test_c_2_4_category_transport_for_uber_refund_not_income",
+      "message": "playwright._impl._errors.TimeoutError: Page.wait_for_selector: Timeout 5000ms exceeded.\nCall log:\n  - waiting for locator(\"[data-testid=\\\"tx-row\\\"]\") to be visible"
+    },
+    "c-2-5": {
+      "status": "fail",
+      "check": "Screen sc-dashboard renders a visible heading 'Summary by category' exactly once",
+      "session": 2,
+      "test": "verify/test_ui_session2.py::test_c_2_5_summary_heading_visible_once",
+      "message": "AssertionError: Locator expected to have count '1'\nActual value: 0 \nCall log:\n  - Expect \"to_have_count\" with timeout 5000ms\n  - waiting for get_by_text(\"Summary by category\", exact=True)\n    14 \u00d7 locator resolved to 0 elements\n       - unexpected value \"0\""
+    },
+    "c-2-6": {
+      "status": "fail",
+      "check": "Screen sc-dashboard Summary shows the Transport total as 20 (reads 'summary-cat' == 'Transport' then 'summary-total')",
+      "session": 2,
+      "test": "verify/test_ui_session2.py::test_c_2_6_summary_transport_total_20",
+      "message": "playwright._impl._errors.TimeoutError: Page.wait_for_selector: Timeout 5000ms exceeded.\nCall log:\n  - waiting for locator(\"[data-testid=\\\"summary\\\"]\") to be visible"
+    },
+    "c-3-1": {
+      "status": "fail",
+      "check": "After typing 30 into the Transport budget input (data-testid 'budget-Transport'), the Transport row's delta shows -10 (reads data-testid 'summary-delta')",
+      "session": 3,
+      "test": "verify/test_ui_session3.py::test_c_3_1_delta_updates_after_setting_transport_budget_30",
+      "message": "playwright._impl._errors.TimeoutError: Page.wait_for_selector: Timeout 5000ms exceeded.\nCall log:\n  - waiting for locator(\"[data-testid=\\\"summary\\\"]\") to be visible"
+    },
+    "c-3-2": {
+      "status": "fail",
+      "check": "Clicking the Sort by delta button (data-testid 'sort-delta') sorts summary rows by delta descending; with the fixtures and the step above, the first summary row is 'Expense'",
+      "session": 3,
+      "test": "verify/test_ui_session3.py::test_c_3_2_sort_by_delta_places_expense_first_after_budget",
+      "message": "playwright._impl._errors.TimeoutError: Page.wait_for_selector: Timeout 5000ms exceeded.\nCall log:\n  - waiting for locator(\"[data-testid=\\\"summary\\\"]\") to be visible"
+    },
+    "c-3-3": {
+      "status": "fail",
+      "check": "Toggling Over budget only (data-testid 'toggle-over') hides categories with delta \u00e2\u2030\u00a4 0; after the step above, Transport disappears while Expense remains",
+      "session": 3,
+      "test": "verify/test_ui_session3.py::test_c_3_3_toggle_overbudget_hides_transport_and_keeps_expense",
+      "message": "playwright._impl._errors.TimeoutError: Page.wait_for_selector: Timeout 5000ms exceeded.\nCall log:\n  - waiting for locator(\"[data-testid=\\\"summary\\\"]\") to be visible"
+    },
+    "c-3-4": {
+      "status": "fail",
+      "check": "The Percent column shows one decimal place; after the step above, Transport percent reads 66.7% (data-testid 'summary-pct')",
+      "session": 3,
+      "test": "verify/test_ui_session3.py::test_c_3_4_percent_shows_one_decimal_transport_66_7",
+      "message": "playwright._impl._errors.TimeoutError: Page.wait_for_selector: Timeout 5000ms exceeded.\nCall log:\n  - waiting for locator(\"[data-testid=\\\"summary\\\"]\") to be visible"
+    },
+    "c-3-5": {
+      "status": "fail",
+      "check": "Screen sc-dashboard renders a visible column header 'Delta' exactly once",
+      "session": 3,
+      "test": "verify/test_ui_session3.py::test_c_3_5_delta_header_visible_once",
+      "message": "AssertionError: Locator expected to have count '1'\nActual value: 0 \nCall log:\n  - Expect \"to_have_count\" with timeout 5000ms\n  - waiting for get_by_text(\"Delta\", exact=True)\n    14 \u00d7 locator resolved to 0 elements\n       - unexpected value \"0\""
+    }
+  },
+  "pytest_returncode": 1,
+  "stdout_tail": " None\n    ) -> Any:\n        if self._api_zone.get():\n            return await cb()\n        task = asyncio.current_task(self._loop)\n        parsed_st = _attach_api_call_information(\n            getattr(task, \"__pw_stack__\", None) or _capture_stack_trace(),\n            is_internal,\n            title,\n        )\n        self._api_zone.set(parsed_st)\n        try:\n            return await cb()\n        except Exception as error:\n>           raise rewrite_error(error, f\"{parsed_st['apiName']}: {error}\") from None\nE           playwright._impl._errors.TimeoutError: Page.wait_for_selector: Timeout 5000ms exceeded.\nE           Call log:\nE             - waiting for locator(\"[data-testid=\\\"summary\\\"]\") to be visible\n\n.pipeline\\venv\\Lib\\site-packages\\playwright\\_impl\\_connection.py:632: TimeoutError\n____________________ test_c_3_5_delta_header_visible_once _____________________\n\npage = <Page url='http://127.0.0.1:59583/'>, base_url = 'http://127.0.0.1:59583'\n\n    def test_c_3_5_delta_header_visible_once(page, base_url):\n        page.goto(base_url)\n        # Exact-case \"Delta\" should match the header, not the \"Sort by delta\" button.\n        loc = page.get_by_text(\"Delta\", exact=True)\n>       expect(loc).to_have_count(1)\nE       AssertionError: Locator expected to have count '1'\nE       Actual value: 0 \nE       Call log:\nE         - Expect \"to_have_count\" with timeout 5000ms\nE         - waiting for get_by_text(\"Delta\", exact=True)\nE           14 \u00d7 locator resolved to 0 elements\nE              - unexpected value \"0\"\n\nskeleton\\verify\\test_ui_session3.py:90: AssertionError\n=========================== short test summary info ===========================\nFAILED skeleton/verify/test_api_transactions.py::test_c_1_1_get_transactions_returns_array_with_required_fields\nFAILED skeleton/verify/test_ui_session1.py::test_c_1_2_ui_renders_one_row_per_transaction\nFAILED skeleton/verify/test_ui_session1.py::test_c_1_3_ui_renders_each_row_memo\nFAILED skeleton/verify/test_ui_session2.py::test_c_2_1_category_transport_for_uber_trip_downtown\nFAILED skeleton/verify/test_ui_session2.py::test_c_2_2_rule_label_for_uber_trip_downtown\nFAILED skeleton/verify/test_ui_session2.py::test_c_2_3_summary_has_supplies_total_25\nFAILED skeleton/verify/test_ui_session2.py::test_c_2_4_category_transport_for_uber_refund_not_income\nFAILED skeleton/verify/test_ui_session2.py::test_c_2_5_summary_heading_visible_once\nFAILED skeleton/verify/test_ui_session2.py::test_c_2_6_summary_transport_total_20\nFAILED skeleton/verify/test_ui_session3.py::test_c_3_1_delta_updates_after_setting_transport_budget_30\nFAILED skeleton/verify/test_ui_session3.py::test_c_3_2_sort_by_delta_places_expense_first_after_budget\nFAILED skeleton/verify/test_ui_session3.py::test_c_3_3_toggle_overbudget_hides_transport_and_keeps_expense\nFAILED skeleton/verify/test_ui_session3.py::test_c_3_4_percent_shows_one_decimal_transport_66_7\nFAILED skeleton/verify/test_ui_session3.py::test_c_3_5_delta_header_visible_once\n14 failed in 80.64s (0:01:20)\n",
+  "stderr_tail": ""
+}

@@ -1,0 +1,8 @@
+# Runtime state must not ship
+node_modules/
+.next/
+*.log
+
+# Live data store should be ignored; seed is included
+/data/expenses.json
+!/data/expenses.seed.json

@@ -1,0 +1,163 @@
+{
+  "ok": true,
+  "errors": [],
+  "warnings": [
+    {
+      "code": "W112",
+      "where": "session 1",
+      "message": "estimated 43.2 teaching minutes against a 40 minute cap. Nothing before step 9 measures this, so decide it here: 2 cuts, 2 builds, 5 concepts plus the project setup."
+    },
+    {
+      "code": "W112",
+      "where": "session 2",
+      "message": "estimated 43 teaching minutes against a 40 minute cap. Nothing before step 9 measures this, so decide it here: 3 cuts, 3 builds, 4 concepts."
+    },
+    {
+      "code": "W112",
+      "where": "session 3",
+      "message": "estimated 46.6 teaching minutes against a 40 minute cap. Nothing before step 9 measures this, so decide it here: 4 cuts, 1 builds, 3 concepts."
+    },
+    {
+      "code": "W112",
+      "where": "session 4",
+      "message": "estimated 49 teaching minutes against a 40 minute cap. Nothing before step 9 measures this, so decide it here: 4 cuts, 4 builds, 2 concepts."
+    }
+  ],
+  "counts": {
+    "errors": 0,
+    "warnings": 4
+  },
+  "session_minutes": [
+    {
+      "n": 1,
+      "minutes": 43.2,
+      "cuts": 2,
+      "builds": 2,
+      "concepts": 5,
+      "carries_setup": true,
+      "over_cap": true,
+      "weighted": true,
+      "cut_minutes": [
+        {
+          "id": "cut-ui-skus-fetch",
+          "minutes": 7.7,
+          "decisions": 1,
+          "hint_words": 16
+        },
+        {
+          "id": "cut-ep-skus-list-query",
+          "minutes": 6.0,
+          "decisions": 0,
+          "hint_words": 13
+        }
+      ],
+      "largest_cut_share": 0.56
+    },
+    {
+      "n": 2,
+      "minutes": 43.0,
+      "cuts": 3,
+      "builds": 3,
+      "concepts": 4,
+      "carries_setup": false,
+      "over_cap": true,
+      "weighted": true,
+      "cut_minutes": [
+        {
+          "id": "cut-ui-suggestions-filter",
+          "minutes": 6.0,
+          "decisions": 0,
+          "hint_words": 12
+        },
+        {
+          "id": "cut-ui-suggestions-fetch",
+          "minutes": 6.0,
+          "decisions": 0,
+          "hint_words": 10
+        },
+        {
+          "id": "cut-ep-suggestions-calc",
+          "minutes": 6.0,
+          "decisions": 0,
+          "hint_words": 25
+        }
+      ],
+      "largest_cut_share": 0.33
+    },
+    {
+      "n": 3,
+      "minutes": 46.6,
+      "cuts": 4,
+      "builds": 1,
+      "concepts": 3,
+      "carries_setup": false,
+      "over_cap": true,
+      "weighted": true,
+      "cut_minutes": [
+        {
+          "id": "cut-ui-suggestions-submit",
+          "minutes": 7.7,
+          "decisions": 1,
+          "hint_words": 24
+        },
+        {
+          "id": "cut-ui-suggestions-select",
+          "minutes": 7.7,
+          "decisions": 1,
+          "hint_words": 19
+        },
+        {
+          "id": "cut-ep-po-create-transaction",
+          "minutes": 7.7,
+          "decisions": 1,
+          "hint_words": 37
+        },
+        {
+          "id": "cut-ui-po-created-read",
+          "minutes": 6.0,
+          "decisions": 0,
+          "hint_words": 18
+        }
+      ],
+      "largest_cut_share": 0.26
+    },
+    {
+      "n": 4,
+      "minutes": 49.0,
+      "cuts": 4,
+      "builds": 4,
+      "concepts": 2,
+      "carries_setup": false,
+      "over_cap": true,
+      "weighted": true,
+      "cut_minutes": [
+        {
+          "id": "cut-ui-po-history-fetch",
+          "minutes": 6.0,
+          "decisions": 0,
+          "hint_words": 10
+        },
+        {
+          "id": "cut-ui-po-detail-fetch",
+          "minutes": 6.0,
+          "decisions": 0,
+          "hint_words": 14
+        },
+        {
+          "id": "cut-ep-po-list-aggregate",
+          "minutes": 6.0,
+          "decisions": 0,
+          "hint_words": 26
+        },
+        {
+          "id": "cut-ep-po-detail-join",
+          "minutes": 6.0,
+          "decisions": 0,
+          "hint_words": 28
+        }
+      ],
+      "largest_cut_share": 0.25
+    }
+  ],
+  "spec_hash": "2208a859095aa8db2ed3d2a3b382526af5ec51d1d5b2b2ae2f499ea75d07b9e9"
+}

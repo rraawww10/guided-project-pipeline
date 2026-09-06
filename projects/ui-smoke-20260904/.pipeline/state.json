@@ -1,0 +1,41 @@
+{
+  "slug": "ui-smoke-20260904",
+  "created": "2026-09-04T06:32:08+00:00",
+  "flow": 2,
+  "phase": "idea",
+  "retries": {
+    "idea": 0,
+    "spec": 0,
+    "code": 0,
+    "pack": 0
+  },
+  "step_runs": {
+    "stack": 1,
+    "ideas": 1
+  },
+  "gates": {
+    "gate0": null,
+    "gate1": null,
+    "gate2": null,
+    "gate3": null
+  },
+  "steps": [
+    {
+      "step": "stack",
+      "ok": true,
+      "at": "2026-09-04T06:32:09+00:00",
+      "detail": "next, react, typescript",
+      "run": 1
+    },
+    {
+      "step": "ideas",
+      "ok": false,
+      "at": "2026-09-04T06:50:03+00:00",
+      "detail": "0 ideas",
+      "run": 1
+    }
+  ],
+  "ticket": null,
+  "dry_run": null,
+  "feedback": []
+}

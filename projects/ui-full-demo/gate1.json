@@ -1,0 +1,114 @@
+{
+  "ok": false,
+  "verdict": "reject",
+  "spec_hash": "fd12fe24e5d3fa739e5ff550b1412f3363cb51198c42fd5b9848ba11564ef88e",
+  "findings": [
+    {
+      "id": "A1",
+      "title": "GD column present in Session 1 or not",
+      "section": "blocking",
+      "owner": "nothing",
+      "line": "\"The row for team \\\"Lions\\\" shows P, W, D, L, GF, GA and Pts equal to totals computed from data/matches.seed.json\"",
+      "where": "spec.md, Session 1, criterion c-1-2 and cut-page-rows-render hint; spec.json mirrors both",
+      "line_key": "41750aa93906b33f",
+      "subject": [
+        "c-1-2",
+        "cut-page-rows-render"
+      ],
+      "blocking": true,
+      "owner_declared": "nothing",
+      "owner_valid": true,
+      "owner_downgraded": null,
+      "fail_open": false,
+      "caught_by": "NO downstream checker sees this - it ships as written",
+      "must_fix_now": true
+    },
+    {
+      "id": "A2",
+      "title": "Rationale list ordering is unspecified",
+      "section": "blocking",
+      "owner": "test-runner",
+      "line": "\"buildTeamRationale(team, matches) returns one entry per match that team appears in, each entry carrying the match id, opponent name, points delta (3/1/0) and goal-difference delta\"",
+      "where": "spec.md, Session 3, criteria c-3-1 and c-3-4",
+      "line_key": "adf2ed9270b52768",
+      "subject": [
+        "c-3-1",
+        "c-3-4"
+      ],
+      "blocking": true,
+      "owner_declared": "test-runner",
+      "owner_valid": true,
+      "owner_downgraded": null,
+      "fail_open": false,
+      "caught_by": "step 6 - the Builder/test-runner loop fixes this for free",
+      "must_fix_now": false
+    },
+    {
+      "id": "W1",
+      "title": "One panel open vs multiple panels open",
+      "section": "worth a look",
+      "owner": "nothing",
+      "line": "\"clicking data-testid \\\"toggle-<TEAM>\\\" twice hides the panel; data-testid \\\"panel-<TEAM>\\\" is not rendered after the second click\"",
+      "where": "spec.md, Session 3, criterion c-3-3",
+      "line_key": "7e347403532925ea",
+      "subject": [
+        "c-3-3"
+      ],
+      "blocking": false,
+      "owner_declared": "nothing",
+      "owner_valid": true,
+      "owner_downgraded": null,
+      "fail_open": false,
+      "caught_by": "NO downstream checker sees this - it ships as written",
+      "must_fix_now": false
+    },
+    {
+      "id": "W2",
+      "title": "Rank column criterion is weakly specified",
+      "section": "worth a look",
+      "owner": "test-runner",
+      "line": "\"renders a Rank column with \\\"1\\\" in the first row and non-decreasing rank numbers down the table\"",
+      "where": "spec.md, Session 2, criterion c-2-3",
+      "line_key": "572f1f05930034c3",
+      "subject": [
+        "c-2-3"
+      ],
+      "blocking": false,
+      "owner_declared": "test-runner",
+      "owner_valid": true,
+      "owner_downgraded": null,
+      "fail_open": false,
+      "caught_by": "step 6 - the Builder/test-runner loop fixes this for free",
+      "must_fix_now": false
+    },
+    {
+      "id": "W3",
+      "title": "Unsorted order in Session 1 is unspecified",
+      "section": "worth a look",
+      "owner": "test-runner",
+      "line": "\"render a basic standings table at \\\"/\\\" from local data, unsorted\"",
+      "where": "spec.md, Session 1, Goal paragraph and overall table rendering",
+      "line_key": "278c47e49ac7367f",
+      "subject": [],
+      "blocking": false,
+      "owner_declared": "test-runner",
+      "owner_valid": true,
+      "owner_downgraded": null,
+      "fail_open": false,
+      "caught_by": "step 6 - the Builder/test-runner loop fixes this for free",
+      "must_fix_now": false
+    }
+  ],
+  "counts": {
+    "blocking": 2,
+    "worth_a_look": 3,
+    "unowned_blocking": 1
+  },
+  "reasons": [
+    "A1 (GD column present in Session 1 or not) is blocking and nothing downstream catches it"
+  ],
+  "rule": "reject when any blocking finding is owned by 'nothing'; approve when every remaining finding sits in a column a downstream checker owns. An owner that can pass by not running is owned only conditionally: it approves, and the confirmation it actually ran is listed in verify_later",
+  "reviewed_spec_hash": "fd12fe24e5d3fa739e5ff550b1412f3363cb51198c42fd5b9848ba11564ef88e",
+  "drift": [],
+  "verify_later": []
+}

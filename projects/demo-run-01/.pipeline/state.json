@@ -1,0 +1,418 @@
+{
+  "slug": "demo-run-01",
+  "created": "2026-09-06T09:10:50+00:00",
+  "flow": 2,
+  "phase": "pack",
+  "retries": {
+    "idea": 0,
+    "spec": 3,
+    "code": 13,
+    "pack": 0
+  },
+  "step_runs": {
+    "stack": 1,
+    "ideas": 1,
+    "pick": 1,
+    "lint": 9,
+    "breaker": 5,
+    "redfirst": 1,
+    "test:app": 14,
+    "mutation": 6,
+    "cut": 2,
+    "leak-scan": 2,
+    "guide-lint": 1,
+    "deploy": 5,
+    "dryrun": 1,
+    "ship": 1
+  },
+  "gates": {
+    "gate0": {
+      "approved": true,
+      "at": "2026-09-06T09:14:21+00:00",
+      "note": "picked idea-01",
+      "picked": "idea-01.md"
+    },
+    "gate1": {
+      "approved": true,
+      "at": "2026-09-06T10:06:46+00:00",
+      "note": "",
+      "spec_hash": "e566d6427a29fc88aed3153ff1be96fc0743ff5d938d56804e2ecf0469c71bad",
+      "verify_hash": "87cd9e71eebaa9b960c0b98cd61d563b578c70be08749d433dd5fe97a5eb5c5a",
+      "override": false
+    },
+    "gate2": {
+      "approved": true,
+      "at": "2026-09-06T12:13:11+00:00",
+      "note": "",
+      "verify_hash": "08c13dd5579985a4bf1c2f76f98ee464c08edbb7232abbe1e0c4d98278271e31",
+      "verify_moved": true
+    },
+    "gate3": {
+      "approved": true,
+      "at": "2026-09-06T12:55:03+00:00",
+      "note": ""
+    }
+  },
+  "steps": [
+    {
+      "step": "stack",
+      "ok": true,
+      "at": "2026-09-06T09:10:50+00:00",
+      "detail": "next, react, typescript",
+      "run": 1
+    },
+    {
+      "step": "ideas",
+      "ok": true,
+      "at": "2026-09-06T09:12:58+00:00",
+      "detail": "5 ideas",
+      "run": 1
+    },
+    {
+      "step": "pick",
+      "ok": true,
+      "at": "2026-09-06T09:14:21+00:00",
+      "detail": "idea-01.md",
+      "run": 1
+    },
+    {
+      "step": "lint",
+      "ok": false,
+      "at": "2026-09-06T09:17:16+00:00",
+      "detail": "",
+      "run": 1
+    },
+    {
+      "step": "lint",
+      "ok": true,
+      "at": "2026-09-06T09:19:23+00:00",
+      "detail": "",
+      "run": 2
+    },
+    {
+      "step": "breaker",
+      "ok": true,
+      "at": "2026-09-06T09:22:12+00:00",
+      "detail": "be980a19d6d3",
+      "run": 1
+    },
+    {
+      "step": "lint",
+      "ok": true,
+      "at": "2026-09-06T09:24:13+00:00",
+      "detail": "",
+      "run": 3
+    },
+    {
+      "step": "breaker",
+      "ok": true,
+      "at": "2026-09-06T09:28:27+00:00",
+      "detail": "a2e00b3415e0",
+      "run": 2
+    },
+    {
+      "step": "lint",
+      "ok": false,
+      "at": "2026-09-06T09:30:12+00:00",
+      "detail": "",
+      "run": 4
+    },
+    {
+      "step": "lint",
+      "ok": true,
+      "at": "2026-09-06T09:31:11+00:00",
+      "detail": "",
+      "run": 5
+    },
+    {
+      "step": "breaker",
+      "ok": true,
+      "at": "2026-09-06T09:35:15+00:00",
+      "detail": "c3c65e60b227",
+      "run": 3
+    },
+    {
+      "step": "lint",
+      "ok": true,
+      "at": "2026-09-06T09:37:56+00:00",
+      "detail": "",
+      "run": 6
+    },
+    {
+      "step": "lint",
+      "ok": false,
+      "at": "2026-09-06T09:43:16+00:00",
+      "detail": "",
+      "run": 7
+    },
+    {
+      "step": "lint",
+      "ok": true,
+      "at": "2026-09-06T09:45:02+00:00",
+      "detail": "",
+      "run": 8
+    },
+    {
+      "step": "breaker",
+      "ok": true,
+      "at": "2026-09-06T09:48:30+00:00",
+      "detail": "8b8ae1631ce4",
+      "run": 4
+    },
+    {
+      "step": "breaker",
+      "ok": true,
+      "at": "2026-09-06T09:57:42+00:00",
+      "detail": "e566d6427a29",
+      "run": 5
+    },
+    {
+      "step": "lint",
+      "ok": true,
+      "at": "2026-09-06T10:01:05+00:00",
+      "detail": "",
+      "run": 9
+    },
+    {
+      "step": "redfirst",
+      "ok": true,
+      "at": "2026-09-06T10:04:49+00:00",
+      "detail": "",
+      "run": 1
+    },
+    {
+      "step": "test:app",
+      "ok": false,
+      "at": "2026-09-06T10:10:56+00:00",
+      "detail": "",
+      "run": 1
+    },
+    {
+      "step": "test:app",
+      "ok": false,
+      "at": "2026-09-06T10:13:04+00:00",
+      "detail": "",
+      "run": 2
+    },
+    {
+      "step": "test:app",
+      "ok": false,
+      "at": "2026-09-06T10:14:18+00:00",
+      "detail": "",
+      "run": 3
+    },
+    {
+      "step": "test:app",
+      "ok": false,
+      "at": "2026-09-06T10:15:44+00:00",
+      "detail": "",
+      "run": 4
+    },
+    {
+      "step": "test:app",
+      "ok": true,
+      "at": "2026-09-06T10:26:06+00:00",
+      "detail": "",
+      "run": 5
+    },
+    {
+      "step": "test:app",
+      "ok": false,
+      "at": "2026-09-06T10:32:42+00:00",
+      "detail": "",
+      "run": 6
+    },
+    {
+      "step": "test:app",
+      "ok": false,
+      "at": "2026-09-06T10:44:24+00:00",
+      "detail": "",
+      "run": 7
+    },
+    {
+      "step": "test:app",
+      "ok": false,
+      "at": "2026-09-06T10:45:43+00:00",
+      "detail": "",
+      "run": 8
+    },
+    {
+      "step": "test:app",
+      "ok": false,
+      "at": "2026-09-06T10:47:29+00:00",
+      "detail": "",
+      "run": 9
+    },
+    {
+      "step": "test:app",
+      "ok": true,
+      "at": "2026-09-06T10:52:25+00:00",
+      "detail": "",
+      "run": 10
+    },
+    {
+      "step": "mutation",
+      "ok": false,
+      "at": "2026-09-06T11:05:37+00:00",
+      "detail": "",
+      "run": 1
+    },
+    {
+      "step": "mutation",
+      "ok": false,
+      "at": "2026-09-06T11:30:56+00:00",
+      "detail": "",
+      "run": 2
+    },
+    {
+      "step": "test:app",
+      "ok": true,
+      "at": "2026-09-06T11:37:06+00:00",
+      "detail": "",
+      "run": 11
+    },
+    {
+      "step": "test:app",
+      "ok": true,
+      "at": "2026-09-06T11:40:37+00:00",
+      "detail": "",
+      "run": 12
+    },
+    {
+      "step": "mutation",
+      "ok": false,
+      "at": "2026-09-06T11:41:33+00:00",
+      "detail": "",
+      "run": 3
+    },
+    {
+      "step": "mutation",
+      "ok": false,
+      "at": "2026-09-06T11:50:46+00:00",
+      "detail": "",
+      "run": 4
+    },
+    {
+      "step": "test:app",
+      "ok": true,
+      "at": "2026-09-06T11:55:20+00:00",
+      "detail": "",
+      "run": 13
+    },
+    {
+      "step": "mutation",
+      "ok": false,
+      "at": "2026-09-06T12:02:02+00:00",
+      "detail": "",
+      "run": 5
+    },
+    {
+      "step": "test:app",
+      "ok": true,
+      "at": "2026-09-06T12:03:49+00:00",
+      "detail": "",
+      "run": 14
+    },
+    {
+      "step": "mutation",
+      "ok": true,
+      "at": "2026-09-06T12:10:27+00:00",
+      "detail": "",
+      "run": 6
+    },
+    {
+      "step": "cut",
+      "ok": true,
+      "at": "2026-09-06T12:15:13+00:00",
+      "detail": "",
+      "run": 1
+    },
+    {
+      "step": "leak-scan",
+      "ok": true,
+      "at": "2026-09-06T12:15:19+00:00",
+      "detail": "",
+      "run": 1
+    },
+    {
+      "step": "guide-lint",
+      "ok": true,
+      "at": "2026-09-06T12:22:44+00:00",
+      "detail": "",
+      "run": 1
+    },
+    {
+      "step": "deploy",
+      "ok": false,
+      "at": "2026-09-06T12:23:14+00:00",
+      "detail": "",
+      "run": 1
+    },
+    {
+      "step": "deploy",
+      "ok": false,
+      "at": "2026-09-06T12:24:03+00:00",
+      "detail": "",
+      "run": 2
+    },
+    {
+      "step": "deploy",
+      "ok": false,
+      "at": "2026-09-06T12:25:08+00:00",
+      "detail": "",
+      "run": 3
+    },
+    {
+      "step": "deploy",
+      "ok": false,
+      "at": "2026-09-06T12:27:17+00:00",
+      "detail": "",
+      "run": 4
+    },
+    {
+      "step": "deploy",
+      "ok": true,
+      "at": "2026-09-06T12:31:05+00:00",
+      "detail": "",
+      "run": 5
+    },
+    {
+      "step": "cut",
+      "ok": true,
+      "at": "2026-09-06T12:35:24+00:00",
+      "detail": "",
+      "run": 2
+    },
+    {
+      "step": "leak-scan",
+      "ok": true,
+      "at": "2026-09-06T12:35:51+00:00",
+      "detail": "",
+      "run": 2
+    },
+    {
+      "step": "dryrun",
+      "ok": true,
+      "at": "2026-09-06T12:54:59+00:00",
+      "detail": "session 1, 40 min, none",
+      "run": 1
+    },
+    {
+      "step": "ship",
+      "ok": true,
+      "at": "2026-09-06T12:55:03+00:00",
+      "detail": "",
+      "run": 1
+    }
+  ],
+  "ticket": null,
+  "dry_run": {
+    "at": "2026-09-06T12:54:59+00:00",
+    "session": 1,
+    "minutes": 40,
+    "by": "none",
+    "taught_without_the_code": true,
+    "note": "was taught successfully"
+  },
+  "feedback": []
+}

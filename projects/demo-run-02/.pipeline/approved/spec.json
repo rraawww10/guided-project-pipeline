@@ -1,0 +1,82 @@
+{
+  "slug": "demo-run-02",
+  "title": "FairShare: Expense Settlement Calculator",
+  "track": "fullstack",
+  "sessions_planned": 3,
+  "stack": ["next", "react", "typescript"],
+  "source": null,
+  "code_checks": [],
+  "endpoints": [
+    {"id": "ep-expenses-list", "method": "GET", "path": "/api/expenses", "request": null, "response": "Expense[]", "status": [200]},
+    {"id": "ep-naive-settlement", "method": "GET", "path": "/api/settlement/naive", "request": null, "response": "Transfer[]", "status": [200]}
+  ],
+  "screens": [
+    {"id": "sc-home", "route": "/", "elements": [
+      "Expenses table [data-testid=expense-row]",
+      "Balances list [data-testid=balance-row]",
+      "Proposed transfers list [data-testid=transfer-row]",
+      "Include/exclude checkboxes [data-testid=include-<name>]",
+      "Minimal transfers toggle [data-testid=toggle-minimal]",
+      "Formatting probe [data-testid=money-sample]"
+    ], "states": ["loading", "loaded", "error"]}
+  ],
+  "sessions": [
+    {
+      "n": 1,
+      "title": "App boots and shows data",
+      "goal": "Boot the app, serve the seeded expenses via an API, render an expenses table, and show per-person totals-paid.",
+      "teaches": ["fetch in Next.js app router", "useState for loaded data", "mapping arrays to summary totals"],
+      "builds": ["ep-expenses-list", "sc-home"],
+      "criteria": [
+        {"id": "c-1-1", "check": "GET /api/expenses returns 200 with a JSON array of 4 Expense", "target": "ep-expenses-list", "cuts": ["cut-api-expenses-list"]},
+        {"id": "c-1-2", "check": "sc-home renders 4 elements with data-testid=expense-row after load", "target": "sc-home", "cuts": ["cut-ui-load-expenses"]},
+        {"id": "c-1-3", "check": "sc-home shows a per-person totals-paid summary with 5 rows and exact amounts: Alice $52.00, Bob $30.00, Cara $40.00, Dan $15.00, Eve $0.00", "target": "sc-home", "cuts": ["cut-ui-load-expenses", "cut-ui-compute-paid-totals"]}
+      ],
+      "cuts": [
+        {"id": "cut-api-expenses-list", "file": "app/api/expenses/route.ts", "writes_into": "body", "hint": "Put every expense from the seed store into `body` and set `status` to 200"},
+        {"id": "cut-ui-load-expenses", "file": "app/page.tsx", "writes_into": "items", "hint": "Fetch \"/api/expenses\" and write the parsed JSON array into `items`; keep the existing error and loading state handling unchanged"},
+        {"id": "cut-ui-compute-paid-totals", "file": "app/page.tsx", "writes_into": "totals", "hint": "Accumulate the sum of `amountCents` each payer contributed into `totals` keyed by person id using integer cents already present in `items`"}
+      ]
+    },
+    {
+      "n": 2,
+      "title": "Netting works and a naive settlement renders",
+      "goal": "Compute per-person net balances (paid minus owed) and show a naive greedy settlement on the page; expose the same transfers via an API.",
+      "teaches": ["pure functions over arrays and maps", "integer-safe netting", "deterministic greedy matching", "wiring computed data into UI and an endpoint"],
+      "builds": ["ep-naive-settlement"],
+      "criteria": [
+        {"id": "c-2-1", "check": "sc-home renders 5 elements with data-testid=balance-row in name-ASC order, with exact texts: Alice +$26.00; Bob -$6.00; Cara +$4.00; Dan -$11.00; Eve -$13.00", "target": "sc-home", "cuts": ["cut-lib-compute-balances", "cut-ui-set-balances"]},
+        {"id": "c-2-2", "check": "sc-home renders a Proposed transfers list with 4 elements with data-testid=transfer-row and the first item reads \"Eve pays Alice $13.00\"", "target": "sc-home", "cuts": ["cut-lib-compute-balances", "cut-lib-settle-naive", "cut-ui-set-transfers"]},
+        {"id": "c-2-3", "check": "sc-home shows a total transfers amount element [data-testid=transfers-total] equal to \"$30.00\"", "target": "sc-home", "cuts": ["cut-lib-settle-naive", "cut-ui-set-transfers"]},
+        {"id": "c-2-4", "check": "GET /api/settlement/naive returns 200 with a JSON array of 4 Transfer; the first element equals {\"from\":\"Eve\",\"to\":\"Alice\",\"amountCents\":1300}", "target": "ep-naive-settlement", "cuts": ["cut-lib-compute-balances", "cut-lib-settle-naive", "cut-api-naive-settlement"]}
+      ],
+      "cuts": [
+        {"id": "cut-lib-compute-balances", "file": "lib/settlement.ts", "writes_into": "out", "hint": "Compute each person's net in cents into `out` by adding amounts they paid and subtracting their share of each expense; divide an expense by the sum of participant weights (default 1) and subtract each share from that participant"},
+        {"id": "cut-lib-settle-naive", "file": "lib/settlement.ts", "writes_into": "out", "hint": "From a `balances` map, build `out` as a list of transfers by repeatedly matching the largest positive balance to the largest (most negative) balance and moving the smaller absolute amount; continue until no balances remain nonzero"},
+        {"id": "cut-ui-set-balances", "file": "app/page.tsx", "writes_into": "balances", "hint": "Derive `balances` from the loaded `items` (and the current included people) using the provided netting function"},
+        {"id": "cut-ui-set-transfers", "file": "app/page.tsx", "writes_into": "transfers", "hint": "Derive `transfers` from the current `balances` using the naive settlement function and make it stable across renders"},
+        {"id": "cut-api-naive-settlement", "file": "app/api/settlement/naive/route.ts", "writes_into": "body", "hint": "Populate `body` with the current naive settlement computed from the seeded expenses and set `status` to 200"}
+      ]
+    },
+    {
+      "n": 3,
+      "title": "Minimal-mode, integer formatting, and include/exclude",
+      "goal": "Add a minimal-mode toggle that switches to a refined, deterministically ordered settlement for display; format all money with integer-safe cents; and add include/exclude per person that immediately recomputes balances and transfers.",
+      "teaches": ["stable sort and tie-breaking", "integer-safe currency formatting", "local UI toggles that drive recomputation"],
+      "builds": [],
+      "criteria": [
+        {"id": "c-3-1", "check": "sc-home renders [data-testid=money-sample] equal to \"-$6.15\"", "target": "sc-home", "cuts": ["cut-lib-format-money"]},
+        {"id": "c-3-2", "check": "With [data-testid=toggle-minimal] set ON, sc-home renders the transfers in amount-descending order then payer then payee; the sequence reads exactly: \"Eve pays Alice $13.00\", \"Dan pays Alice $11.00\", \"Bob pays Cara $4.00\", \"Bob pays Alice $2.00\"", "target": "sc-home", "cuts": ["cut-lib-settle-minimal", "cut-ui-use-minimal"]},
+        {"id": "c-3-3", "check": "Unchecking [data-testid=include-Eve] removes Eve from balances and no [data-testid=transfer-row] contains \"Eve\"", "target": "sc-home", "cuts": ["cut-ui-toggle-include"]},
+        {"id": "c-3-4", "check": "With [data-testid=toggle-minimal] set ON, sc-home renders 4 elements with data-testid=transfer-row", "target": "sc-home", "cuts": ["cut-lib-settle-minimal", "cut-ui-use-minimal"]},
+        {"id": "c-3-5", "check": "With [data-testid=toggle-minimal] set OFF, sc-home renders the last [data-testid=transfer-row] item as \"Bob pays Cara $4.00\"", "target": "sc-home", "cuts": ["cut-ui-use-minimal"]}
+      ],
+      "cuts": [
+        {"id": "cut-lib-format-money", "file": "lib/money.ts", "writes_into": "out", "hint": "Format integer cents into `out` as \"$X.YY\" with a leading minus for negatives (e.g. -615 → \"-$6.15\"); do not use floats"},
+        {"id": "cut-lib-settle-minimal", "file": "lib/settlement.ts", "writes_into": "out", "hint": "Produce `out` as a transfer list equivalent in totals to the naive result but ordered by amount descending, then payer asc, then payee asc; do not increase the number of transfers"},
+        {"id": "cut-ui-toggle-include", "file": "app/page.tsx", "writes_into": "included", "hint": "Toggle the given person's id in the `included` Set while preserving every other selection; the next recompute must use exactly the currently included people"},
+        {"id": "cut-ui-use-minimal", "file": "app/page.tsx", "writes_into": "transfers", "hint": "When minimal mode is ON, write the refined transfer sequence into `transfers` using the minimal function; when it is OFF, preserve the naive sequence already derived"}
+      ]
+    }
+  ]
+}

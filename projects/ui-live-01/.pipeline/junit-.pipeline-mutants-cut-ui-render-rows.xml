@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="5" skipped="0" tests="14" time="46.262" timestamp="2026-09-05T14:05:11.043847+05:30" hostname="HERO"><testcase classname="verify.test_api_transactions" name="test_c_1_1_get_transactions_returns_array_with_required_fields" time="0.443" /><testcase classname="verify.test_ui_session1" name="test_c_1_2_ui_renders_one_row_per_transaction" time="7.814"><failure message="playwright._impl._errors.TimeoutError: Page.wait_for_selector: Timeout 5000ms exceeded.&#10;Call log:&#10;  - waiting for locator(&quot;[data-testid=\&quot;tx-row\&quot;]&quot;) to be visible">page = &lt;Page url='http://127.0.0.1:57257/'&gt;, base_url = 'http://127.0.0.1:57257'
+
+    def test_c_1_2_ui_renders_one_row_per_transaction(page, base_url):
+        # Fetch API length as the source of truth, then compare to rendered row count
+        txs = _get_transactions(base_url)
+        page.goto(base_url)
+        # Wait for at least one row to appear; an empty UI should fail this wait
+&gt;       page.wait_for_selector('[data-testid="tx-row"]')
+
+verify\test_ui_session1.py:16: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+.pipeline\venv\Lib\site-packages\playwright\sync_api\_generated.py:9033: in wait_for_selector
+    self._sync(
+.pipeline\venv\Lib\site-packages\playwright\_impl\_page.py:427: in wait_for_selector
+    return await self._main_frame.wait_for_selector(**locals_to_params(locals()))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.pipeline\venv\Lib\site-packages\playwright\_impl\_frame.py:394: in wait_for_selector
+    await self._channel.send(
+.pipeline\venv\Lib\site-packages\playwright\_impl\_connection.py:76: in send
+    return await self._connection.wrap_api_call(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = &lt;playwright._impl._connection.Connection object at 0x000002D2FED5D2B0&gt;
+cb = &lt;function Channel.send.&lt;locals&gt;.&lt;lambda&gt; at 0x000002D2FEE8F950&gt;
+is_internal = False, title = None
+
+    async def wrap_api_call(
+        self, cb: Callable[[], Any], is_internal: bool = False, title: str = None
+    ) -&gt; Any:
+        if self._api_zone.get():
+            return await cb()
+        task = asyncio.current_task(self._loop)
+        parsed_st = _attach_api_call_information(
+            getattr(task, "__pw_stack__", None) or _capture_stack_trace(),
+            is_internal,
+            title,
+        )
+        self._api_zone.set(parsed_st)
+        try:
+            return await cb()
+        except Exception as error:
+&gt;           raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+E           playwright._impl._errors.TimeoutError: Page.wait_for_selector: Timeout 5000ms exceeded.
+E           Call log:
+E             - waiting for locator("[data-testid=\"tx-row\"]") to be visible
+
+.pipeline\venv\Lib\site-packages\playwright\_impl\_connection.py:632: TimeoutError</failure></testcase><testcase classname="verify.test_ui_session1" name="test_c_1_3_ui_renders_each_row_memo" time="6.938"><failure message="playwright._impl._errors.TimeoutError: Page.wait_for_selector: Timeout 5000ms exceeded.&#10;Call log:&#10;  - waiting for locator(&quot;[data-testid=\&quot;tx-row\&quot;]&quot;) to be visible">page = &lt;Page url='http://127.0.0.1:57257/'&gt;, base_url = 'http://127.0.0.1:57257'
+
+    def test_c_1_3_ui_renders_each_row_memo(page, base_url):
+        txs = _get_transactions(base_url)
+        page.goto(base_url)
+&gt;       page.wait_for_selector('[data-testid="tx-row"]')
+
+verify\test_ui_session1.py:24: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+.pipeline\venv\Lib\site-packages\playwright\sync_api\_generated.py:9033: in wait_for_selector
+    self._sync(
+.pipeline\venv\Lib\site-packages\playwright\_impl\_page.py:427: in wait_for_selector
+    return await self._main_frame.wait_for_selector(**locals_to_params(locals()))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.pipeline\venv\Lib\site-packages\playwright\_impl\_frame.py:394: in wait_for_selector
+    await self._channel.send(
+.pipeline\venv\Lib\site-packages\playwright\_impl\_connection.py:76: in send
+    return await self._connection.wrap_api_call(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = &lt;playwright._impl._connection.Connection object at 0x000002D2FF1AB4D0&gt;
+cb = &lt;function Channel.send.&lt;locals&gt;.&lt;lambda&gt; at 0x000002D2FF1A6CF0&gt;
+is_internal = False, title = None
+
+    async def wrap_api_call(
+        self, cb: Callable[[], Any], is_internal: bool = False, title: str = None
+    ) -&gt; Any:
+        if self._api_zone.get():
+            return await cb()
+        task = asyncio.current_task(self._loop)
+        parsed_st = _attach_api_call_information(
+            getattr(task, "__pw_stack__", None) or _capture_stack_trace(),
+            is_internal,
+            title,
+        )
+        self._api_zone.set(parsed_st)
+        try:
+            return await cb()
+        except Exception as error:
+&gt;           raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+E           playwright._impl._errors.TimeoutError: Page.wait_for_selector: Timeout 5000ms exceeded.
+E           Call log:
+E             - waiting for locator("[data-testid=\"tx-row\"]") to be visible
+
+.pipeline\venv\Lib\site-packages\playwright\_impl\_connection.py:632: TimeoutError</failure></testcase><testcase classname="verify.test_ui_session2" name="test_c_2_1_category_transport_for_uber_trip_downtown" time="6.634"><failure message="playwright._impl._errors.TimeoutError: Page.wait_for_selector: Timeout 5000ms exceeded.&#10;Call log:&#10;  - waiting for locator(&quot;[data-testid=\&quot;tx-row\&quot;]&quot;) to be visible">page = &lt;Page url='http://127.0.0.1:57257/'&gt;, base_url = 'http://127.0.0.1:57257'
+
+    def test_c_2_1_category_transport_for_uber_trip_downtown(page, base_url):
+        page.goto(base_url)
+&gt;       page.wait_for_selector('[data-testid="tx-row"]')
+
+verify\test_ui_session2.py:25: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+.pipeline\venv\Lib\site-packages\playwright\sync_api\_generated.py:9033: in wait_for_selector
+    self._sync(
+.pipeline\venv\Lib\site-packages\playwright\_impl\_page.py:427: in wait_for_selector
+    return await self._main_frame.wait_for_selector(**locals_to_params(locals()))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.pipeline\venv\Lib\site-packages\playwright\_impl\_frame.py:394: in wait_for_selector
+    await self._channel.send(
+.pipeline\venv\Lib\site-packages\playwright\_impl\_connection.py:76: in send
+    return await self._connection.wrap_api_call(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = &lt;playwright._impl._connection.Connection object at 0x000002D2FF237610&gt;
+cb = &lt;function Channel.send.&lt;locals&gt;.&lt;lambda&gt; at 0x000002D2FF276DA0&gt;
+is_internal = False, title = None
+
+    async def wrap_api_call(
+        self, cb: Callable[[], Any], is_internal: bool = False, title: str = None
+    ) -&gt; Any:
+        if self._api_zone.get():
+            return await cb()
+        task = asyncio.current_task(self._loop)
+        parsed_st = _attach_api_call_information(
+            getattr(task, "__pw_stack__", None) or _capture_stack_trace(),
+            is_internal,
+            title,
+        )
+        self._api_zone.set(parsed_st)
+        try:
+            return await cb()
+        except Exception as error:
+&gt;           raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+E           playwright._impl._errors.TimeoutError: Page.wait_for_selector: Timeout 5000ms exceeded.
+E           Call log:
+E             - waiting for locator("[data-testid=\"tx-row\"]") to be visible
+
+.pipeline\venv\Lib\site-packages\playwright\_impl\_connection.py:632: TimeoutError</failure></testcase><testcase classname="verify.test_ui_session2" name="test_c_2_2_rule_label_for_uber_trip_downtown" time="6.618"><failure message="playwright._impl._errors.TimeoutError: Page.wait_for_selector: Timeout 5000ms exceeded.&#10;Call log:&#10;  - waiting for locator(&quot;[data-testid=\&quot;tx-row\&quot;]&quot;) to be visible">page = &lt;Page url='http://127.0.0.1:57257/'&gt;, base_url = 'http://127.0.0.1:57257'
+
+    def test_c_2_2_rule_label_for_uber_trip_downtown(page, base_url):
+        page.goto(base_url)
+&gt;       page.wait_for_selector('[data-testid="tx-row"]')
+
+verify\test_ui_session2.py:34: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+.pipeline\venv\Lib\site-packages\playwright\sync_api\_generated.py:9033: in wait_for_selector
+    self._sync(
+.pipeline\venv\Lib\site-packages\playwright\_impl\_page.py:427: in wait_for_selector
+    return await self._main_frame.wait_for_selector(**locals_to_params(locals()))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.pipeline\venv\Lib\site-packages\playwright\_impl\_frame.py:394: in wait_for_selector
+    await self._channel.send(
+.pipeline\venv\Lib\site-packages\playwright\_impl\_connection.py:76: in send
+    return await self._connection.wrap_api_call(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = &lt;playwright._impl._connection.Connection object at 0x000002D2FF1B63F0&gt;
+cb = &lt;function Channel.send.&lt;locals&gt;.&lt;lambda&gt; at 0x000002D2FF3BA6C0&gt;
+is_internal = False, title = None
+
+    async def wrap_api_call(
+        self, cb: Callable[[], Any], is_internal: bool = False, title: str = None
+    ) -&gt; Any:
+        if self._api_zone.get():
+            return await cb()
+        task = asyncio.current_task(self._loop)
+        parsed_st = _attach_api_call_information(
+            getattr(task, "__pw_stack__", None) or _capture_stack_trace(),
+            is_internal,
+            title,
+        )
+        self._api_zone.set(parsed_st)
+        try:
+            return await cb()
+        except Exception as error:
+&gt;           raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+E           playwright._impl._errors.TimeoutError: Page.wait_for_selector: Timeout 5000ms exceeded.
+E           Call log:
+E             - waiting for locator("[data-testid=\"tx-row\"]") to be visible
+
+.pipeline\venv\Lib\site-packages\playwright\_impl\_connection.py:632: TimeoutError</failure></testcase><testcase classname="verify.test_ui_session2" name="test_c_2_3_summary_has_supplies_total_25" time="1.065" /><testcase classname="verify.test_ui_session2" name="test_c_2_4_category_transport_for_uber_refund_not_income" time="6.667"><failure message="playwright._impl._errors.TimeoutError: Page.wait_for_selector: Timeout 5000ms exceeded.&#10;Call log:&#10;  - waiting for locator(&quot;[data-testid=\&quot;tx-row\&quot;]&quot;) to be visible">page = &lt;Page url='http://127.0.0.1:57257/'&gt;, base_url = 'http://127.0.0.1:57257'
+
+    def test_c_2_4_category_transport_for_uber_refund_not_income(page, base_url):
+        page.goto(base_url)
+&gt;       page.wait_for_selector('[data-testid="tx-row"]')
+
+verify\test_ui_session2.py:53: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+.pipeline\venv\Lib\site-packages\playwright\sync_api\_generated.py:9033: in wait_for_selector
+    self._sync(
+.pipeline\venv\Lib\site-packages\playwright\_impl\_page.py:427: in wait_for_selector
+    return await self._main_frame.wait_for_selector(**locals_to_params(locals()))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.pipeline\venv\Lib\site-packages\playwright\_impl\_frame.py:394: in wait_for_selector
+    await self._channel.send(
+.pipeline\venv\Lib\site-packages\playwright\_impl\_connection.py:76: in send
+    return await self._connection.wrap_api_call(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = &lt;playwright._impl._connection.Connection object at 0x000002D2FF220290&gt;
+cb = &lt;function Channel.send.&lt;locals&gt;.&lt;lambda&gt; at 0x000002D282D2F320&gt;
+is_internal = False, title = None
+
+    async def wrap_api_call(
+        self, cb: Callable[[], Any], is_internal: bool = False, title: str = None
+    ) -&gt; Any:
+        if self._api_zone.get():
+            return await cb()
+        task = asyncio.current_task(self._loop)
+        parsed_st = _attach_api_call_information(
+            getattr(task, "__pw_stack__", None) or _capture_stack_trace(),
+            is_internal,
+            title,
+        )
+        self._api_zone.set(parsed_st)
+        try:
+            return await cb()
+        except Exception as error:
+&gt;           raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+E           playwright._impl._errors.TimeoutError: Page.wait_for_selector: Timeout 5000ms exceeded.
+E           Call log:
+E             - waiting for locator("[data-testid=\"tx-row\"]") to be visible
+
+.pipeline\venv\Lib\site-packages\playwright\_impl\_connection.py:632: TimeoutError</failure></testcase><testcase classname="verify.test_ui_session2" name="test_c_2_5_summary_heading_visible_once" time="1.086" /><testcase classname="verify.test_ui_session2" name="test_c_2_6_summary_transport_total_20" time="1.207" /><testcase classname="verify.test_ui_session3" name="test_c_3_1_delta_updates_after_setting_transport_budget_30" time="1.295" /><testcase classname="verify.test_ui_session3" name="test_c_3_2_sort_by_delta_places_expense_first_after_budget" time="1.290" /><testcase classname="verify.test_ui_session3" name="test_c_3_3_toggle_overbudget_hides_transport_and_keeps_expense" time="1.222" /><testcase classname="verify.test_ui_session3" name="test_c_3_4_percent_shows_one_decimal_transport_66_7" time="1.154" /><testcase classname="verify.test_ui_session3" name="test_c_3_5_delta_header_visible_once" time="1.122" /></testsuite></testsuites>

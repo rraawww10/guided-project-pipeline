@@ -1,0 +1,153 @@
+{
+  "ok": true,
+  "verdict": "approve-eligible",
+  "spec_hash": "b07b28533759a4d675f7fd4e8f621f918481b351db030a464ea47cde2e731666",
+  "findings": [
+    {
+      "id": "A1",
+      "title": "\"Matched rule label\" is undefined and the quotes conflict",
+      "section": "blocking",
+      "owner": "test-runner",
+      "line": "\"shows the matched rule label ... as \\\"memo contains 'uber'\\\"\" (c-2-2) vs Default rule written as memo contains \"uber\" (double quotes)",
+      "where": "spec.md, Session 2, criterion c-2-2; spec.md, Default rules list; spec.json, Session 2, criterion c-2-2",
+      "line_key": "0d7080373e286334",
+      "subject": [
+        "c-2-2"
+      ],
+      "blocking": true,
+      "owner_declared": "test-runner",
+      "owner_valid": true,
+      "owner_downgraded": null,
+      "fail_open": false,
+      "caught_by": "step 6 - the Builder/test-runner loop fixes this for free",
+      "must_fix_now": false
+    },
+    {
+      "id": "A2",
+      "title": "No contract for how the UI learns \"which rule fired\"",
+      "section": "blocking",
+      "owner": "test-runner",
+      "line": "\"Walk `rules` in order and set `out` to the first rule\u2019s category ...\" (cut-lib-apply-rules) vs \"ClassifiedTx: ... { category; ruleId }\" and \"row includes ... tx-rule with the matched rule label\".",
+      "where": "spec.json, Session 2, cut `cut-lib-apply-rules` (hint only sets category); spec.md, Data model (ClassifiedTx includes ruleId); spec.md, Session 2, c-2-2; spec.json, Session 2, cut `cut-ui-render-category-cell`",
+      "line_key": "5414c336da06cb55",
+      "subject": [
+        "c-2-2",
+        "cut-lib-apply-rules",
+        "cut-ui-render-category-cell"
+      ],
+      "blocking": true,
+      "owner_declared": "test-runner",
+      "owner_valid": true,
+      "owner_downgraded": null,
+      "fail_open": false,
+      "caught_by": "step 6 - the Builder/test-runner loop fixes this for free",
+      "must_fix_now": false
+    },
+    {
+      "id": "A3",
+      "title": "Income and budget checks: include or exclude?",
+      "section": "blocking",
+      "owner": "test-runner",
+      "line": "\"Income: [+10] \u2192 -10 (not used in budget checks)\" vs \"From session 3: one input per category ...\" and \"Join each summary row with its budget (default 0)\".",
+      "where": "spec.md, Data model \u2192 Summary math (\"Income ... not used in budget checks\"); spec.md, Screens (\"one input per category with data-testid=\\\"budget-<category>\\\"\"); spec.md, Session 3 (c-3-1..c-3-4) and cut `cut-lib-compute-delta`",
+      "line_key": "907157efb7334e59",
+      "subject": [
+        "c-3-1",
+        "c-3-4",
+        "cut-lib-compute-delta"
+      ],
+      "blocking": true,
+      "owner_declared": "test-runner",
+      "owner_valid": true,
+      "owner_downgraded": null,
+      "fail_open": false,
+      "caught_by": "step 6 - the Builder/test-runner loop fixes this for free",
+      "must_fix_now": false
+    },
+    {
+      "id": "W1",
+      "title": "Number formatting of totals is unspecified",
+      "section": "worth a look",
+      "owner": "test-runner",
+      "line": "Totals are asserted as bare integers in prose while amounts are decimals in fixtures (e.g., -35.00, +15.00).",
+      "where": "spec.md, Session 2, c-2-3 and c-2-6 (\"shows the total for Supplies as 25\", \"Transport total as 20\"); spec.json mirrors",
+      "line_key": "301df1e0d418bac2",
+      "subject": [
+        "c-2-3",
+        "c-2-6"
+      ],
+      "blocking": false,
+      "owner_declared": "test-runner",
+      "owner_valid": true,
+      "owner_downgraded": null,
+      "fail_open": false,
+      "caught_by": "step 6 - the Builder/test-runner loop fixes this for free",
+      "must_fix_now": false
+    },
+    {
+      "id": "W2",
+      "title": "Case sensitivity of merchantEquals is not stated",
+      "section": "worth a look",
+      "owner": "test-runner",
+      "line": "Only memoContains is explicitly case\u2011insensitive; merchant equality has no case rule.",
+      "where": "spec.md, Default rules (\"merchant == \\\"ACME\\\"\")",
+      "line_key": "8d28c41f468da243",
+      "subject": [],
+      "blocking": false,
+      "owner_declared": "test-runner",
+      "owner_valid": true,
+      "owner_downgraded": null,
+      "fail_open": false,
+      "caught_by": "step 6 - the Builder/test-runner loop fixes this for free",
+      "must_fix_now": false
+    },
+    {
+      "id": "W3",
+      "title": "Less/greater-than comparisons: strict or inclusive?",
+      "section": "worth a look",
+      "owner": "test-runner",
+      "line": "Operator semantics are not pinned.",
+      "where": "spec.md, Data model \u2192 Rule (amountLessThan / amountGreaterThan)",
+      "line_key": "88d3ef1aab2bb9f2",
+      "subject": [],
+      "blocking": false,
+      "owner_declared": "test-runner",
+      "owner_valid": true,
+      "owner_downgraded": null,
+      "fail_open": false,
+      "caught_by": "step 6 - the Builder/test-runner loop fixes this for free",
+      "must_fix_now": false
+    },
+    {
+      "id": "W4",
+      "title": "Which categories appear in the Summary when their total is zero",
+      "section": "worth a look",
+      "owner": "test-runner",
+      "line": "\"one row per category\" without stating whether this means \"per category present in the data\" or \"all categories in the enum\", and whether zero\u2011total categories are shown.",
+      "where": "spec.md, Session 2, c-2-3 (\"lists one row per category\")",
+      "line_key": "094b60b7245b97df",
+      "subject": [
+        "c-2-3"
+      ],
+      "blocking": false,
+      "owner_declared": "test-runner",
+      "owner_valid": true,
+      "owner_downgraded": null,
+      "fail_open": false,
+      "caught_by": "step 6 - the Builder/test-runner loop fixes this for free",
+      "must_fix_now": false
+    }
+  ],
+  "counts": {
+    "blocking": 3,
+    "worth_a_look": 4,
+    "unowned_blocking": 0
+  },
+  "reasons": [
+    "3 blocking finding(s), all owned by a downstream checker; 4 worth a look. Nothing here escapes to the shipped project."
+  ],
+  "rule": "reject when any blocking finding is owned by 'nothing'; approve when every remaining finding sits in a column a downstream checker owns. An owner that can pass by not running is owned only conditionally: it approves, and the confirmation it actually ran is listed in verify_later",
+  "reviewed_spec_hash": "b07b28533759a4d675f7fd4e8f621f918481b351db030a464ea47cde2e731666",
+  "drift": [],
+  "verify_later": []
+}

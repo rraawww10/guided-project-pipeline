@@ -1,0 +1,122 @@
+{
+  "slug": "demo-run-03",
+  "cuts": [
+    {
+      "id": "cut-ep-po-detail-join",
+      "file": "app\\api\\purchase-orders\\[id]\\route.ts",
+      "line": 10,
+      "lines_removed": 11
+    },
+    {
+      "id": "cut-ep-po-create-transaction",
+      "file": "app\\api\\purchase-orders\\route.ts",
+      "line": 6,
+      "lines_removed": 13
+    },
+    {
+      "id": "cut-ep-po-list-aggregate",
+      "file": "app\\api\\purchase-orders\\route.ts",
+      "line": 27,
+      "lines_removed": 10
+    },
+    {
+      "id": "cut-ep-suggestions-calc",
+      "file": "app\\api\\reorder-suggestions\\route.ts",
+      "line": 6,
+      "lines_removed": 9
+    },
+    {
+      "id": "cut-ep-skus-list-query",
+      "file": "app\\api\\skus\\route.ts",
+      "line": 6,
+      "lines_removed": 3
+    },
+    {
+      "id": "cut-ui-skus-fetch",
+      "file": "app\\page.tsx",
+      "line": 10,
+      "lines_removed": 7
+    },
+    {
+      "id": "cut-ui-po-detail-fetch",
+      "file": "app\\purchase-orders\\[id]\\page.tsx",
+      "line": 14,
+      "lines_removed": 9
+    },
+    {
+      "id": "cut-ui-po-created-read",
+      "file": "app\\purchase-orders\\created\\page.tsx",
+      "line": 9,
+      "lines_removed": 4
+    },
+    {
+      "id": "cut-ui-po-history-fetch",
+      "file": "app\\purchase-orders\\page.tsx",
+      "line": 10,
+      "lines_removed": 7
+    },
+    {
+      "id": "cut-ui-suggestions-fetch",
+      "file": "app\\suggestions\\page.tsx",
+      "line": 15,
+      "lines_removed": 8
+    },
+    {
+      "id": "cut-ui-suggestions-filter",
+      "file": "app\\suggestions\\page.tsx",
+      "line": 26,
+      "lines_removed": 3
+    },
+    {
+      "id": "cut-ui-suggestions-select",
+      "file": "app\\suggestions\\page.tsx",
+      "line": 37,
+      "lines_removed": 8
+    },
+    {
+      "id": "cut-ui-suggestions-submit",
+      "file": "app\\suggestions\\page.tsx",
+      "line": 51,
+      "lines_removed": 10
+    }
+  ],
+  "count": 13,
+  "by_session": {
+    "1": [
+      "cut-ep-skus-list-query",
+      "cut-ui-skus-fetch"
+    ],
+    "2": [
+      "cut-ep-suggestions-calc",
+      "cut-ui-suggestions-fetch",
+      "cut-ui-suggestions-filter"
+    ],
+    "3": [
+      "cut-ep-po-create-transaction",
+      "cut-ui-po-created-read",
+      "cut-ui-suggestions-select",
+      "cut-ui-suggestions-submit"
+    ],
+    "4": [
+      "cut-ep-po-detail-join",
+      "cut-ep-po-list-aggregate",
+      "cut-ui-po-detail-fetch",
+      "cut-ui-po-history-fetch"
+    ]
+  },
+  "return_safety": {
+    "ok": true,
+    "checked": 13,
+    "violations": []
+  },
+  "partial_state_risks": [],
+  "typecheck": {
+    "ran": true,
+    "ok": true,
+    "error_count": 0,
+    "errors": [],
+    "missing_return": [],
+    "hint": ""
+  },
+  "ok": true
+}

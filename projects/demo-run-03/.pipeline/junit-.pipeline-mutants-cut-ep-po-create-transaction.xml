@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="5" skipped="0" tests="14" time="46.710" timestamp="2026-09-07T02:09:23.183683+05:30" hostname="HERO"><testcase classname="verify.test_api_purchase_orders" name="test_c_3_1_ep_po_create_returns_summary" time="0.483"><failure message="AssertionError: {&quot;id&quot;:0,&quot;itemsCount&quot;:0,&quot;totalQty&quot;:0}&#10;assert 501 == 200&#10; +  where 501 = &lt;Response [501 Not Implemented]&gt;.status_code">http_client = &lt;httpx.Client object at 0x000002933A0C0C20&gt;
+
+    def test_c_3_1_ep_po_create_returns_summary(http_client):
+        sku_ids = _two_sku_ids(http_client)
+        lines = [
+            {"sku_id": sku_ids[0], "qty": 2},
+            {"sku_id": sku_ids[1], "qty": 5},
+        ]
+        resp = http_client.post("/api/purchase-orders", json={"lines": lines})
+&gt;       assert resp.status_code == 200, resp.text
+E       AssertionError: {"id":0,"itemsCount":0,"totalQty":0}
+E       assert 501 == 200
+E        +  where 501 = &lt;Response [501 Not Implemented]&gt;.status_code
+
+verify\test_api_purchase_orders.py:17: AssertionError</failure></testcase><testcase classname="verify.test_api_purchase_orders" name="test_c_4_1_ep_po_list_returns_summaries" time="0.373"><failure message="AssertionError: created PO 0 not found in list&#10;assert None is not None">http_client = &lt;httpx.Client object at 0x000002933A23C550&gt;
+
+    def test_c_4_1_ep_po_list_returns_summaries(http_client):
+        # Create a PO first so we can assert against a known id and totals
+        sku_ids = _two_sku_ids(http_client)
+        lines = [
+            {"sku_id": sku_ids[0], "qty": 1},
+            {"sku_id": sku_ids[1], "qty": 4},
+        ]
+        created = http_client.post("/api/purchase-orders", json={"lines": lines}).json()
+        created_id = created["id"]
+        items = created["itemsCount"]
+        total = created["totalQty"]
+    
+        resp = http_client.get("/api/purchase-orders")
+        assert resp.status_code == 200, resp.text
+        arr = resp.json()
+        assert isinstance(arr, list)
+        # Find our created PO in the list
+        match = None
+        for po in arr:
+            if po.get("id") == created_id:
+                match = po
+                break
+&gt;       assert match is not None, f"created PO {created_id} not found in list"
+E       AssertionError: created PO 0 not found in list
+E       assert None is not None
+
+verify\test_api_purchase_orders.py:49: AssertionError</failure></testcase><testcase classname="verify.test_api_purchase_orders" name="test_c_4_3_ep_po_detail_returns_detail" time="0.381"><failure message="assert 0 == 2&#10; +  where 0 = len([])">http_client = &lt;httpx.Client object at 0x000002933A23EE90&gt;
+
+    def test_c_4_3_ep_po_detail_returns_detail(http_client):
+        sku_ids = _two_sku_ids(http_client)
+        # Distinct quantities to make the totals easy to assert
+        lines = [
+            {"sku_id": sku_ids[0], "qty": 3},
+            {"sku_id": sku_ids[1], "qty": 6},
+        ]
+        created = http_client.post("/api/purchase-orders", json={"lines": lines}).json()
+        created_id = created["id"]
+    
+        resp = http_client.get(f"/api/purchase-orders/{created_id}")
+        assert resp.status_code == 200, resp.text
+        detail = resp.json()
+        for k in ("id", "lines", "itemsCount", "totalQty"):
+            assert k in detail
+        assert detail["id"] == created_id
+        assert isinstance(detail["lines"], list)
+&gt;       assert detail["itemsCount"] == len(detail["lines"]) == 2
+E       assert 0 == 2
+E        +  where 0 = len([])
+
+verify\test_api_purchase_orders.py:71: AssertionError</failure></testcase><testcase classname="verify.test_api_skus" name="test_c_1_1_ep_skus_list_returns_8" time="0.337" /><testcase classname="verify.test_api_suggestions" name="test_c_2_1_ep_reorder_suggestions_qty_formula" time="0.330" /><testcase classname="verify.test_smoke" name="test_smoke_always_passes" time="0.001" /><testcase classname="verify.test_ui_purchase_orders" name="test_c_3_2_sc_suggestions_button_counts_checked" time="2.281" /><testcase classname="verify.test_ui_purchase_orders" name="test_c_3_3_sc_suggestions_navigates_to_created_with_counts" time="17.387"><failure message="playwright._impl._errors.TimeoutError: Timeout 15000ms exceeded.&#10;=========================== logs ===========================&#10;waiting for navigation to &quot;**/purchase-orders/created**&quot; until 'load'&#10;============================================================">base_url = 'http://127.0.0.1:50579'
+page = &lt;Page url='http://127.0.0.1:50579/suggestions'&gt;
+
+    def test_c_3_3_sc_suggestions_navigates_to_created_with_counts(base_url, page):
+        page.goto("/suggestions")
+        page.wait_for_selector('[data-testid="suggestion-row"]', timeout=essential_wait)
+        rows = page.locator('[data-testid="suggestion-row"]')
+        assert rows.count() &gt;= 2
+        # Read the qty_to_order of first two rows so we know the expected total
+        q1 = _parse_int(rows.nth(0).locator('[data-testid="qty-to-order"]').inner_text())
+        q2 = _parse_int(rows.nth(1).locator('[data-testid="qty-to-order"]').inner_text())
+        expected_items = 2
+        expected_total = q1 + q2
+        # Select them and submit
+        rows.nth(0).locator('input[type="checkbox"]').check()
+        rows.nth(1).locator('input[type="checkbox"]').check()
+        page.locator('[data-testid="po-submit"]').click()
+        # Wait for navigation and assert URL params
+&gt;       page.wait_for_url("**/purchase-orders/created**", timeout=essential_wait)
+
+verify\test_ui_purchase_orders.py:44: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+.pipeline\venv\Lib\site-packages\playwright\sync_api\_generated.py:10029: in wait_for_url
+    self._sync(
+.pipeline\venv\Lib\site-packages\playwright\_impl\_page.py:588: in wait_for_url
+    return await self._main_frame.wait_for_url(**locals_to_params(locals()))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.pipeline\venv\Lib\site-packages\playwright\_impl\_frame.py:288: in wait_for_url
+    async with self.expect_navigation(
+.pipeline\venv\Lib\site-packages\playwright\_impl\_event_context_manager.py:33: in __aexit__
+    await self._future
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    async def continuation() -&gt; Optional[Response]:
+&gt;       event = await waiter.result()
+                ^^^^^^^^^^^^^^^^^^^^^
+E       playwright._impl._errors.TimeoutError: Timeout 15000ms exceeded.
+E       =========================== logs ===========================
+E       waiting for navigation to "**/purchase-orders/created**" until 'load'
+E       ============================================================
+
+.pipeline\venv\Lib\site-packages\playwright\_impl\_frame.py:264: TimeoutError</failure></testcase><testcase classname="verify.test_ui_purchase_orders" name="test_c_3_4_sc_po_created_renders_numbers_from_url" time="1.206" /><testcase classname="verify.test_ui_purchase_orders" name="test_c_4_2_sc_po_history_renders_rows_with_counts" time="1.601" /><testcase classname="verify.test_ui_purchase_orders" name="test_c_4_4_sc_po_detail_renders_lines" time="17.597"><failure message="playwright._impl._errors.TimeoutError: Page.wait_for_selector: Timeout 15000ms exceeded.&#10;Call log:&#10;  - waiting for locator(&quot;[data-testid=\&quot;po-line\&quot;]&quot;) to be visible">base_url = 'http://127.0.0.1:50579'
+page = &lt;Page url='http://127.0.0.1:50579/purchase-orders/0'&gt;
+http_client = &lt;httpx.Client object at 0x000002933A22B130&gt;
+
+    def test_c_4_4_sc_po_detail_renders_lines(base_url, page, http_client):
+        # Create a PO with two known lines (ids and names from /api/skus)
+        skus = http_client.get("/api/skus").json()
+        assert len(skus) &gt;= 2
+        id1, name1 = skus[0]["id"], skus[0]["name"]
+        id2, name2 = skus[1]["id"], skus[1]["name"]
+        lines = [{"sku_id": id1, "qty": 1}, {"sku_id": id2, "qty": 3}]
+        created = http_client.post("/api/purchase-orders", json={"lines": lines}).json()
+    
+        page.goto(f"/purchase-orders/{created['id']}")
+&gt;       page.wait_for_selector('[data-testid="po-line"]', timeout=essential_wait)
+
+verify\test_ui_purchase_orders.py:97: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+.pipeline\venv\Lib\site-packages\playwright\sync_api\_generated.py:9033: in wait_for_selector
+    self._sync(
+.pipeline\venv\Lib\site-packages\playwright\_impl\_page.py:427: in wait_for_selector
+    return await self._main_frame.wait_for_selector(**locals_to_params(locals()))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.pipeline\venv\Lib\site-packages\playwright\_impl\_frame.py:394: in wait_for_selector
+    await self._channel.send(
+.pipeline\venv\Lib\site-packages\playwright\_impl\_connection.py:76: in send
+    return await self._connection.wrap_api_call(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = &lt;playwright._impl._connection.Connection object at 0x0000029339FEAB10&gt;
+cb = &lt;function Channel.send.&lt;locals&gt;.&lt;lambda&gt; at 0x000002933B2F0D50&gt;
+is_internal = False, title = None
+
+    async def wrap_api_call(
+        self, cb: Callable[[], Any], is_internal: bool = False, title: str = None
+    ) -&gt; Any:
+        if self._api_zone.get():
+            return await cb()
+        task = asyncio.current_task(self._loop)
+        parsed_st = _attach_api_call_information(
+            getattr(task, "__pw_stack__", None) or _capture_stack_trace(),
+            is_internal,
+            title,
+        )
+        self._api_zone.set(parsed_st)
+        try:
+            return await cb()
+        except Exception as error:
+&gt;           raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+E           playwright._impl._errors.TimeoutError: Page.wait_for_selector: Timeout 15000ms exceeded.
+E           Call log:
+E             - waiting for locator("[data-testid=\"po-line\"]") to be visible
+
+.pipeline\venv\Lib\site-packages\playwright\_impl\_connection.py:632: TimeoutError</failure></testcase><testcase classname="verify.test_ui_skus" name="test_c_1_2_sc_skus_list_renders_8_rows" time="1.521" /><testcase classname="verify.test_ui_suggestions" name="test_c_2_2_sc_suggestions_renders_only_positive" time="1.155" /><testcase classname="verify.test_ui_suggestions" name="test_c_2_3_sc_suggestions_shows_qty_in_cell" time="1.223" /></testsuite></testsuites>

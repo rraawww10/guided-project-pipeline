@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="13" time="11.335" timestamp="2026-09-06T17:38:03.607125+05:30" hostname="HERO"><testcase classname="verify.test_api_candidates" name="test_c_1_1_candidates_list_has_10_items" time="0.434" /><testcase classname="verify.test_api_candidates" name="test_c_1_4_candidates_list_has_duplicate_years" time="0.343" /><testcase classname="verify.test_api_candidates" name="test_c_1_5_candidates_list_has_typescript_tag" time="0.321" /><testcase classname="verify.test_api_rank" name="test_c_2_1_rank_years_returns_10_items_with_shape" time="0.330" /><testcase classname="verify.test_api_rank" name="test_c_2_2_rank_years_orders_by_unrounded_score_desc" time="0.320"><failure message="AssertionError: scores must be in non-increasing order&#10;assert [0.7, 0.8, 0...., 0.1, 1, ...] == [1, 0.8, 0.7,...0.5, 0.5, ...]&#10;  &#10;  At index 0 diff: 0.7 != 1&#10;  Use -v to get more diff">def test_c_2_2_rank_years_orders_by_unrounded_score_desc():
+        """
+        c-2-2: With active=years only, GET /api/rank returns items ordered by unrounded score in descending order (non-increasing)
+        """
+        with httpx.Client(base_url=BASE_URL, timeout=10.0) as client:
+            resp = client.get("/api/rank", params={"active": "years"})
+        assert resp.status_code == 200
+        data: List[Dict[str, Any]] = resp.json()
+        # Assert scores are non-increasing across the list
+        scores = [item["score"] for item in data]
+        assert all(isinstance(s, (int, float)) for s in scores)
+&gt;       assert scores == sorted(scores, reverse=True), "scores must be in non-increasing order"
+E       AssertionError: scores must be in non-increasing order
+E       assert [0.7, 0.8, 0...., 0.1, 1, ...] == [1, 0.8, 0.7,...0.5, 0.5, ...]
+E         
+E         At index 0 diff: 0.7 != 1
+E         Use -v to get more diff
+
+verify\test_api_rank.py:53: AssertionError</failure></testcase><testcase classname="verify.test_api_rank" name="test_c_3_4_rank_years_min_100_returns_empty_array" time="0.458" /><testcase classname="verify.test_sort_and_filter" name="test_c_3_1_no_active_orders_by_name_ascii" time="0.752" /><testcase classname="verify.test_sort_and_filter" name="test_c_3_2_tag_active_same_years_same_tag_break_ties_by_name" time="0.793"><failure message="AssertionError: name ASCII order must decide ties when both have (or both lack) the tag&#10;assert 8 &lt; 7">def test_c_3_2_tag_active_same_years_same_tag_break_ties_by_name():
+        """
+        c-3-2: With active=tag, when two candidates have equal years and both either have or both lack the preferred tag, the tie is broken by name in ASCII order.
+        This test locates such a pair from the seed and asserts their relative order under active=tag.
+        """
+        # Find a pair in the seed with same years and same tag presence
+        items = _get_candidates()
+        by_years: Dict[int, List[Tuple[str, str, bool]]] = {}
+        for it in items:
+            has_tag = isinstance(it.get("tags"), list) and ("typescript" in it["tags"])
+            by_years.setdefault(it["years"], []).append((it["id"], it["name"], has_tag))
+        pair: Optional[Tuple[Tuple[str, str, bool], Tuple[str, str, bool]]] = None
+        for same_years_group in by_years.values():
+            if len(same_years_group) &lt; 2:
+                continue
+            # try to find two with same tag presence
+            for i in range(len(same_years_group)):
+                for j in range(i + 1, len(same_years_group)):
+                    a, b = same_years_group[i], same_years_group[j]
+                    if a[2] == b[2]:
+                        pair = (a, b)
+                        break
+                if pair:
+                    break
+            if pair:
+                break
+        assert pair is not None, "seed must contain two candidates with the same years and same tag presence"
+        (id_a, name_a, _has_tag), (id_b, name_b, _has_tag2) = pair
+        # Fetch active=tag ranking
+        with httpx.Client(base_url=BASE_URL, timeout=10.0) as client:
+            resp = client.get("/api/rank", params={"active": "tag"})
+        assert resp.status_code == 200
+        ranked: List[Dict[str, Any]] = resp.json()
+        order = [it["id"] for it in ranked]
+        # Under equal years and equal tag presence, name ASCII should decide
+        expected_first, expected_second = (id_a, id_b) if name_a &lt;= name_b else (id_b, id_a)
+        first_idx = order.index(expected_first)
+        second_idx = order.index(expected_second)
+&gt;       assert first_idx &lt; second_idx, "name ASCII order must decide ties when both have (or both lack) the tag"
+E       AssertionError: name ASCII order must decide ties when both have (or both lack) the tag
+E       assert 8 &lt; 7
+
+verify\test_sort_and_filter.py:96: AssertionError</failure></testcase><testcase classname="verify.test_sort_and_filter" name="test_c_3_3_tag_active_one_tagged_comes_first" time="0.687" /><testcase classname="verify.test_ui_main" name="test_c_1_2_renders_10_cards" time="1.888" /><testcase classname="verify.test_ui_main" name="test_c_1_3_renders_both_toggles" time="1.336" /><testcase classname="verify.test_ui_rank" name="test_c_2_3_years_toggle_shows_two_decimal_scores" time="1.685" /><testcase classname="verify.test_ui_rank" name="test_c_2_4_years_toggle_reasons_contains_years" time="1.535" /></testsuite></testsuites>

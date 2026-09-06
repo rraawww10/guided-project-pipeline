@@ -1,0 +1,139 @@
+{
+  "ok": true,
+  "errors": [],
+  "warnings": [
+    {
+      "code": "W112",
+      "where": "session 1",
+      "message": "estimated 47.5 teaching minutes against a 40 minute cap. Nothing before step 9 measures this, so decide it here: 3 cuts, 2 builds, 5 concepts plus the project setup."
+    },
+    {
+      "code": "W112",
+      "where": "session 2",
+      "message": "estimated 47.7 teaching minutes against a 40 minute cap. Nothing before step 9 measures this, so decide it here: 5 cuts, 0 builds, 4 concepts."
+    },
+    {
+      "code": "W112",
+      "where": "session 3",
+      "message": "estimated 46.6 teaching minutes against a 40 minute cap. Nothing before step 9 measures this, so decide it here: 4 cuts, 0 builds, 5 concepts."
+    }
+  ],
+  "counts": {
+    "errors": 0,
+    "warnings": 3
+  },
+  "session_minutes": [
+    {
+      "n": 1,
+      "minutes": 47.5,
+      "cuts": 3,
+      "builds": 2,
+      "concepts": 5,
+      "carries_setup": true,
+      "over_cap": true,
+      "weighted": true,
+      "cut_minutes": [
+        {
+          "id": "cut-ui-render-rows",
+          "minutes": 6.0,
+          "decisions": 0,
+          "hint_words": 18
+        },
+        {
+          "id": "cut-ui-fetch-transactions",
+          "minutes": 6.0,
+          "decisions": 0,
+          "hint_words": 12
+        },
+        {
+          "id": "cut-api-transactions-list",
+          "minutes": 6.0,
+          "decisions": 0,
+          "hint_words": 11
+        }
+      ],
+      "largest_cut_share": 0.33
+    },
+    {
+      "n": 2,
+      "minutes": 47.7,
+      "cuts": 5,
+      "builds": 0,
+      "concepts": 4,
+      "carries_setup": false,
+      "over_cap": true,
+      "weighted": true,
+      "cut_minutes": [
+        {
+          "id": "cut-lib-apply-rules",
+          "minutes": 7.7,
+          "decisions": 1,
+          "hint_words": 26
+        },
+        {
+          "id": "cut-ui-render-summary",
+          "minutes": 6.0,
+          "decisions": 0,
+          "hint_words": 21
+        },
+        {
+          "id": "cut-ui-render-category-cell",
+          "minutes": 6.0,
+          "decisions": 0,
+          "hint_words": 22
+        },
+        {
+          "id": "cut-lib-summarize-by-category",
+          "minutes": 6.0,
+          "decisions": 0,
+          "hint_words": 29
+        },
+        {
+          "id": "cut-lib-compute-delta",
+          "minutes": 6.0,
+          "decisions": 0,
+          "hint_words": 34
+        }
+      ],
+      "largest_cut_share": 0.24
+    },
+    {
+      "n": 3,
+      "minutes": 46.6,
+      "cuts": 4,
+      "builds": 0,
+      "concepts": 5,
+      "carries_setup": false,
+      "over_cap": true,
+      "weighted": true,
+      "cut_minutes": [
+        {
+          "id": "cut-ui-toggle-overbudget",
+          "minutes": 7.7,
+          "decisions": 1,
+          "hint_words": 22
+        },
+        {
+          "id": "cut-ui-sort-by-delta",
+          "minutes": 7.7,
+          "decisions": 1,
+          "hint_words": 22
+        },
+        {
+          "id": "cut-ui-budgets-state",
+          "minutes": 7.7,
+          "decisions": 1,
+          "hint_words": 23
+        },
+        {
+          "id": "cut-ui-render-delta",
+          "minutes": 6.0,
+          "decisions": 0,
+          "hint_words": 22
+        }
+      ],
+      "largest_cut_share": 0.26
+    }
+  ],
+  "spec_hash": "b07b28533759a4d675f7fd4e8f621f918481b351db030a464ea47cde2e731666"
+}

@@ -1,0 +1,13 @@
+{
+  "stack": [
+    "next",
+    "react",
+    "typescript"
+  ],
+  "sessions": 1,
+  "minutes_per_session": 30,
+  "track": "fullstack",
+  "limits": "ui smoke test",
+  "given_by": "codex",
+  "at": "2026-09-04T06:32:08+00:00"
+}

@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="6" skipped="0" tests="14" time="48.016" timestamp="2026-09-05T13:52:57.406010+05:30" hostname="HERO"><testcase classname="verify.test_api_transactions" name="test_c_1_1_get_transactions_returns_array_with_required_fields" time="0.525" /><testcase classname="verify.test_ui_session1" name="test_c_1_2_ui_renders_one_row_per_transaction" time="3.694" /><testcase classname="verify.test_ui_session1" name="test_c_1_3_ui_renders_each_row_memo" time="1.841" /><testcase classname="verify.test_ui_session2" name="test_c_2_1_category_transport_for_uber_trip_downtown" time="1.099" /><testcase classname="verify.test_ui_session2" name="test_c_2_2_rule_label_for_uber_trip_downtown" time="1.287" /><testcase classname="verify.test_ui_session2" name="test_c_2_3_summary_has_supplies_total_25" time="6.979"><failure message="AssertionError: Locator expected to have count '1'&#10;Actual value: 0 &#10;Call log:&#10;  - Expect &quot;to_have_count&quot; with timeout 5000ms&#10;  - waiting for locator(&quot;[data-testid=\&quot;summary-row\&quot;]&quot;).filter(has=get_by_test_id(&quot;summary-cat&quot;).filter(has_text=&quot;Supplies&quot;))&#10;    14 × locator resolved to 0 elements&#10;       - unexpected value &quot;0&quot;">page = &lt;Page url='http://127.0.0.1:59010/'&gt;, base_url = 'http://127.0.0.1:59010'
+
+    def test_c_2_3_summary_has_supplies_total_25(page, base_url):
+        page.goto(base_url)
+        # Summary is present in session 2
+        page.wait_for_selector('[data-testid="summary"]')
+        row = get_summary_row(page, "Supplies")
+&gt;       expect(row).to_have_count(1)
+E       AssertionError: Locator expected to have count '1'
+E       Actual value: 0 
+E       Call log:
+E         - Expect "to_have_count" with timeout 5000ms
+E         - waiting for locator("[data-testid=\"summary-row\"]").filter(has=get_by_test_id("summary-cat").filter(has_text="Supplies"))
+E           14 × locator resolved to 0 elements
+E              - unexpected value "0"
+
+verify\test_ui_session2.py:46: AssertionError</failure></testcase><testcase classname="verify.test_ui_session2" name="test_c_2_4_category_transport_for_uber_refund_not_income" time="1.125" /><testcase classname="verify.test_ui_session2" name="test_c_2_5_summary_heading_visible_once" time="1.138" /><testcase classname="verify.test_ui_session2" name="test_c_2_6_summary_transport_total_20" time="6.826"><failure message="AssertionError: Locator expected to have count '1'&#10;Actual value: 0 &#10;Call log:&#10;  - Expect &quot;to_have_count&quot; with timeout 5000ms&#10;  - waiting for locator(&quot;[data-testid=\&quot;summary-row\&quot;]&quot;).filter(has=get_by_test_id(&quot;summary-cat&quot;).filter(has_text=&quot;Transport&quot;))&#10;    14 × locator resolved to 0 elements&#10;       - unexpected value &quot;0&quot;">page = &lt;Page url='http://127.0.0.1:59010/'&gt;, base_url = 'http://127.0.0.1:59010'
+
+    def test_c_2_6_summary_transport_total_20(page, base_url):
+        page.goto(base_url)
+        page.wait_for_selector('[data-testid="summary"]')
+        row = get_summary_row(page, "Transport")
+&gt;       expect(row).to_have_count(1)
+E       AssertionError: Locator expected to have count '1'
+E       Actual value: 0 
+E       Call log:
+E         - Expect "to_have_count" with timeout 5000ms
+E         - waiting for locator("[data-testid=\"summary-row\"]").filter(has=get_by_test_id("summary-cat").filter(has_text="Transport"))
+E           14 × locator resolved to 0 elements
+E              - unexpected value "0"
+
+verify\test_ui_session2.py:72: AssertionError</failure></testcase><testcase classname="verify.test_ui_session3" name="test_c_3_1_delta_updates_after_setting_transport_budget_30" time="6.948"><failure message="AssertionError: Locator expected to have count '1'&#10;Actual value: 0 &#10;Call log:&#10;  - Expect &quot;to_have_count&quot; with timeout 5000ms&#10;  - waiting for locator(&quot;[data-testid=\&quot;summary-row\&quot;]&quot;).filter(has=get_by_test_id(&quot;summary-cat&quot;).filter(has_text=&quot;Transport&quot;))&#10;    14 × locator resolved to 0 elements&#10;       - unexpected value &quot;0&quot;">page = &lt;Page url='http://127.0.0.1:59010/'&gt;, base_url = 'http://127.0.0.1:59010'
+
+    def test_c_3_1_delta_updates_after_setting_transport_budget_30(page, base_url):
+        page.goto(base_url)
+        page.wait_for_selector('[data-testid="summary"]')
+        set_budget(page, "Transport", "30")
+        row = get_summary_row(page, "Transport")
+&gt;       expect(row).to_have_count(1)
+E       AssertionError: Locator expected to have count '1'
+E       Actual value: 0 
+E       Call log:
+E         - Expect "to_have_count" with timeout 5000ms
+E         - waiting for locator("[data-testid=\"summary-row\"]").filter(has=get_by_test_id("summary-cat").filter(has_text="Transport"))
+E           14 × locator resolved to 0 elements
+E              - unexpected value "0"
+
+verify\test_ui_session3.py:30: AssertionError</failure></testcase><testcase classname="verify.test_ui_session3" name="test_c_3_2_sort_by_delta_places_expense_first_after_budget" time="1.161"><failure message="AssertionError: the fixtures start in delta order ([]), so this test could not tell a working sort from a missing one&#10;assert [] != []&#10; +  where [] = sorted([], reverse=True)">page = &lt;Page url='http://127.0.0.1:59010/'&gt;, base_url = 'http://127.0.0.1:59010'
+
+    def test_c_3_2_sort_by_delta_places_expense_first_after_budget(page, base_url):
+        page.goto(base_url)
+        page.wait_for_selector('[data-testid="summary"]')
+        set_budget(page, "Transport", "30")
+        # summarizeByCategory already orders by category name, and "Expense" is both
+        # alphabetically first and largest by delta - so asserting only the first row
+        # passes whether the sort ran or not. Check the deltas themselves, in DOM
+        # order, and refuse to run at all against fixtures that start sorted.
+        before = read_deltas(page)
+&gt;       assert before != sorted(before, reverse=True), (
+            f"the fixtures start in delta order ({before}), so this test could not "
+            f"tell a working sort from a missing one")
+E       AssertionError: the fixtures start in delta order ([]), so this test could not tell a working sort from a missing one
+E       assert [] != []
+E        +  where [] = sorted([], reverse=True)
+
+verify\test_ui_session3.py:49: AssertionError</failure></testcase><testcase classname="verify.test_ui_session3" name="test_c_3_3_toggle_overbudget_hides_transport_and_keeps_expense" time="6.870"><failure message="AssertionError: Locator expected to have count '1'&#10;Actual value: 0 &#10;Call log:&#10;  - Expect &quot;to_have_count&quot; with timeout 5000ms&#10;  - waiting for locator(&quot;[data-testid=\&quot;summary-row\&quot;]&quot;).filter(has=get_by_test_id(&quot;summary-cat&quot;).filter(has_text=&quot;Expense&quot;))&#10;    14 × locator resolved to 0 elements&#10;       - unexpected value &quot;0&quot;">page = &lt;Page url='http://127.0.0.1:59010/'&gt;, base_url = 'http://127.0.0.1:59010'
+
+    def test_c_3_3_toggle_overbudget_hides_transport_and_keeps_expense(page, base_url):
+        page.goto(base_url)
+        page.wait_for_selector('[data-testid="summary"]')
+        set_budget(page, "Transport", "30")
+        toggle = page.get_by_test_id('toggle-over')
+        expect(toggle).to_have_count(1)
+        toggle.check()
+        # Transport has delta -10 after budget 30 -&gt; should disappear
+        expect(get_summary_row(page, "Transport")).to_have_count(0)
+        # Expense remains (delta positive)
+&gt;       expect(get_summary_row(page, "Expense")).to_have_count(1)
+E       AssertionError: Locator expected to have count '1'
+E       Actual value: 0 
+E       Call log:
+E         - Expect "to_have_count" with timeout 5000ms
+E         - waiting for locator("[data-testid=\"summary-row\"]").filter(has=get_by_test_id("summary-cat").filter(has_text="Expense"))
+E           14 × locator resolved to 0 elements
+E              - unexpected value "0"
+
+verify\test_ui_session3.py:73: AssertionError</failure></testcase><testcase classname="verify.test_ui_session3" name="test_c_3_4_percent_shows_one_decimal_transport_66_7" time="6.974"><failure message="AssertionError: Locator expected to have count '1'&#10;Actual value: 0 &#10;Call log:&#10;  - Expect &quot;to_have_count&quot; with timeout 5000ms&#10;  - waiting for locator(&quot;[data-testid=\&quot;summary-row\&quot;]&quot;).filter(has=get_by_test_id(&quot;summary-cat&quot;).filter(has_text=&quot;Transport&quot;))&#10;    14 × locator resolved to 0 elements&#10;       - unexpected value &quot;0&quot;">page = &lt;Page url='http://127.0.0.1:59010/'&gt;, base_url = 'http://127.0.0.1:59010'
+
+    def test_c_3_4_percent_shows_one_decimal_transport_66_7(page, base_url):
+        page.goto(base_url)
+        page.wait_for_selector('[data-testid="summary"]')
+        set_budget(page, "Transport", "30")
+        row = get_summary_row(page, "Transport")
+&gt;       expect(row).to_have_count(1)
+E       AssertionError: Locator expected to have count '1'
+E       Actual value: 0 
+E       Call log:
+E         - Expect "to_have_count" with timeout 5000ms
+E         - waiting for locator("[data-testid=\"summary-row\"]").filter(has=get_by_test_id("summary-cat").filter(has_text="Transport"))
+E           14 × locator resolved to 0 elements
+E              - unexpected value "0"
+
+verify\test_ui_session3.py:81: AssertionError</failure></testcase><testcase classname="verify.test_ui_session3" name="test_c_3_5_delta_header_visible_once" time="1.164" /></testsuite></testsuites>

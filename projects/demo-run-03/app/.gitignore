@@ -1,0 +1,2 @@
+# Runtime database should not ship in skeleton or deploy copy
+prisma/dev.db

@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="6" skipped="0" tests="13" time="22.218" timestamp="2026-09-06T17:35:48.344531+05:30" hostname="HERO"><testcase classname="verify.test_api_candidates" name="test_c_1_1_candidates_list_has_10_items" time="0.437" /><testcase classname="verify.test_api_candidates" name="test_c_1_4_candidates_list_has_duplicate_years" time="0.328" /><testcase classname="verify.test_api_candidates" name="test_c_1_5_candidates_list_has_typescript_tag" time="0.338" /><testcase classname="verify.test_api_rank" name="test_c_2_1_rank_years_returns_10_items_with_shape" time="0.328"><failure message="assert 0 == 10&#10; +  where 0 = len([])">def test_c_2_1_rank_years_returns_10_items_with_shape():
+        """
+        c-2-1: GET /api/rank?active=years returns 200 with a JSON array of 10 RankItem having id, name, score (number), and reasons (string[])
+    
+        Strengthened to ensure the 'active=years' token is actually applied: at least one item must
+        have a positive numeric score and at least one reasons[] entry that mentions 'years'. This
+        ensures the query parser is exercised and prevents a fallback implementation from passing.
+        """
+        with httpx.Client(base_url=BASE_URL, timeout=10.0) as client:
+            resp = client.get("/api/rank", params={"active": "years"})
+        assert resp.status_code == 200
+        data = resp.json()
+        assert isinstance(data, list)
+&gt;       assert len(data) == 10
+E       assert 0 == 10
+E        +  where 0 = len([])
+
+verify\test_api_rank.py:23: AssertionError</failure></testcase><testcase classname="verify.test_api_rank" name="test_c_2_2_rank_years_orders_by_unrounded_score_desc" time="0.424" /><testcase classname="verify.test_api_rank" name="test_c_3_4_rank_years_min_100_returns_empty_array" time="0.335" /><testcase classname="verify.test_sort_and_filter" name="test_c_3_1_no_active_orders_by_name_ascii" time="0.715"><failure message="ValueError: list.index(x): x not in list">def test_c_3_1_no_active_orders_by_name_ascii():
+        """
+        c-3-1: With no active tokens (?active=), if two items have equal unrounded scores then name ASC by ASCII order decides; GET /api/rank reflects that order.
+    
+        Reading taken: all unrounded scores are equal when no signals are active, but we assert only the minimal requirement:
+        pick any pair of candidates that also share the same years value (spec guarantees at least one pair), and assert their
+        relative order under active="" follows ASCII name order. This avoids over-asserting a global sort the spec does not pin.
+        """
+        # Find a pair with the same years value (c-1-4 guarantees such a pair exists)
+        items = _get_candidates()
+        by_years: Dict[int, List[Tuple[str, str]]] = {}
+        for it in items:
+            by_years.setdefault(it["years"], []).append((it["id"], it["name"]))
+        pair: Optional[Tuple[Tuple[str, str], Tuple[str, str]]] = None
+        for group in by_years.values():
+            if len(group) &gt;= 2:
+                # pick first two
+                pair = (group[0], group[1])
+                break
+        assert pair is not None, "seed must contain at least one duplicate years value"
+        (id_a, name_a), (id_b, name_b) = pair
+    
+        # Fetch ranking with no active tokens
+        with httpx.Client(base_url=BASE_URL, timeout=10.0) as client:
+            resp = client.get("/api/rank", params={"active": ""})
+        assert resp.status_code == 200
+        ranked: List[Dict[str, Any]] = resp.json()
+        order = [it["id"] for it in ranked]
+    
+        expected_first, expected_second = (id_a, id_b) if name_a &lt;= name_b else (id_b, id_a)
+&gt;       first_idx = order.index(expected_first)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       ValueError: list.index(x): x not in list
+
+verify\test_sort_and_filter.py:53: ValueError</failure></testcase><testcase classname="verify.test_sort_and_filter" name="test_c_3_2_tag_active_same_years_same_tag_break_ties_by_name" time="0.671"><failure message="ValueError: list.index(x): x not in list">def test_c_3_2_tag_active_same_years_same_tag_break_ties_by_name():
+        """
+        c-3-2: With active=tag, when two candidates have equal years and both either have or both lack the preferred tag, the tie is broken by name in ASCII order.
+        This test locates such a pair from the seed and asserts their relative order under active=tag.
+        """
+        # Find a pair in the seed with same years and same tag presence
+        items = _get_candidates()
+        by_years: Dict[int, List[Tuple[str, str, bool]]] = {}
+        for it in items:
+            has_tag = isinstance(it.get("tags"), list) and ("typescript" in it["tags"])
+            by_years.setdefault(it["years"], []).append((it["id"], it["name"], has_tag))
+        pair: Optional[Tuple[Tuple[str, str, bool], Tuple[str, str, bool]]] = None
+        for same_years_group in by_years.values():
+            if len(same_years_group) &lt; 2:
+                continue
+            # try to find two with same tag presence
+            for i in range(len(same_years_group)):
+                for j in range(i + 1, len(same_years_group)):
+                    a, b = same_years_group[i], same_years_group[j]
+                    if a[2] == b[2]:
+                        pair = (a, b)
+                        break
+                if pair:
+                    break
+            if pair:
+                break
+        assert pair is not None, "seed must contain two candidates with the same years and same tag presence"
+        (id_a, name_a, _has_tag), (id_b, name_b, _has_tag2) = pair
+        # Fetch active=tag ranking
+        with httpx.Client(base_url=BASE_URL, timeout=10.0) as client:
+            resp = client.get("/api/rank", params={"active": "tag"})
+        assert resp.status_code == 200
+        ranked: List[Dict[str, Any]] = resp.json()
+        order = [it["id"] for it in ranked]
+        # Under equal years and equal tag presence, name ASCII should decide
+        expected_first, expected_second = (id_a, id_b) if name_a &lt;= name_b else (id_b, id_a)
+&gt;       first_idx = order.index(expected_first)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       ValueError: list.index(x): x not in list
+
+verify\test_sort_and_filter.py:94: ValueError</failure></testcase><testcase classname="verify.test_sort_and_filter" name="test_c_3_3_tag_active_one_tagged_comes_first" time="0.658"><failure message="ValueError: list.index(x): x not in list">def test_c_3_3_tag_active_one_tagged_comes_first():
+        """
+        c-3-3: With active=tag, when two candidates have equal years and exactly one has the preferred tag, the tagged candidate appears first in GET /api/rank.
+        """
+        items = _get_candidates()
+        by_years: Dict[int, List[Tuple[str, bool]]] = {}
+        for it in items:
+            has_tag = isinstance(it.get("tags"), list) and ("typescript" in it["tags"])
+            by_years.setdefault(it["years"], []).append((it["id"], has_tag))
+        pair_ids: Optional[Tuple[str, str]] = None
+        for group in by_years.values():
+            if len(group) &lt; 2:
+                continue
+            for i in range(len(group)):
+                for j in range(i + 1, len(group)):
+                    (id_a, tag_a), (id_b, tag_b) = group[i], group[j]
+                    if tag_a != tag_b:
+                        # pick (tagged, untagged)
+                        pair_ids = (id_a, id_b) if tag_a else (id_b, id_a)
+                        break
+                if pair_ids:
+                    break
+            if pair_ids:
+                break
+        assert pair_ids is not None, "seed must contain two candidates with the same years where exactly one has the preferred tag"
+        tagged_id, untagged_id = pair_ids
+        # Fetch active=tag ranking
+        with httpx.Client(base_url=BASE_URL, timeout=10.0) as client:
+            resp = client.get("/api/rank", params={"active": "tag"})
+        assert resp.status_code == 200
+        ranked: List[Dict[str, Any]] = resp.json()
+        order = [it["id"] for it in ranked]
+&gt;       assert order.index(tagged_id) &lt; order.index(untagged_id), "tagged candidate must come first under active=tag"
+               ^^^^^^^^^^^^^^^^^^^^^^
+E       ValueError: list.index(x): x not in list
+
+verify\test_sort_and_filter.py:131: ValueError</failure></testcase><testcase classname="verify.test_ui_main" name="test_c_1_2_renders_10_cards" time="1.913" /><testcase classname="verify.test_ui_main" name="test_c_1_3_renders_both_toggles" time="1.285" /><testcase classname="verify.test_ui_rank" name="test_c_2_3_years_toggle_shows_two_decimal_scores" time="6.762"><failure message="playwright._impl._errors.TimeoutError: Locator.wait_for: Timeout 5000ms exceeded.&#10;Call log:&#10;  - waiting for get_by_test_id(&quot;score&quot;).first to be visible">@pytest.mark.sync
+    def test_c_2_3_years_toggle_shows_two_decimal_scores():
+        """
+        c-2-3: On "/" with years toggle on, each card renders a score text data-testid="score" formatted to two decimals
+        """
+        with sync_playwright() as p:
+            browser = p.chromium.launch()
+            try:
+                page = browser.new_page()
+                page.goto(BASE_URL + "/", wait_until="load")
+                # Turn on the years toggle
+                page.get_by_test_id("toggle-years").check()
+                # Wait for scores to render
+&gt;               page.get_by_test_id("score").first.wait_for(timeout=5000)
+
+verify\test_ui_rank.py:24: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+.pipeline\venv\Lib\site-packages\playwright\sync_api\_generated.py:20539: in wait_for
+    self._sync(
+.pipeline\venv\Lib\site-packages\playwright\_impl\_locator.py:748: in wait_for
+    await self._frame.wait_for_selector(
+.pipeline\venv\Lib\site-packages\playwright\_impl\_frame.py:394: in wait_for_selector
+    await self._channel.send(
+.pipeline\venv\Lib\site-packages\playwright\_impl\_connection.py:76: in send
+    return await self._connection.wrap_api_call(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = &lt;playwright._impl._connection.Connection object at 0x0000020D06F3E850&gt;
+cb = &lt;function Channel.send.&lt;locals&gt;.&lt;lambda&gt; at 0x0000020D06F564B0&gt;
+is_internal = False, title = None
+
+    async def wrap_api_call(
+        self, cb: Callable[[], Any], is_internal: bool = False, title: str = None
+    ) -&gt; Any:
+        if self._api_zone.get():
+            return await cb()
+        task = asyncio.current_task(self._loop)
+        parsed_st = _attach_api_call_information(
+            getattr(task, "__pw_stack__", None) or _capture_stack_trace(),
+            is_internal,
+            title,
+        )
+        self._api_zone.set(parsed_st)
+        try:
+            return await cb()
+        except Exception as error:
+&gt;           raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+E           playwright._impl._errors.TimeoutError: Locator.wait_for: Timeout 5000ms exceeded.
+E           Call log:
+E             - waiting for get_by_test_id("score").first to be visible
+
+.pipeline\venv\Lib\site-packages\playwright\_impl\_connection.py:632: TimeoutError</failure></testcase><testcase classname="verify.test_ui_rank" name="test_c_2_4_years_toggle_reasons_contains_years" time="6.960"><failure message="playwright._impl._errors.TimeoutError: Locator.wait_for: Timeout 5000ms exceeded.&#10;Call log:&#10;  - waiting for get_by_test_id(&quot;reasons&quot;).first to be visible">@pytest.mark.sync
+    def test_c_2_4_years_toggle_reasons_contains_years():
+        """
+        c-2-4: On "/" with years toggle on, at least one card's data-testid="reasons" contains the word "years"
+        """
+        with sync_playwright() as p:
+            browser = p.chromium.launch()
+            try:
+                page = browser.new_page()
+                page.goto(BASE_URL + "/", wait_until="load")
+                # Turn on the years toggle so the scorer includes the years signal
+                page.get_by_test_id("toggle-years").check()
+                # Wait for reasons to appear
+&gt;               page.get_by_test_id("reasons").first.wait_for(timeout=5000)
+
+verify\test_ui_rank.py:47: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+.pipeline\venv\Lib\site-packages\playwright\sync_api\_generated.py:20539: in wait_for
+    self._sync(
+.pipeline\venv\Lib\site-packages\playwright\_impl\_locator.py:748: in wait_for
+    await self._frame.wait_for_selector(
+.pipeline\venv\Lib\site-packages\playwright\_impl\_frame.py:394: in wait_for_selector
+    await self._channel.send(
+.pipeline\venv\Lib\site-packages\playwright\_impl\_connection.py:76: in send
+    return await self._connection.wrap_api_call(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = &lt;playwright._impl._connection.Connection object at 0x0000020D05C78FC0&gt;
+cb = &lt;function Channel.send.&lt;locals&gt;.&lt;lambda&gt; at 0x0000020D06FE2FB0&gt;
+is_internal = False, title = None
+
+    async def wrap_api_call(
+        self, cb: Callable[[], Any], is_internal: bool = False, title: str = None
+    ) -&gt; Any:
+        if self._api_zone.get():
+            return await cb()
+        task = asyncio.current_task(self._loop)
+        parsed_st = _attach_api_call_information(
+            getattr(task, "__pw_stack__", None) or _capture_stack_trace(),
+            is_internal,
+            title,
+        )
+        self._api_zone.set(parsed_st)
+        try:
+            return await cb()
+        except Exception as error:
+&gt;           raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+E           playwright._impl._errors.TimeoutError: Locator.wait_for: Timeout 5000ms exceeded.
+E           Call log:
+E             - waiting for get_by_test_id("reasons").first to be visible
+
+.pipeline\venv\Lib\site-packages\playwright\_impl\_connection.py:632: TimeoutError</failure></testcase></testsuite></testsuites>

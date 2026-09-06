@@ -1,0 +1,37 @@
+{
+  "ok": true,
+  "target": "app",
+  "preview": "http://127.0.0.1:59185",
+  "advisories": [
+    "npm warn deprecated next@15.1.6: This version has a security vulnerability. Please upgrade to a patched version. See https://nextjs.org/blog/CVE-2025-66478 for more details."
+  ],
+  "advisories_allowed": true,
+  "seconds": 88.6,
+  "steps": [
+    {
+      "step": "fresh copy",
+      "ok": true,
+      "detail": "C:\\Users\\Hp\\AppData\\Local\\Temp\\gp-deploy-ui-live-01-33y9ykoz\\app"
+    },
+    {
+      "step": "install",
+      "ok": true,
+      "detail": "npm warn deprecated next@15.1.6: This version has a security vulnerability. Please upgrade to a patched version. See https://nextjs.org/blog/CVE-2025-66478 for more details.\n"
+    },
+    {
+      "step": "install advisories",
+      "ok": true,
+      "detail": "npm reported a security advisory during install:\n  npm warn deprecated next@15.1.6: This version has a security vulnerability. Please upgrade to a patched version. See https://nextjs.org/blog/CVE-2025-66478 for more details.\n(allowed by --allow-advisories)"
+    },
+    {
+      "step": "build",
+      "ok": true,
+      "detail": " \u00e2\u0161\u00a0 Next.js can't recognize the exported `runtime` field in \"/api/transactions/route\", it may be re-exported from another file. The default config will be used instead.\n \u00e2\u0161\u00a0 Next.js can't recognize the exported `dynamic` field in \"/api/transactions/route\", it may be re-exported from another file. The default config will be used instead.\n \u00e2\u0161\u00a0 Next.js can't recognize the exported `runtime` field in \"/api/transactions/route\", it may be re-exported from another file. The default config will be used instead.\n \u00e2\u0161\u00a0 Next.js can't recognize the exported `dynamic` field in \"/api/transactions/route\", it may be re-exported from another file. The default config will be used instead.\n \u00e2\u0161\u00a0 Next.js can't recognize the exported `runtime` field in \"/api/transactions/route\", it may be re-exported from another file. The default config will be used instead.\n \u00e2\u0161\u00a0 Next.js can't recognize the exported `dynamic` field in \"/api/transactions/route\", it may be re-exported from another file. The default config will be used instead.\n \u00e2\u0161\u00a0 Next.js can't recognize the exported `runtime` field in \"/api/transactions/route\", it may be re-exported from another file. The default config will be used instead.\n \u00e2\u0161\u00a0 Next.js can't recognize the exported `dynamic` field in \"/api/transactions/route\", it may be re-exported from another file. The default config will be used instead.\n"
+    },
+    {
+      "step": "preview",
+      "ok": true,
+      "detail": "http://127.0.0.1:59185"
+    }
+  ]
+}

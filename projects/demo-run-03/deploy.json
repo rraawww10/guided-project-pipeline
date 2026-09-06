@@ -1,0 +1,35 @@
+{
+  "ok": true,
+  "target": "app",
+  "preview": "http://127.0.0.1:61885",
+  "advisories": [],
+  "advisories_allowed": false,
+  "seconds": 71.3,
+  "steps": [
+    {
+      "step": "fresh copy",
+      "ok": true,
+      "detail": "C:\\Users\\Hp\\AppData\\Local\\Temp\\gp-deploy-demo-run-03-viyg1j8r\\app"
+    },
+    {
+      "step": "install",
+      "ok": true,
+      "detail": "\n> stockroom-reorder-advisor@1.0.0 postinstall\n> prisma generate\n\nPrisma schema loaded from prisma\\schema.prisma\n\n\u2714 Generated Prisma Client (v5.16.1) to .\\node_modules\\@prisma\\client in 83ms\n\nStart using Prisma Client in Node.js (See: https://pris.ly/d/client)\n```\nimport { PrismaClient } from '@prisma/client'\nconst prisma = new PrismaClient()\n```\nor start using Prisma Client at the edge (See: https://pris.ly/d/accelerate)\n```\nimport { PrismaClient } from '@prisma/client/edge'\nconst prisma = new PrismaClient()\n```\n\nSee other ways of importing Prisma Client: http://pris.ly/d/importing-client\n\n\u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510\n\u2502  Deploying your app to serverless or edge functions?        \u2502\n\u2502  Try Prisma Accelerate for connection pooling and caching.  \u2502\n\u2502  https://pris.ly/cli/--accelerate                           \u2502\n\u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518\n\n\nadded 93 packages in 36s\n"
+    },
+    {
+      "step": "install advisories",
+      "ok": true,
+      "detail": "none"
+    },
+    {
+      "step": "build",
+      "ok": true,
+      "detail": "\u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510\n\u2502  Update available 5.16.1 -> 8.0.0-rc.13                 \u2502\n\u2502                                                         \u2502\n\u2502  This is a major update - please follow the guide at    \u2502\n\u2502  https://pris.ly/d/major-version-upgrade                \u2502\n\u2502                                                         \u2502\n\u2502  Run the following to update                            \u2502\n\u2502    npm i --save-dev prisma@latest                       \u2502\n\u2502    npm i @prisma/client@latest                          \u2502\n\u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518\n"
+    },
+    {
+      "step": "preview",
+      "ok": true,
+      "detail": "http://127.0.0.1:61885"
+    }
+  ]
+}

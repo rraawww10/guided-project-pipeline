@@ -1,0 +1,114 @@
+{
+  "ok": false,
+  "target": "app",
+  "code_checks": {
+    "ok": true,
+    "target": "app",
+    "declared": [],
+    "unknown": [],
+    "checks": {}
+  },
+  "seconds": 0.0,
+  "counts": {
+    "pass": 0,
+    "fail": 0,
+    "skip": 0,
+    "missing": 13
+  },
+  "criteria": {
+    "c-1-1": {
+      "status": "missing",
+      "check": "GET /api/candidates returns 200 with a JSON array of 10 Candidate items",
+      "session": 1,
+      "test": "verify/test_api_candidates.py::test_c_1_1_candidates_list_has_10_items",
+      "message": "test did not run"
+    },
+    "c-1-2": {
+      "status": "missing",
+      "check": "sc-main renders 10 elements with data-testid=card on /",
+      "session": 1,
+      "test": "verify/test_ui_main.py::test_c_1_2_renders_10_cards",
+      "message": "test did not run"
+    },
+    "c-1-3": {
+      "status": "missing",
+      "check": "sc-main renders checkboxes with data-testids toggle-years and toggle-tag",
+      "session": 1,
+      "test": "verify/test_ui_main.py::test_c_1_3_renders_both_toggles",
+      "message": "test did not run"
+    },
+    "c-1-4": {
+      "status": "missing",
+      "check": "The /api/candidates JSON contains at least one pair of candidates with the same years value",
+      "session": 1,
+      "test": "verify/test_api_candidates.py::test_c_1_4_candidates_list_has_duplicate_years",
+      "message": "test did not run"
+    },
+    "c-1-5": {
+      "status": "missing",
+      "check": "GET /api/candidates returns 200 with a JSON array that includes at least one item whose tags contain 'typescript'",
+      "session": 1,
+      "test": "verify/test_api_candidates.py::test_c_1_5_candidates_list_has_typescript_tag",
+      "message": "test did not run"
+    },
+    "c-2-1": {
+      "status": "missing",
+      "check": "GET /api/rank?active=years returns 200 with a JSON array of 10 RankItem having id, name, score (number), and reasons (string[])",
+      "session": 2,
+      "test": "verify/test_api_rank.py::test_c_2_1_rank_years_returns_10_items_with_shape",
+      "message": "test did not run"
+    },
+    "c-2-2": {
+      "status": "missing",
+      "check": "With active=years only, GET /api/rank returns items ordered by unrounded score in descending order",
+      "session": 2,
+      "test": "verify/test_api_rank.py::test_c_2_2_rank_years_orders_by_unrounded_score_desc",
+      "message": "test did not run"
+    },
+    "c-2-3": {
+      "status": "missing",
+      "check": "On / with years toggle on, each card renders a score text data-testid=score formatted to two decimals",
+      "session": 2,
+      "test": "verify/test_ui_rank.py::test_c_2_3_years_toggle_shows_two_decimal_scores",
+      "message": "test did not run"
+    },
+    "c-2-4": {
+      "status": "missing",
+      "check": "On / with years toggle on, at least one card's data-testid=reasons contains the word 'years'",
+      "session": 2,
+      "test": "verify/test_ui_rank.py::test_c_2_4_years_toggle_reasons_contains_years",
+      "message": "test did not run"
+    },
+    "c-3-1": {
+      "status": "missing",
+      "check": "With no active tokens (?active=), if two items have equal unrounded scores then name ASC by ASCII order decides; GET /api/rank reflects that order",
+      "session": 3,
+      "test": "verify/test_sort_and_filter.py::test_c_3_1_no_active_orders_by_name_ascii",
+      "message": "test did not run"
+    },
+    "c-3-2": {
+      "status": "missing",
+      "check": "With active=tag, GET /api/rank returns 200 with items ordered so that when two candidates have equal years and both either have or both lack the preferred tag, the tie is broken by name ASC (ASCII)",
+      "session": 3,
+      "test": "verify/test_sort_and_filter.py::test_c_3_2_tag_active_same_years_same_tag_break_ties_by_name",
+      "message": "test did not run"
+    },
+    "c-3-3": {
+      "status": "missing",
+      "check": "With active=tag, when two candidates have equal years and exactly one has the preferred tag, the tagged candidate appears first in GET /api/rank",
+      "session": 3,
+      "test": "verify/test_sort_and_filter.py::test_c_3_3_tag_active_one_tagged_comes_first",
+      "message": "test did not run"
+    },
+    "c-3-4": {
+      "status": "missing",
+      "check": "GET /api/rank?active=years&min=100 returns 200 with an empty JSON array",
+      "session": 3,
+      "test": "verify/test_api_rank.py::test_c_3_4_rank_years_min_100_returns_empty_array",
+      "message": "test did not run"
+    }
+  },
+  "pytest_returncode": 99,
+  "stdout_tail": "",
+  "stderr_tail": "[WinError 267] The directory name is invalid"
+}

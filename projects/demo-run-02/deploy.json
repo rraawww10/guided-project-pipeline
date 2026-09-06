@@ -1,0 +1,35 @@
+{
+  "ok": true,
+  "target": "app",
+  "preview": "http://127.0.0.1:58096",
+  "advisories": [],
+  "advisories_allowed": false,
+  "seconds": 92.4,
+  "steps": [
+    {
+      "step": "fresh copy",
+      "ok": true,
+      "detail": "C:\\Users\\Hp\\AppData\\Local\\Temp\\gp-deploy-demo-run-02-4pi1g1ox\\app"
+    },
+    {
+      "step": "install",
+      "ok": true,
+      "detail": "\nadded 62 packages in 29s\n"
+    },
+    {
+      "step": "install advisories",
+      "ok": true,
+      "detail": "none"
+    },
+    {
+      "step": "build",
+      "ok": true,
+      "detail": "\n> fairshare-expense-settlement@1.0.0 build\n> next build\n\n   \u25b2 Next.js 15.5.25\n\n   Creating an optimized production build ...\n \u2713 Compiled successfully in 9.9s\n   Linting and checking validity of types ...\n   Collecting page data ...\n   Generating static pages (0/6) ...\n   Generating static pages (1/6) \n   Generating static pages (2/6) \n   Generating static pages (4/6) \n \u2713 Generating static pages (6/6)\n   Finalizing page optimization ...\n   Collecting build traces ...\n\nRoute (app)                                 Size  First Load JS\n\u250c \u25cb /                                    1.68 kB         104 kB\n\u251c \u25cb /_not-found                            993 B         104 kB\n\u251c \u0192 /api/expenses                          131 B         103 kB\n\u2514 \u0192 /api/settlement/naive                  131 B         103 kB\n+ First Load JS shared by all             103 kB\n  \u251c chunks/255-37e0f0325134c4d7.js       46.4 kB\n  \u251c chunks/4bd1b696-c023c6e3521b1417.js  54.2 kB\n  \u2514 other shared chunks (total)          1.95 kB\n\n\n\u25cb  (Static)   prerendered as static content\n\u0192  (Dynamic)  server-rendered on demand\n\n"
+    },
+    {
+      "step": "preview",
+      "ok": true,
+      "detail": "http://127.0.0.1:58096"
+    }
+  ]
+}

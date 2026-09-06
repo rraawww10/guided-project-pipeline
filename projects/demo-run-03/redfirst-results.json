@@ -1,0 +1,126 @@
+{
+  "ok": false,
+  "target": "app",
+  "code_checks": {
+    "ok": true,
+    "target": "app",
+    "declared": [],
+    "unknown": [],
+    "checks": {}
+  },
+  "stack_check": {
+    "ok": true,
+    "skipped": "app/ has not been built yet",
+    "stack": [
+      "next",
+      "react",
+      "typescript",
+      "prisma",
+      "sqlite"
+    ],
+    "violations": []
+  },
+  "seconds": 0.0,
+  "counts": {
+    "pass": 0,
+    "fail": 0,
+    "skip": 0,
+    "missing": 13
+  },
+  "criteria": {
+    "c-1-1": {
+      "status": "missing",
+      "check": "GET /api/skus returns 200 with a JSON array of SKU with length 8",
+      "session": 1,
+      "test": "verify/test_api_skus.py::test_c_1_1_ep_skus_list_returns_8",
+      "message": "test did not run"
+    },
+    "c-1-2": {
+      "status": "missing",
+      "check": "sc-skus-list renders exactly 8 elements with data-testid=sku-row",
+      "session": 1,
+      "test": "verify/test_ui_skus.py::test_c_1_2_sc_skus_list_renders_8_rows",
+      "message": "test did not run"
+    },
+    "c-2-1": {
+      "status": "missing",
+      "check": "GET /api/reorder-suggestions returns 200 with Suggestion[] where for every item qty_to_order == max(0, reorder_point - on_hand)",
+      "session": 2,
+      "test": "verify/test_api_suggestions.py::test_c_2_1_ep_reorder_suggestions_qty_formula",
+      "message": "test did not run"
+    },
+    "c-2-2": {
+      "status": "missing",
+      "check": "sc-suggestions renders one data-testid=suggestion-row per item where qty_to_order > 0, and none where qty_to_order == 0",
+      "session": 2,
+      "test": "verify/test_ui_suggestions.py::test_c_2_2_sc_suggestions_renders_only_positive",
+      "message": "test did not run"
+    },
+    "c-2-3": {
+      "status": "missing",
+      "check": "Each rendered suggestion row shows its qty_to_order in a cell with data-testid=qty-to-order",
+      "session": 2,
+      "test": "verify/test_ui_suggestions.py::test_c_2_3_sc_suggestions_shows_qty_in_cell",
+      "message": "test did not run"
+    },
+    "c-3-1": {
+      "status": "missing",
+      "check": "POST /api/purchase-orders with lines [{sku_id, qty}] returns 200 with JSON { id: number, itemsCount: number, totalQty: number }",
+      "session": 3,
+      "test": "verify/test_api_purchase_orders.py::test_c_3_1_ep_po_create_returns_summary",
+      "message": "test did not run"
+    },
+    "c-3-2": {
+      "status": "missing",
+      "check": "sc-suggestions renders a button with data-testid=po-submit whose text includes '(2)' after two rows are checked",
+      "session": 3,
+      "test": "verify/test_ui_purchase_orders.py::test_c_3_2_sc_suggestions_button_counts_checked",
+      "message": "test did not run"
+    },
+    "c-3-3": {
+      "status": "missing",
+      "check": "After selecting rows and clicking Create Purchase Order, the app navigates to /purchase-orders/created?items=<n>&total=<m>",
+      "session": 3,
+      "test": "verify/test_ui_purchase_orders.py::test_c_3_3_sc_suggestions_navigates_to_created_with_counts",
+      "message": "test did not run"
+    },
+    "c-3-4": {
+      "status": "missing",
+      "check": "sc-po-created renders the two numbers from the URL (data-testid=po-created-items and data-testid=po-created-total)",
+      "session": 3,
+      "test": "verify/test_ui_purchase_orders.py::test_c_3_4_sc_po_created_renders_numbers_from_url",
+      "message": "test did not run"
+    },
+    "c-4-1": {
+      "status": "missing",
+      "check": "GET /api/purchase-orders returns 200 with an array of { id, itemsCount, totalQty }",
+      "session": 4,
+      "test": "verify/test_api_purchase_orders.py::test_c_4_1_ep_po_list_returns_summaries",
+      "message": "test did not run"
+    },
+    "c-4-2": {
+      "status": "missing",
+      "check": "sc-po-history renders one data-testid=po-row per order and shows both itemsCount and totalQty on each row",
+      "session": 4,
+      "test": "verify/test_ui_purchase_orders.py::test_c_4_2_sc_po_history_renders_rows_with_counts",
+      "message": "test did not run"
+    },
+    "c-4-3": {
+      "status": "missing",
+      "check": "GET /api/purchase-orders/:id returns 200 with { id, lines: [{ sku_id, name, qty }], itemsCount, totalQty }",
+      "session": 4,
+      "test": "verify/test_api_purchase_orders.py::test_c_4_3_ep_po_detail_returns_detail",
+      "message": "test did not run"
+    },
+    "c-4-4": {
+      "status": "missing",
+      "check": "sc-po-detail renders one data-testid=po-line per line, each showing a SKU name and qty",
+      "session": 4,
+      "test": "verify/test_ui_purchase_orders.py::test_c_4_4_sc_po_detail_renders_lines",
+      "message": "test did not run"
+    }
+  },
+  "pytest_returncode": 99,
+  "stdout_tail": "",
+  "stderr_tail": "[WinError 267] The directory name is invalid"
+}

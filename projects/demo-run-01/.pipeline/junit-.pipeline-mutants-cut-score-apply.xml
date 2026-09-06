@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="13" time="16.579" timestamp="2026-09-06T17:37:20.126473+05:30" hostname="HERO"><testcase classname="verify.test_api_candidates" name="test_c_1_1_candidates_list_has_10_items" time="0.484" /><testcase classname="verify.test_api_candidates" name="test_c_1_4_candidates_list_has_duplicate_years" time="0.339" /><testcase classname="verify.test_api_candidates" name="test_c_1_5_candidates_list_has_typescript_tag" time="0.318" /><testcase classname="verify.test_api_rank" name="test_c_2_1_rank_years_returns_10_items_with_shape" time="0.332"><failure message="AssertionError: with active=years, at least one score must be &gt; 0&#10;assert False&#10; +  where False = any(&lt;generator object test_c_2_1_rank_years_returns_10_items_with_shape.&lt;locals&gt;.&lt;genexpr&gt; at 0x000001E664E62C20&gt;)">def test_c_2_1_rank_years_returns_10_items_with_shape():
+        """
+        c-2-1: GET /api/rank?active=years returns 200 with a JSON array of 10 RankItem having id, name, score (number), and reasons (string[])
+    
+        Strengthened to ensure the 'active=years' token is actually applied: at least one item must
+        have a positive numeric score and at least one reasons[] entry that mentions 'years'. This
+        ensures the query parser is exercised and prevents a fallback implementation from passing.
+        """
+        with httpx.Client(base_url=BASE_URL, timeout=10.0) as client:
+            resp = client.get("/api/rank", params={"active": "years"})
+        assert resp.status_code == 200
+        data = resp.json()
+        assert isinstance(data, list)
+        assert len(data) == 10
+        first = data[0]
+        assert isinstance(first.get("id"), str)
+        assert isinstance(first.get("name"), str)
+        # score must be a JSON number, not a string
+        assert isinstance(first.get("score"), (int, float)), "score must be a number in JSON"
+        # reasons must be an array of strings
+        reasons = first.get("reasons")
+        assert isinstance(reasons, list)
+        assert all(isinstance(r, str) for r in reasons)
+    
+        # Additionally, with active=years at least one item should show a non-zero score coming from years
+        scores: List[float] = [it.get("score") for it in data if isinstance(it.get("score"), (int, float))]
+&gt;       assert any(s &gt; 0 for s in scores), "with active=years, at least one score must be &gt; 0"
+E       AssertionError: with active=years, at least one score must be &gt; 0
+E       assert False
+E        +  where False = any(&lt;generator object test_c_2_1_rank_years_returns_10_items_with_shape.&lt;locals&gt;.&lt;genexpr&gt; at 0x000001E664E62C20&gt;)
+
+verify\test_api_rank.py:36: AssertionError</failure></testcase><testcase classname="verify.test_api_rank" name="test_c_2_2_rank_years_orders_by_unrounded_score_desc" time="0.319" /><testcase classname="verify.test_api_rank" name="test_c_3_4_rank_years_min_100_returns_empty_array" time="0.331" /><testcase classname="verify.test_sort_and_filter" name="test_c_3_1_no_active_orders_by_name_ascii" time="0.748" /><testcase classname="verify.test_sort_and_filter" name="test_c_3_2_tag_active_same_years_same_tag_break_ties_by_name" time="0.683" /><testcase classname="verify.test_sort_and_filter" name="test_c_3_3_tag_active_one_tagged_comes_first" time="0.794" /><testcase classname="verify.test_ui_main" name="test_c_1_2_renders_10_cards" time="1.835" /><testcase classname="verify.test_ui_main" name="test_c_1_3_renders_both_toggles" time="1.282" /><testcase classname="verify.test_ui_rank" name="test_c_2_3_years_toggle_shows_two_decimal_scores" time="1.357" /><testcase classname="verify.test_ui_rank" name="test_c_2_4_years_toggle_reasons_contains_years" time="7.059"><failure message="playwright._impl._errors.TimeoutError: Locator.wait_for: Timeout 5000ms exceeded.&#10;Call log:&#10;  - waiting for get_by_test_id(&quot;reasons&quot;).first to be visible&#10;    14 × locator resolved to hidden &lt;div data-testid=&quot;reasons&quot;&gt;&lt;/div&gt;">@pytest.mark.sync
+    def test_c_2_4_years_toggle_reasons_contains_years():
+        """
+        c-2-4: On "/" with years toggle on, at least one card's data-testid="reasons" contains the word "years"
+        """
+        with sync_playwright() as p:
+            browser = p.chromium.launch()
+            try:
+                page = browser.new_page()
+                page.goto(BASE_URL + "/", wait_until="load")
+                # Turn on the years toggle so the scorer includes the years signal
+                page.get_by_test_id("toggle-years").check()
+                # Wait for reasons to appear
+&gt;               page.get_by_test_id("reasons").first.wait_for(timeout=5000)
+
+verify\test_ui_rank.py:47: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+.pipeline\venv\Lib\site-packages\playwright\sync_api\_generated.py:20539: in wait_for
+    self._sync(
+.pipeline\venv\Lib\site-packages\playwright\_impl\_locator.py:748: in wait_for
+    await self._frame.wait_for_selector(
+.pipeline\venv\Lib\site-packages\playwright\_impl\_frame.py:394: in wait_for_selector
+    await self._channel.send(
+.pipeline\venv\Lib\site-packages\playwright\_impl\_connection.py:76: in send
+    return await self._connection.wrap_api_call(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = &lt;playwright._impl._connection.Connection object at 0x000001E668221940&gt;
+cb = &lt;function Channel.send.&lt;locals&gt;.&lt;lambda&gt; at 0x000001E6684CD010&gt;
+is_internal = False, title = None
+
+    async def wrap_api_call(
+        self, cb: Callable[[], Any], is_internal: bool = False, title: str = None
+    ) -&gt; Any:
+        if self._api_zone.get():
+            return await cb()
+        task = asyncio.current_task(self._loop)
+        parsed_st = _attach_api_call_information(
+            getattr(task, "__pw_stack__", None) or _capture_stack_trace(),
+            is_internal,
+            title,
+        )
+        self._api_zone.set(parsed_st)
+        try:
+            return await cb()
+        except Exception as error:
+&gt;           raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+E           playwright._impl._errors.TimeoutError: Locator.wait_for: Timeout 5000ms exceeded.
+E           Call log:
+E             - waiting for get_by_test_id("reasons").first to be visible
+E               14 × locator resolved to hidden &lt;div data-testid="reasons"&gt;&lt;/div&gt;
+
+.pipeline\venv\Lib\site-packages\playwright\_impl\_connection.py:632: TimeoutError</failure></testcase></testsuite></testsuites>

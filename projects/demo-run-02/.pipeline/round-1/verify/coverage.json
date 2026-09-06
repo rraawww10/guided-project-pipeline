@@ -1,0 +1,14 @@
+{
+  "c-1-1": {"test": "verify/test_api_endpoints.py::test_c_1_1_get_expenses_returns_array_with_integer_amountcents"},
+  "c-1-2": {"test": "verify/test_ui.py::test_c_1_2_ui_renders_one_row_per_expense"},
+  "c-1-3": {"test": "verify/test_ui.py::test_c_1_3_ui_renders_per_payer_totals_equal_sum_paid"},
+  "c-2-1": {"test": "verify/test_api_endpoints.py::test_c_2_1_get_settlement_balances_match_expected_from_expenses"},
+  "c-2-2": {"test": "verify/test_api_endpoints.py::test_c_2_2_get_settlement_transfers_conserve_balances_and_sum_to_zero"},
+  "c-2-3": {"test": "verify/test_api_endpoints.py::test_c_2_3_get_settlement_transfers_sorted_deterministically"},
+  "c-2-4": {"test": "verify/test_ui.py::test_c_2_4_ui_shows_proposed_transfers_title_when_loaded"},
+  "c-3-1": {"test": "verify/test_api_endpoints.py::test_c_3_1_get_settlement_minimalish_and_deterministic"},
+  "c-3-2": {"test": "verify/test_api_endpoints.py::test_c_3_2_get_settlement_include_filter_excludes_and_balances_zero"},
+  "c-3-3": {"test": "verify/test_ui.py::test_c_3_3_ui_toggle_include_recomputes_transfers"},
+  "c-3-4": {"test": "verify/test_ui.py::test_c_3_4_ui_transfer_amount_text_matches_currency"},
+  "c-3-5": {"test": "verify/test_ui.py::test_c_3_5_ui_renders_one_row_per_transfer"}
+}

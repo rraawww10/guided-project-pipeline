@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="14" time="30.584" timestamp="2026-09-07T02:16:44.477397+05:30" hostname="HERO"><testcase classname="verify.test_api_purchase_orders" name="test_c_3_1_ep_po_create_returns_summary" time="0.654" /><testcase classname="verify.test_api_purchase_orders" name="test_c_4_1_ep_po_list_returns_summaries" time="0.514" /><testcase classname="verify.test_api_purchase_orders" name="test_c_4_3_ep_po_detail_returns_detail" time="0.512" /><testcase classname="verify.test_api_skus" name="test_c_1_1_ep_skus_list_returns_8" time="0.326" /><testcase classname="verify.test_api_suggestions" name="test_c_2_1_ep_reorder_suggestions_qty_formula" time="0.349" /><testcase classname="verify.test_smoke" name="test_smoke_always_passes" time="0.001" /><testcase classname="verify.test_ui_purchase_orders" name="test_c_3_2_sc_suggestions_button_counts_checked" time="2.234" /><testcase classname="verify.test_ui_purchase_orders" name="test_c_3_3_sc_suggestions_navigates_to_created_with_counts" time="1.717" /><testcase classname="verify.test_ui_purchase_orders" name="test_c_3_4_sc_po_created_renders_numbers_from_url" time="1.193" /><testcase classname="verify.test_ui_purchase_orders" name="test_c_4_2_sc_po_history_renders_rows_with_counts" time="17.251"><failure message="playwright._impl._errors.TimeoutError: Page.wait_for_selector: Timeout 15000ms exceeded.&#10;Call log:&#10;  - waiting for locator(&quot;[data-testid=\&quot;po-row\&quot;]&quot;) to be visible">base_url = 'http://127.0.0.1:59265'
+page = &lt;Page url='http://127.0.0.1:59265/purchase-orders'&gt;
+http_client = &lt;httpx.Client object at 0x000002152E02B1D0&gt;
+
+    def test_c_4_2_sc_po_history_renders_rows_with_counts(base_url, page, http_client):
+        # Create a PO we can assert against
+        skus = http_client.get("/api/skus").json()
+        assert len(skus) &gt;= 2
+        lines = [{"sku_id": skus[0]["id"], "qty": 2}, {"sku_id": skus[1]["id"], "qty": 3}]
+        created = http_client.post("/api/purchase-orders", json={"lines": lines}).json()
+    
+        page.goto("/purchase-orders")
+&gt;       page.wait_for_selector('[data-testid="po-row"]', timeout=essential_wait)
+
+verify\test_ui_purchase_orders.py:71: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+.pipeline\venv\Lib\site-packages\playwright\sync_api\_generated.py:9033: in wait_for_selector
+    self._sync(
+.pipeline\venv\Lib\site-packages\playwright\_impl\_page.py:427: in wait_for_selector
+    return await self._main_frame.wait_for_selector(**locals_to_params(locals()))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.pipeline\venv\Lib\site-packages\playwright\_impl\_frame.py:394: in wait_for_selector
+    await self._channel.send(
+.pipeline\venv\Lib\site-packages\playwright\_impl\_connection.py:76: in send
+    return await self._connection.wrap_api_call(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = &lt;playwright._impl._connection.Connection object at 0x000002152E097100&gt;
+cb = &lt;function Channel.send.&lt;locals&gt;.&lt;lambda&gt; at 0x000002152F428040&gt;
+is_internal = False, title = None
+
+    async def wrap_api_call(
+        self, cb: Callable[[], Any], is_internal: bool = False, title: str = None
+    ) -&gt; Any:
+        if self._api_zone.get():
+            return await cb()
+        task = asyncio.current_task(self._loop)
+        parsed_st = _attach_api_call_information(
+            getattr(task, "__pw_stack__", None) or _capture_stack_trace(),
+            is_internal,
+            title,
+        )
+        self._api_zone.set(parsed_st)
+        try:
+            return await cb()
+        except Exception as error:
+&gt;           raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+E           playwright._impl._errors.TimeoutError: Page.wait_for_selector: Timeout 15000ms exceeded.
+E           Call log:
+E             - waiting for locator("[data-testid=\"po-row\"]") to be visible
+
+.pipeline\venv\Lib\site-packages\playwright\_impl\_connection.py:632: TimeoutError</failure></testcase><testcase classname="verify.test_ui_purchase_orders" name="test_c_4_4_sc_po_detail_renders_lines" time="1.769" /><testcase classname="verify.test_ui_skus" name="test_c_1_2_sc_skus_list_renders_8_rows" time="1.135" /><testcase classname="verify.test_ui_suggestions" name="test_c_2_2_sc_suggestions_renders_only_positive" time="1.234" /><testcase classname="verify.test_ui_suggestions" name="test_c_2_3_sc_suggestions_shows_qty_in_cell" time="1.161" /></testsuite></testsuites>

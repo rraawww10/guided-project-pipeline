@@ -1,0 +1,28 @@
+{
+  "ok": true,
+  "target": "app",
+  "vacuous_tests": [],
+  "runnable": {
+    "ran": true,
+    "ok": true,
+    "broken": [],
+    "count": 0,
+    "why": "every test's fixtures resolve",
+    "detail": ""
+  },
+  "dynamic": {
+    "ran": true,
+    "ok": true,
+    "target": "app",
+    "checked": 13,
+    "passed_too_early": [],
+    "counts": {
+      "pass": 0,
+      "fail": 0,
+      "skip": 0,
+      "missing": 13
+    },
+    "why": "every test is red before the code is written",
+    "runner_returncode": 1
+  }
+}

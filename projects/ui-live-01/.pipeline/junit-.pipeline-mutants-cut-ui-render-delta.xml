@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="5" skipped="0" tests="14" time="45.826" timestamp="2026-09-05T14:03:13.240323+05:30" hostname="HERO"><testcase classname="verify.test_api_transactions" name="test_c_1_1_get_transactions_returns_array_with_required_fields" time="0.532" /><testcase classname="verify.test_ui_session1" name="test_c_1_2_ui_renders_one_row_per_transaction" time="2.733" /><testcase classname="verify.test_ui_session1" name="test_c_1_3_ui_renders_each_row_memo" time="1.790" /><testcase classname="verify.test_ui_session2" name="test_c_2_1_category_transport_for_uber_trip_downtown" time="1.139" /><testcase classname="verify.test_ui_session2" name="test_c_2_2_rule_label_for_uber_trip_downtown" time="1.394" /><testcase classname="verify.test_ui_session2" name="test_c_2_3_summary_has_supplies_total_25" time="1.252" /><testcase classname="verify.test_ui_session2" name="test_c_2_4_category_transport_for_uber_refund_not_income" time="1.200" /><testcase classname="verify.test_ui_session2" name="test_c_2_5_summary_heading_visible_once" time="1.118" /><testcase classname="verify.test_ui_session2" name="test_c_2_6_summary_transport_total_20" time="1.119" /><testcase classname="verify.test_ui_session3" name="test_c_3_1_delta_updates_after_setting_transport_budget_30" time="6.738"><failure message="AssertionError: Locator expected to have count '1'&#10;Actual value: 0 &#10;Call log:&#10;  - Expect &quot;to_have_count&quot; with timeout 5000ms&#10;  - waiting for get_by_test_id(&quot;budget-Transport&quot;)&#10;    14 × locator resolved to 0 elements&#10;       - unexpected value &quot;0&quot;">page = &lt;Page url='http://127.0.0.1:63919/'&gt;, base_url = 'http://127.0.0.1:63919'
+
+    def test_c_3_1_delta_updates_after_setting_transport_budget_30(page, base_url):
+        page.goto(base_url)
+        page.wait_for_selector('[data-testid="summary"]')
+&gt;       set_budget(page, "Transport", "30")
+
+verify\test_ui_session3.py:28: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+page = &lt;Page url='http://127.0.0.1:63919/'&gt;, category = 'Transport'
+value = '30'
+
+    def set_budget(page, category: str, value: str):
+        inp = page.get_by_test_id(f"budget-{category}")
+&gt;       expect(inp).to_have_count(1)
+E       AssertionError: Locator expected to have count '1'
+E       Actual value: 0 
+E       Call log:
+E         - Expect "to_have_count" with timeout 5000ms
+E         - waiting for get_by_test_id("budget-Transport")
+E           14 × locator resolved to 0 elements
+E              - unexpected value "0"
+
+verify\test_ui_session3.py:19: AssertionError</failure></testcase><testcase classname="verify.test_ui_session3" name="test_c_3_2_sort_by_delta_places_expense_first_after_budget" time="6.640"><failure message="AssertionError: Locator expected to have count '1'&#10;Actual value: 0 &#10;Call log:&#10;  - Expect &quot;to_have_count&quot; with timeout 5000ms&#10;  - waiting for get_by_test_id(&quot;budget-Transport&quot;)&#10;    14 × locator resolved to 0 elements&#10;       - unexpected value &quot;0&quot;">page = &lt;Page url='http://127.0.0.1:63919/'&gt;, base_url = 'http://127.0.0.1:63919'
+
+    def test_c_3_2_sort_by_delta_places_expense_first_after_budget(page, base_url):
+        page.goto(base_url)
+        page.wait_for_selector('[data-testid="summary"]')
+&gt;       set_budget(page, "Transport", "30")
+
+verify\test_ui_session3.py:43: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+page = &lt;Page url='http://127.0.0.1:63919/'&gt;, category = 'Transport'
+value = '30'
+
+    def set_budget(page, category: str, value: str):
+        inp = page.get_by_test_id(f"budget-{category}")
+&gt;       expect(inp).to_have_count(1)
+E       AssertionError: Locator expected to have count '1'
+E       Actual value: 0 
+E       Call log:
+E         - Expect "to_have_count" with timeout 5000ms
+E         - waiting for get_by_test_id("budget-Transport")
+E           14 × locator resolved to 0 elements
+E              - unexpected value "0"
+
+verify\test_ui_session3.py:19: AssertionError</failure></testcase><testcase classname="verify.test_ui_session3" name="test_c_3_3_toggle_overbudget_hides_transport_and_keeps_expense" time="6.655"><failure message="AssertionError: Locator expected to have count '1'&#10;Actual value: 0 &#10;Call log:&#10;  - Expect &quot;to_have_count&quot; with timeout 5000ms&#10;  - waiting for get_by_test_id(&quot;budget-Transport&quot;)&#10;    14 × locator resolved to 0 elements&#10;       - unexpected value &quot;0&quot;">page = &lt;Page url='http://127.0.0.1:63919/'&gt;, base_url = 'http://127.0.0.1:63919'
+
+    def test_c_3_3_toggle_overbudget_hides_transport_and_keeps_expense(page, base_url):
+        page.goto(base_url)
+        page.wait_for_selector('[data-testid="summary"]')
+&gt;       set_budget(page, "Transport", "30")
+
+verify\test_ui_session3.py:66: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+page = &lt;Page url='http://127.0.0.1:63919/'&gt;, category = 'Transport'
+value = '30'
+
+    def set_budget(page, category: str, value: str):
+        inp = page.get_by_test_id(f"budget-{category}")
+&gt;       expect(inp).to_have_count(1)
+E       AssertionError: Locator expected to have count '1'
+E       Actual value: 0 
+E       Call log:
+E         - Expect "to_have_count" with timeout 5000ms
+E         - waiting for get_by_test_id("budget-Transport")
+E           14 × locator resolved to 0 elements
+E              - unexpected value "0"
+
+verify\test_ui_session3.py:19: AssertionError</failure></testcase><testcase classname="verify.test_ui_session3" name="test_c_3_4_percent_shows_one_decimal_transport_66_7" time="6.595"><failure message="AssertionError: Locator expected to have count '1'&#10;Actual value: 0 &#10;Call log:&#10;  - Expect &quot;to_have_count&quot; with timeout 5000ms&#10;  - waiting for get_by_test_id(&quot;budget-Transport&quot;)&#10;    14 × locator resolved to 0 elements&#10;       - unexpected value &quot;0&quot;">page = &lt;Page url='http://127.0.0.1:63919/'&gt;, base_url = 'http://127.0.0.1:63919'
+
+    def test_c_3_4_percent_shows_one_decimal_transport_66_7(page, base_url):
+        page.goto(base_url)
+        page.wait_for_selector('[data-testid="summary"]')
+&gt;       set_budget(page, "Transport", "30")
+
+verify\test_ui_session3.py:79: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+page = &lt;Page url='http://127.0.0.1:63919/'&gt;, category = 'Transport'
+value = '30'
+
+    def set_budget(page, category: str, value: str):
+        inp = page.get_by_test_id(f"budget-{category}")
+&gt;       expect(inp).to_have_count(1)
+E       AssertionError: Locator expected to have count '1'
+E       Actual value: 0 
+E       Call log:
+E         - Expect "to_have_count" with timeout 5000ms
+E         - waiting for get_by_test_id("budget-Transport")
+E           14 × locator resolved to 0 elements
+E              - unexpected value "0"
+
+verify\test_ui_session3.py:19: AssertionError</failure></testcase><testcase classname="verify.test_ui_session3" name="test_c_3_5_delta_header_visible_once" time="6.558"><failure message="AssertionError: Locator expected to have count '1'&#10;Actual value: 0 &#10;Call log:&#10;  - Expect &quot;to_have_count&quot; with timeout 5000ms&#10;  - waiting for get_by_text(&quot;Delta&quot;, exact=True)&#10;    14 × locator resolved to 0 elements&#10;       - unexpected value &quot;0&quot;">page = &lt;Page url='http://127.0.0.1:63919/'&gt;, base_url = 'http://127.0.0.1:63919'
+
+    def test_c_3_5_delta_header_visible_once(page, base_url):
+        page.goto(base_url)
+        # Exact-case "Delta" should match the header, not the "Sort by delta" button.
+        loc = page.get_by_text("Delta", exact=True)
+&gt;       expect(loc).to_have_count(1)
+E       AssertionError: Locator expected to have count '1'
+E       Actual value: 0 
+E       Call log:
+E         - Expect "to_have_count" with timeout 5000ms
+E         - waiting for get_by_text("Delta", exact=True)
+E           14 × locator resolved to 0 elements
+E              - unexpected value "0"
+
+verify\test_ui_session3.py:90: AssertionError</failure></testcase></testsuite></testsuites>

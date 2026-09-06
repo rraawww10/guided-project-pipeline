@@ -1,0 +1,145 @@
+{
+  "ok": true,
+  "verdict": "approve-eligible",
+  "spec_hash": "e566d6427a29fc88aed3153ff1be96fc0743ff5d938d56804e2ecf0469c71bad",
+  "findings": [
+    {
+      "id": "A1",
+      "title": "Years tie-break when no tokens are active",
+      "section": "blocking",
+      "owner": "test-runner",
+      "line": "\"Tie\u2011break 2: years DESC\" (spec.md) vs \"c-3-1: With no active tokens (?active=), if two items have the same unrounded score, the order is by name in ASCII codepoint order\" (spec.md/spec.json)",
+      "where": "spec.md, Stable comparator (Session 3) and spec.json, Session 3, criterion c-3-1",
+      "line_key": "c5144b799ff9169a",
+      "subject": [
+        "c-3-1"
+      ],
+      "blocking": true,
+      "owner_declared": "test-runner",
+      "owner_valid": true,
+      "owner_downgraded": null,
+      "fail_open": false,
+      "caught_by": "step 6 - the Builder/test-runner loop fixes this for free",
+      "must_fix_now": false
+    },
+    {
+      "id": "W1",
+      "title": "\"current dataset\" for years normalization",
+      "section": "worth a look",
+      "owner": "test-runner",
+      "line": "\"normalize years to a 0..1 band by dividing by the maximum years in the current dataset\"",
+      "where": "spec.md, Weights and signals \u2192 Session 2 scoring rule",
+      "line_key": "8a45fee03718c388",
+      "subject": [],
+      "blocking": false,
+      "owner_declared": "test-runner",
+      "owner_valid": true,
+      "owner_downgraded": null,
+      "fail_open": false,
+      "caught_by": "step 6 - the Builder/test-runner loop fixes this for free",
+      "must_fix_now": false
+    },
+    {
+      "id": "W2",
+      "title": "Duplicates and order in the 'active' query",
+      "section": "worth a look",
+      "owner": "test-runner",
+      "line": "\"If multiple 'active' keys are present ... join their values with commas in arrival order before parsing\" and \"write the valid set into activeTokens\"",
+      "where": "spec.md, Endpoints \u2192 ep-rank \u2192 Query parameters; spec.json, ep-rank.request.query.active; cut hint for cut-api-rank-parse-query",
+      "line_key": "89ca26b5cdc5a048",
+      "subject": [
+        "cut-api-rank-parse-query",
+        "ep-rank"
+      ],
+      "blocking": false,
+      "owner_declared": "test-runner",
+      "owner_valid": true,
+      "owner_downgraded": null,
+      "fail_open": false,
+      "caught_by": "step 6 - the Builder/test-runner loop fixes this for free",
+      "must_fix_now": false
+    },
+    {
+      "id": "W3",
+      "title": "Behaviour on invalid 'min' values",
+      "section": "worth a look",
+      "owner": "test-runner",
+      "line": "\"min: optional number\"",
+      "where": "spec.md, Endpoints \u2192 ep-rank \u2192 Query parameters (min); spec.json, ep-rank.request.query.min",
+      "line_key": "eb07a4d2a18de057",
+      "subject": [
+        "ep-rank"
+      ],
+      "blocking": false,
+      "owner_declared": "test-runner",
+      "owner_valid": true,
+      "owner_downgraded": null,
+      "fail_open": false,
+      "caught_by": "step 6 - the Builder/test-runner loop fixes this for free",
+      "must_fix_now": false
+    },
+    {
+      "id": "W4",
+      "title": "Reasons formatting for the tag bonus",
+      "section": "worth a look",
+      "owner": "nothing",
+      "line": "\"reasons[] includes ... e.g., 'years +0.60', 'preferred tag +1'\"",
+      "where": "spec.md, Data model \u2192 RankItem.reasons examples",
+      "line_key": "360f841b9f876fab",
+      "subject": [],
+      "blocking": false,
+      "owner_declared": "nothing",
+      "owner_valid": true,
+      "owner_downgraded": null,
+      "fail_open": false,
+      "caught_by": "NO downstream checker sees this - it ships as written",
+      "must_fix_now": false
+    },
+    {
+      "id": "W5",
+      "title": "How cmp knows whether 'tag' is active",
+      "section": "worth a look",
+      "owner": "nothing",
+      "line": "\"always sort using the stable comparator from lib/sort.ts (cmp)\" and \"when the 'tag' token is active ...\"",
+      "where": "spec.md, Stable comparator (Session 3); cut hints referencing lib/sort.ts (cmp)",
+      "line_key": "ff11cf4adcf897e7",
+      "subject": [],
+      "blocking": false,
+      "owner_declared": "nothing",
+      "owner_valid": true,
+      "owner_downgraded": null,
+      "fail_open": false,
+      "caught_by": "NO downstream checker sees this - it ships as written",
+      "must_fix_now": false
+    },
+    {
+      "id": "W6",
+      "title": "Idea/spec drift on seed size",
+      "section": "worth a look",
+      "owner": "nothing",
+      "line": "idea.md: \"seed file of 8\u201312 candidates\" vs spec.md: \"Exactly 10 candidates\"",
+      "where": "idea.md (Sessions 1) vs spec.md (Seed)",
+      "line_key": "62404dcfbc1d69e3",
+      "subject": [],
+      "blocking": false,
+      "owner_declared": "nothing",
+      "owner_valid": true,
+      "owner_downgraded": null,
+      "fail_open": false,
+      "caught_by": "NO downstream checker sees this - it ships as written",
+      "must_fix_now": false
+    }
+  ],
+  "counts": {
+    "blocking": 1,
+    "worth_a_look": 6,
+    "unowned_blocking": 0
+  },
+  "reasons": [
+    "1 blocking finding(s), all owned by a downstream checker; 6 worth a look. Nothing here escapes to the shipped project."
+  ],
+  "rule": "reject when any blocking finding is owned by 'nothing'; approve when every remaining finding sits in a column a downstream checker owns. An owner that can pass by not running is owned only conditionally: it approves, and the confirmation it actually ran is listed in verify_later",
+  "reviewed_spec_hash": "e566d6427a29fc88aed3153ff1be96fc0743ff5d938d56804e2ecf0469c71bad",
+  "drift": [],
+  "verify_later": []
+}

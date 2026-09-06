@@ -1,0 +1,239 @@
+{
+  "ok": true,
+  "ungraded_tasks": [],
+  "inconclusive_tasks": [],
+  "target": "app",
+  "checked": 13,
+  "of_total": 13,
+  "seconds": 835.8,
+  "results": [
+    {
+      "task": "cut-ep-po-create-transaction",
+      "ok": true,
+      "inconclusive": false,
+      "lines_removed": 13,
+      "graded_by": [
+        "c-3-1"
+      ],
+      "went_red": [
+        "c-3-1"
+      ],
+      "stayed_green": [],
+      "collateral": [
+        "c-3-3",
+        "c-4-1",
+        "c-4-3",
+        "c-4-4"
+      ],
+      "why": "removing it turns its requirements red"
+    },
+    {
+      "task": "cut-ep-po-detail-join",
+      "ok": true,
+      "inconclusive": false,
+      "lines_removed": 11,
+      "graded_by": [
+        "c-4-3",
+        "c-4-4"
+      ],
+      "went_red": [
+        "c-4-3",
+        "c-4-4"
+      ],
+      "stayed_green": [],
+      "collateral": [],
+      "why": "removing it turns its requirements red"
+    },
+    {
+      "task": "cut-ep-po-list-aggregate",
+      "ok": true,
+      "inconclusive": false,
+      "lines_removed": 10,
+      "graded_by": [
+        "c-4-1",
+        "c-4-2"
+      ],
+      "went_red": [
+        "c-4-1",
+        "c-4-2"
+      ],
+      "stayed_green": [],
+      "collateral": [],
+      "why": "removing it turns its requirements red"
+    },
+    {
+      "task": "cut-ep-skus-list-query",
+      "ok": true,
+      "inconclusive": false,
+      "lines_removed": 3,
+      "graded_by": [
+        "c-1-1"
+      ],
+      "went_red": [
+        "c-1-1"
+      ],
+      "stayed_green": [],
+      "collateral": [
+        "c-1-2",
+        "c-3-1",
+        "c-4-1",
+        "c-4-2",
+        "c-4-3",
+        "c-4-4"
+      ],
+      "why": "removing it turns its requirements red"
+    },
+    {
+      "task": "cut-ep-suggestions-calc",
+      "ok": true,
+      "inconclusive": false,
+      "lines_removed": 9,
+      "graded_by": [
+        "c-2-1"
+      ],
+      "went_red": [
+        "c-2-1"
+      ],
+      "stayed_green": [],
+      "collateral": [
+        "c-2-2",
+        "c-2-3",
+        "c-3-2",
+        "c-3-3"
+      ],
+      "why": "removing it turns its requirements red"
+    },
+    {
+      "task": "cut-ui-po-created-read",
+      "ok": true,
+      "inconclusive": false,
+      "lines_removed": 4,
+      "graded_by": [
+        "c-3-4"
+      ],
+      "went_red": [
+        "c-3-4"
+      ],
+      "stayed_green": [],
+      "collateral": [],
+      "why": "removing it turns its requirements red"
+    },
+    {
+      "task": "cut-ui-po-detail-fetch",
+      "ok": true,
+      "inconclusive": false,
+      "lines_removed": 9,
+      "graded_by": [
+        "c-4-4"
+      ],
+      "went_red": [
+        "c-4-4"
+      ],
+      "stayed_green": [],
+      "collateral": [],
+      "why": "removing it turns its requirements red"
+    },
+    {
+      "task": "cut-ui-po-history-fetch",
+      "ok": true,
+      "inconclusive": false,
+      "lines_removed": 7,
+      "graded_by": [
+        "c-4-2"
+      ],
+      "went_red": [
+        "c-4-2"
+      ],
+      "stayed_green": [],
+      "collateral": [],
+      "why": "removing it turns its requirements red"
+    },
+    {
+      "task": "cut-ui-skus-fetch",
+      "ok": true,
+      "inconclusive": false,
+      "lines_removed": 7,
+      "graded_by": [
+        "c-1-2"
+      ],
+      "went_red": [
+        "c-1-2"
+      ],
+      "stayed_green": [],
+      "collateral": [],
+      "why": "removing it turns its requirements red"
+    },
+    {
+      "task": "cut-ui-suggestions-fetch",
+      "ok": true,
+      "inconclusive": false,
+      "lines_removed": 8,
+      "graded_by": [
+        "c-2-2",
+        "c-2-3"
+      ],
+      "went_red": [
+        "c-2-2",
+        "c-2-3"
+      ],
+      "stayed_green": [],
+      "collateral": [
+        "c-3-2",
+        "c-3-3"
+      ],
+      "why": "removing it turns its requirements red"
+    },
+    {
+      "task": "cut-ui-suggestions-filter",
+      "ok": true,
+      "inconclusive": false,
+      "lines_removed": 3,
+      "graded_by": [
+        "c-2-2"
+      ],
+      "went_red": [
+        "c-2-2"
+      ],
+      "stayed_green": [],
+      "collateral": [
+        "c-2-3",
+        "c-3-2",
+        "c-3-3"
+      ],
+      "why": "removing it turns its requirements red"
+    },
+    {
+      "task": "cut-ui-suggestions-select",
+      "ok": true,
+      "inconclusive": false,
+      "lines_removed": 8,
+      "graded_by": [
+        "c-3-2",
+        "c-3-3"
+      ],
+      "went_red": [
+        "c-3-2",
+        "c-3-3"
+      ],
+      "stayed_green": [],
+      "collateral": [],
+      "why": "removing it turns its requirements red"
+    },
+    {
+      "task": "cut-ui-suggestions-submit",
+      "ok": true,
+      "inconclusive": false,
+      "lines_removed": 10,
+      "graded_by": [
+        "c-3-3"
+      ],
+      "went_red": [
+        "c-3-3"
+      ],
+      "stayed_green": [],
+      "collateral": [],
+      "why": "removing it turns its requirements red"
+    }
+  ],
+  "rule": "every student task must turn at least one of its requirements red when it alone is removed"
+}

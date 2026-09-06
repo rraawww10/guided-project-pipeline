@@ -1,0 +1,460 @@
+# Next AI Handoff Context
+
+This repo is `D:\project_creation_workflow`. The user wants a simple V1 UI/control layer for the existing Guided Project Pipeline. The most important instruction from the user is:
+
+> Do not change anything in the already existing workflow.
+
+Treat the workflow core as read-only unless the user explicitly says otherwise. Do not edit orchestrator behavior, retry rules, gates, deterministic scripts, agent prompts, project artifacts, or existing project state just to make the UI easier.
+
+## Existing Workflow Summary
+
+The committed workflow lives under `pipeline/`, `.claude/agents/`, `.claude/skills/`, and `.claude/workflows/`.
+
+Important workflow files:
+
+- `pipeline/cli.py`: CLI orchestrator and source of truth for commands.
+- `pipeline/state.py`: phase/gate/retry/state model.
+- `pipeline/spec_linter.py`, `redfirst.py`, `test_runner.py`, `mutation.py`, `cutter.py`, `leak_scan.py`, `guide_linter.py`, `deploy_check.py`, `watchdog.py`: deterministic scripts.
+- `.claude/agents/*.md`: existing agent definitions.
+- `.claude/skills/*/SKILL.md`: existing agent task instructions.
+- `.claude/workflows/gp-phase*.js`: existing Claude workflow runners.
+
+Flow 2 is the default/current flow:
+
+1. Step 0, human stack input: `pipeline stack <slug> --stack ... --sessions ... --minutes ...`
+2. Step 1, AI idea generator: writes `ideas/idea-01.md` through `idea-05.md`
+3. Step 2, Gate 0: human picks with `pipeline pick <slug> <n>`
+4. Step 3, spec writer: writes `spec.md` and `spec.json`
+5. Step 4, spec breaker: writes `ambiguity.md`
+6. Step 5, test writer: writes `verify/`, checked by `redfirst`
+7. Step 6, Gate 1: approve plan and tests
+8. Step 7, builder: writes `app/`
+9. Step 8, verifier: browser tests, checked by `test` and `mutation`
+10. Step 9, Gate 2
+11. Step 10, cutter: generates `skeleton/`, checked by skeleton check and leak scan
+12. Step 11, guide writer: existing agent file is `pack-writer.md`; step text may say guide-writer
+13. Step 12, deploy check
+14. Step 13, human dry run
+15. Step 14, Gate 3
+16. Step 15, ship/watch/feedback
+
+Flow 1 is the legacy 12-step flow and must still be displayed correctly for old projects.
+
+## What Was Already Implemented Before This Turn
+
+The previous Codex had already created an untracked UI layer:
+
+- `pipeline/ui.py`
+- `pipeline/ui_static/app.js`
+- `pipeline/ui_static/app.css`
+
+These files were not tracked by Git when I started. `git status --short` showed:
+
+```text
+?? blockers_round_3.txt
+?? pipeline/ui.py
+?? pipeline/ui_static/
+```
+
+The pre-existing UI layer already had:
+
+- A local Python HTTP server: `python -m pipeline.ui --host 127.0.0.1 --port 8765`
+- Static dashboard HTML served from `pipeline/ui.py`
+- Browser app in `pipeline/ui_static/app.js`
+- Styling in `pipeline/ui_static/app.css`
+- API endpoints:
+  - `GET /api/overview`
+  - `GET /api/runs`
+  - `GET /api/projects/<slug>`
+  - `GET /api/projects/<slug>/artifact?path=...`
+  - `POST /api/projects`
+  - `POST /api/run`
+- Real state reading from `projects/*/.pipeline/state.json`
+- Project summary/status/progress derived from actual files and gates
+- Artifact listing from existing project directories
+- Script execution through existing CLI commands, via subprocess
+- Gate approval/rejection through existing `pipeline gate`
+- Dry-run recording through existing `pipeline dryrun`
+- Basic file upload into `projects/<slug>/uploads/`
+- OpenRouter backend-only agent runner using `OPENROUTER_API_KEY` and `OPENROUTER_MODEL`
+- Agent tool surface for OpenRouter calls: read file, write file, list files, grep, run command
+
+Important: OpenRouter is only available if `.env` or environment variables define `OPENROUTER_API_KEY`. `.env` is already gitignored.
+
+## What I Changed In This Turn
+
+I only edited the UI/control layer and added this handoff file. I did not edit the committed workflow core.
+
+Changed files:
+
+- `pipeline/ui.py`
+- `pipeline/ui_static/app.js`
+- `pipeline/ui_static/app.css`
+- `NEXT_AI_CONTEXT.md`
+
+UI backend changes in `pipeline/ui.py`:
+
+- Added `STEP_AGENT_ALIASES = {"guide-writer": "pack-writer"}` for the UI layer to understand the workflow wording mismatch. The actual workflow was not changed.
+- Added `pipeline_env()` so UI-launched pipeline subprocesses run with:
+  - `GP_ROOT=<repo root>`
+  - `PYTHONUTF8=1`
+  - `PYTHONIOENCODING=utf-8`
+- Added `pipeline_python_args()` so UI-launched workflow commands use `python -X utf8 -m pipeline ...`.
+- Reason for `pipeline_env()`: on Windows, `pipeline pick` calls the existing `cmd_ideas`, and that workflow code uses `Path.read_text()` without an explicit encoding. UTF-8 punctuation in generated idea Markdown can crash under the default `cp1252` decoder with `UnicodeDecodeError: byte 0x9d`. The UI now launches existing workflow commands in UTF-8 mode instead of changing the workflow core.
+- Added artifact download support:
+  - `GET /api/projects/<slug>/download?path=...`
+  - implemented through `send_artifact(...)`
+- Added `is_inside(...)` using `Path.relative_to(...)` and used it for safer path containment checks.
+- Replaced fragile string-prefix checks in the UI agent runner path helper with `is_inside(...)`.
+- Added last execution metadata to agent summaries:
+  - `status`
+  - `last_execution`
+  - `last_output`
+- Added last execution metadata to script summaries:
+  - `status`
+  - `last_execution`
+  - `last_output`
+  - `error`
+
+Browser UI changes in `pipeline/ui_static/app.js`:
+
+- Added `fmtTime(...)` for timestamps.
+- Added pending upload list with remove buttons before submit.
+- Changed project creation to upload only files in the pending upload list.
+- Added artifact download links in artifact tables and artifact viewer.
+- Fixed Gate 0 behavior:
+  - Gate 0 is not a generic `pipeline gate 0 approve`.
+  - UI now uses the existing `pick` action, which runs `pipeline pick <slug> <n>`.
+- Added Gate 0 idea selection form in Reviews and Project Details.
+- Added `submitPick(...)`.
+- Mapped next-step `guide-writer` text to runnable `pack-writer` agent in the UI button.
+- Changed polling to refresh every 5 seconds, so external workflow/state changes become visible without manual refresh.
+- Added stack/session/minutes display to Project Details overview.
+- Added last execution/status/output columns to Agents and Scripts pages.
+
+CSS changes in `pipeline/ui_static/app.css`:
+
+- Added styling for artifact download links.
+- Added styling for pending upload rows.
+
+## Verification Already Run
+
+These passed after the UI edits:
+
+```powershell
+python -m py_compile pipeline\ui.py
+node --check pipeline\ui_static\app.js
+python -c "from pipeline.ui import overview; import json; data=overview(); print(json.dumps({'counts': data['counts'], 'openrouter': data['openrouter'], 'projects': len(data['projects']), 'reviews': len(data['reviews']), 'agents': len(data['agents']), 'scripts': len(data['scripts'])}, indent=2))"
+```
+
+The overview output at that time was:
+
+```json
+{
+  "counts": {
+    "Total": 8,
+    "Running": 0,
+    "Queued": 0,
+    "Completed": 8,
+    "Failed": 0,
+    "Waiting for Review": 0
+  },
+  "openrouter": {
+    "available": false,
+    "model": "openai/gpt-5"
+  },
+  "projects": 8,
+  "reviews": 0,
+  "agents": 7,
+  "scripts": 15
+}
+```
+
+I also started the UI server and smoke-tested:
+
+```powershell
+python -m pipeline.ui --host 127.0.0.1 --port 8765
+Invoke-WebRequest -UseBasicParsing http://127.0.0.1:8765/
+Invoke-WebRequest -UseBasicParsing http://127.0.0.1:8765/api/overview
+Invoke-WebRequest -UseBasicParsing http://127.0.0.1:8765/api/projects/<slug>
+```
+
+Results:
+
+- `/` returned HTTP 200.
+- `/api/overview` returned HTTP 200 with 8 projects, 7 agents, 15 scripts.
+- A project detail endpoint returned a real project with 4 phases and 90 artifacts.
+
+The UI server was stopped cleanly afterward.
+
+## Remaining Work / Known Gaps
+
+Do these next, still without changing workflow core:
+
+1. Re-run verification after this handoff file and final UI tweaks:
+- `python -m py_compile pipeline\ui.py`
+- `node --check pipeline\ui_static\app.js`
+- optional local server smoke test.
+2. If a UI-launched command still shows old behavior after code edits or `.env` changes, restart the UI server. Existing Python server processes do not reload `pipeline/ui.py` or `.env`.
+3. Consider adding `overview-grid` CSS if the stack/session row needs spacing polish.
+4. Test a new project through the UI:
+   - create project
+   - confirm `pipeline new` ran
+   - confirm uploaded files land in `projects/<slug>/uploads/`
+   - confirm stack input runs for flow 2 when stack is supplied
+5. Test Gate 0 from the UI with a project that has five idea files:
+   - choose an idea
+   - confirm it runs `pipeline pick <slug> <n>`
+   - confirm `idea.md` is copied and `gate0` is recorded
+6. Test an actual deterministic script button from the UI, preferably on a scratch project.
+7. Test artifact view and artifact download.
+8. Test OpenRouter agent execution only after the user adds `.env`:
+   - `OPENROUTER_API_KEY=...`
+   - `OPENROUTER_MODEL=...`
+9. The OpenRouter agent runner exists, but it is minimal. Watch for:
+   - provider/model tool-call compatibility
+   - long-running agent timeouts
+   - whether the agent writes exactly the files expected by the existing workflow
+   - whether it needs better project-specific context per agent
+10. The UI has no persistent run history; `RUNS` is in memory. This is acceptable for V1 unless the user asks otherwise.
+11. The UI does not run the `.claude/workflows/gp-phase*.js` files directly. It exposes the phase command text and lets the user run agents/scripts. If full workflow execution from one button is needed, add it in the UI layer only by calling existing workflow/CLI entry points.
+12. The UI currently marks all existing projects completed based on derived state. If that seems wrong, inspect `step_checks(...)` in `pipeline/ui.py`; do not change `pipeline/state.py` or `pipeline/cli.py`.
+13. Avoid creating fake data, fake agent success, or fake progress. Every page should continue reading actual project state and artifacts.
+
+## How To Run
+
+From `D:\project_creation_workflow`:
+
+```powershell
+python -m pipeline.ui --host 127.0.0.1 --port 8765
+```
+
+Open:
+
+```text
+http://127.0.0.1:8765
+```
+
+Optional `.env` for real agent execution:
+
+```env
+OPENROUTER_API_KEY=your_key_here
+OPENROUTER_MODEL=openai/gpt-5
+```
+
+Never expose the key in frontend code. Keep `.env` untracked.
+
+## Strong Guardrail For The Next AI
+
+If you find a limitation in the pipeline itself, report it clearly as a limitation. Do not silently modify the existing workflow to make the UI pass. The user explicitly asked that the already existing workflow must not be changed.
+
+## Continuation Update - 2026-09-04
+
+The next Codex agent resumed after the previous agent hit the usage limit while adding the user's OpenRouter key.
+
+What was done in this continuation:
+
+- Verified `.env` exists.
+- Verified `.env` has `OPENROUTER_API_KEY` configured without printing the secret.
+- Verified `.env` has `OPENROUTER_MODEL` configured.
+- Verified `.gitignore` excludes `.env` and `.env.*`.
+- Ran `python -m py_compile pipeline\ui.py`; it passed.
+- Ran `node --check pipeline\ui_static\app.js`; it passed.
+- Started the UI backend with `python -m pipeline.ui --host 127.0.0.1 --port 8765`.
+- Smoke-tested `/`; it returned HTTP 200.
+- Smoke-tested `/api/overview`; it returned 8 projects, 7 agents, and 15 scripts.
+
+Important:
+
+- The OpenRouter key must never be printed into logs, committed, copied into frontend code, or included in future handoffs.
+- No existing workflow core files were changed in this continuation.
+- The UI server was left running so the user can test at `http://127.0.0.1:8765`.
+
+Still to do:
+
+- Use the browser UI to create a scratch project and run the workflow step by step.
+- Confirm real OpenRouter agent execution works from the UI.
+- If a step fails, inspect the run output/artifact and report the real limitation rather than changing workflow core behavior.
+
+## Continuation Update - Create Form Input Fix
+
+The user reported that typing into the Create Project UI disappeared from the input fields.
+
+Root cause:
+
+- `pipeline/ui_static/app.js` auto-refreshes overview data every 5 seconds.
+- Each refresh calls `render()`, and `renderCreate()` rebuilt the Create Project form from hard-coded defaults.
+- Because the form had no persistent local draft state, partially typed input was wiped on refresh.
+
+What was changed:
+
+- Added a `createDraft` object in `pipeline/ui_static/app.js` to preserve Create Project form values across renders.
+- Wired create form `input` and `change` events into that draft state.
+- Reset `createDraft` only after successful project creation.
+- Added a small `formDirty` guard so background refresh does not wipe in-progress gate/dry-run form notes elsewhere in the UI.
+- Added a `Cache-Control: no-store` header in the UI server's `send_bytes()` helper to reduce stale frontend asset issues after UI changes.
+
+Verification:
+
+- `node --check pipeline\ui_static\app.js` passed.
+- `python -m py_compile pipeline\ui.py` passed.
+- The running UI served patched `app.js` containing `createDraft` and `formDirty`.
+- `/api/overview` continued to respond with real workspace data.
+
+Scope:
+
+- Only UI wrapper files were changed.
+- No existing workflow core behavior was changed.
+
+## Continuation Update - Run Agent Button Fix
+
+The user shared a browser screenshot showing `ui-test-01` stuck on the Projects page at Flow 2 step 1:
+
+- Current phase: `idea`
+- Current step: `1`
+- Agent/script: `idea-generator`
+- Action text: `idea-generator -> ideas/idea-01..05.md (checked by: pipeline ideas)`
+
+Two UI-layer issues were found:
+
+- The running UI reported `openrouter_available=False` even though `.env` existed and contained `OPENROUTER_API_KEY`.
+- The project detail panel is rendered asynchronously by `renderProjectDetail()`, after the main `wireView()` pass. Buttons inserted into that panel, including `Run Agent`, were not always getting event listeners.
+
+What was changed:
+
+- Updated `pipeline/ui.py` `load_dotenv()` so values from `.env` are loaded when the inherited environment variable is missing or blank.
+- Updated `pipeline/ui_static/app.js` so asynchronously rendered project detail and artifact detail controls call `wireDynamicControls(...)` after insertion.
+- `wireDynamicControls(...)` wires project-detail `Run Agent`, script, gate, dry-run, and artifact buttons/forms.
+
+Verification:
+
+- `node --check pipeline\ui_static\app.js` passed.
+- `python -m py_compile pipeline\ui.py` passed.
+- Restarted the UI server.
+- `/api/overview` now reports `openrouter_available=True`.
+- `/api/projects/ui-test-01` reports it is queued at `idea` step `1`, `who=AGENT`, `agent=idea-generator`.
+
+Next user action:
+
+- Hard refresh the browser with `Ctrl + F5`.
+- Open Projects -> `ui-test-01`.
+- Click `Run Agent`.
+- Then watch Running Workflows for the `idea-generator` run.
+
+## Continuation Update - Run Agent Appeared To Do Nothing
+
+The user reported that clicking `Run Agent` appeared to do nothing.
+
+What was observed:
+
+- The click was actually reaching the backend.
+- The project briefly changed to `Running`.
+- Previous agent runs failed almost immediately with:
+  - `OpenRouter request failed: <urlopen error [WinError 10061] No connection could be made because the target machine actively refused it>`
+- The Projects page showed an empty black output area instead of the failed run error, making the UI feel non-functional.
+- Multiple stale `python -m pipeline.ui --host 127.0.0.1 --port 8765` processes were listening on the same port, so the browser could receive inconsistent old/new UI behavior.
+
+What was changed:
+
+- `pipeline/ui.py` now sorts per-project runs newest-first so the latest run is shown predictably.
+- `pipeline/ui_static/app.js` now shows a latest run summary on the project page, including failed run stderr.
+- Action buttons now change to `Starting...` while their request is being submitted.
+- Agent/script/watch buttons now use the same visible action handler.
+- `pipeline/ui_static/app.css` adds small styling for the run summary block.
+
+What was done operationally:
+
+- Stopped all stale `pipeline.ui` Python processes.
+- Started exactly one fresh UI server on `127.0.0.1:8765`.
+- Verified only one listener remained.
+- Verified `/api/overview` reports `openrouter=True`.
+- Verified `ui-test-01` is queued at Flow 2 step 1, `who=AGENT`, `agent=idea-generator`.
+- Verified a tiny authenticated OpenRouter ping with the configured model succeeded.
+
+Current next action:
+
+- In the browser, hard refresh with `Ctrl + F5`.
+- Open Projects -> `ui-test-01`.
+- Click `Run Agent` once.
+- The button should show `Starting...`, then the project should show `Running`.
+- If the run fails, the project page should now show the real error in the run summary instead of a blank black output block.
+
+## Continuation Update - Page Refresh Loop Calmed
+
+The user reported that the UI page was refreshing again and again.
+
+Root cause:
+
+- `pipeline/ui_static/app.js` used `setInterval(..., 5000)` to call `load()`.
+- `load()` always fetched `/api/overview` and re-rendered the entire current view.
+- On the Projects page this made the page visibly redraw every 5 seconds.
+
+What was changed:
+
+- Added `refreshData({ rerender })`.
+- Manual refresh and action completion still perform a normal render.
+- Background polling now fetches data silently.
+- Background polling only re-renders the Running Workflows page, or a selected project detail while that project is actively running.
+- Create Project and dirty/editing forms are still protected from polling.
+
+Verification:
+
+- `node --check pipeline\ui_static\app.js` passed.
+- `python -m py_compile pipeline\ui.py` passed.
+- Stopped duplicate UI processes.
+- Started exactly one fresh `python -m pipeline.ui --host 127.0.0.1 --port 8765` process.
+- `/api/overview` reports `openrouter=True`.
+- Served `app.js` contains `autoRefresh` and silent `refreshData({ rerender: false })`.
+
+Streamlit note:
+
+- Streamlit is not currently installed in this Python environment.
+- A Streamlit UI can be built as a replacement UI wrapper without changing the existing workflow core, by reading project state files and calling the existing pipeline CLI with subprocesses.
+
+## Continuation Update - Dynamic Workflow Detail Polish
+
+The next Codex agent continued the same V1 UI/control-layer work and still did not edit workflow core files.
+
+Changed only:
+
+- `pipeline/ui.py`
+- `pipeline/ui_static/app.js`
+- `pipeline/ui_static/app.css`
+- `context_till_now.txt`
+
+What changed:
+
+- Aligned the UI's step completion projection with `pipeline next` for Spec Breaker freshness by using `gate1.check(...)` and `spec_hash(...)` in the UI layer.
+- Added real step-level state under each phase, including component, status, checker scripts, retries, and discovered artifacts.
+- Added `current_execution` to project detail API responses, derived from current project state and active run records.
+- Added `events` to project detail API responses, built from project creation, state `steps`, gate records, and in-memory UI run records.
+- Added `POST /api/run` action `next`, which dispatches the current real next step to either:
+  - the existing OpenRouter agent runner for AGENT steps,
+  - the existing `python -m pipeline ...` CLI for SCRIPT steps,
+  - the existing `pipeline stack` CLI for Flow 2 step 0 when stack inputs are supplied.
+- Added run metadata (`kind`, `component`, `phase`) so the UI can distinguish agents, scripts, human actions, and generic commands.
+- Updated Project Details to show:
+  - prominent Current Execution
+  - Refresh Status fallback
+  - Start / Run Current Step
+  - checker buttons for agent steps where the existing workflow requires deterministic validation
+  - full Workflow Steps list by phase
+  - Workflow Events log
+- Updated Running Workflows to show active project cards above command runs.
+- Changed background polling on Projects to refresh only the selected project detail panel, not the full page.
+
+Verification:
+
+- `python -m py_compile pipeline\ui.py` passed.
+- `node --check pipeline\ui_static\app.js` passed.
+- Restarted the UI server on `http://127.0.0.1:8765`.
+- Live HTTP smoke tests passed for `/`, `/api/overview`, and `/api/projects/ui-test-01`.
+- Confirmed `ui-test-01` UI state now agrees with `python -m pipeline next ui-test-01`: Flow 2 step 4, `spec-breaker`.
+- Created scratch project `ui-smoke-20260904` through the UI API.
+- Ran the new `next` action with stack inputs against that scratch project.
+- Confirmed the action used the real CLI path, wrote `projects/ui-smoke-20260904/stack.json`, logged a real `stack` event, and advanced to Flow 2 step 1 `idea-generator`.
+
+Known limits:
+
+- A full OpenRouter agent-to-ship end-to-end run was not completed in this continuation. The smoke run avoided spending a long/costly agent call and verified the UI-to-real-CLI control path instead.
+- The UI still does not execute `.claude/workflows/gp-phase*.js` directly; it exposes real current steps and calls the existing Python CLI or OpenRouter agent runner.

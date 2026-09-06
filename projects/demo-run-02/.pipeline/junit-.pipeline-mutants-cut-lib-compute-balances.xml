@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="8" skipped="0" tests="12" time="36.423" timestamp="2026-09-06T21:55:08.037642+05:30" hostname="HERO"><testcase classname="verify.test_api" name="test_c_1_1_get_expenses_returns_4_items[/api/expenses-4]" time="0.513" /><testcase classname="verify.test_api" name="test_c_2_4_naive_settlement_api_first_item" time="0.334"><failure message="AssertionError: expected 4 transfers, got 0&#10;assert 0 == 4&#10; +  where 0 = len([])">def test_c_2_4_naive_settlement_api_first_item():
+        url = BASE_URL.rstrip("/") + "/api/settlement/naive"
+        resp = httpx.get(url, timeout=10.0)
+        assert resp.status_code == 200, f"expected 200, got {resp.status_code}: {resp.text}"
+        data = resp.json()
+        assert isinstance(data, list), "expected a JSON array"
+&gt;       assert len(data) == 4, f"expected 4 transfers, got {len(data)}"
+E       AssertionError: expected 4 transfers, got 0
+E       assert 0 == 4
+E        +  where 0 = len([])
+
+verify\test_api.py:28: AssertionError</failure></testcase><testcase classname="verify.test_ui_session1" name="test_c_1_2_home_renders_4_expense_rows" time="1.885" /><testcase classname="verify.test_ui_session1" name="test_c_1_3_totals_paid_summary_5_rows_with_exact_amounts" time="0.610"><failure message="AssertionError: Locator expected to be visible&#10;Actual value: None&#10;Error: strict mode violation: get_by_text(&quot;Eve $0.00&quot;, exact=True) resolved to 2 elements:&#10;    1) &lt;li&gt;Eve $0.00&lt;/li&gt; aka get_by_text(&quot;Eve $&quot;).first&#10;    2) &lt;li data-testid=&quot;balance-row&quot;&gt;Eve $0.00&lt;/li&gt; aka get_by_test_id(&quot;balance-row&quot;).nth(4)&#10; &#10;Call log:&#10;  - Expect &quot;to_be_visible&quot; with timeout 5000ms&#10;  - waiting for get_by_text(&quot;Eve $0.00&quot;, exact=True)">page = &lt;Page url='http://127.0.0.1:55035/'&gt;
+
+    def test_c_1_3_totals_paid_summary_5_rows_with_exact_amounts(page):
+        page.goto(BASE_URL + "/")
+        # Assert each expected totals-paid line is rendered exactly somewhere on the page
+        expected = [
+            "Alice $52.00",
+            "Bob $30.00",
+            "Cara $40.00",
+            "Dan $15.00",
+            "Eve $0.00",
+        ]
+        for text in expected:
+            loc = page.get_by_text(text, exact=True)
+&gt;           expect(loc).to_be_visible()
+E           AssertionError: Locator expected to be visible
+E           Actual value: None
+E           Error: strict mode violation: get_by_text("Eve $0.00", exact=True) resolved to 2 elements:
+E               1) &lt;li&gt;Eve $0.00&lt;/li&gt; aka get_by_text("Eve $").first
+E               2) &lt;li data-testid="balance-row"&gt;Eve $0.00&lt;/li&gt; aka get_by_test_id("balance-row").nth(4)
+E            
+E           Call log:
+E             - Expect "to_be_visible" with timeout 5000ms
+E             - waiting for get_by_text("Eve $0.00", exact=True)
+
+verify\test_ui_session1.py:26: AssertionError</failure></testcase><testcase classname="verify.test_ui_session2" name="test_c_2_1_balances_name_order_and_exact_texts" time="0.603"><failure message="AssertionError: assert ['Alice $0.00..., 'Eve $0.00'] == ['Alice +$26....'Eve -$13.00']&#10;  &#10;  At index 0 diff: 'Alice $0.00' != 'Alice +$26.00'&#10;  Use -v to get more diff">page = &lt;Page url='http://127.0.0.1:55035/'&gt;
+
+    def test_c_2_1_balances_name_order_and_exact_texts(page):
+        page.goto(BASE_URL + "/")
+        rows = page.locator('[data-testid="balance-row"]')
+        expect(rows).to_have_count(5)
+        texts = [t.strip() for t in rows.all_inner_texts()]
+        expected = [
+            "Alice +$26.00",
+            "Bob -$6.00",
+            "Cara +$4.00",
+            "Dan -$11.00",
+            "Eve -$13.00",
+        ]
+&gt;       assert texts == expected
+E       AssertionError: assert ['Alice $0.00..., 'Eve $0.00'] == ['Alice +$26....'Eve -$13.00']
+E         
+E         At index 0 diff: 'Alice $0.00' != 'Alice +$26.00'
+E         Use -v to get more diff
+
+verify\test_ui_session2.py:19: AssertionError</failure></testcase><testcase classname="verify.test_ui_session2" name="test_c_2_2_transfers_first_item_text" time="6.119"><failure message="AssertionError: Locator expected to have count '4'&#10;Actual value: 0 &#10;Call log:&#10;  - Expect &quot;to_have_count&quot; with timeout 5000ms&#10;  - waiting for locator(&quot;[data-testid=\&quot;transfer-row\&quot;]&quot;)&#10;    13 × locator resolved to 0 elements&#10;       - unexpected value &quot;0&quot;">page = &lt;Page url='http://127.0.0.1:55035/'&gt;
+
+    def test_c_2_2_transfers_first_item_text(page):
+        page.goto(BASE_URL + "/")
+        rows = page.locator('[data-testid="transfer-row"]')
+&gt;       expect(rows).to_have_count(4)
+E       AssertionError: Locator expected to have count '4'
+E       Actual value: 0 
+E       Call log:
+E         - Expect "to_have_count" with timeout 5000ms
+E         - waiting for locator("[data-testid=\"transfer-row\"]")
+E           13 × locator resolved to 0 elements
+E              - unexpected value "0"
+
+verify\test_ui_session2.py:25: AssertionError</failure></testcase><testcase classname="verify.test_ui_session2" name="test_c_2_3_transfers_total_amount" time="6.171"><failure message="AssertionError: Locator expected to have text '$30.00'&#10;Actual value: $0.00 &#10;Call log:&#10;  - Expect &quot;to_have_text&quot; with timeout 5000ms&#10;  - waiting for locator(&quot;[data-testid=\&quot;transfers-total\&quot;]&quot;)&#10;    14 × locator resolved to &lt;span data-testid=&quot;transfers-total&quot;&gt;$0.00&lt;/span&gt;&#10;       - unexpected value &quot;$0.00&quot;&#10;&#10;Aria snapshot:&#10;- text: $0.00">page = &lt;Page url='http://127.0.0.1:55035/'&gt;
+
+    def test_c_2_3_transfers_total_amount(page):
+        page.goto(BASE_URL + "/")
+        total = page.locator('[data-testid="transfers-total"]')
+        expect(total).to_be_visible()
+&gt;       expect(total).to_have_text("$30.00")
+E       AssertionError: Locator expected to have text '$30.00'
+E       Actual value: $0.00 
+E       Call log:
+E         - Expect "to_have_text" with timeout 5000ms
+E         - waiting for locator("[data-testid=\"transfers-total\"]")
+E           14 × locator resolved to &lt;span data-testid="transfers-total"&gt;$0.00&lt;/span&gt;
+E              - unexpected value "$0.00"
+E       
+E       Aria snapshot:
+E       - text: $0.00
+
+verify\test_ui_session2.py:34: AssertionError</failure></testcase><testcase classname="verify.test_ui_session3" name="test_c_3_1_money_sample_shows_negative_format" time="0.593" /><testcase classname="verify.test_ui_session3" name="test_c_3_2_minimal_on_orders_transfers_by_amount_then_payer_payee" time="6.225"><failure message="AssertionError: Locator expected to have count '4'&#10;Actual value: 0 &#10;Call log:&#10;  - Expect &quot;to_have_count&quot; with timeout 5000ms&#10;  - waiting for locator(&quot;[data-testid=\&quot;transfer-row\&quot;]&quot;)&#10;    14 × locator resolved to 0 elements&#10;       - unexpected value &quot;0&quot;">page = &lt;Page url='http://127.0.0.1:55035/'&gt;
+
+    def test_c_3_2_minimal_on_orders_transfers_by_amount_then_payer_payee(page):
+        page.goto(BASE_URL + "/")
+        toggle = page.locator('[data-testid="toggle-minimal"]')
+        # Turn minimal mode ON by clicking once
+        toggle.click()
+        rows = page.locator('[data-testid="transfer-row"]')
+&gt;       expect(rows).to_have_count(4)
+E       AssertionError: Locator expected to have count '4'
+E       Actual value: 0 
+E       Call log:
+E         - Expect "to_have_count" with timeout 5000ms
+E         - waiting for locator("[data-testid=\"transfer-row\"]")
+E           14 × locator resolved to 0 elements
+E              - unexpected value "0"
+
+verify\test_ui_session3.py:20: AssertionError</failure></testcase><testcase classname="verify.test_ui_session3" name="test_c_3_3_unchecking_eve_excludes_from_balances_and_transfers" time="0.640" /><testcase classname="verify.test_ui_session3" name="test_c_3_4_minimal_on_renders_4_transfer_rows" time="6.189"><failure message="AssertionError: Locator expected to have count '4'&#10;Actual value: 0 &#10;Call log:&#10;  - Expect &quot;to_have_count&quot; with timeout 5000ms&#10;  - waiting for locator(&quot;[data-testid=\&quot;transfer-row\&quot;]&quot;)&#10;    14 × locator resolved to 0 elements&#10;       - unexpected value &quot;0&quot;">page = &lt;Page url='http://127.0.0.1:55035/'&gt;
+
+    def test_c_3_4_minimal_on_renders_4_transfer_rows(page):
+        page.goto(BASE_URL + "/")
+        toggle = page.locator('[data-testid="toggle-minimal"]')
+        toggle.click()  # turn ON
+        rows = page.locator('[data-testid="transfer-row"]')
+&gt;       expect(rows).to_have_count(4)
+E       AssertionError: Locator expected to have count '4'
+E       Actual value: 0 
+E       Call log:
+E         - Expect "to_have_count" with timeout 5000ms
+E         - waiting for locator("[data-testid=\"transfer-row\"]")
+E           14 × locator resolved to 0 elements
+E              - unexpected value "0"
+
+verify\test_ui_session3.py:51: AssertionError</failure></testcase><testcase classname="verify.test_ui_session3" name="test_c_3_5_minimal_off_last_item_is_bob_pays_cara" time="6.204"><failure message="AssertionError: Locator expected to have count '4'&#10;Actual value: 0 &#10;Call log:&#10;  - Expect &quot;to_have_count&quot; with timeout 5000ms&#10;  - waiting for locator(&quot;[data-testid=\&quot;transfer-row\&quot;]&quot;)&#10;    14 × locator resolved to 0 elements&#10;       - unexpected value &quot;0&quot;">page = &lt;Page url='http://127.0.0.1:55035/'&gt;
+
+    def test_c_3_5_minimal_off_last_item_is_bob_pays_cara(page):
+        page.goto(BASE_URL + "/")
+        toggle = page.locator('[data-testid="toggle-minimal"]')
+        # Ensure we end in OFF: click twice
+        toggle.click()
+        toggle.click()
+        rows = page.locator('[data-testid="transfer-row"]')
+&gt;       expect(rows).to_have_count(4)
+E       AssertionError: Locator expected to have count '4'
+E       Actual value: 0 
+E       Call log:
+E         - Expect "to_have_count" with timeout 5000ms
+E         - waiting for locator("[data-testid=\"transfer-row\"]")
+E           14 × locator resolved to 0 elements
+E              - unexpected value "0"
+
+verify\test_ui_session3.py:61: AssertionError</failure></testcase></testsuite></testsuites>

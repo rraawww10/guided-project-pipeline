@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="12" time="8.437" timestamp="2026-09-06T22:03:47.149219+05:30" hostname="HERO"><testcase classname="verify.test_api" name="test_c_1_1_get_expenses_returns_4_items[/api/expenses-4]" time="0.436" /><testcase classname="verify.test_api" name="test_c_2_4_naive_settlement_api_first_item" time="0.365" /><testcase classname="verify.test_ui_session1" name="test_c_1_2_home_renders_4_expense_rows" time="1.736" /><testcase classname="verify.test_ui_session1" name="test_c_1_3_totals_paid_summary_5_rows_with_exact_amounts" time="0.661" /><testcase classname="verify.test_ui_session2" name="test_c_2_1_balances_name_order_and_exact_texts" time="0.623" /><testcase classname="verify.test_ui_session2" name="test_c_2_2_transfers_first_item_text" time="0.553" /><testcase classname="verify.test_ui_session2" name="test_c_2_3_transfers_total_amount" time="0.577" /><testcase classname="verify.test_ui_session3" name="test_c_3_1_money_sample_shows_negative_format" time="0.589" /><testcase classname="verify.test_ui_session3" name="test_c_3_2_minimal_on_orders_transfers_by_amount_then_payer_payee" time="0.652"><failure message="AssertionError: assert ['Eve pays Al...s Cara $4.00'] == ['Eve pays Al... Alice $2.00']&#10;  &#10;  At index 2 diff: 'Bob pays Alice $2.00' != 'Bob pays Cara $4.00'&#10;  Use -v to get more diff">page = &lt;Page url='http://127.0.0.1:50234/'&gt;
+
+    def test_c_3_2_minimal_on_orders_transfers_by_amount_then_payer_payee(page):
+        page.goto(BASE_URL + "/")
+        toggle = page.locator('[data-testid="toggle-minimal"]')
+        # Turn minimal mode ON by clicking once
+        toggle.click()
+        rows = page.locator('[data-testid="transfer-row"]')
+        expect(rows).to_have_count(4)
+        texts = [t.strip() for t in rows.all_inner_texts()]
+        expected = [
+            "Eve pays Alice $13.00",
+            "Dan pays Alice $11.00",
+            "Bob pays Cara $4.00",
+            "Bob pays Alice $2.00",
+        ]
+&gt;       assert texts == expected
+E       AssertionError: assert ['Eve pays Al...s Cara $4.00'] == ['Eve pays Al... Alice $2.00']
+E         
+E         At index 2 diff: 'Bob pays Alice $2.00' != 'Bob pays Cara $4.00'
+E         Use -v to get more diff
+
+verify\test_ui_session3.py:28: AssertionError</failure></testcase><testcase classname="verify.test_ui_session3" name="test_c_3_3_unchecking_eve_excludes_from_balances_and_transfers" time="0.633" /><testcase classname="verify.test_ui_session3" name="test_c_3_4_minimal_on_renders_4_transfer_rows" time="0.594" /><testcase classname="verify.test_ui_session3" name="test_c_3_5_minimal_off_last_item_is_bob_pays_cara" time="0.722" /></testsuite></testsuites>

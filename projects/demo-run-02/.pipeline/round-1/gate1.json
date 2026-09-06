@@ -1,0 +1,189 @@
+{
+  "ok": true,
+  "verdict": "approve-eligible",
+  "spec_hash": "787032f0d870362734d23f3a99971c5a5299800f9a2b375891e21f6c12600317",
+  "findings": [
+    {
+      "id": "A1",
+      "title": "What \u201cinclude\u201d means for expenses that mention excluded people",
+      "section": "blocking",
+      "owner": "test-runner",
+      "line": "\"GET /api/settlement?include=<subset> excludes the omitted person(s): no transfer mentions an excluded name and the transfers still balance to zero.\"",
+      "where": "spec.md, Session 3, criterion c-3-2",
+      "line_key": "a8aebadf14544348",
+      "subject": [
+        "c-3-2"
+      ],
+      "blocking": true,
+      "owner_declared": "test-runner",
+      "owner_valid": true,
+      "owner_downgraded": null,
+      "fail_open": false,
+      "caught_by": "step 6 - the Builder/test-runner loop fixes this for free",
+      "must_fix_now": false
+    },
+    {
+      "id": "A2",
+      "title": "Rounding and remainder distribution for weighted shares in integer cents",
+      "section": "blocking",
+      "owner": "test-runner",
+      "line": "\"hint: For the given expenses and participants, compute each person\u2019s net cents (paid minus an equal share by weight) and write the mapping into `out`.\"",
+      "where": "spec.md, Session 2, cut `cut-lib-compute-balances` hint",
+      "line_key": "54bca567dce06280",
+      "subject": [
+        "cut-lib-compute-balances"
+      ],
+      "blocking": true,
+      "owner_declared": "test-runner",
+      "owner_valid": true,
+      "owner_downgraded": null,
+      "fail_open": false,
+      "caught_by": "step 6 - the Builder/test-runner loop fixes this for free",
+      "must_fix_now": false
+    },
+    {
+      "id": "A3",
+      "title": "\u201cRefined minimal strategy\u201d is undefined",
+      "section": "blocking",
+      "owner": "test-runner",
+      "line": "\"GET /api/settlement on the seed produces a transfers list whose length matches the refined minimal strategy for the fixture and in a deterministic sequence.\"",
+      "where": "spec.md, Session 3, criterion c-3-1",
+      "line_key": "dc121a36a25f33b6",
+      "subject": [
+        "c-3-1"
+      ],
+      "blocking": true,
+      "owner_declared": "test-runner",
+      "owner_valid": true,
+      "owner_downgraded": null,
+      "fail_open": false,
+      "caught_by": "step 6 - the Builder/test-runner loop fixes this for free",
+      "must_fix_now": false
+    },
+    {
+      "id": "W1",
+      "title": "Test id uses raw name or a normalised slug",
+      "section": "worth a look",
+      "owner": "test-runner",
+      "line": "\"Elements: expenses table (data-testid=\\\"expense-row\\\" per item), per-payer totals (data-testid=\\\"payer-total-<name>\\\"), proposed transfers list (data-testid=\\\"transfer-row\\\"), transfer amount element (data-testid=\\\"transfer-amount\\\"), include/exclude toggle per person (checkbox with data-testid=\\\"toggle-<name>\\\")\"",
+      "where": "spec.md, Screens, sc-expenses elements",
+      "line_key": "7e998f300edad5b4",
+      "subject": [
+        "sc-expenses"
+      ],
+      "blocking": false,
+      "owner_declared": "test-runner",
+      "owner_valid": true,
+      "owner_downgraded": null,
+      "fail_open": false,
+      "caught_by": "step 6 - the Builder/test-runner loop fixes this for free",
+      "must_fix_now": false
+    },
+    {
+      "id": "W2",
+      "title": "Sort order \u201cascending\u201d and collation rules",
+      "section": "worth a look",
+      "owner": "test-runner",
+      "line": "\"GET /api/settlement returns transfers in a deterministic order (sorted by from, then to, both ascending), enabling exact assertions.\"",
+      "where": "spec.md, Session 2, criterion c-2-3",
+      "line_key": "dd5213d19fac665e",
+      "subject": [
+        "c-2-3"
+      ],
+      "blocking": false,
+      "owner_declared": "test-runner",
+      "owner_valid": true,
+      "owner_downgraded": null,
+      "fail_open": false,
+      "caught_by": "step 6 - the Builder/test-runner loop fixes this for free",
+      "must_fix_now": false
+    },
+    {
+      "id": "W3",
+      "title": "Parsing the include list in the query string",
+      "section": "worth a look",
+      "owner": "test-runner",
+      "line": "\"Request: optional query param `include` as a comma-separated list of person names to include in the computation. If omitted, include all people found in expenses.\"",
+      "where": "spec.md, Endpoints, ep-settlement request description",
+      "line_key": "f5830f4ffa81551b",
+      "subject": [
+        "ep-settlement"
+      ],
+      "blocking": false,
+      "owner_declared": "test-runner",
+      "owner_valid": true,
+      "owner_downgraded": null,
+      "fail_open": false,
+      "caught_by": "step 6 - the Builder/test-runner loop fixes this for free",
+      "must_fix_now": false
+    },
+    {
+      "id": "W4",
+      "title": "What event counts as \u201cwhen settlement data has been loaded\u201d",
+      "section": "worth a look",
+      "owner": "test-runner",
+      "line": "\"sc-expenses shows a section title \\\"Proposed transfers\\\" when settlement data has been loaded.\"",
+      "where": "spec.md, Session 2, criterion c-2-4",
+      "line_key": "2c3b6ebbaf6f444e",
+      "subject": [
+        "c-2-4",
+        "sc-expenses"
+      ],
+      "blocking": false,
+      "owner_declared": "test-runner",
+      "owner_valid": true,
+      "owner_downgraded": null,
+      "fail_open": false,
+      "caught_by": "step 6 - the Builder/test-runner loop fixes this for free",
+      "must_fix_now": false
+    },
+    {
+      "id": "W5",
+      "title": "Formatting rules for zero and negative amounts",
+      "section": "worth a look",
+      "owner": "test-runner",
+      "line": "\"hint: Format an integer cents value into `out` as a currency string like \"$12.34\" without using floating-point rounding.\"",
+      "where": "spec.md, Session 3, cut `cut-lib-format-money` hint",
+      "line_key": "b623d631dc64f993",
+      "subject": [
+        "cut-lib-format-money"
+      ],
+      "blocking": false,
+      "owner_declared": "test-runner",
+      "owner_valid": true,
+      "owner_downgraded": null,
+      "fail_open": false,
+      "caught_by": "step 6 - the Builder/test-runner loop fixes this for free",
+      "must_fix_now": false
+    },
+    {
+      "id": "W6",
+      "title": "Session 3 declares no builds despite adding API/UI cuts",
+      "section": "worth a look",
+      "owner": "pack-writer",
+      "line": "\"\"builds\": [],\"",
+      "where": "spec.json, Session 3, \"builds\": []",
+      "line_key": "be2fd0138bbbda59",
+      "subject": [],
+      "blocking": false,
+      "owner_declared": "pack-writer",
+      "owner_valid": true,
+      "owner_downgraded": null,
+      "fail_open": false,
+      "caught_by": "step 9 - a person reads the guide at Gate 3",
+      "must_fix_now": false
+    }
+  ],
+  "counts": {
+    "blocking": 3,
+    "worth_a_look": 6,
+    "unowned_blocking": 0
+  },
+  "reasons": [
+    "3 blocking finding(s), all owned by a downstream checker; 6 worth a look. Nothing here escapes to the shipped project."
+  ],
+  "rule": "reject when any blocking finding is owned by 'nothing'; approve when every remaining finding sits in a column a downstream checker owns. An owner that can pass by not running is owned only conditionally: it approves, and the confirmation it actually ran is listed in verify_later",
+  "reviewed_spec_hash": "787032f0d870362734d23f3a99971c5a5299800f9a2b375891e21f6c12600317",
+  "drift": [],
+  "verify_later": []
+}

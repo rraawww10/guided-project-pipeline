@@ -1,0 +1,113 @@
+{
+  "slug": "ui-live-01",
+  "cuts": [
+    {
+      "id": "cut-api-transactions-list",
+      "file": "api\\transactions\\route.ts",
+      "line": 13,
+      "lines_removed": 10
+    },
+    {
+      "id": "cut-lib-compute-delta",
+      "file": "lib\\budgets.ts",
+      "line": 5,
+      "lines_removed": 6
+    },
+    {
+      "id": "cut-lib-apply-rules",
+      "file": "lib\\rules.ts",
+      "line": 32,
+      "lines_removed": 6
+    },
+    {
+      "id": "cut-lib-summarize-by-category",
+      "file": "lib\\summary.ts",
+      "line": 5,
+      "lines_removed": 8
+    },
+    {
+      "id": "cut-ui-render-category-cell",
+      "file": "page.tsx",
+      "line": 18,
+      "lines_removed": 9
+    },
+    {
+      "id": "cut-ui-fetch-transactions",
+      "file": "page.tsx",
+      "line": 44,
+      "lines_removed": 3
+    },
+    {
+      "id": "cut-ui-budgets-state",
+      "file": "page.tsx",
+      "line": 84,
+      "lines_removed": 1
+    },
+    {
+      "id": "cut-ui-sort-by-delta",
+      "file": "page.tsx",
+      "line": 96,
+      "lines_removed": 3
+    },
+    {
+      "id": "cut-ui-toggle-overbudget",
+      "file": "page.tsx",
+      "line": 104,
+      "lines_removed": 3
+    },
+    {
+      "id": "cut-ui-render-rows",
+      "file": "page.tsx",
+      "line": 113,
+      "lines_removed": 6
+    },
+    {
+      "id": "cut-ui-render-delta",
+      "file": "page.tsx",
+      "line": 130,
+      "lines_removed": 43
+    },
+    {
+      "id": "cut-ui-render-summary",
+      "file": "page.tsx",
+      "line": 177,
+      "lines_removed": 25
+    }
+  ],
+  "count": 12,
+  "by_session": {
+    "1": [
+      "cut-api-transactions-list",
+      "cut-ui-fetch-transactions",
+      "cut-ui-render-rows"
+    ],
+    "2": [
+      "cut-lib-apply-rules",
+      "cut-lib-compute-delta",
+      "cut-lib-summarize-by-category",
+      "cut-ui-render-category-cell",
+      "cut-ui-render-summary"
+    ],
+    "3": [
+      "cut-ui-budgets-state",
+      "cut-ui-render-delta",
+      "cut-ui-sort-by-delta",
+      "cut-ui-toggle-overbudget"
+    ]
+  },
+  "return_safety": {
+    "ok": true,
+    "checked": 12,
+    "violations": []
+  },
+  "partial_state_risks": [],
+  "typecheck": {
+    "ran": true,
+    "ok": true,
+    "error_count": 0,
+    "errors": [],
+    "missing_return": [],
+    "hint": ""
+  },
+  "ok": true
+}

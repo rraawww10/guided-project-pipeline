@@ -1,0 +1,108 @@
+{
+  "ok": false,
+  "target": "skeleton",
+  "code_checks": {
+    "ok": true,
+    "checks": {}
+  },
+  "stack_check": {
+    "ok": true,
+    "violations": []
+  },
+  "seconds": 184.4,
+  "counts": {
+    "pass": 0,
+    "fail": 12,
+    "skip": 0,
+    "missing": 0
+  },
+  "criteria": {
+    "c-1-1": {
+      "status": "fail",
+      "check": "GET /api/expenses returns 200 with a JSON array of 4 Expense",
+      "session": 1,
+      "test": "verify/test_api.py::test_c_1_1_get_expenses_returns_4_items",
+      "message": "1 of 1 parametrised case(s) fail: AssertionError: expected 200, got 501: []\nassert 501 == 200\n +  where 501 = <Response [501 Not Implemented]>.status_code"
+    },
+    "c-1-2": {
+      "status": "fail",
+      "check": "sc-home renders 4 elements with data-testid=expense-row after load",
+      "session": 1,
+      "test": "verify/test_ui_session1.py::test_c_1_2_home_renders_4_expense_rows",
+      "message": "AssertionError: Locator expected to have count '4'\nActual value: 0 \nCall log:\n  - Expect \"to_have_count\" with timeout 5000ms\n  - waiting for locator(\"[data-testid=\\\"expense-row\\\"]\")\n    14 \u00d7 locator resolved to 0 elements\n       - unexpected value \"0\""
+    },
+    "c-1-3": {
+      "status": "fail",
+      "check": "sc-home shows a per-person totals-paid summary with 5 rows and exact amounts: Alice $52.00, Bob $30.00, Cara $40.00, Dan $15.00, Eve $0.00",
+      "session": 1,
+      "test": "verify/test_ui_session1.py::test_c_1_3_totals_paid_summary_5_rows_with_exact_amounts",
+      "message": "AssertionError: Locator expected to be visible\nActual value: None\nError: element(s) not found \nCall log:\n  - Expect \"to_be_visible\" with timeout 5000ms\n  - waiting for get_by_text(\"Alice $52.00\", exact=True)\n\nAria snapshot:\n- main:\n  - heading \"FairShare\" [level=1]\n  - checkbox \"Minimal transfers\"\n  - text: Minimal transfers\n  - heading \"Expenses\" [level=2]\n  - table:\n    - rowgroup:\n      - row \"Description Amount Paid by\":\n        - columnheader \"Description\"\n        - columnheader \"Amount\"\n        - columnheader \"Paid by\"\n    - rowgroup\n  - heading \"Totals paid\" [level=2]\n  - list\n  - heading \"Balances\" [level=2]\n  - list\n  - heading \"Proposed transfers\" [level=2]\n  - strong: \"Total:\"\n  - list\n- alert"
+    },
+    "c-2-1": {
+      "status": "fail",
+      "check": "sc-home renders 5 elements with data-testid=balance-row in name-ASC order, with exact texts: Alice +$26.00; Bob -$6.00; Cara +$4.00; Dan -$11.00; Eve -$13.00",
+      "session": 2,
+      "test": "verify/test_ui_session2.py::test_c_2_1_balances_name_order_and_exact_texts",
+      "message": "AssertionError: Locator expected to have count '5'\nActual value: 0 \nCall log:\n  - Expect \"to_have_count\" with timeout 5000ms\n  - waiting for locator(\"[data-testid=\\\"balance-row\\\"]\")\n    14 \u00d7 locator resolved to 0 elements\n       - unexpected value \"0\""
+    },
+    "c-2-2": {
+      "status": "fail",
+      "check": "sc-home renders a Proposed transfers list with 4 elements with data-testid=transfer-row and the first item reads \"Eve pays Alice $13.00\"",
+      "session": 2,
+      "test": "verify/test_ui_session2.py::test_c_2_2_transfers_first_item_text",
+      "message": "AssertionError: Locator expected to have count '4'\nActual value: 0 \nCall log:\n  - Expect \"to_have_count\" with timeout 5000ms\n  - waiting for locator(\"[data-testid=\\\"transfer-row\\\"]\")\n    14 \u00d7 locator resolved to 0 elements\n       - unexpected value \"0\""
+    },
+    "c-2-3": {
+      "status": "fail",
+      "check": "sc-home shows a total transfers amount element [data-testid=transfers-total] equal to \"$30.00\"",
+      "session": 2,
+      "test": "verify/test_ui_session2.py::test_c_2_3_transfers_total_amount",
+      "message": "AssertionError: Locator expected to be visible\nActual value: hidden \nCall log:\n  - Expect \"to_be_visible\" with timeout 5000ms\n  - waiting for locator(\"[data-testid=\\\"transfers-total\\\"]\")\n    13 \u00d7 locator resolved to <span data-testid=\"transfers-total\"></span>\n       - unexpected value \"hidden\"\n\nAria snapshot:\n- main:\n  - heading \"FairShare\" [level=1]\n  - checkbox \"Minimal transfers\"\n  - text: Minimal transfers\n  - heading \"Expenses\" [level=2]\n  - table:\n    - rowgroup:\n      - row \"Description Amount Paid by\":\n        - columnheader \"Description\"\n        - columnheader \"Amount\"\n        - columnheader \"Paid by\"\n    - rowgroup\n  - heading \"Totals paid\" [level=2]\n  - list\n  - heading \"Balances\" [level=2]\n  - list\n  - heading \"Proposed transfers\" [level=2]\n  - strong: \"Total:\"\n  - list\n- alert"
+    },
+    "c-2-4": {
+      "status": "fail",
+      "check": "GET /api/settlement/naive returns 200 with a JSON array of 4 Transfer; the first element equals {\"from\":\"Eve\",\"to\":\"Alice\",\"amountCents\":1300}",
+      "session": 2,
+      "test": "verify/test_api.py::test_c_2_4_naive_settlement_api_first_item",
+      "message": "AssertionError: expected 200, got 501: []\nassert 501 == 200\n +  where 501 = <Response [501 Not Implemented]>.status_code"
+    },
+    "c-3-1": {
+      "status": "fail",
+      "check": "sc-home renders [data-testid=money-sample] equal to \"-$6.15\"",
+      "session": 3,
+      "test": "verify/test_ui_session3.py::test_c_3_1_money_sample_shows_negative_format",
+      "message": "AssertionError: Locator expected to be visible\nActual value: hidden \nCall log:\n  - Expect \"to_be_visible\" with timeout 5000ms\n  - waiting for locator(\"[data-testid=\\\"money-sample\\\"]\")\n    13 \u00d7 locator resolved to <div data-testid=\"money-sample\"></div>\n       - unexpected value \"hidden\"\n\nAria snapshot:\n- main:\n  - heading \"FairShare\" [level=1]\n  - checkbox \"Minimal transfers\"\n  - text: Minimal transfers\n  - heading \"Expenses\" [level=2]\n  - table:\n    - rowgroup:\n      - row \"Description Amount Paid by\":\n        - columnheader \"Description\"\n        - columnheader \"Amount\"\n        - columnheader \"Paid by\"\n    - rowgroup\n  - heading \"Totals paid\" [level=2]\n  - list\n  - heading \"Balances\" [level=2]\n  - list\n  - heading \"Proposed transfers\" [level=2]\n  - strong: \"Total:\"\n  - list\n- alert"
+    },
+    "c-3-2": {
+      "status": "fail",
+      "check": "With [data-testid=toggle-minimal] set ON, sc-home renders the transfers in amount-descending order then payer then payee; the sequence reads exactly: \"Eve pays Alice $13.00\", \"Dan pays Alice $11.00\", \"Bob pays Cara $4.00\", \"Bob pays Alice $2.00\"",
+      "session": 3,
+      "test": "verify/test_ui_session3.py::test_c_3_2_minimal_on_orders_transfers_by_amount_then_payer_payee",
+      "message": "AssertionError: Locator expected to have count '4'\nActual value: 0 \nCall log:\n  - Expect \"to_have_count\" with timeout 5000ms\n  - waiting for locator(\"[data-testid=\\\"transfer-row\\\"]\")\n    14 \u00d7 locator resolved to 0 elements\n       - unexpected value \"0\""
+    },
+    "c-3-3": {
+      "status": "fail",
+      "check": "Unchecking [data-testid=include-Eve] removes Eve from balances and no [data-testid=transfer-row] contains \"Eve\"",
+      "session": 3,
+      "test": "verify/test_ui_session3.py::test_c_3_3_unchecking_eve_excludes_from_balances_and_transfers",
+      "message": "playwright._impl._errors.TimeoutError: Locator.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator(\"[data-testid=\\\"include-Eve\\\"]\")"
+    },
+    "c-3-4": {
+      "status": "fail",
+      "check": "With [data-testid=toggle-minimal] set ON, sc-home renders 4 elements with data-testid=transfer-row",
+      "session": 3,
+      "test": "verify/test_ui_session3.py::test_c_3_4_minimal_on_renders_4_transfer_rows",
+      "message": "AssertionError: Locator expected to have count '4'\nActual value: 0 \nCall log:\n  - Expect \"to_have_count\" with timeout 5000ms\n  - waiting for locator(\"[data-testid=\\\"transfer-row\\\"]\")\n    14 \u00d7 locator resolved to 0 elements\n       - unexpected value \"0\""
+    },
+    "c-3-5": {
+      "status": "fail",
+      "check": "With [data-testid=toggle-minimal] set OFF, sc-home renders the last [data-testid=transfer-row] item as \"Bob pays Cara $4.00\"",
+      "session": 3,
+      "test": "verify/test_ui_session3.py::test_c_3_5_minimal_off_last_item_is_bob_pays_cara",
+      "message": "AssertionError: Locator expected to have count '4'\nActual value: 0 \nCall log:\n  - Expect \"to_have_count\" with timeout 5000ms\n  - waiting for locator(\"[data-testid=\\\"transfer-row\\\"]\")\n    14 \u00d7 locator resolved to 0 elements\n       - unexpected value \"0\""
+    }
+  },
+  "pytest_returncode": 1,
+  "stdout_tail": "s exceeded.\nE           Call log:\nE             - waiting for locator(\"[data-testid=\\\"include-Eve\\\"]\")\n\n.pipeline\\venv\\Lib\\site-packages\\playwright\\_impl\\_connection.py:632: TimeoutError\n________________ test_c_3_4_minimal_on_renders_4_transfer_rows ________________\n\npage = <Page url='http://127.0.0.1:63985/'>\n\n    def test_c_3_4_minimal_on_renders_4_transfer_rows(page):\n        page.goto(BASE_URL + \"/\")\n        toggle = page.locator('[data-testid=\"toggle-minimal\"]')\n        toggle.click()  # turn ON\n        rows = page.locator('[data-testid=\"transfer-row\"]')\n>       expect(rows).to_have_count(4)\nE       AssertionError: Locator expected to have count '4'\nE       Actual value: 0 \nE       Call log:\nE         - Expect \"to_have_count\" with timeout 5000ms\nE         - waiting for locator(\"[data-testid=\\\"transfer-row\\\"]\")\nE           14 \u00d7 locator resolved to 0 elements\nE              - unexpected value \"0\"\n\nverify\\test_ui_session3.py:51: AssertionError\n______________ test_c_3_5_minimal_off_last_item_is_bob_pays_cara ______________\n\npage = <Page url='http://127.0.0.1:63985/'>\n\n    def test_c_3_5_minimal_off_last_item_is_bob_pays_cara(page):\n        page.goto(BASE_URL + \"/\")\n        toggle = page.locator('[data-testid=\"toggle-minimal\"]')\n        # Ensure we end in OFF: click twice\n        toggle.click()\n        toggle.click()\n        rows = page.locator('[data-testid=\"transfer-row\"]')\n>       expect(rows).to_have_count(4)\nE       AssertionError: Locator expected to have count '4'\nE       Actual value: 0 \nE       Call log:\nE         - Expect \"to_have_count\" with timeout 5000ms\nE         - waiting for locator(\"[data-testid=\\\"transfer-row\\\"]\")\nE           14 \u00d7 locator resolved to 0 elements\nE              - unexpected value \"0\"\n\nverify\\test_ui_session3.py:61: AssertionError\n=========================== short test summary info ===========================\nFAILED skeleton/verify/test_api.py::test_c_1_1_get_expenses_returns_4_items[/api/expenses-4]\nFAILED skeleton/verify/test_api.py::test_c_2_4_naive_settlement_api_first_item\nFAILED skeleton/verify/test_ui_session1.py::test_c_1_2_home_renders_4_expense_rows\nFAILED skeleton/verify/test_ui_session1.py::test_c_1_3_totals_paid_summary_5_rows_with_exact_amounts\nFAILED skeleton/verify/test_ui_session2.py::test_c_2_1_balances_name_order_and_exact_texts\nFAILED skeleton/verify/test_ui_session2.py::test_c_2_2_transfers_first_item_text\nFAILED skeleton/verify/test_ui_session2.py::test_c_2_3_transfers_total_amount\nFAILED skeleton/verify/test_ui_session3.py::test_c_3_1_money_sample_shows_negative_format\nFAILED skeleton/verify/test_ui_session3.py::test_c_3_2_minimal_on_orders_transfers_by_amount_then_payer_payee\nFAILED skeleton/verify/test_ui_session3.py::test_c_3_3_unchecking_eve_excludes_from_balances_and_transfers\nFAILED skeleton/verify/test_ui_session3.py::test_c_3_4_minimal_on_renders_4_transfer_rows\nFAILED skeleton/verify/test_ui_session3.py::test_c_3_5_minimal_off_last_item_is_bob_pays_cara\n12 failed in 90.36s (0:01:30)\n",
+  "stderr_tail": ""
+}

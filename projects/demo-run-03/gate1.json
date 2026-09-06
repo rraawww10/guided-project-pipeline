@@ -1,0 +1,130 @@
+{
+  "ok": true,
+  "verdict": "approve-eligible",
+  "spec_hash": "2208a859095aa8db2ed3d2a3b382526af5ec51d1d5b2b2ae2f499ea75d07b9e9",
+  "findings": [
+    {
+      "id": "A1",
+      "title": "POST body shape and field names are not pinned",
+      "section": "blocking",
+      "owner": "test-runner",
+      "line": "\"c-3-1: POST /api/purchase-orders with lines [{sku_id, qty}] returns 200 with JSON { id: number, itemsCount: number, totalQty: number }\" and in spec.json: `\"request\": \"PurchaseOrderCreate\"`",
+      "where": "spec.md, Session 3, criterion c-3-1; spec.json, endpoints[ep-po-create]",
+      "line_key": "9c8ebcc6d9012f06",
+      "subject": [
+        "c-3-1",
+        "ep-po-create"
+      ],
+      "blocking": true,
+      "owner_declared": "test-runner",
+      "owner_valid": true,
+      "owner_downgraded": null,
+      "fail_open": false,
+      "caught_by": "step 6 - the Builder/test-runner loop fixes this for free",
+      "must_fix_now": false
+    },
+    {
+      "id": "A2",
+      "title": "\"Show only positive suggestions\" can be read as server filter or client filter",
+      "section": "blocking",
+      "owner": "mutation",
+      "line": "\"Goal: Compute qty_to_order on the server and show only positive suggestions on the Suggestions page.\" and \"c-2-2: sc-suggestions at \\\"/suggestions\\\" renders one element with data-testid=\\\"suggestion-row\\\" per item where qty_to_order > 0, and none where qty_to_order == 0\"",
+      "where": "spec.md, Session 2, Goal; spec.md, Session 2, criterion c-2-2",
+      "line_key": "cb231541cef07c30",
+      "subject": [
+        "c-2-2",
+        "sc-suggestions"
+      ],
+      "blocking": true,
+      "owner_declared": "mutation",
+      "owner_valid": true,
+      "owner_downgraded": null,
+      "fail_open": true,
+      "caught_by": "step 8 - leave-one-out: each task alone removed must turn one of its own criteria red",
+      "must_fix_now": false
+    },
+    {
+      "id": "W1",
+      "title": "Create/Created types are referenced but not defined",
+      "section": "worth a look",
+      "owner": "nothing",
+      "line": "`\"request\": \"PurchaseOrderCreate\"`, `\"response\": \"PurchaseOrderCreated\"`",
+      "where": "spec.json, endpoints[ep-po-create] `\"request\": \"PurchaseOrderCreate\"`, `\"response\": \"PurchaseOrderCreated\"`; spec.md has no corresponding type entries",
+      "line_key": "1ba50ee88b2df6b8",
+      "subject": [
+        "ep-po-create"
+      ],
+      "blocking": false,
+      "owner_declared": "nothing",
+      "owner_valid": true,
+      "owner_downgraded": null,
+      "fail_open": false,
+      "caught_by": "NO downstream checker sees this - it ships as written",
+      "must_fix_now": false
+    },
+    {
+      "id": "W2",
+      "title": "itemsCount semantics on the list endpoint are implied, not stated",
+      "section": "worth a look",
+      "owner": "test-runner",
+      "line": "\"c-4-1: GET /api/purchase-orders returns 200 with an array of { id, itemsCount, totalQty }\"",
+      "where": "spec.md, Session 4, criterion c-4-1; spec.md, Session 3, cut-ep-po-create-transaction hint",
+      "line_key": "070841488daaa3af",
+      "subject": [
+        "c-4-1",
+        "cut-ep-po-create-transaction"
+      ],
+      "blocking": false,
+      "owner_declared": "test-runner",
+      "owner_valid": true,
+      "owner_downgraded": null,
+      "fail_open": false,
+      "caught_by": "step 6 - the Builder/test-runner loop fixes this for free",
+      "must_fix_now": false
+    },
+    {
+      "id": "W3",
+      "title": "Row order is unspecified for history and detail",
+      "section": "worth a look",
+      "owner": "test-runner",
+      "line": "\"sc-po-history ... renders one element with data-testid=\\\"po-row\\\" per order\" and \"sc-po-detail ... renders one element with data-testid=\\\"po-line\\\" per line\"",
+      "where": "spec.md, Session 4, criteria c-4-2 and c-4-4",
+      "line_key": "b874cdd4078f8447",
+      "subject": [
+        "c-4-2",
+        "c-4-4",
+        "sc-po-detail",
+        "sc-po-history"
+      ],
+      "blocking": false,
+      "owner_declared": "test-runner",
+      "owner_valid": true,
+      "owner_downgraded": null,
+      "fail_open": false,
+      "caught_by": "step 6 - the Builder/test-runner loop fixes this for free",
+      "must_fix_now": false
+    }
+  ],
+  "counts": {
+    "blocking": 2,
+    "worth_a_look": 3,
+    "unowned_blocking": 0
+  },
+  "reasons": [
+    "A2 is blocking and owned by 'mutation', which can pass by not running - step 8 must show checked == of_total, and the task this finding names must be among the mutants run - mutation is opt-in and --only/--max narrow it, so ok:true over a subset proves nothing about a task that was skipped",
+    "2 blocking finding(s), all owned by a downstream checker; 3 worth a look. Nothing here escapes to the shipped project, PROVIDED the 1 finding(s) in verify_later are confirmed to have actually been checked - see each one's report and flag."
+  ],
+  "rule": "reject when any blocking finding is owned by 'nothing'; approve when every remaining finding sits in a column a downstream checker owns. An owner that can pass by not running is owned only conditionally: it approves, and the confirmation it actually ran is listed in verify_later",
+  "reviewed_spec_hash": "2208a859095aa8db2ed3d2a3b382526af5ec51d1d5b2b2ae2f499ea75d07b9e9",
+  "drift": [],
+  "verify_later": [
+    {
+      "id": "A2",
+      "title": "\"Show only positive suggestions\" can be read as server filter or clien",
+      "owner": "mutation",
+      "report": "mutation.json",
+      "flag": "checked",
+      "requirement": "step 8 must show checked == of_total, and the task this finding names must be among the mutants run - mutation is opt-in and --only/--max narrow it, so ok:true over a subset proves nothing about a task that was skipped"
+    }
+  ]
+}

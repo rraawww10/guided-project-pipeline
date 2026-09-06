@@ -1,0 +1,79 @@
+{
+  "slug": "ui-test-01",
+  "title": "Envelope Budget Allocator",
+  "track": "react",
+  "sessions_planned": 3,
+  "stack": ["next", "react", "typescript"],
+  "source": null,
+  "code_checks": [],
+  "endpoints": [],
+  "screens": [
+    {"id": "sc-main", "route": "/", "elements": ["Paycheck input", "Rules editor", "Results list", "Total allocated", "Remainder", "Rationale toggle"], "states": ["empty", "allocated"]},
+    {"id": "sc-compare", "route": "/compare", "elements": ["Scenario A column", "Scenario B column", "Share URL"], "states": ["loaded", "restored"]}
+  ],
+  "sessions": [
+    {
+      "n": 1,
+      "title": "First pass allocation",
+      "goal": "Build a controlled paycheck input, a minimal rules editor, and a pure allocate(paycheck, rules) for fixed and percent rules; render results that update as you type.",
+      "teaches": ["useState", "controlled inputs", "mapping data to UI", "pure functions"],
+      "builds": ["sc-main"],
+      "criteria": [
+        {"id": "c-1-1", "check": "sc-main renders a row for 'Rent' with amount 300.00 after entering paycheck 1000 and a fixed rule of 300 to 'Rent'", "target": "sc-main", "cuts": ["cut-allocate-fixed", "cut-ui-build-rows"]},
+        {"id": "c-1-2", "check": "sc-main renders a row for 'Food' with amount 50.00 after entering paycheck 500 and a 10% rule to 'Food'", "target": "sc-main", "cuts": ["cut-allocate-percent", "cut-ui-build-rows"]},
+        {"id": "c-1-3", "check": "sc-main renders one results row per distinct envelope after adding two envelopes with any rules", "target": "sc-main", "cuts": ["cut-ui-build-rows"]},
+        {"id": "c-1-4", "check": "On sc-main, changing the Paycheck input from 400 to 600 renders updated totals immediately", "target": "sc-main", "cuts": ["cut-ui-handle-paycheck-change", "cut-ui-build-rows"]}
+      ],
+      "cuts": [
+        {"id": "cut-allocate-fixed", "file": "app/lib/allocate.ts", "writes_into": "out", "hint": "Apply every fixed rule to its target envelope and add the fixed amount into `out` without touching percent rules."},
+        {"id": "cut-allocate-percent", "file": "app/lib/allocate.ts", "writes_into": "out", "hint": "For each percent rule, add paycheck * percent/100 into the matching envelope in `out` using the paycheck as the base."},
+        {"id": "cut-ui-build-rows", "file": "app/app/page.tsx", "writes_into": "rows", "hint": "Build `rows` from the current allocation so each envelope name and its numeric amount appear as a list row."},
+        {"id": "cut-ui-handle-paycheck-change", "file": "app/app/page.tsx", "writes_into": "nextPaycheck", "hint": "Read the input event and parse its numeric value into `nextPaycheck` so the paycheck state can be updated."}
+      ]
+    },
+    {
+      "n": 2,
+      "title": "Caps, ordering and rationale",
+      "goal": "Add rule priority and caps, implement remainder distribution with a stable order, and generate a per-envelope trace shown in the UI.",
+      "teaches": ["comparators", "stable ordering", "capped calculations", "building a trace"],
+      "builds": [],
+      "criteria": [
+        {"id": "c-2-1", "check": "On sc-main, a 50% rule with a cap of 100 applied to paycheck 1000 renders amount 100.00 for its envelope", "target": "sc-main", "cuts": ["cut-apply-caps", "cut-ui-build-rows"]},
+        {"id": "c-2-2", "check": "On sc-main, with two rules for the same envelope at different priorities, the rationale panel renders the higher-priority rule's line before the lower-priority one", "target": "sc-main", "cuts": ["cut-rules-by-priority", "cut-generate-trace", "cut-ui-show-rationale"]},
+        {"id": "c-2-3", "check": "On sc-main, with remainder 30 and three eligible envelopes at equal priority, the Results list renders each of those three increased by 10.00", "target": "sc-main", "cuts": ["cut-distribute-remainder", "cut-ui-build-rows"]},
+        {"id": "c-2-4", "check": "On sc-main, expanding an envelope renders at least two rationale lines that include rule identifiers and applied amounts", "target": "sc-main", "cuts": ["cut-generate-trace", "cut-ui-show-rationale"]},
+        {"id": "c-2-5", "check": "On sc-main, after reloading the page with identical inputs, the Results list renders the same per-envelope amounts and the same remainder distribution order", "target": "sc-main", "cuts": ["cut-distribute-remainder"]},
+        {"id": "c-2-6", "check": "On sc-main, clicking the rationale toggle shows the rationale panel; clicking it again hides the panel", "target": "sc-main", "cuts": ["cut-ui-show-rationale"]}
+      ],
+      "cuts": [
+        {"id": "cut-rules-by-priority", "file": "app/lib/rules.ts", "writes_into": "ordered", "hint": "Sort the given rules into `ordered` so higher priority comes first and ties are resolved stably by rule id."},
+        {"id": "cut-apply-caps", "file": "app/lib/allocate.ts", "writes_into": "out", "hint": "Limit any percent-with-cap contribution so the envelope’s addition into `out` never exceeds its declared cap."},
+        {"id": "cut-distribute-remainder", "file": "app/lib/distribute.ts", "writes_into": "updated", "hint": "Spread the leftover amount into `updated` across eligible envelopes in a fixed, repeatable order until no remainder or all caps are met."},
+        {"id": "cut-generate-trace", "file": "app/lib/trace.ts", "writes_into": "trace", "hint": "Build `trace` entries that record before, applied and after amounts per rule with a short reason string."},
+        {"id": "cut-ui-show-rationale", "file": "app/app/page.tsx", "writes_into": "details", "hint": "Build `details` for the selected envelope so its rationale text lines render under that row when expanded."}
+      ]
+    },
+    {
+      "n": 3,
+      "title": "Compare, undo/redo and shareable URLs",
+      "goal": "Compare two rule sets side-by-side, add undo/redo to the editor, and encode/decode scenario state in the URL.",
+      "teaches": ["useReducer", "undo/redo patterns", "URL encoding/decoding"],
+      "builds": ["sc-compare"],
+      "criteria": [
+        {"id": "c-3-1", "check": "sc-compare renders headings 'Scenario A' and 'Scenario B' and shows one editor and one results list under each heading", "target": "sc-compare", "cuts": ["cut-ui-compare-columns"]},
+        {"id": "c-3-2", "check": "On sc-compare, after entering different rules into A and B, the page renders different totals per column", "target": "sc-compare", "cuts": ["cut-ui-compare-columns"]},
+        {"id": "c-3-3", "check": "On sc-compare, after pressing Undo, the active editor shows the previous value", "target": "sc-compare", "cuts": ["cut-reducer-undo-redo"]},
+        {"id": "c-3-4", "check": "On sc-compare, after pressing Redo, the active editor shows the value that was undone", "target": "sc-compare", "cuts": ["cut-reducer-undo-redo"]},
+        {"id": "c-3-5", "check": "On sc-compare, opening a copied share URL displays an identical scenario in both the editor and results", "target": "sc-compare", "cuts": ["cut-encode-url", "cut-decode-url"]},
+        {"id": "c-3-6", "check": "On sc-compare, changing any scenario field updates the browser URL and the visible share link to show the current state", "target": "sc-compare", "cuts": ["cut-encode-url", "cut-ui-share-link"]}
+      ],
+      "cuts": [
+        {"id": "cut-ui-compare-columns", "file": "app/app/compare/page.tsx", "writes_into": "rowsB", "hint": "Build `rowsB` so Scenario B renders its own results list independently from Scenario A."},
+        {"id": "cut-reducer-undo-redo", "file": "app/lib/state.ts", "writes_into": "next", "hint": "Produce `next` from the current state and an action so UNDO steps back one past state and REDO steps forward when available."},
+        {"id": "cut-encode-url", "file": "app/lib/url.ts", "writes_into": "url", "hint": "Encode the current scenario into `url` as a query string that fully describes the scenario."},
+        {"id": "cut-decode-url", "file": "app/lib/url.ts", "writes_into": "restored", "hint": "Parse the browser location and fill `restored` with a complete scenario object so the UI can initialize from it."},
+        {"id": "cut-ui-share-link", "file": "app/app/compare/page.tsx", "writes_into": "shareHref", "hint": "Build `shareHref` from the current browser location so a copyable link always matches the visible scenario."}
+      ]
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "c-1-1": {"test": "verify/test_api_candidates.py::test_c_1_1_candidates_list_has_10_items"},
+  "c-1-2": {"test": "verify/test_ui_main.py::test_c_1_2_renders_10_cards"},
+  "c-1-3": {"test": "verify/test_ui_main.py::test_c_1_3_renders_both_toggles"},
+  "c-1-4": {"test": "verify/test_api_candidates.py::test_c_1_4_candidates_list_has_duplicate_years"},
+  "c-1-5": {"test": "verify/test_api_candidates.py::test_c_1_5_candidates_list_has_typescript_tag"},
+
+  "c-2-1": {"test": "verify/test_api_rank.py::test_c_2_1_rank_years_returns_10_items_with_shape"},
+  "c-2-2": {"test": "verify/test_api_rank.py::test_c_2_2_rank_years_orders_by_unrounded_score_desc"},
+  "c-2-3": {"test": "verify/test_ui_rank.py::test_c_2_3_years_toggle_shows_two_decimal_scores"},
+  "c-2-4": {"test": "verify/test_ui_rank.py::test_c_2_4_years_toggle_reasons_contains_years"},
+
+  "c-3-1": {"test": "verify/test_sort_and_filter.py::test_c_3_1_no_active_orders_by_name_ascii"},
+  "c-3-2": {"test": "verify/test_sort_and_filter.py::test_c_3_2_tag_active_same_years_same_tag_break_ties_by_name"},
+  "c-3-3": {"test": "verify/test_sort_and_filter.py::test_c_3_3_tag_active_one_tagged_comes_first"},
+  "c-3-4": {"test": "verify/test_api_rank.py::test_c_3_4_rank_years_min_100_returns_empty_array"}
+}

@@ -1,0 +1,95 @@
+{
+  "slug": "demo-run-03",
+  "title": "Stockroom Reorder Advisor",
+  "track": "fullstack",
+  "sessions_planned": 4,
+  "stack": ["next", "react", "typescript", "prisma", "sqlite"],
+  "source": null,
+  "code_checks": [],
+  "endpoints": [
+    {"id": "ep-skus-list", "method": "GET", "path": "/api/skus", "request": null, "response": "SKU[]", "status": [200]},
+    {"id": "ep-reorder-suggestions", "method": "GET", "path": "/api/reorder-suggestions", "request": null, "response": "Suggestion[]", "status": [200]},
+    {"id": "ep-po-create", "method": "POST", "path": "/api/purchase-orders", "request": "PurchaseOrderCreate", "response": "PurchaseOrderCreated", "status": [200]},
+    {"id": "ep-po-list", "method": "GET", "path": "/api/purchase-orders", "request": null, "response": "PurchaseOrderSummary[]", "status": [200]},
+    {"id": "ep-po-detail", "method": "GET", "path": "/api/purchase-orders/:id", "request": null, "response": "PurchaseOrderDetail", "status": [200]}
+  ],
+  "screens": [
+    {"id": "sc-skus-list", "route": "/", "elements": ["sku table"], "states": ["loaded"]},
+    {"id": "sc-suggestions", "route": "/suggestions", "elements": ["suggestion table", "Create Purchase Order button"], "states": ["loaded", "filtered"]},
+    {"id": "sc-po-created", "route": "/purchase-orders/created", "elements": ["created summary"], "states": ["loaded"]},
+    {"id": "sc-po-history", "route": "/purchase-orders", "elements": ["po list"], "states": ["loaded"]},
+    {"id": "sc-po-detail", "route": "/purchase-orders/[id]", "elements": ["po lines"], "states": ["loaded"]}
+  ],
+  "sessions": [
+    {
+      "n": 1,
+      "title": "Setup and SKU list",
+      "goal": "Set up schema, migrate and seed, list SKUs via API and table.",
+      "teaches": ["Prisma schema", "migrations and seed", "Next.js API route basics", "client fetch", "table rendering"],
+      "builds": ["ep-skus-list", "sc-skus-list"],
+      "criteria": [
+        {"id": "c-1-1", "check": "GET /api/skus returns 200 with a JSON array of SKU with length 8", "target": "ep-skus-list", "cuts": ["cut-ep-skus-list-query"]},
+        {"id": "c-1-2", "check": "sc-skus-list renders exactly 8 elements with data-testid=sku-row", "target": "sc-skus-list", "cuts": ["cut-ui-skus-fetch"]}
+      ],
+      "cuts": [
+        {"id": "cut-ep-skus-list-query", "file": "app/api/skus/route.ts", "writes_into": "body", "hint": "Put every SKU the store holds into `body` and set `status` to 200"},
+        {"id": "cut-ui-skus-fetch", "file": "app/page.tsx", "writes_into": "items", "hint": "Fetch GET /api/skus and write the parsed array into `items`, then render one row per SKU"}
+      ]
+    },
+    {
+      "n": 2,
+      "title": "Reorder suggestions",
+      "goal": "Compute qty_to_order server-side and show only positive rows.",
+      "teaches": ["shape a computed REST view", "array mapping", "client fetch", "conditional rendering/filter"],
+      "builds": ["ep-reorder-suggestions", "sc-suggestions", "ep-po-create"],
+      "criteria": [
+        {"id": "c-2-1", "check": "GET /api/reorder-suggestions returns 200 with Suggestion[] where for every item qty_to_order == max(0, reorder_point - on_hand)", "target": "ep-reorder-suggestions", "cuts": ["cut-ep-suggestions-calc"]},
+        {"id": "c-2-2", "check": "sc-suggestions renders one data-testid=suggestion-row per item where qty_to_order > 0, and none where qty_to_order == 0", "target": "sc-suggestions", "cuts": ["cut-ui-suggestions-fetch", "cut-ui-suggestions-filter"]},
+        {"id": "c-2-3", "check": "Each rendered suggestion row shows its qty_to_order in a cell with data-testid=qty-to-order", "target": "sc-suggestions", "cuts": ["cut-ui-suggestions-fetch"]}
+      ],
+      "cuts": [
+        {"id": "cut-ep-suggestions-calc", "file": "app/api/reorder-suggestions/route.ts", "writes_into": "body", "hint": "Build `body` as an array of { sku_id, name, on_hand, reorder_point, qty_to_order } where qty_to_order is max(0, reorder_point - on_hand), and set `status` to 200"},
+        {"id": "cut-ui-suggestions-fetch", "file": "app/suggestions/page.tsx", "writes_into": "suggestions", "hint": "Fetch GET /api/reorder-suggestions and write the parsed array into `suggestions`"},
+        {"id": "cut-ui-suggestions-filter", "file": "app/suggestions/page.tsx", "writes_into": "visible", "hint": "Write into `visible` only the suggestions whose qty_to_order is greater than 0"}
+      ]
+    },
+    {
+      "n": 3,
+      "title": "Commit a suggested order",
+      "goal": "Select suggestions, POST them to create a purchase order in one transaction, and show a confirmation.",
+      "teaches": ["checkbox selection with Set", "POST to a JSON API", "Prisma transaction"],
+      "builds": ["sc-po-created"],
+      "criteria": [
+        {"id": "c-3-1", "check": "POST /api/purchase-orders with lines [{sku_id, qty}] returns 200 with JSON { id: number, itemsCount: number, totalQty: number }", "target": "ep-po-create", "cuts": ["cut-ep-po-create-transaction"]},
+        {"id": "c-3-2", "check": "sc-suggestions renders a button with data-testid=po-submit whose text includes '(2)' after two rows are checked", "target": "sc-suggestions", "cuts": ["cut-ui-suggestions-select"]},
+        {"id": "c-3-3", "check": "After selecting rows and clicking Create Purchase Order, the app navigates to /purchase-orders/created?items=<n>&total=<m>", "target": "sc-suggestions", "cuts": ["cut-ui-suggestions-select", "cut-ui-suggestions-submit"]},
+        {"id": "c-3-4", "check": "sc-po-created renders the two numbers from the URL (data-testid=po-created-items and data-testid=po-created-total)", "target": "sc-po-created", "cuts": ["cut-ui-po-created-read"]}
+      ],
+      "cuts": [
+        {"id": "cut-ui-suggestions-select", "file": "app/suggestions/page.tsx", "writes_into": "selected", "hint": "When a row’s checkbox is toggled, add or remove that sku_id in `selected` and leave all other ids unchanged"},
+        {"id": "cut-ui-suggestions-submit", "file": "app/suggestions/page.tsx", "writes_into": "nav", "hint": "Build a JSON body from the current `selected` using each line’s qty_to_order, POST it to /api/purchase-orders, and set `nav` to /purchase-orders/created?items={itemsCount}&total={totalQty} when it succeeds"},
+        {"id": "cut-ep-po-create-transaction", "file": "app/api/purchase-orders/route.ts", "writes_into": "body", "hint": "In one transaction, insert a new PurchaseOrder with a fixed created_label (e.g. 'manual'), insert one PurchaseOrderItem per line, then set `body` to { id, itemsCount: number of lines, totalQty: sum of qty } and `status` to 200"},
+        {"id": "cut-ui-po-created-read", "file": "app/purchase-orders/created/page.tsx", "writes_into": "summary", "hint": "Read the items and total numbers from the page URL and write { itemsCount, totalQty } into `summary`"}
+      ]
+    },
+    {
+      "n": 4,
+      "title": "Purchase order history and detail",
+      "goal": "List prior POs with totals and show a detail page of its lines.",
+      "teaches": ["aggregate queries with Prisma", "detail join query"],
+      "builds": ["ep-po-list", "ep-po-detail", "sc-po-history", "sc-po-detail"],
+      "criteria": [
+        {"id": "c-4-1", "check": "GET /api/purchase-orders returns 200 with an array of { id, itemsCount, totalQty }", "target": "ep-po-list", "cuts": ["cut-ep-po-list-aggregate"]},
+        {"id": "c-4-2", "check": "sc-po-history renders one data-testid=po-row per order and shows both itemsCount and totalQty on each row", "target": "sc-po-history", "cuts": ["cut-ui-po-history-fetch", "cut-ep-po-list-aggregate"]},
+        {"id": "c-4-3", "check": "GET /api/purchase-orders/:id returns 200 with { id, lines: [{ sku_id, name, qty }], itemsCount, totalQty }", "target": "ep-po-detail", "cuts": ["cut-ep-po-detail-join"]},
+        {"id": "c-4-4", "check": "sc-po-detail renders one data-testid=po-line per line, each showing a SKU name and qty", "target": "sc-po-detail", "cuts": ["cut-ui-po-detail-fetch", "cut-ep-po-detail-join"]}
+      ],
+      "cuts": [
+        {"id": "cut-ui-po-history-fetch", "file": "app/purchase-orders/page.tsx", "writes_into": "orders", "hint": "Fetch GET /api/purchase-orders and write the parsed array into `orders`"},
+        {"id": "cut-ep-po-list-aggregate", "file": "app/api/purchase-orders/route.ts", "writes_into": "body", "hint": "Query purchase orders with an aggregate to produce { id, itemsCount, totalQty } for each order, write the array into `body`, and set `status` to 200"},
+        {"id": "cut-ep-po-detail-join", "file": "app/api/purchase-orders/[id]/route.ts", "writes_into": "body", "hint": "Query a single purchase order’s lines joined to SKU names, compute itemsCount and totalQty, write { id, lines, itemsCount, totalQty } into `body`, and set `status` to 200"},
+        {"id": "cut-ui-po-detail-fetch", "file": "app/purchase-orders/[id]/page.tsx", "writes_into": "po", "hint": "Fetch GET /api/purchase-orders/:id for the current id and write the parsed object into `po`"}
+      ]
+    }
+  ]
+}

@@ -1,0 +1,38 @@
+// Prisma schema for Stockroom Reorder Advisor
+// SQLite database stored locally in prisma/dev.db
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Sku {
+  id            Int                 @id @default(autoincrement())
+  name          String
+  on_hand       Int
+  reorder_point Int
+  items         PurchaseOrderItem[]
+}
+
+model PurchaseOrder {
+  id            Int                  @id @default(autoincrement())
+  created_label String
+  items         PurchaseOrderItem[]
+}
+
+model PurchaseOrderItem {
+  id     Int  @id @default(autoincrement())
+  po_id  Int
+  sku_id Int
+  qty    Int
+
+  po   PurchaseOrder @relation(fields: [po_id], references: [id], onDelete: Cascade)
+  sku  Sku           @relation(fields: [sku_id], references: [id], onDelete: Restrict)
+
+  @@index([po_id])
+  @@index([sku_id])
+}

@@ -1,0 +1,113 @@
+{
+  "slug": "demo-run-02",
+  "cuts": [
+    {
+      "id": "cut-api-expenses-list",
+      "file": "app\\api\\expenses\\route.ts",
+      "line": 7,
+      "lines_removed": 2
+    },
+    {
+      "id": "cut-api-naive-settlement",
+      "file": "app\\api\\settlement\\naive\\route.ts",
+      "line": 8,
+      "lines_removed": 9
+    },
+    {
+      "id": "cut-ui-load-expenses",
+      "file": "app\\page.tsx",
+      "line": 22,
+      "lines_removed": 3
+    },
+    {
+      "id": "cut-ui-set-balances",
+      "file": "app\\page.tsx",
+      "line": 59,
+      "lines_removed": 1
+    },
+    {
+      "id": "cut-ui-set-transfers",
+      "file": "app\\page.tsx",
+      "line": 67,
+      "lines_removed": 1
+    },
+    {
+      "id": "cut-ui-use-minimal",
+      "file": "app\\page.tsx",
+      "line": 75,
+      "lines_removed": 3
+    },
+    {
+      "id": "cut-ui-toggle-include",
+      "file": "app\\page.tsx",
+      "line": 87,
+      "lines_removed": 3
+    },
+    {
+      "id": "cut-ui-compute-paid-totals",
+      "file": "app\\page.tsx",
+      "line": 97,
+      "lines_removed": 6
+    },
+    {
+      "id": "cut-lib-format-money",
+      "file": "lib\\money.ts",
+      "line": 3,
+      "lines_removed": 6
+    },
+    {
+      "id": "cut-lib-compute-balances",
+      "file": "lib\\settlement.ts",
+      "line": 9,
+      "lines_removed": 16
+    },
+    {
+      "id": "cut-lib-settle-naive",
+      "file": "lib\\settlement.ts",
+      "line": 32,
+      "lines_removed": 22
+    },
+    {
+      "id": "cut-lib-settle-minimal",
+      "file": "lib\\settlement.ts",
+      "line": 61,
+      "lines_removed": 9
+    }
+  ],
+  "count": 12,
+  "by_session": {
+    "1": [
+      "cut-api-expenses-list",
+      "cut-ui-compute-paid-totals",
+      "cut-ui-load-expenses"
+    ],
+    "2": [
+      "cut-api-naive-settlement",
+      "cut-lib-compute-balances",
+      "cut-lib-settle-naive",
+      "cut-ui-set-balances",
+      "cut-ui-set-transfers"
+    ],
+    "3": [
+      "cut-lib-format-money",
+      "cut-lib-settle-minimal",
+      "cut-ui-toggle-include",
+      "cut-ui-use-minimal"
+    ]
+  },
+  "return_safety": {
+    "ok": true,
+    "checked": 12,
+    "violations": []
+  },
+  "partial_state_risks": [],
+  "typecheck": {
+    "ran": true,
+    "ok": true,
+    "error_count": 0,
+    "errors": [],
+    "missing_return": [],
+    "hint": ""
+  },
+  "ok": true
+}

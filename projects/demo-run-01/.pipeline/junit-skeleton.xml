@@ -1,0 +1,299 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="13" skipped="0" tests="13" time="27.220" timestamp="2026-09-06T18:04:55.564105+05:30" hostname="HERO"><testcase classname="skeleton.verify.test_api_candidates" name="test_c_1_1_candidates_list_has_10_items" time="0.508"><failure message="assert 501 == 200&#10; +  where 501 = &lt;Response [501 Not Implemented]&gt;.status_code">def test_c_1_1_candidates_list_has_10_items():
+        """
+        c-1-1: GET /api/candidates returns 200 with a JSON array of 10 Candidate items
+        """
+        with httpx.Client(base_url=BASE_URL, timeout=10.0) as client:
+            resp = client.get("/api/candidates")
+&gt;       assert resp.status_code == 200
+E       assert 501 == 200
+E        +  where 501 = &lt;Response [501 Not Implemented]&gt;.status_code
+
+skeleton\verify\test_api_candidates.py:17: AssertionError</failure></testcase><testcase classname="skeleton.verify.test_api_candidates" name="test_c_1_4_candidates_list_has_duplicate_years" time="0.321"><failure message="assert 501 == 200&#10; +  where 501 = &lt;Response [501 Not Implemented]&gt;.status_code">def test_c_1_4_candidates_list_has_duplicate_years():
+        """
+        c-1-4: The /api/candidates JSON contains at least one pair of candidates with the same years value
+        """
+        with httpx.Client(base_url=BASE_URL, timeout=10.0) as client:
+            resp = client.get("/api/candidates")
+&gt;       assert resp.status_code == 200
+E       assert 501 == 200
+E        +  where 501 = &lt;Response [501 Not Implemented]&gt;.status_code
+
+skeleton\verify\test_api_candidates.py:35: AssertionError</failure></testcase><testcase classname="skeleton.verify.test_api_candidates" name="test_c_1_5_candidates_list_has_typescript_tag" time="0.366"><failure message="assert 501 == 200&#10; +  where 501 = &lt;Response [501 Not Implemented]&gt;.status_code">def test_c_1_5_candidates_list_has_typescript_tag():
+        """
+        c-1-5: GET /api/candidates returns 200 with a JSON array that includes at least one item whose tags contain 'typescript'
+        """
+        with httpx.Client(base_url=BASE_URL, timeout=10.0) as client:
+            resp = client.get("/api/candidates")
+&gt;       assert resp.status_code == 200
+E       assert 501 == 200
+E        +  where 501 = &lt;Response [501 Not Implemented]&gt;.status_code
+
+skeleton\verify\test_api_candidates.py:50: AssertionError</failure></testcase><testcase classname="skeleton.verify.test_api_rank" name="test_c_2_1_rank_years_returns_10_items_with_shape" time="0.351"><failure message="assert 501 == 200&#10; +  where 501 = &lt;Response [501 Not Implemented]&gt;.status_code">def test_c_2_1_rank_years_returns_10_items_with_shape():
+        """
+        c-2-1: GET /api/rank?active=years returns 200 with a JSON array of 10 RankItem having id, name, score (number), and reasons (string[])
+    
+        Strengthened to ensure the 'active=years' token is actually applied: at least one item must
+        have a positive numeric score and at least one reasons[] entry that mentions 'years'. This
+        ensures the query parser is exercised and prevents a fallback implementation from passing.
+        """
+        with httpx.Client(base_url=BASE_URL, timeout=10.0) as client:
+            resp = client.get("/api/rank", params={"active": "years"})
+&gt;       assert resp.status_code == 200
+E       assert 501 == 200
+E        +  where 501 = &lt;Response [501 Not Implemented]&gt;.status_code
+
+skeleton\verify\test_api_rank.py:20: AssertionError</failure></testcase><testcase classname="skeleton.verify.test_api_rank" name="test_c_2_2_rank_years_orders_by_unrounded_score_desc" time="0.364"><failure message="assert 501 == 200&#10; +  where 501 = &lt;Response [501 Not Implemented]&gt;.status_code">def test_c_2_2_rank_years_orders_by_unrounded_score_desc():
+        """
+        c-2-2: With active=years only, GET /api/rank returns items ordered by unrounded score in descending order (non-increasing)
+        """
+        with httpx.Client(base_url=BASE_URL, timeout=10.0) as client:
+            resp = client.get("/api/rank", params={"active": "years"})
+&gt;       assert resp.status_code == 200
+E       assert 501 == 200
+E        +  where 501 = &lt;Response [501 Not Implemented]&gt;.status_code
+
+skeleton\verify\test_api_rank.py:48: AssertionError</failure></testcase><testcase classname="skeleton.verify.test_api_rank" name="test_c_3_4_rank_years_min_100_returns_empty_array" time="0.363"><failure message="assert 501 == 200&#10; +  where 501 = &lt;Response [501 Not Implemented]&gt;.status_code">def test_c_3_4_rank_years_min_100_returns_empty_array():
+        """
+        c-3-4: GET /api/rank?active=years&amp;min=100 returns 200 with an empty JSON array
+        """
+        with httpx.Client(base_url=BASE_URL, timeout=10.0) as client:
+            resp = client.get("/api/rank", params={"active": "years", "min": 100})
+&gt;       assert resp.status_code == 200
+E       assert 501 == 200
+E        +  where 501 = &lt;Response [501 Not Implemented]&gt;.status_code
+
+skeleton\verify\test_api_rank.py:62: AssertionError</failure></testcase><testcase classname="skeleton.verify.test_sort_and_filter" name="test_c_3_1_no_active_orders_by_name_ascii" time="0.384"><failure message="assert 501 == 200&#10; +  where 501 = &lt;Response [501 Not Implemented]&gt;.status_code">def test_c_3_1_no_active_orders_by_name_ascii():
+        """
+        c-3-1: With no active tokens (?active=), if two items have equal unrounded scores then name ASC by ASCII order decides; GET /api/rank reflects that order.
+    
+        Reading taken: all unrounded scores are equal when no signals are active, but we assert only the minimal requirement:
+        pick any pair of candidates that also share the same years value (spec guarantees at least one pair), and assert their
+        relative order under active="" follows ASCII name order. This avoids over-asserting a global sort the spec does not pin.
+        """
+        # Find a pair with the same years value (c-1-4 guarantees such a pair exists)
+&gt;       items = _get_candidates()
+                ^^^^^^^^^^^^^^^^^
+
+skeleton\verify\test_sort_and_filter.py:32: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def _get_candidates() -&gt; List[Dict[str, Any]]:
+        with httpx.Client(base_url=BASE_URL, timeout=10.0) as client:
+            resp = client.get("/api/candidates")
+&gt;       assert resp.status_code == 200
+E       assert 501 == 200
+E        +  where 501 = &lt;Response [501 Not Implemented]&gt;.status_code
+
+skeleton\verify\test_sort_and_filter.py:13: AssertionError</failure></testcase><testcase classname="skeleton.verify.test_sort_and_filter" name="test_c_3_2_tag_active_same_years_same_tag_break_ties_by_name" time="0.363"><failure message="assert 501 == 200&#10; +  where 501 = &lt;Response [501 Not Implemented]&gt;.status_code">def test_c_3_2_tag_active_same_years_same_tag_break_ties_by_name():
+        """
+        c-3-2: With active=tag, when two candidates have equal years and both either have or both lack the preferred tag, the tie is broken by name in ASCII order.
+        This test locates such a pair from the seed and asserts their relative order under active=tag.
+        """
+        # Find a pair in the seed with same years and same tag presence
+&gt;       items = _get_candidates()
+                ^^^^^^^^^^^^^^^^^
+
+skeleton\verify\test_sort_and_filter.py:64: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def _get_candidates() -&gt; List[Dict[str, Any]]:
+        with httpx.Client(base_url=BASE_URL, timeout=10.0) as client:
+            resp = client.get("/api/candidates")
+&gt;       assert resp.status_code == 200
+E       assert 501 == 200
+E        +  where 501 = &lt;Response [501 Not Implemented]&gt;.status_code
+
+skeleton\verify\test_sort_and_filter.py:13: AssertionError</failure></testcase><testcase classname="skeleton.verify.test_sort_and_filter" name="test_c_3_3_tag_active_one_tagged_comes_first" time="0.322"><failure message="assert 501 == 200&#10; +  where 501 = &lt;Response [501 Not Implemented]&gt;.status_code">def test_c_3_3_tag_active_one_tagged_comes_first():
+        """
+        c-3-3: With active=tag, when two candidates have equal years and exactly one has the preferred tag, the tagged candidate appears first in GET /api/rank.
+        """
+&gt;       items = _get_candidates()
+                ^^^^^^^^^^^^^^^^^
+
+skeleton\verify\test_sort_and_filter.py:103: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def _get_candidates() -&gt; List[Dict[str, Any]]:
+        with httpx.Client(base_url=BASE_URL, timeout=10.0) as client:
+            resp = client.get("/api/candidates")
+&gt;       assert resp.status_code == 200
+E       assert 501 == 200
+E        +  where 501 = &lt;Response [501 Not Implemented]&gt;.status_code
+
+skeleton\verify\test_sort_and_filter.py:13: AssertionError</failure></testcase><testcase classname="skeleton.verify.test_ui_main" name="test_c_1_2_renders_10_cards" time="7.594"><failure message="playwright._impl._errors.TimeoutError: Locator.wait_for: Timeout 5000ms exceeded.&#10;Call log:&#10;  - waiting for get_by_test_id(&quot;card&quot;).first to be visible">@pytest.mark.sync
+    def test_c_1_2_renders_10_cards():
+        """
+        c-1-2: sc-main renders 10 elements with data-testid="card" on "/"
+        """
+        with sync_playwright() as p:
+            browser = p.chromium.launch()
+            try:
+                page = browser.new_page()
+                page.goto(BASE_URL + "/", wait_until="load")
+                # Expect exactly 10 candidate cards rendered
+                locator = page.get_by_test_id("card")
+                # give the UI a short time to load
+&gt;               locator.first.wait_for(timeout=5000)
+
+skeleton\verify\test_ui_main.py:23: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+.pipeline\venv\Lib\site-packages\playwright\sync_api\_generated.py:20539: in wait_for
+    self._sync(
+.pipeline\venv\Lib\site-packages\playwright\_impl\_locator.py:748: in wait_for
+    await self._frame.wait_for_selector(
+.pipeline\venv\Lib\site-packages\playwright\_impl\_frame.py:394: in wait_for_selector
+    await self._channel.send(
+.pipeline\venv\Lib\site-packages\playwright\_impl\_connection.py:76: in send
+    return await self._connection.wrap_api_call(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = &lt;playwright._impl._connection.Connection object at 0x00000154CA367A10&gt;
+cb = &lt;function Channel.send.&lt;locals&gt;.&lt;lambda&gt; at 0x00000154CA5907D0&gt;
+is_internal = False, title = None
+
+    async def wrap_api_call(
+        self, cb: Callable[[], Any], is_internal: bool = False, title: str = None
+    ) -&gt; Any:
+        if self._api_zone.get():
+            return await cb()
+        task = asyncio.current_task(self._loop)
+        parsed_st = _attach_api_call_information(
+            getattr(task, "__pw_stack__", None) or _capture_stack_trace(),
+            is_internal,
+            title,
+        )
+        self._api_zone.set(parsed_st)
+        try:
+            return await cb()
+        except Exception as error:
+&gt;           raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+E           playwright._impl._errors.TimeoutError: Locator.wait_for: Timeout 5000ms exceeded.
+E           Call log:
+E             - waiting for get_by_test_id("card").first to be visible
+
+.pipeline\venv\Lib\site-packages\playwright\_impl\_connection.py:632: TimeoutError</failure></testcase><testcase classname="skeleton.verify.test_ui_main" name="test_c_1_3_renders_both_toggles" time="1.205"><failure message="assert True is False&#10; +  where True = is_checked()&#10; +    where is_checked = &lt;Locator frame=&lt;Frame name= url='http://127.0.0.1:58394/'&gt; selector='internal:testid=[data-testid=&quot;toggle-years&quot;s]'&gt;.is_checked">@pytest.mark.sync
+    def test_c_1_3_renders_both_toggles():
+        """
+        c-1-3: sc-main renders checkboxes with data-testids "toggle-years" and "toggle-tag"
+        """
+        with sync_playwright() as p:
+            browser = p.chromium.launch()
+            try:
+                page = browser.new_page()
+                page.goto(BASE_URL + "/", wait_until="load")
+                years = page.get_by_test_id("toggle-years")
+                tag = page.get_by_test_id("toggle-tag")
+                years.wait_for(timeout=5000)
+                tag.wait_for(timeout=5000)
+                assert years.is_visible()
+                assert tag.is_visible()
+                # Also assert they are rendered as unchecked inputs on first load
+                # (initial state: no active tokens). This remains an assertion on what the user sees.
+&gt;               assert years.is_checked() is False
+E               assert True is False
+E                +  where True = is_checked()
+E                +    where is_checked = &lt;Locator frame=&lt;Frame name= url='http://127.0.0.1:58394/'&gt; selector='internal:testid=[data-testid="toggle-years"s]'&gt;.is_checked
+
+skeleton\verify\test_ui_main.py:48: AssertionError</failure></testcase><testcase classname="skeleton.verify.test_ui_rank" name="test_c_2_3_years_toggle_shows_two_decimal_scores" time="6.708"><failure message="playwright._impl._errors.TimeoutError: Locator.wait_for: Timeout 5000ms exceeded.&#10;Call log:&#10;  - waiting for get_by_test_id(&quot;score&quot;).first to be visible">@pytest.mark.sync
+    def test_c_2_3_years_toggle_shows_two_decimal_scores():
+        """
+        c-2-3: On "/" with years toggle on, each card renders a score text data-testid="score" formatted to two decimals
+        """
+        with sync_playwright() as p:
+            browser = p.chromium.launch()
+            try:
+                page = browser.new_page()
+                page.goto(BASE_URL + "/", wait_until="load")
+                # Turn on the years toggle
+                page.get_by_test_id("toggle-years").check()
+                # Wait for scores to render
+&gt;               page.get_by_test_id("score").first.wait_for(timeout=5000)
+
+skeleton\verify\test_ui_rank.py:24: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+.pipeline\venv\Lib\site-packages\playwright\sync_api\_generated.py:20539: in wait_for
+    self._sync(
+.pipeline\venv\Lib\site-packages\playwright\_impl\_locator.py:748: in wait_for
+    await self._frame.wait_for_selector(
+.pipeline\venv\Lib\site-packages\playwright\_impl\_frame.py:394: in wait_for_selector
+    await self._channel.send(
+.pipeline\venv\Lib\site-packages\playwright\_impl\_connection.py:76: in send
+    return await self._connection.wrap_api_call(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = &lt;playwright._impl._connection.Connection object at 0x00000154CB885590&gt;
+cb = &lt;function Channel.send.&lt;locals&gt;.&lt;lambda&gt; at 0x00000154CB88DD20&gt;
+is_internal = False, title = None
+
+    async def wrap_api_call(
+        self, cb: Callable[[], Any], is_internal: bool = False, title: str = None
+    ) -&gt; Any:
+        if self._api_zone.get():
+            return await cb()
+        task = asyncio.current_task(self._loop)
+        parsed_st = _attach_api_call_information(
+            getattr(task, "__pw_stack__", None) or _capture_stack_trace(),
+            is_internal,
+            title,
+        )
+        self._api_zone.set(parsed_st)
+        try:
+            return await cb()
+        except Exception as error:
+&gt;           raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+E           playwright._impl._errors.TimeoutError: Locator.wait_for: Timeout 5000ms exceeded.
+E           Call log:
+E             - waiting for get_by_test_id("score").first to be visible
+
+.pipeline\venv\Lib\site-packages\playwright\_impl\_connection.py:632: TimeoutError</failure></testcase><testcase classname="skeleton.verify.test_ui_rank" name="test_c_2_4_years_toggle_reasons_contains_years" time="6.749"><failure message="playwright._impl._errors.TimeoutError: Locator.wait_for: Timeout 5000ms exceeded.&#10;Call log:&#10;  - waiting for get_by_test_id(&quot;reasons&quot;).first to be visible">@pytest.mark.sync
+    def test_c_2_4_years_toggle_reasons_contains_years():
+        """
+        c-2-4: On "/" with years toggle on, at least one card's data-testid="reasons" contains the word "years"
+        """
+        with sync_playwright() as p:
+            browser = p.chromium.launch()
+            try:
+                page = browser.new_page()
+                page.goto(BASE_URL + "/", wait_until="load")
+                # Turn on the years toggle so the scorer includes the years signal
+                page.get_by_test_id("toggle-years").check()
+                # Wait for reasons to appear
+&gt;               page.get_by_test_id("reasons").first.wait_for(timeout=5000)
+
+skeleton\verify\test_ui_rank.py:47: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+.pipeline\venv\Lib\site-packages\playwright\sync_api\_generated.py:20539: in wait_for
+    self._sync(
+.pipeline\venv\Lib\site-packages\playwright\_impl\_locator.py:748: in wait_for
+    await self._frame.wait_for_selector(
+.pipeline\venv\Lib\site-packages\playwright\_impl\_frame.py:394: in wait_for_selector
+    await self._channel.send(
+.pipeline\venv\Lib\site-packages\playwright\_impl\_connection.py:76: in send
+    return await self._connection.wrap_api_call(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = &lt;playwright._impl._connection.Connection object at 0x00000154CA55A9E0&gt;
+cb = &lt;function Channel.send.&lt;locals&gt;.&lt;lambda&gt; at 0x00000154CBA43ED0&gt;
+is_internal = False, title = None
+
+    async def wrap_api_call(
+        self, cb: Callable[[], Any], is_internal: bool = False, title: str = None
+    ) -&gt; Any:
+        if self._api_zone.get():
+            return await cb()
+        task = asyncio.current_task(self._loop)
+        parsed_st = _attach_api_call_information(
+            getattr(task, "__pw_stack__", None) or _capture_stack_trace(),
+            is_internal,
+            title,
+        )
+        self._api_zone.set(parsed_st)
+        try:
+            return await cb()
+        except Exception as error:
+&gt;           raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+E           playwright._impl._errors.TimeoutError: Locator.wait_for: Timeout 5000ms exceeded.
+E           Call log:
+E             - waiting for get_by_test_id("reasons").first to be visible
+
+.pipeline\venv\Lib\site-packages\playwright\_impl\_connection.py:632: TimeoutError</failure></testcase></testsuite></testsuites>

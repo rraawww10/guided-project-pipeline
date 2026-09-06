@@ -1,0 +1,92 @@
+{
+  "slug": "demo-run-01",
+  "cuts": [
+    {
+      "id": "cut-api-candidates-list",
+      "file": "app\\api\\candidates\\route.ts",
+      "line": 8,
+      "lines_removed": 2
+    },
+    {
+      "id": "cut-api-rank-parse-query",
+      "file": "app\\api\\rank\\route.ts",
+      "line": 31,
+      "lines_removed": 6
+    },
+    {
+      "id": "cut-api-rank-build",
+      "file": "app\\api\\rank\\route.ts",
+      "line": 41,
+      "lines_removed": 7
+    },
+    {
+      "id": "cut-api-rank-apply-min",
+      "file": "app\\api\\rank\\route.ts",
+      "line": 52,
+      "lines_removed": 8
+    },
+    {
+      "id": "cut-ui-toggle-init",
+      "file": "app\\page.tsx",
+      "line": 20,
+      "lines_removed": 1
+    },
+    {
+      "id": "cut-ui-load-candidates",
+      "file": "app\\page.tsx",
+      "line": 34,
+      "lines_removed": 1
+    },
+    {
+      "id": "cut-ui-rank-fetch",
+      "file": "app\\page.tsx",
+      "line": 58,
+      "lines_removed": 1
+    },
+    {
+      "id": "cut-score-apply",
+      "file": "lib\\score.ts",
+      "line": 29,
+      "lines_removed": 17
+    },
+    {
+      "id": "cut-sort-cmp",
+      "file": "lib\\sort.ts",
+      "line": 13,
+      "lines_removed": 24
+    }
+  ],
+  "count": 9,
+  "by_session": {
+    "1": [
+      "cut-api-candidates-list",
+      "cut-ui-load-candidates",
+      "cut-ui-toggle-init"
+    ],
+    "2": [
+      "cut-api-rank-build",
+      "cut-api-rank-parse-query",
+      "cut-score-apply",
+      "cut-ui-rank-fetch"
+    ],
+    "3": [
+      "cut-api-rank-apply-min",
+      "cut-sort-cmp"
+    ]
+  },
+  "return_safety": {
+    "ok": true,
+    "checked": 9,
+    "violations": []
+  },
+  "partial_state_risks": [],
+  "typecheck": {
+    "ran": true,
+    "ok": true,
+    "error_count": 0,
+    "errors": [],
+    "missing_return": [],
+    "hint": ""
+  },
+  "ok": true
+}

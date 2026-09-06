@@ -1,0 +1,214 @@
+{
+  "slug": "demo-run-01",
+  "title": "Shortlist Scorer",
+  "track": "fullstack",
+  "sessions_planned": 3,
+  "stack": ["next", "react", "typescript"],
+  "source": null,
+  "code_checks": [],
+  "endpoints": [
+    {
+      "id": "ep-candidates-list",
+      "method": "GET",
+      "path": "/api/candidates",
+      "request": null,
+      "response": "Candidate[]",
+      "status": [200]
+    },
+    {
+      "id": "ep-rank",
+      "method": "GET",
+      "path": "/api/rank",
+      "request": {
+        "query": {
+          "active": "comma-separated tokens among {years, tag}; join repeated keys by comma in arrival order; unknown token => 400; ignore empty tokens",
+          "min": "optional number; APPLY TO ROUNDED SCORE (two decimals as in RankItem.score): drop items with rounded_score < min; keep rounded_score >= min"
+        }
+      },
+      "response": "RankItem[]",
+      "status": [200, 400]
+    }
+  ],
+  "screens": [
+    {
+      "id": "sc-main",
+      "route": "/",
+      "elements": [
+        "card",
+        "toggle-years",
+        "toggle-tag",
+        "score",
+        "reasons",
+        "input-min (appears starting in Session 3 only)"
+      ],
+      "states": ["empty", "loaded", "error"]
+    }
+  ],
+  "sessions": [
+    {
+      "n": 1,
+      "title": "Seed, list, and toggles",
+      "goal": "Expose /api/candidates and render a list with a toggle panel (no scoring)",
+      "teaches": ["Next API route basics", "fetch", "useState"],
+      "builds": ["ep-candidates-list", "sc-main"],
+      "criteria": [
+        {
+          "id": "c-1-1",
+          "check": "GET /api/candidates returns 200 with a JSON array of 10 Candidate items",
+          "target": "ep-candidates-list",
+          "cuts": ["cut-api-candidates-list"]
+        },
+        {
+          "id": "c-1-2",
+          "check": "sc-main renders 10 elements with data-testid=card on /",
+          "target": "sc-main",
+          "cuts": ["cut-ui-load-candidates"]
+        },
+        {
+          "id": "c-1-3",
+          "check": "sc-main renders checkboxes with data-testids toggle-years and toggle-tag",
+          "target": "sc-main",
+          "cuts": ["cut-ui-toggle-init"]
+        },
+        {
+          "id": "c-1-4",
+          "check": "The /api/candidates JSON contains at least one pair of candidates with the same years value",
+          "target": "ep-candidates-list",
+          "cuts": ["cut-api-candidates-list"]
+        },
+        {
+          "id": "c-1-5",
+          "check": "GET /api/candidates returns 200 with a JSON array that includes at least one item whose tags contain 'typescript'",
+          "target": "ep-candidates-list",
+          "cuts": ["cut-api-candidates-list"]
+        }
+      ],
+      "cuts": [
+        {
+          "id": "cut-api-candidates-list",
+          "file": "app/api/candidates/route.ts",
+          "writes_into": "body",
+          "hint": "Put every candidate from the seed into `body` and set `status` to 200"
+        },
+        {
+          "id": "cut-ui-load-candidates",
+          "file": "app/page.tsx",
+          "writes_into": "items",
+          "hint": "After fetching \"/api/candidates\", parse the JSON array and write it into the `items` state"
+        },
+        {
+          "id": "cut-ui-toggle-init",
+          "file": "app/page.tsx",
+          "writes_into": "active",
+          "hint": "Initialize the `active` state to an empty Set of tokens (no signals active yet)"
+        }
+      ]
+    },
+    {
+      "n": 2,
+      "title": "Pure scorer and rank endpoint",
+      "goal": "Map candidates through a pure scorer and serve /api/rank; render ranked cards with score and reasons",
+      "teaches": ["pure functions", "map to DTO", "parse query strings", "descending sort"],
+      "builds": ["ep-rank"],
+      "criteria": [
+        {
+          "id": "c-2-1",
+          "check": "GET /api/rank?active=years returns 200 with a JSON array of 10 RankItem having id, name, score (number), and reasons (string[])",
+          "target": "ep-rank",
+          "cuts": ["cut-api-rank-parse-query", "cut-api-rank-build"]
+        },
+        {
+          "id": "c-2-2",
+          "check": "With active=years only, GET /api/rank returns items ordered by unrounded score in descending order",
+          "target": "ep-rank",
+          "cuts": ["cut-api-rank-build"]
+        },
+        {
+          "id": "c-2-3",
+          "check": "On / with years toggle on, each card renders a score text data-testid=score formatted to two decimals",
+          "target": "sc-main",
+          "cuts": ["cut-ui-rank-fetch"]
+        },
+        {
+          "id": "c-2-4",
+          "check": "On / with years toggle on, at least one card's data-testid=reasons contains the word 'years'",
+          "target": "sc-main",
+          "cuts": ["cut-score-apply"]
+        }
+      ],
+      "cuts": [
+        {
+          "id": "cut-score-apply",
+          "file": "lib/score.ts",
+          "writes_into": "out",
+          "hint": "Set fields on `out`: compute `out.score` from the rules (years normalization plus optional preferred‑tag bonus) and fill `out.reasons` with one entry per active signal"
+        },
+        {
+          "id": "cut-api-rank-parse-query",
+          "file": "app/api/rank/route.ts",
+          "writes_into": "activeTokens",
+          "hint": "Parse the 'active' query by splitting on commas after merging repeated keys, drop empty tokens, validate each token against {years, tag}, and write the valid set into `activeTokens`; answer 400 for any unknown"
+        },
+        {
+          "id": "cut-api-rank-build",
+          "file": "app/api/rank/route.ts",
+          "writes_into": "body",
+          "hint": "Map every Candidate to a RankItem using the pure scorer, set each RankItem.score as a number already rounded to two decimals, and fill `body` with all RankItem rows; in Session 2 you may sort by unrounded score in descending order, and in the final app always sort using `cmp` from lib/sort.ts; set `status` to 200 when successful"
+        },
+        {
+          "id": "cut-ui-rank-fetch",
+          "file": "app/page.tsx",
+          "writes_into": "items",
+          "hint": "When the active tokens change, call \"/api/rank?active=...\" and write the parsed RankItem array into the `items` state"
+        }
+      ]
+    },
+    {
+      "n": 3,
+      "title": "Stable comparator and threshold filter",
+      "goal": "Make order deterministic with explicit tie-breakers and add a minimum score filter",
+      "teaches": ["stable multi-key comparator", "ASCII collation", "threshold filtering"],
+      "builds": [],
+      "criteria": [
+        {
+          "id": "c-3-1",
+          "check": "With no active tokens (?active=), if two items have equal unrounded scores then name ASC by ASCII order decides; GET /api/rank reflects that order",
+          "target": "ep-rank",
+          "cuts": ["cut-sort-cmp"]
+        },
+        {
+          "id": "c-3-2",
+          "check": "With active=tag, GET /api/rank returns 200 with items ordered so that when two candidates have equal years and both either have or both lack the preferred tag, the tie is broken by name ASC (ASCII)",
+          "target": "ep-rank",
+          "cuts": ["cut-sort-cmp"]
+        },
+        {
+          "id": "c-3-3",
+          "check": "With active=tag, when two candidates have equal years and exactly one has the preferred tag, the tagged candidate appears first in GET /api/rank",
+          "target": "ep-rank",
+          "cuts": ["cut-sort-cmp"]
+        },
+        {
+          "id": "c-3-4",
+          "check": "GET /api/rank?active=years&min=100 returns 200 with an empty JSON array",
+          "target": "ep-rank",
+          "cuts": ["cut-api-rank-apply-min"]
+        }
+      ],
+      "cuts": [
+        {
+          "id": "cut-sort-cmp",
+          "file": "lib/sort.ts",
+          "writes_into": "cmp",
+          "hint": "Implement `cmp` so that it compares a and b by unrounded score DESC; when the 'tag' token is active and one candidate has the preferred tag and the other does not, place the tagged candidate first; next break ties by years DESC; finally by name ASC using ASCII codepoint order"
+        },
+        {
+          "id": "cut-api-rank-apply-min",
+          "file": "app/api/rank/route.ts",
+          "writes_into": "body",
+          "hint": "If the 'min' query parameter is present, remove from `body` any RankItem whose ROUNDED two‑decimal score is strictly less than that threshold before responding"
+        }
+      ]
+    }
+  ]
+}

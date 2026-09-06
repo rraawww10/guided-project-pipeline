@@ -1,0 +1,235 @@
+{
+  "slug": "demo-run-02",
+  "title": "FairShare: Expense Settlement Calculator",
+  "track": "fullstack",
+  "sessions_planned": 3,
+  "stack": ["next", "react", "typescript"],
+  "source": null,
+  "code_checks": [],
+  "endpoints": [
+    {
+      "id": "ep-expenses-list",
+      "method": "GET",
+      "path": "/api/expenses",
+      "request": null,
+      "response": "Expense[]",
+      "status": [200]
+    },
+    {
+      "id": "ep-settlement",
+      "method": "GET",
+      "path": "/api/settlement",
+      "request": {"query": {"include": "string | null"}},
+      "response": "SettlementResponse",
+      "status": [200]
+    }
+  ],
+  "screens": [
+    {
+      "id": "sc-expenses",
+      "route": "/",
+      "elements": [
+        "expenses table (data-testid=expense-row)",
+        "per-payer totals (data-testid=payer-total-<name>)",
+        "proposed transfers list (data-testid=transfer-row)",
+        "transfer amount element (data-testid=transfer-amount)",
+        "include/exclude toggle (data-testid=toggle-<name>)"
+      ],
+      "states": ["loading", "loaded", "error"]
+    }
+  ],
+  "sessions": [
+    {
+      "n": 1,
+      "title": "App boots and shows data",
+      "goal": "Serve the seeded expenses and render them as a table with a per-payer totals section.",
+      "teaches": [
+        "Next.js route handler basics",
+        "GET endpoint",
+        "fetching data for a page",
+        "grouping and summing with Array.reduce"
+      ],
+      "builds": ["ep-expenses-list", "sc-expenses"],
+      "criteria": [
+        {
+          "id": "c-1-1",
+          "check": "GET /api/expenses returns 200 with a JSON array of Expense (every item has integer amountCents)",
+          "target": "ep-expenses-list",
+          "cuts": ["cut-api-expenses-list"]
+        },
+        {
+          "id": "c-1-2",
+          "check": "sc-expenses renders one row per expense (count of data-testid=expense-row equals the number of seeded expenses)",
+          "target": "sc-expenses",
+          "cuts": ["cut-ui-fetch-expenses"]
+        },
+        {
+          "id": "c-1-3",
+          "check": "sc-expenses renders per-payer totals (data-testid=payer-total-<name>) with each payer's total equaling the sum of their paid amountCents",
+          "target": "sc-expenses",
+          "cuts": ["cut-ui-fetch-expenses", "cut-ui-totals-by-payer"]
+        }
+      ],
+      "cuts": [
+        {
+          "id": "cut-api-expenses-list",
+          "file": "app/api/expenses/route.ts",
+          "writes_into": "body",
+          "hint": "Put every seeded expense into `body` and set `status` to 200"
+        },
+        {
+          "id": "cut-ui-fetch-expenses",
+          "file": "app/(site)/page.tsx",
+          "writes_into": "expenses",
+          "hint": "Fetch \"/api/expenses\", parse the JSON, and write the resulting array into `expenses`"
+        },
+        {
+          "id": "cut-ui-totals-by-payer",
+          "file": "app/(site)/page.tsx",
+          "writes_into": "totals",
+          "hint": "Group the loaded expenses by payer and write each payer’s summed amount in cents into `totals`"
+        }
+      ]
+    },
+    {
+      "n": 2,
+      "title": "Netting works",
+      "goal": "Compute per-person net balances and propose a naive greedy settlement; render the proposed transfers list.",
+      "teaches": [
+        "Pure functions at a server boundary",
+        "greedy matching",
+        "deterministic ordering",
+        "joining server compute to UI"
+      ],
+      "builds": ["ep-settlement"],
+      "criteria": [
+        {
+          "id": "c-2-1",
+          "check": "GET /api/settlement returns 200 with balances whose deltas (paid minus owed) match the seeded fixture in integer cents",
+          "target": "ep-settlement",
+          "cuts": ["cut-lib-compute-balances", "cut-api-settlement"]
+        },
+        {
+          "id": "c-2-2",
+          "check": "GET /api/settlement includes a transfers array whose amounts sum to zero and whose totals match balances for each person (greedy proposal)",
+          "target": "ep-settlement",
+          "cuts": ["cut-lib-settle-greedy", "cut-api-settlement"]
+        },
+        {
+          "id": "c-2-3",
+          "check": "GET /api/settlement returns transfers sorted deterministically by from, then to, ascending",
+          "target": "ep-settlement",
+          "cuts": ["cut-api-settlement"]
+        },
+        {
+          "id": "c-2-4",
+          "check": "sc-expenses shows the section title 'Proposed transfers' when settlement data is loaded",
+          "target": "sc-expenses",
+          "cuts": ["cut-ui-load-settlement"]
+        }
+      ],
+      "cuts": [
+        {
+          "id": "cut-lib-compute-balances",
+          "file": "app/lib/settlement.ts",
+          "writes_into": "out",
+          "hint": "For the given expenses and participants, compute each person’s net cents (paid minus an equal share by weight) and write the mapping into `out`"
+        },
+        {
+          "id": "cut-lib-settle-greedy",
+          "file": "app/lib/settlement.ts",
+          "writes_into": "out",
+          "hint": "Using the balances mapping, greedily match the largest creditor with the largest debtor until all deltas are zero and write the list of transfers into `out`"
+        },
+        {
+          "id": "cut-api-settlement",
+          "file": "app/api/settlement/route.ts",
+          "writes_into": "body",
+          "hint": "Compute balances and transfers for the current request and write both into `body` with `status` set to 200; sort `body.transfers` deterministically by from, then to ascending"
+        },
+        {
+          "id": "cut-ui-load-settlement",
+          "file": "app/(site)/page.tsx",
+          "writes_into": "settlement",
+          "hint": "Fetch \"/api/settlement\", parse the JSON, and write the object into `settlement`"
+        }
+      ]
+    },
+    {
+      "n": 3,
+      "title": "Minimal transfers and rounding",
+      "goal": "Refine the settlement to reduce the number of transfers while preserving totals, keep output deterministic, add an include/exclude toggle and integer-safe formatting.",
+      "teaches": [
+        "algorithm refinement",
+        "tie-breaking for determinism",
+        "integer-safe currency formatting",
+        "UI toggle state and query parameters"
+      ],
+      "builds": [],
+      "criteria": [
+        {
+          "id": "c-3-1",
+          "check": "GET /api/settlement on the seed yields a transfers list length equal to the refined minimal strategy and in a deterministic sequence",
+          "target": "ep-settlement",
+          "cuts": ["cut-lib-refine-settle"]
+        },
+        {
+          "id": "c-3-2",
+          "check": "GET /api/settlement?include=<subset> excludes omitted people (no transfer mentions an excluded name) and transfers still balance to zero",
+          "target": "ep-settlement",
+          "cuts": ["cut-api-include-filter", "cut-lib-refine-settle"]
+        },
+        {
+          "id": "c-3-3",
+          "check": "sc-expenses include/exclude toggle recomputes the transfers list without a full page reload (toggling a person off removes any transfer involving them)",
+          "target": "sc-expenses",
+          "cuts": ["cut-ui-toggle-include", "cut-ui-load-settlement"]
+        },
+        {
+          "id": "c-3-4",
+          "check": "sc-expenses renders, for each transfer-row, a transfer amount element (data-testid=transfer-amount) whose text equals the currency string for that row's integer cents (e.g., $12.34)",
+          "target": "sc-expenses",
+          "cuts": ["cut-lib-format-money", "cut-ui-render-transfers"]
+        },
+        {
+          "id": "c-3-5",
+          "check": "sc-expenses renders one row per transfer (count of data-testid=transfer-row equals the number of transfers from the settlement endpoint)",
+          "target": "sc-expenses",
+          "cuts": ["cut-ui-load-settlement", "cut-ui-render-transfers"]
+        }
+      ],
+      "cuts": [
+        {
+          "id": "cut-lib-refine-settle",
+          "file": "app/lib/settlement.ts",
+          "writes_into": "out",
+          "hint": "Refine the settlement so `out` contains a transfer set with the same totals but fewer payments than the naive greedy result, using tie-breaking that keeps a deterministic person-order"
+        },
+        {
+          "id": "cut-lib-format-money",
+          "file": "app/lib/format.ts",
+          "writes_into": "out",
+          "hint": "Format an integer cents value into `out` as a currency string like \"$12.34\" without using floating-point rounding"
+        },
+        {
+          "id": "cut-ui-toggle-include",
+          "file": "app/(site)/page.tsx",
+          "writes_into": "included",
+          "hint": "Maintain the set of included people in `included` and update it when a toggle is clicked, then trigger a reload of the settlement using the include list"
+        },
+        {
+          "id": "cut-api-include-filter",
+          "file": "app/api/settlement/route.ts",
+          "writes_into": "included",
+          "hint": "Parse the request’s include query into the set `included` and apply it so only those people participate in balances and transfers"
+        },
+        {
+          "id": "cut-ui-render-transfers",
+          "file": "app/(site)/page.tsx",
+          "writes_into": "rows",
+          "hint": "Build the array of renderable rows for the transfers list from `settlement.transfers` and write it into `rows`"
+        }
+      ]
+    }
+  ]
+}

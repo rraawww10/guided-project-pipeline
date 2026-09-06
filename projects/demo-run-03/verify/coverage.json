@@ -1,0 +1,15 @@
+{
+  "c-1-1": {"test": "verify/test_api_skus.py::test_c_1_1_ep_skus_list_returns_8"},
+  "c-1-2": {"test": "verify/test_ui_skus.py::test_c_1_2_sc_skus_list_renders_8_rows"},
+  "c-2-1": {"test": "verify/test_api_suggestions.py::test_c_2_1_ep_reorder_suggestions_qty_formula"},
+  "c-2-2": {"test": "verify/test_ui_suggestions.py::test_c_2_2_sc_suggestions_renders_only_positive"},
+  "c-2-3": {"test": "verify/test_ui_suggestions.py::test_c_2_3_sc_suggestions_shows_qty_in_cell"},
+  "c-3-1": {"test": "verify/test_api_purchase_orders.py::test_c_3_1_ep_po_create_returns_summary"},
+  "c-3-2": {"test": "verify/test_ui_purchase_orders.py::test_c_3_2_sc_suggestions_button_counts_checked"},
+  "c-3-3": {"test": "verify/test_ui_purchase_orders.py::test_c_3_3_sc_suggestions_navigates_to_created_with_counts"},
+  "c-3-4": {"test": "verify/test_ui_purchase_orders.py::test_c_3_4_sc_po_created_renders_numbers_from_url"},
+  "c-4-1": {"test": "verify/test_api_purchase_orders.py::test_c_4_1_ep_po_list_returns_summaries"},
+  "c-4-2": {"test": "verify/test_ui_purchase_orders.py::test_c_4_2_sc_po_history_renders_rows_with_counts"},
+  "c-4-3": {"test": "verify/test_api_purchase_orders.py::test_c_4_3_ep_po_detail_returns_detail"},
+  "c-4-4": {"test": "verify/test_ui_purchase_orders.py::test_c_4_4_sc_po_detail_renders_lines"}
+}

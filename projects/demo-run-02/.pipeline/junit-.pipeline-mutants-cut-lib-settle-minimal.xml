@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="12" time="19.860" timestamp="2026-09-06T21:57:00.728406+05:30" hostname="HERO"><testcase classname="verify.test_api" name="test_c_1_1_get_expenses_returns_4_items[/api/expenses-4]" time="0.525" /><testcase classname="verify.test_api" name="test_c_2_4_naive_settlement_api_first_item" time="0.364" /><testcase classname="verify.test_ui_session1" name="test_c_1_2_home_renders_4_expense_rows" time="1.802" /><testcase classname="verify.test_ui_session1" name="test_c_1_3_totals_paid_summary_5_rows_with_exact_amounts" time="0.637" /><testcase classname="verify.test_ui_session2" name="test_c_2_1_balances_name_order_and_exact_texts" time="0.615" /><testcase classname="verify.test_ui_session2" name="test_c_2_2_transfers_first_item_text" time="0.562" /><testcase classname="verify.test_ui_session2" name="test_c_2_3_transfers_total_amount" time="0.631" /><testcase classname="verify.test_ui_session3" name="test_c_3_1_money_sample_shows_negative_format" time="0.619" /><testcase classname="verify.test_ui_session3" name="test_c_3_2_minimal_on_orders_transfers_by_amount_then_payer_payee" time="6.217"><failure message="AssertionError: Locator expected to have count '4'&#10;Actual value: 0 &#10;Call log:&#10;  - Expect &quot;to_have_count&quot; with timeout 5000ms&#10;  - waiting for locator(&quot;[data-testid=\&quot;transfer-row\&quot;]&quot;)&#10;    14 × locator resolved to 0 elements&#10;       - unexpected value &quot;0&quot;">page = &lt;Page url='http://127.0.0.1:64383/'&gt;
+
+    def test_c_3_2_minimal_on_orders_transfers_by_amount_then_payer_payee(page):
+        page.goto(BASE_URL + "/")
+        toggle = page.locator('[data-testid="toggle-minimal"]')
+        # Turn minimal mode ON by clicking once
+        toggle.click()
+        rows = page.locator('[data-testid="transfer-row"]')
+&gt;       expect(rows).to_have_count(4)
+E       AssertionError: Locator expected to have count '4'
+E       Actual value: 0 
+E       Call log:
+E         - Expect "to_have_count" with timeout 5000ms
+E         - waiting for locator("[data-testid=\"transfer-row\"]")
+E           14 × locator resolved to 0 elements
+E              - unexpected value "0"
+
+verify\test_ui_session3.py:20: AssertionError</failure></testcase><testcase classname="verify.test_ui_session3" name="test_c_3_3_unchecking_eve_excludes_from_balances_and_transfers" time="0.663" /><testcase classname="verify.test_ui_session3" name="test_c_3_4_minimal_on_renders_4_transfer_rows" time="6.207"><failure message="AssertionError: Locator expected to have count '4'&#10;Actual value: 0 &#10;Call log:&#10;  - Expect &quot;to_have_count&quot; with timeout 5000ms&#10;  - waiting for locator(&quot;[data-testid=\&quot;transfer-row\&quot;]&quot;)&#10;    14 × locator resolved to 0 elements&#10;       - unexpected value &quot;0&quot;">page = &lt;Page url='http://127.0.0.1:64383/'&gt;
+
+    def test_c_3_4_minimal_on_renders_4_transfer_rows(page):
+        page.goto(BASE_URL + "/")
+        toggle = page.locator('[data-testid="toggle-minimal"]')
+        toggle.click()  # turn ON
+        rows = page.locator('[data-testid="transfer-row"]')
+&gt;       expect(rows).to_have_count(4)
+E       AssertionError: Locator expected to have count '4'
+E       Actual value: 0 
+E       Call log:
+E         - Expect "to_have_count" with timeout 5000ms
+E         - waiting for locator("[data-testid=\"transfer-row\"]")
+E           14 × locator resolved to 0 elements
+E              - unexpected value "0"
+
+verify\test_ui_session3.py:51: AssertionError</failure></testcase><testcase classname="verify.test_ui_session3" name="test_c_3_5_minimal_off_last_item_is_bob_pays_cara" time="0.665" /></testsuite></testsuites>

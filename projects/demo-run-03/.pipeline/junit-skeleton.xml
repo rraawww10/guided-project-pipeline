@@ -1,0 +1,302 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="13" skipped="0" tests="14" time="71.495" timestamp="2026-09-07T03:12:57.086819+05:30" hostname="HERO"><testcase classname="skeleton.verify.test_api_purchase_orders" name="test_c_3_1_ep_po_create_returns_summary" time="0.550"><failure message="assert (True and 0 &gt;= 2)&#10; +  where True = isinstance([], list)&#10; +  and   0 = len([])">http_client = &lt;httpx.Client object at 0x0000021FC13C1010&gt;
+
+    def test_c_3_1_ep_po_create_returns_summary(http_client):
+&gt;       sku_ids = _two_sku_ids(http_client)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+skeleton\verify\test_api_purchase_orders.py:11: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+http_client = &lt;httpx.Client object at 0x0000021FC13C1010&gt;
+
+    def _two_sku_ids(http_client) -&gt; List[int]:
+        skus = http_client.get("/api/skus").json()
+&gt;       assert isinstance(skus, list) and len(skus) &gt;= 2
+E       assert (True and 0 &gt;= 2)
+E        +  where True = isinstance([], list)
+E        +  and   0 = len([])
+
+skeleton\verify\test_api_purchase_orders.py:6: AssertionError</failure></testcase><testcase classname="skeleton.verify.test_api_purchase_orders" name="test_c_4_1_ep_po_list_returns_summaries" time="0.330"><failure message="assert (True and 0 &gt;= 2)&#10; +  where True = isinstance([], list)&#10; +  and   0 = len([])">http_client = &lt;httpx.Client object at 0x0000021FC143FC50&gt;
+
+    def test_c_4_1_ep_po_list_returns_summaries(http_client):
+        # Create a PO first so we can assert against a known id and totals
+&gt;       sku_ids = _two_sku_ids(http_client)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+skeleton\verify\test_api_purchase_orders.py:29: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+http_client = &lt;httpx.Client object at 0x0000021FC143FC50&gt;
+
+    def _two_sku_ids(http_client) -&gt; List[int]:
+        skus = http_client.get("/api/skus").json()
+&gt;       assert isinstance(skus, list) and len(skus) &gt;= 2
+E       assert (True and 0 &gt;= 2)
+E        +  where True = isinstance([], list)
+E        +  and   0 = len([])
+
+skeleton\verify\test_api_purchase_orders.py:6: AssertionError</failure></testcase><testcase classname="skeleton.verify.test_api_purchase_orders" name="test_c_4_3_ep_po_detail_returns_detail" time="0.307"><failure message="assert (True and 0 &gt;= 2)&#10; +  where True = isinstance([], list)&#10; +  and   0 = len([])">http_client = &lt;httpx.Client object at 0x0000021FC156DE50&gt;
+
+    def test_c_4_3_ep_po_detail_returns_detail(http_client):
+&gt;       sku_ids = _two_sku_ids(http_client)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+skeleton\verify\test_api_purchase_orders.py:55: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+http_client = &lt;httpx.Client object at 0x0000021FC156DE50&gt;
+
+    def _two_sku_ids(http_client) -&gt; List[int]:
+        skus = http_client.get("/api/skus").json()
+&gt;       assert isinstance(skus, list) and len(skus) &gt;= 2
+E       assert (True and 0 &gt;= 2)
+E        +  where True = isinstance([], list)
+E        +  and   0 = len([])
+
+skeleton\verify\test_api_purchase_orders.py:6: AssertionError</failure></testcase><testcase classname="skeleton.verify.test_api_skus" name="test_c_1_1_ep_skus_list_returns_8" time="0.328"><failure message="AssertionError: []&#10;assert 501 == 200&#10; +  where 501 = &lt;Response [501 Not Implemented]&gt;.status_code">http_client = &lt;httpx.Client object at 0x0000021FC1570C30&gt;
+
+    def test_c_1_1_ep_skus_list_returns_8(http_client):
+        resp = http_client.get("/api/skus")
+&gt;       assert resp.status_code == 200, resp.text
+E       AssertionError: []
+E       assert 501 == 200
+E        +  where 501 = &lt;Response [501 Not Implemented]&gt;.status_code
+
+skeleton\verify\test_api_skus.py:7: AssertionError</failure></testcase><testcase classname="skeleton.verify.test_api_suggestions" name="test_c_2_1_ep_reorder_suggestions_qty_formula" time="0.328"><failure message="AssertionError: []&#10;assert 501 == 200&#10; +  where 501 = &lt;Response [501 Not Implemented]&gt;.status_code">http_client = &lt;httpx.Client object at 0x0000021FC15736F0&gt;
+
+    def test_c_2_1_ep_reorder_suggestions_qty_formula(http_client):
+        resp = http_client.get("/api/reorder-suggestions")
+&gt;       assert resp.status_code == 200, resp.text
+E       AssertionError: []
+E       assert 501 == 200
+E        +  where 501 = &lt;Response [501 Not Implemented]&gt;.status_code
+
+skeleton\verify\test_api_suggestions.py:3: AssertionError</failure></testcase><testcase classname="skeleton.verify.test_smoke" name="test_smoke_always_passes" time="0.001" /><testcase classname="skeleton.verify.test_ui_purchase_orders" name="test_c_3_2_sc_suggestions_button_counts_checked" time="16.837"><failure message="playwright._impl._errors.TimeoutError: Page.wait_for_selector: Timeout 10000ms exceeded.&#10;Call log:&#10;  - waiting for locator(&quot;[data-testid=\&quot;suggestion-row\&quot;]&quot;) to be visible">base_url = 'http://127.0.0.1:62283'
+page = &lt;Page url='http://127.0.0.1:62283/suggestions'&gt;
+
+    def test_c_3_2_sc_suggestions_button_counts_checked(base_url, page):
+        page.goto("/suggestions")
+&gt;       page.wait_for_selector('[data-testid="suggestion-row"]', timeout=10000)
+
+skeleton\verify\test_ui_purchase_orders.py:14: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+.pipeline\venv\Lib\site-packages\playwright\sync_api\_generated.py:9033: in wait_for_selector
+    self._sync(
+.pipeline\venv\Lib\site-packages\playwright\_impl\_page.py:427: in wait_for_selector
+    return await self._main_frame.wait_for_selector(**locals_to_params(locals()))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.pipeline\venv\Lib\site-packages\playwright\_impl\_frame.py:394: in wait_for_selector
+    await self._channel.send(
+.pipeline\venv\Lib\site-packages\playwright\_impl\_connection.py:76: in send
+    return await self._connection.wrap_api_call(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = &lt;playwright._impl._connection.Connection object at 0x0000021FC152E270&gt;
+cb = &lt;function Channel.send.&lt;locals&gt;.&lt;lambda&gt; at 0x0000021FC1542CF0&gt;
+is_internal = False, title = None
+
+    async def wrap_api_call(
+        self, cb: Callable[[], Any], is_internal: bool = False, title: str = None
+    ) -&gt; Any:
+        if self._api_zone.get():
+            return await cb()
+        task = asyncio.current_task(self._loop)
+        parsed_st = _attach_api_call_information(
+            getattr(task, "__pw_stack__", None) or _capture_stack_trace(),
+            is_internal,
+            title,
+        )
+        self._api_zone.set(parsed_st)
+        try:
+            return await cb()
+        except Exception as error:
+&gt;           raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+E           playwright._impl._errors.TimeoutError: Page.wait_for_selector: Timeout 10000ms exceeded.
+E           Call log:
+E             - waiting for locator("[data-testid=\"suggestion-row\"]") to be visible
+
+.pipeline\venv\Lib\site-packages\playwright\_impl\_connection.py:632: TimeoutError</failure></testcase><testcase classname="skeleton.verify.test_ui_purchase_orders" name="test_c_3_3_sc_suggestions_navigates_to_created_with_counts" time="17.055"><failure message="playwright._impl._errors.TimeoutError: Page.wait_for_selector: Timeout 15000ms exceeded.&#10;Call log:&#10;  - waiting for locator(&quot;[data-testid=\&quot;suggestion-row\&quot;]&quot;) to be visible">base_url = 'http://127.0.0.1:62283'
+page = &lt;Page url='http://127.0.0.1:62283/suggestions'&gt;
+
+    def test_c_3_3_sc_suggestions_navigates_to_created_with_counts(base_url, page):
+        page.goto("/suggestions")
+&gt;       page.wait_for_selector('[data-testid="suggestion-row"]', timeout=essential_wait)
+
+skeleton\verify\test_ui_purchase_orders.py:31: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+.pipeline\venv\Lib\site-packages\playwright\sync_api\_generated.py:9033: in wait_for_selector
+    self._sync(
+.pipeline\venv\Lib\site-packages\playwright\_impl\_page.py:427: in wait_for_selector
+    return await self._main_frame.wait_for_selector(**locals_to_params(locals()))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.pipeline\venv\Lib\site-packages\playwright\_impl\_frame.py:394: in wait_for_selector
+    await self._channel.send(
+.pipeline\venv\Lib\site-packages\playwright\_impl\_connection.py:76: in send
+    return await self._connection.wrap_api_call(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = &lt;playwright._impl._connection.Connection object at 0x0000021FC156EE90&gt;
+cb = &lt;function Channel.send.&lt;locals&gt;.&lt;lambda&gt; at 0x0000021FC14883B0&gt;
+is_internal = False, title = None
+
+    async def wrap_api_call(
+        self, cb: Callable[[], Any], is_internal: bool = False, title: str = None
+    ) -&gt; Any:
+        if self._api_zone.get():
+            return await cb()
+        task = asyncio.current_task(self._loop)
+        parsed_st = _attach_api_call_information(
+            getattr(task, "__pw_stack__", None) or _capture_stack_trace(),
+            is_internal,
+            title,
+        )
+        self._api_zone.set(parsed_st)
+        try:
+            return await cb()
+        except Exception as error:
+&gt;           raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+E           playwright._impl._errors.TimeoutError: Page.wait_for_selector: Timeout 15000ms exceeded.
+E           Call log:
+E             - waiting for locator("[data-testid=\"suggestion-row\"]") to be visible
+
+.pipeline\venv\Lib\site-packages\playwright\_impl\_connection.py:632: TimeoutError</failure></testcase><testcase classname="skeleton.verify.test_ui_purchase_orders" name="test_c_3_4_sc_po_created_renders_numbers_from_url" time="1.087"><failure message="AssertionError: assert '0' == '4'&#10;  &#10;  - 4&#10;  + 0">base_url = 'http://127.0.0.1:62283'
+page = &lt;Page url='http://127.0.0.1:62283/purchase-orders/created?items=4&amp;total=11'&gt;
+
+    def test_c_3_4_sc_po_created_renders_numbers_from_url(base_url, page):
+        items = 4
+        total = 11
+        page.goto(f"/purchase-orders/created?items={items}&amp;total={total}")
+        items_el = page.locator('[data-testid="po-created-items"]')
+        total_el = page.locator('[data-testid="po-created-total"]')
+        expect(items_el).to_be_visible()
+        expect(total_el).to_be_visible()
+&gt;       assert items_el.inner_text().strip() == str(items)
+E       AssertionError: assert '0' == '4'
+E         
+E         - 4
+E         + 0
+
+skeleton\verify\test_ui_purchase_orders.py:59: AssertionError</failure></testcase><testcase classname="skeleton.verify.test_ui_purchase_orders" name="test_c_4_2_sc_po_history_renders_rows_with_counts" time="1.237"><failure message="assert 0 &gt;= 2&#10; +  where 0 = len([])">base_url = 'http://127.0.0.1:62283', page = &lt;Page url='about:blank'&gt;
+http_client = &lt;httpx.Client object at 0x0000021FC1634A70&gt;
+
+    def test_c_4_2_sc_po_history_renders_rows_with_counts(base_url, page, http_client):
+        # Create a PO we can assert against
+        skus = http_client.get("/api/skus").json()
+&gt;       assert len(skus) &gt;= 2
+E       assert 0 &gt;= 2
+E        +  where 0 = len([])
+
+skeleton\verify\test_ui_purchase_orders.py:66: AssertionError</failure></testcase><testcase classname="skeleton.verify.test_ui_purchase_orders" name="test_c_4_4_sc_po_detail_renders_lines" time="1.263"><failure message="assert 0 &gt;= 2&#10; +  where 0 = len([])">base_url = 'http://127.0.0.1:62283', page = &lt;Page url='about:blank'&gt;
+http_client = &lt;httpx.Client object at 0x0000021FC1533DF0&gt;
+
+    def test_c_4_4_sc_po_detail_renders_lines(base_url, page, http_client):
+        # Create a PO with two known lines (ids and names from /api/skus)
+        skus = http_client.get("/api/skus").json()
+&gt;       assert len(skus) &gt;= 2
+E       assert 0 &gt;= 2
+E        +  where 0 = len([])
+
+skeleton\verify\test_ui_purchase_orders.py:90: AssertionError</failure></testcase><testcase classname="skeleton.verify.test_ui_skus" name="test_c_1_2_sc_skus_list_renders_8_rows" time="6.701"><failure message="AssertionError: Locator expected to have count '8'&#10;Actual value: 0 &#10;Call log:&#10;  - Expect &quot;to_have_count&quot; with timeout 5000ms&#10;  - waiting for locator(&quot;[data-testid=\&quot;sku-row\&quot;]&quot;)&#10;    14 × locator resolved to 0 elements&#10;       - unexpected value &quot;0&quot;">base_url = 'http://127.0.0.1:62283', page = &lt;Page url='http://127.0.0.1:62283/'&gt;
+
+    def test_c_1_2_sc_skus_list_renders_8_rows(base_url, page):
+        page.goto("/")
+        # Wait for rows to render, then assert exact count
+&gt;       expect(page.locator('[data-testid="sku-row"]')).to_have_count(8)
+E       AssertionError: Locator expected to have count '8'
+E       Actual value: 0 
+E       Call log:
+E         - Expect "to_have_count" with timeout 5000ms
+E         - waiting for locator("[data-testid=\"sku-row\"]")
+E           14 × locator resolved to 0 elements
+E              - unexpected value "0"
+
+skeleton\verify\test_ui_skus.py:7: AssertionError</failure></testcase><testcase classname="skeleton.verify.test_ui_suggestions" name="test_c_2_2_sc_suggestions_renders_only_positive" time="12.046"><failure message="playwright._impl._errors.TimeoutError: Page.wait_for_selector: Timeout 10000ms exceeded.&#10;Call log:&#10;  - waiting for locator(&quot;[data-testid=\&quot;suggestion-row\&quot;]&quot;) to be visible">base_url = 'http://127.0.0.1:62283'
+page = &lt;Page url='http://127.0.0.1:62283/suggestions'&gt;
+
+    def test_c_2_2_sc_suggestions_renders_only_positive(base_url, page):
+        page.goto("/suggestions")
+        # Ensure at least one suggestion is rendered (seed guarantees &gt; 0)
+&gt;       page.wait_for_selector('[data-testid="suggestion-row"]', timeout=10000)
+
+skeleton\verify\test_ui_suggestions.py:16: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+.pipeline\venv\Lib\site-packages\playwright\sync_api\_generated.py:9033: in wait_for_selector
+    self._sync(
+.pipeline\venv\Lib\site-packages\playwright\_impl\_page.py:427: in wait_for_selector
+    return await self._main_frame.wait_for_selector(**locals_to_params(locals()))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.pipeline\venv\Lib\site-packages\playwright\_impl\_frame.py:394: in wait_for_selector
+    await self._channel.send(
+.pipeline\venv\Lib\site-packages\playwright\_impl\_connection.py:76: in send
+    return await self._connection.wrap_api_call(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = &lt;playwright._impl._connection.Connection object at 0x0000021FC1A3A9C0&gt;
+cb = &lt;function Channel.send.&lt;locals&gt;.&lt;lambda&gt; at 0x0000021FC3C740F0&gt;
+is_internal = False, title = None
+
+    async def wrap_api_call(
+        self, cb: Callable[[], Any], is_internal: bool = False, title: str = None
+    ) -&gt; Any:
+        if self._api_zone.get():
+            return await cb()
+        task = asyncio.current_task(self._loop)
+        parsed_st = _attach_api_call_information(
+            getattr(task, "__pw_stack__", None) or _capture_stack_trace(),
+            is_internal,
+            title,
+        )
+        self._api_zone.set(parsed_st)
+        try:
+            return await cb()
+        except Exception as error:
+&gt;           raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+E           playwright._impl._errors.TimeoutError: Page.wait_for_selector: Timeout 10000ms exceeded.
+E           Call log:
+E             - waiting for locator("[data-testid=\"suggestion-row\"]") to be visible
+
+.pipeline\venv\Lib\site-packages\playwright\_impl\_connection.py:632: TimeoutError</failure></testcase><testcase classname="skeleton.verify.test_ui_suggestions" name="test_c_2_3_sc_suggestions_shows_qty_in_cell" time="11.998"><failure message="playwright._impl._errors.TimeoutError: Page.wait_for_selector: Timeout 10000ms exceeded.&#10;Call log:&#10;  - waiting for locator(&quot;[data-testid=\&quot;suggestion-row\&quot;]&quot;) to be visible">base_url = 'http://127.0.0.1:62283'
+page = &lt;Page url='http://127.0.0.1:62283/suggestions'&gt;
+
+    def test_c_2_3_sc_suggestions_shows_qty_in_cell(base_url, page):
+        page.goto("/suggestions")
+&gt;       page.wait_for_selector('[data-testid="suggestion-row"]', timeout=10000)
+
+skeleton\verify\test_ui_suggestions.py:31: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+.pipeline\venv\Lib\site-packages\playwright\sync_api\_generated.py:9033: in wait_for_selector
+    self._sync(
+.pipeline\venv\Lib\site-packages\playwright\_impl\_page.py:427: in wait_for_selector
+    return await self._main_frame.wait_for_selector(**locals_to_params(locals()))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.pipeline\venv\Lib\site-packages\playwright\_impl\_frame.py:394: in wait_for_selector
+    await self._channel.send(
+.pipeline\venv\Lib\site-packages\playwright\_impl\_connection.py:76: in send
+    return await self._connection.wrap_api_call(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = &lt;playwright._impl._connection.Connection object at 0x0000021FC3C79480&gt;
+cb = &lt;function Channel.send.&lt;locals&gt;.&lt;lambda&gt; at 0x0000021FC380F110&gt;
+is_internal = False, title = None
+
+    async def wrap_api_call(
+        self, cb: Callable[[], Any], is_internal: bool = False, title: str = None
+    ) -&gt; Any:
+        if self._api_zone.get():
+            return await cb()
+        task = asyncio.current_task(self._loop)
+        parsed_st = _attach_api_call_information(
+            getattr(task, "__pw_stack__", None) or _capture_stack_trace(),
+            is_internal,
+            title,
+        )
+        self._api_zone.set(parsed_st)
+        try:
+            return await cb()
+        except Exception as error:
+&gt;           raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+E           playwright._impl._errors.TimeoutError: Page.wait_for_selector: Timeout 10000ms exceeded.
+E           Call log:
+E             - waiting for locator("[data-testid=\"suggestion-row\"]") to be visible
+
+.pipeline\venv\Lib\site-packages\playwright\_impl\_connection.py:632: TimeoutError</failure></testcase></testsuite></testsuites>

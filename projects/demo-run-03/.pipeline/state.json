@@ -1,0 +1,243 @@
+{
+  "slug": "demo-run-03",
+  "created": "2026-09-06T19:16:12+00:00",
+  "flow": 2,
+  "phase": "pack",
+  "retries": {
+    "idea": 0,
+    "spec": 2,
+    "code": 3,
+    "pack": 0
+  },
+  "step_runs": {
+    "stack": 1,
+    "ideas": 1,
+    "pick": 1,
+    "lint": 3,
+    "breaker": 1,
+    "redfirst": 1,
+    "test:app": 2,
+    "mutation": 3,
+    "cut": 2,
+    "leak-scan": 2,
+    "guide-lint": 1,
+    "deploy": 5,
+    "dryrun": 1,
+    "ship": 1
+  },
+  "gates": {
+    "gate0": {
+      "approved": true,
+      "at": "2026-09-06T19:20:25+00:00",
+      "note": "picked idea-01",
+      "picked": "idea-01.md"
+    },
+    "gate1": {
+      "approved": true,
+      "at": "2026-09-06T19:56:23+00:00",
+      "note": "",
+      "spec_hash": "2208a859095aa8db2ed3d2a3b382526af5ec51d1d5b2b2ae2f499ea75d07b9e9",
+      "verify_hash": "c5425bbca970e9790abeffe04fe63fbd431dbbd3eb81253a726e87e7cafcb1bf",
+      "override": false
+    },
+    "gate2": {
+      "approved": true,
+      "at": "2026-09-06T21:00:37+00:00",
+      "note": "",
+      "verify_hash": "0faef1e077d2f40569f950383ca004cb0be4c4a2e95c5598f3f219684ad5ee1f",
+      "verify_moved": true
+    },
+    "gate3": {
+      "approved": true,
+      "at": "2026-09-06T21:29:35+00:00",
+      "note": ""
+    }
+  },
+  "steps": [
+    {
+      "step": "stack",
+      "ok": true,
+      "at": "2026-09-06T19:16:12+00:00",
+      "detail": "next, react, typescript, prisma, sqlite",
+      "run": 1
+    },
+    {
+      "step": "ideas",
+      "ok": true,
+      "at": "2026-09-06T19:18:18+00:00",
+      "detail": "5 ideas",
+      "run": 1
+    },
+    {
+      "step": "pick",
+      "ok": true,
+      "at": "2026-09-06T19:20:25+00:00",
+      "detail": "idea-01.md",
+      "run": 1
+    },
+    {
+      "step": "lint",
+      "ok": false,
+      "at": "2026-09-06T19:23:12+00:00",
+      "detail": "",
+      "run": 1
+    },
+    {
+      "step": "lint",
+      "ok": false,
+      "at": "2026-09-06T19:26:22+00:00",
+      "detail": "",
+      "run": 2
+    },
+    {
+      "step": "lint",
+      "ok": true,
+      "at": "2026-09-06T19:29:13+00:00",
+      "detail": "",
+      "run": 3
+    },
+    {
+      "step": "breaker",
+      "ok": true,
+      "at": "2026-09-06T19:32:17+00:00",
+      "detail": "2208a859095a",
+      "run": 1
+    },
+    {
+      "step": "redfirst",
+      "ok": true,
+      "at": "2026-09-06T19:35:59+00:00",
+      "detail": "",
+      "run": 1
+    },
+    {
+      "step": "test:app",
+      "ok": false,
+      "at": "2026-09-06T20:01:58+00:00",
+      "detail": "",
+      "run": 1
+    },
+    {
+      "step": "test:app",
+      "ok": true,
+      "at": "2026-09-06T20:05:34+00:00",
+      "detail": "",
+      "run": 2
+    },
+    {
+      "step": "mutation",
+      "ok": false,
+      "at": "2026-09-06T20:19:36+00:00",
+      "detail": "",
+      "run": 1
+    },
+    {
+      "step": "mutation",
+      "ok": false,
+      "at": "2026-09-06T20:35:45+00:00",
+      "detail": "",
+      "run": 2
+    },
+    {
+      "step": "mutation",
+      "ok": true,
+      "at": "2026-09-06T20:52:50+00:00",
+      "detail": "",
+      "run": 3
+    },
+    {
+      "step": "cut",
+      "ok": true,
+      "at": "2026-09-06T21:03:41+00:00",
+      "detail": "",
+      "run": 1
+    },
+    {
+      "step": "leak-scan",
+      "ok": true,
+      "at": "2026-09-06T21:03:46+00:00",
+      "detail": "",
+      "run": 1
+    },
+    {
+      "step": "guide-lint",
+      "ok": true,
+      "at": "2026-09-06T21:07:09+00:00",
+      "detail": "",
+      "run": 1
+    },
+    {
+      "step": "deploy",
+      "ok": false,
+      "at": "2026-09-06T21:07:52+00:00",
+      "detail": "",
+      "run": 1
+    },
+    {
+      "step": "deploy",
+      "ok": false,
+      "at": "2026-09-06T21:12:58+00:00",
+      "detail": "",
+      "run": 2
+    },
+    {
+      "step": "deploy",
+      "ok": false,
+      "at": "2026-09-06T21:20:10+00:00",
+      "detail": "",
+      "run": 3
+    },
+    {
+      "step": "deploy",
+      "ok": false,
+      "at": "2026-09-06T21:23:47+00:00",
+      "detail": "",
+      "run": 4
+    },
+    {
+      "step": "deploy",
+      "ok": true,
+      "at": "2026-09-06T21:26:43+00:00",
+      "detail": "",
+      "run": 5
+    },
+    {
+      "step": "dryrun",
+      "ok": true,
+      "at": "2026-09-06T21:29:26+00:00",
+      "detail": "session 4, 40 min, pizza-hut",
+      "run": 1
+    },
+    {
+      "step": "ship",
+      "ok": true,
+      "at": "2026-09-06T21:29:36+00:00",
+      "detail": "",
+      "run": 1
+    },
+    {
+      "step": "cut",
+      "ok": true,
+      "at": "2026-09-06T21:44:15+00:00",
+      "detail": "",
+      "run": 2
+    },
+    {
+      "step": "leak-scan",
+      "ok": true,
+      "at": "2026-09-06T21:44:31+00:00",
+      "detail": "",
+      "run": 2
+    }
+  ],
+  "ticket": null,
+  "dry_run": {
+    "at": "2026-09-06T21:29:26+00:00",
+    "session": 4,
+    "minutes": 40,
+    "by": "pizza-hut",
+    "taught_without_the_code": true,
+    "note": ""
+  },
+  "feedback": []
+}

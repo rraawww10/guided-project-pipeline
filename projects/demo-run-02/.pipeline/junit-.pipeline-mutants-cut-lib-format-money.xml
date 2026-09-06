@@ -1,0 +1,311 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="7" skipped="0" tests="12" time="25.183" timestamp="2026-09-06T21:56:09.569383+05:30" hostname="HERO"><testcase classname="verify.test_api" name="test_c_1_1_get_expenses_returns_4_items[/api/expenses-4]" time="0.521" /><testcase classname="verify.test_api" name="test_c_2_4_naive_settlement_api_first_item" time="0.375" /><testcase classname="verify.test_ui_session1" name="test_c_1_2_home_renders_4_expense_rows" time="1.830" /><testcase classname="verify.test_ui_session1" name="test_c_1_3_totals_paid_summary_5_rows_with_exact_amounts" time="6.144"><failure message="AssertionError: Locator expected to be visible&#10;Actual value: None&#10;Error: element(s) not found &#10;Call log:&#10;  - Expect &quot;to_be_visible&quot; with timeout 5000ms&#10;  - waiting for get_by_text(&quot;Alice $52.00&quot;, exact=True)&#10;&#10;Aria snapshot:&#10;- main:&#10;  - heading &quot;FairShare&quot; [level=1]&#10;  - checkbox &quot;Minimal transfers&quot;&#10;  - text: Minimal transfers&#10;  - checkbox &quot;Alice&quot; [checked]&#10;  - text: Alice&#10;  - checkbox &quot;Bob&quot; [checked]&#10;  - text: Bob&#10;  - checkbox &quot;Cara&quot; [checked]&#10;  - text: Cara&#10;  - checkbox &quot;Dan&quot; [checked]&#10;  - text: Dan&#10;  - checkbox &quot;Eve&quot; [checked]&#10;  - text: Eve&#10;  - heading &quot;Expenses&quot; [level=2]&#10;  - table:&#10;    - rowgroup:&#10;      - row &quot;Description Amount Paid by&quot;:&#10;        - columnheader &quot;Description&quot;&#10;        - columnheader &quot;Amount&quot;&#10;        - columnheader &quot;Paid by&quot;&#10;    - rowgroup:&#10;      - row &quot;Lunch Alice&quot;:&#10;        - cell &quot;Lunch&quot;&#10;        - cell&#10;        - cell &quot;Alice&quot;&#10;      - row &quot;Groceries Bob&quot;:&#10;        - cell &quot;Groceries&quot;&#10;        - cell&#10;        - cell &quot;Bob&quot;&#10;      - row &quot;Taxi Dan&quot;:&#10;        - cell &quot;Taxi&quot;&#10;        - cell&#10;        - cell &quot;Dan&quot;&#10;      - row &quot;Tickets Cara&quot;:&#10;        - cell &quot;Tickets&quot;&#10;        - cell&#10;        - cell &quot;Cara&quot;&#10;  - heading &quot;Totals paid&quot; [level=2]&#10;  - list:&#10;    - listitem: Alice&#10;    - listitem: Bob&#10;    - listitem: Cara&#10;    - listitem: Dan&#10;    - listitem: Eve&#10;  - heading &quot;Balances&quot; [level=2]&#10;  - list:&#10;    - listitem: Alice +&#10;    - listitem: Bob&#10;    - listitem: Cara +&#10;    - listitem: Dan&#10;    - listitem: Eve&#10;  - heading &quot;Proposed transfers&quot; [level=2]&#10;  - strong: &quot;Total:&quot;&#10;  - list:&#10;    - listitem: Eve pays Alice&#10;    - listitem: Dan pays Alice&#10;    - listitem: Bob pays Alice&#10;    - listitem: Bob pays Cara&#10;- alert">page = &lt;Page url='http://127.0.0.1:49738/'&gt;
+
+    def test_c_1_3_totals_paid_summary_5_rows_with_exact_amounts(page):
+        page.goto(BASE_URL + "/")
+        # Assert each expected totals-paid line is rendered exactly somewhere on the page
+        expected = [
+            "Alice $52.00",
+            "Bob $30.00",
+            "Cara $40.00",
+            "Dan $15.00",
+            "Eve $0.00",
+        ]
+        for text in expected:
+            loc = page.get_by_text(text, exact=True)
+&gt;           expect(loc).to_be_visible()
+E           AssertionError: Locator expected to be visible
+E           Actual value: None
+E           Error: element(s) not found 
+E           Call log:
+E             - Expect "to_be_visible" with timeout 5000ms
+E             - waiting for get_by_text("Alice $52.00", exact=True)
+E           
+E           Aria snapshot:
+E           - main:
+E             - heading "FairShare" [level=1]
+E             - checkbox "Minimal transfers"
+E             - text: Minimal transfers
+E             - checkbox "Alice" [checked]
+E             - text: Alice
+E             - checkbox "Bob" [checked]
+E             - text: Bob
+E             - checkbox "Cara" [checked]
+E             - text: Cara
+E             - checkbox "Dan" [checked]
+E             - text: Dan
+E             - checkbox "Eve" [checked]
+E             - text: Eve
+E             - heading "Expenses" [level=2]
+E             - table:
+E               - rowgroup:
+E                 - row "Description Amount Paid by":
+E                   - columnheader "Description"
+E                   - columnheader "Amount"
+E                   - columnheader "Paid by"
+E               - rowgroup:
+E                 - row "Lunch Alice":
+E                   - cell "Lunch"
+E                   - cell
+E                   - cell "Alice"
+E                 - row "Groceries Bob":
+E                   - cell "Groceries"
+E                   - cell
+E                   - cell "Bob"
+E                 - row "Taxi Dan":
+E                   - cell "Taxi"
+E                   - cell
+E                   - cell "Dan"
+E                 - row "Tickets Cara":
+E                   - cell "Tickets"
+E                   - cell
+E                   - cell "Cara"
+E             - heading "Totals paid" [level=2]
+E             - list:
+E               - listitem: Alice
+E               - listitem: Bob
+E               - listitem: Cara
+E               - listitem: Dan
+E               - listitem: Eve
+E             - heading "Balances" [level=2]
+E             - list:
+E               - listitem: Alice +
+E               - listitem: Bob
+E               - listitem: Cara +
+E               - listitem: Dan
+E               - listitem: Eve
+E             - heading "Proposed transfers" [level=2]
+E             - strong: "Total:"
+E             - list:
+E               - listitem: Eve pays Alice
+E               - listitem: Dan pays Alice
+E               - listitem: Bob pays Alice
+E               - listitem: Bob pays Cara
+E           - alert
+
+verify\test_ui_session1.py:26: AssertionError</failure></testcase><testcase classname="verify.test_ui_session2" name="test_c_2_1_balances_name_order_and_exact_texts" time="0.548"><failure message="AssertionError: assert ['Alice +', '... 'Dan', 'Eve'] == ['Alice +$26....'Eve -$13.00']&#10;  &#10;  At index 0 diff: 'Alice +' != 'Alice +$26.00'&#10;  Use -v to get more diff">page = &lt;Page url='http://127.0.0.1:49738/'&gt;
+
+    def test_c_2_1_balances_name_order_and_exact_texts(page):
+        page.goto(BASE_URL + "/")
+        rows = page.locator('[data-testid="balance-row"]')
+        expect(rows).to_have_count(5)
+        texts = [t.strip() for t in rows.all_inner_texts()]
+        expected = [
+            "Alice +$26.00",
+            "Bob -$6.00",
+            "Cara +$4.00",
+            "Dan -$11.00",
+            "Eve -$13.00",
+        ]
+&gt;       assert texts == expected
+E       AssertionError: assert ['Alice +', '... 'Dan', 'Eve'] == ['Alice +$26....'Eve -$13.00']
+E         
+E         At index 0 diff: 'Alice +' != 'Alice +$26.00'
+E         Use -v to get more diff
+
+verify\test_ui_session2.py:19: AssertionError</failure></testcase><testcase classname="verify.test_ui_session2" name="test_c_2_2_transfers_first_item_text" time="0.601"><failure message="AssertionError: assert 'Eve pays Alice' == 'Eve pays Alice $13.00'&#10;  &#10;  - Eve pays Alice $13.00&#10;  ?               -------&#10;  + Eve pays Alice">page = &lt;Page url='http://127.0.0.1:49738/'&gt;
+
+    def test_c_2_2_transfers_first_item_text(page):
+        page.goto(BASE_URL + "/")
+        rows = page.locator('[data-testid="transfer-row"]')
+        expect(rows).to_have_count(4)
+        first_text = rows.nth(0).inner_text().strip()
+&gt;       assert first_text == "Eve pays Alice $13.00"
+E       AssertionError: assert 'Eve pays Alice' == 'Eve pays Alice $13.00'
+E         
+E         - Eve pays Alice $13.00
+E         ?               -------
+E         + Eve pays Alice
+
+verify\test_ui_session2.py:27: AssertionError</failure></testcase><testcase classname="verify.test_ui_session2" name="test_c_2_3_transfers_total_amount" time="6.097"><failure message="AssertionError: Locator expected to be visible&#10;Actual value: hidden &#10;Call log:&#10;  - Expect &quot;to_be_visible&quot; with timeout 5000ms&#10;  - waiting for locator(&quot;[data-testid=\&quot;transfers-total\&quot;]&quot;)&#10;    13 × locator resolved to &lt;span data-testid=&quot;transfers-total&quot;&gt;&lt;/span&gt;&#10;       - unexpected value &quot;hidden&quot;&#10;&#10;Aria snapshot:&#10;- main:&#10;  - heading &quot;FairShare&quot; [level=1]&#10;  - checkbox &quot;Minimal transfers&quot;&#10;  - text: Minimal transfers&#10;  - checkbox &quot;Alice&quot; [checked]&#10;  - text: Alice&#10;  - checkbox &quot;Bob&quot; [checked]&#10;  - text: Bob&#10;  - checkbox &quot;Cara&quot; [checked]&#10;  - text: Cara&#10;  - checkbox &quot;Dan&quot; [checked]&#10;  - text: Dan&#10;  - checkbox &quot;Eve&quot; [checked]&#10;  - text: Eve&#10;  - heading &quot;Expenses&quot; [level=2]&#10;  - table:&#10;    - rowgroup:&#10;      - row &quot;Description Amount Paid by&quot;:&#10;        - columnheader &quot;Description&quot;&#10;        - columnheader &quot;Amount&quot;&#10;        - columnheader &quot;Paid by&quot;&#10;    - rowgroup:&#10;      - row &quot;Lunch Alice&quot;:&#10;        - cell &quot;Lunch&quot;&#10;        - cell&#10;        - cell &quot;Alice&quot;&#10;      - row &quot;Groceries Bob&quot;:&#10;        - cell &quot;Groceries&quot;&#10;        - cell&#10;        - cell &quot;Bob&quot;&#10;      - row &quot;Taxi Dan&quot;:&#10;        - cell &quot;Taxi&quot;&#10;        - cell&#10;        - cell &quot;Dan&quot;&#10;      - row &quot;Tickets Cara&quot;:&#10;        - cell &quot;Tickets&quot;&#10;        - cell&#10;        - cell &quot;Cara&quot;&#10;  - heading &quot;Totals paid&quot; [level=2]&#10;  - list:&#10;    - listitem: Alice&#10;    - listitem: Bob&#10;    - listitem: Cara&#10;    - listitem: Dan&#10;    - listitem: Eve&#10;  - heading &quot;Balances&quot; [level=2]&#10;  - list:&#10;    - listitem: Alice +&#10;    - listitem: Bob&#10;    - listitem: Cara +&#10;    - listitem: Dan&#10;    - listitem: Eve&#10;  - heading &quot;Proposed transfers&quot; [level=2]&#10;  - strong: &quot;Total:&quot;&#10;  - list:&#10;    - listitem: Eve pays Alice&#10;    - listitem: Dan pays Alice&#10;    - listitem: Bob pays Alice&#10;    - listitem: Bob pays Cara&#10;- alert">page = &lt;Page url='http://127.0.0.1:49738/'&gt;
+
+    def test_c_2_3_transfers_total_amount(page):
+        page.goto(BASE_URL + "/")
+        total = page.locator('[data-testid="transfers-total"]')
+&gt;       expect(total).to_be_visible()
+E       AssertionError: Locator expected to be visible
+E       Actual value: hidden 
+E       Call log:
+E         - Expect "to_be_visible" with timeout 5000ms
+E         - waiting for locator("[data-testid=\"transfers-total\"]")
+E           13 × locator resolved to &lt;span data-testid="transfers-total"&gt;&lt;/span&gt;
+E              - unexpected value "hidden"
+E       
+E       Aria snapshot:
+E       - main:
+E         - heading "FairShare" [level=1]
+E         - checkbox "Minimal transfers"
+E         - text: Minimal transfers
+E         - checkbox "Alice" [checked]
+E         - text: Alice
+E         - checkbox "Bob" [checked]
+E         - text: Bob
+E         - checkbox "Cara" [checked]
+E         - text: Cara
+E         - checkbox "Dan" [checked]
+E         - text: Dan
+E         - checkbox "Eve" [checked]
+E         - text: Eve
+E         - heading "Expenses" [level=2]
+E         - table:
+E           - rowgroup:
+E             - row "Description Amount Paid by":
+E               - columnheader "Description"
+E               - columnheader "Amount"
+E               - columnheader "Paid by"
+E           - rowgroup:
+E             - row "Lunch Alice":
+E               - cell "Lunch"
+E               - cell
+E               - cell "Alice"
+E             - row "Groceries Bob":
+E               - cell "Groceries"
+E               - cell
+E               - cell "Bob"
+E             - row "Taxi Dan":
+E               - cell "Taxi"
+E               - cell
+E               - cell "Dan"
+E             - row "Tickets Cara":
+E               - cell "Tickets"
+E               - cell
+E               - cell "Cara"
+E         - heading "Totals paid" [level=2]
+E         - list:
+E           - listitem: Alice
+E           - listitem: Bob
+E           - listitem: Cara
+E           - listitem: Dan
+E           - listitem: Eve
+E         - heading "Balances" [level=2]
+E         - list:
+E           - listitem: Alice +
+E           - listitem: Bob
+E           - listitem: Cara +
+E           - listitem: Dan
+E           - listitem: Eve
+E         - heading "Proposed transfers" [level=2]
+E         - strong: "Total:"
+E         - list:
+E           - listitem: Eve pays Alice
+E           - listitem: Dan pays Alice
+E           - listitem: Bob pays Alice
+E           - listitem: Bob pays Cara
+E       - alert
+
+verify\test_ui_session2.py:33: AssertionError</failure></testcase><testcase classname="verify.test_ui_session3" name="test_c_3_1_money_sample_shows_negative_format" time="6.107"><failure message="AssertionError: Locator expected to be visible&#10;Actual value: hidden &#10;Call log:&#10;  - Expect &quot;to_be_visible&quot; with timeout 5000ms&#10;  - waiting for locator(&quot;[data-testid=\&quot;money-sample\&quot;]&quot;)&#10;    13 × locator resolved to &lt;div data-testid=&quot;money-sample&quot;&gt;&lt;/div&gt;&#10;       - unexpected value &quot;hidden&quot;&#10;&#10;Aria snapshot:&#10;- main:&#10;  - heading &quot;FairShare&quot; [level=1]&#10;  - checkbox &quot;Minimal transfers&quot;&#10;  - text: Minimal transfers&#10;  - checkbox &quot;Alice&quot; [checked]&#10;  - text: Alice&#10;  - checkbox &quot;Bob&quot; [checked]&#10;  - text: Bob&#10;  - checkbox &quot;Cara&quot; [checked]&#10;  - text: Cara&#10;  - checkbox &quot;Dan&quot; [checked]&#10;  - text: Dan&#10;  - checkbox &quot;Eve&quot; [checked]&#10;  - text: Eve&#10;  - heading &quot;Expenses&quot; [level=2]&#10;  - table:&#10;    - rowgroup:&#10;      - row &quot;Description Amount Paid by&quot;:&#10;        - columnheader &quot;Description&quot;&#10;        - columnheader &quot;Amount&quot;&#10;        - columnheader &quot;Paid by&quot;&#10;    - rowgroup:&#10;      - row &quot;Lunch Alice&quot;:&#10;        - cell &quot;Lunch&quot;&#10;        - cell&#10;        - cell &quot;Alice&quot;&#10;      - row &quot;Groceries Bob&quot;:&#10;        - cell &quot;Groceries&quot;&#10;        - cell&#10;        - cell &quot;Bob&quot;&#10;      - row &quot;Taxi Dan&quot;:&#10;        - cell &quot;Taxi&quot;&#10;        - cell&#10;        - cell &quot;Dan&quot;&#10;      - row &quot;Tickets Cara&quot;:&#10;        - cell &quot;Tickets&quot;&#10;        - cell&#10;        - cell &quot;Cara&quot;&#10;  - heading &quot;Totals paid&quot; [level=2]&#10;  - list:&#10;    - listitem: Alice&#10;    - listitem: Bob&#10;    - listitem: Cara&#10;    - listitem: Dan&#10;    - listitem: Eve&#10;  - heading &quot;Balances&quot; [level=2]&#10;  - list:&#10;    - listitem: Alice +&#10;    - listitem: Bob&#10;    - listitem: Cara +&#10;    - listitem: Dan&#10;    - listitem: Eve&#10;  - heading &quot;Proposed transfers&quot; [level=2]&#10;  - strong: &quot;Total:&quot;&#10;  - list:&#10;    - listitem: Eve pays Alice&#10;    - listitem: Dan pays Alice&#10;    - listitem: Bob pays Alice&#10;    - listitem: Bob pays Cara&#10;- alert">page = &lt;Page url='http://127.0.0.1:49738/'&gt;
+
+    def test_c_3_1_money_sample_shows_negative_format(page):
+        page.goto(BASE_URL + "/")
+        sample = page.locator('[data-testid="money-sample"]')
+&gt;       expect(sample).to_be_visible()
+E       AssertionError: Locator expected to be visible
+E       Actual value: hidden 
+E       Call log:
+E         - Expect "to_be_visible" with timeout 5000ms
+E         - waiting for locator("[data-testid=\"money-sample\"]")
+E           13 × locator resolved to &lt;div data-testid="money-sample"&gt;&lt;/div&gt;
+E              - unexpected value "hidden"
+E       
+E       Aria snapshot:
+E       - main:
+E         - heading "FairShare" [level=1]
+E         - checkbox "Minimal transfers"
+E         - text: Minimal transfers
+E         - checkbox "Alice" [checked]
+E         - text: Alice
+E         - checkbox "Bob" [checked]
+E         - text: Bob
+E         - checkbox "Cara" [checked]
+E         - text: Cara
+E         - checkbox "Dan" [checked]
+E         - text: Dan
+E         - checkbox "Eve" [checked]
+E         - text: Eve
+E         - heading "Expenses" [level=2]
+E         - table:
+E           - rowgroup:
+E             - row "Description Amount Paid by":
+E               - columnheader "Description"
+E               - columnheader "Amount"
+E               - columnheader "Paid by"
+E           - rowgroup:
+E             - row "Lunch Alice":
+E               - cell "Lunch"
+E               - cell
+E               - cell "Alice"
+E             - row "Groceries Bob":
+E               - cell "Groceries"
+E               - cell
+E               - cell "Bob"
+E             - row "Taxi Dan":
+E               - cell "Taxi"
+E               - cell
+E               - cell "Dan"
+E             - row "Tickets Cara":
+E               - cell "Tickets"
+E               - cell
+E               - cell "Cara"
+E         - heading "Totals paid" [level=2]
+E         - list:
+E           - listitem: Alice
+E           - listitem: Bob
+E           - listitem: Cara
+E           - listitem: Dan
+E           - listitem: Eve
+E         - heading "Balances" [level=2]
+E         - list:
+E           - listitem: Alice +
+E           - listitem: Bob
+E           - listitem: Cara +
+E           - listitem: Dan
+E           - listitem: Eve
+E         - heading "Proposed transfers" [level=2]
+E         - strong: "Total:"
+E         - list:
+E           - listitem: Eve pays Alice
+E           - listitem: Dan pays Alice
+E           - listitem: Bob pays Alice
+E           - listitem: Bob pays Cara
+E       - alert
+
+verify\test_ui_session3.py:10: AssertionError</failure></testcase><testcase classname="verify.test_ui_session3" name="test_c_3_2_minimal_on_orders_transfers_by_amount_then_payer_payee" time="0.600"><failure message="AssertionError: assert ['Eve pays Al...b pays Alice'] == ['Eve pays Al... Alice $2.00']&#10;  &#10;  At index 0 diff: 'Eve pays Alice' != 'Eve pays Alice $13.00'&#10;  Use -v to get more diff">page = &lt;Page url='http://127.0.0.1:49738/'&gt;
+
+    def test_c_3_2_minimal_on_orders_transfers_by_amount_then_payer_payee(page):
+        page.goto(BASE_URL + "/")
+        toggle = page.locator('[data-testid="toggle-minimal"]')
+        # Turn minimal mode ON by clicking once
+        toggle.click()
+        rows = page.locator('[data-testid="transfer-row"]')
+        expect(rows).to_have_count(4)
+        texts = [t.strip() for t in rows.all_inner_texts()]
+        expected = [
+            "Eve pays Alice $13.00",
+            "Dan pays Alice $11.00",
+            "Bob pays Cara $4.00",
+            "Bob pays Alice $2.00",
+        ]
+&gt;       assert texts == expected
+E       AssertionError: assert ['Eve pays Al...b pays Alice'] == ['Eve pays Al... Alice $2.00']
+E         
+E         At index 0 diff: 'Eve pays Alice' != 'Eve pays Alice $13.00'
+E         Use -v to get more diff
+
+verify\test_ui_session3.py:28: AssertionError</failure></testcase><testcase classname="verify.test_ui_session3" name="test_c_3_3_unchecking_eve_excludes_from_balances_and_transfers" time="0.636" /><testcase classname="verify.test_ui_session3" name="test_c_3_4_minimal_on_renders_4_transfer_rows" time="0.614" /><testcase classname="verify.test_ui_session3" name="test_c_3_5_minimal_off_last_item_is_bob_pays_cara" time="0.783"><failure message="AssertionError: assert 'Bob pays Cara' == 'Bob pays Cara $4.00'&#10;  &#10;  - Bob pays Cara $4.00&#10;  ?              ------&#10;  + Bob pays Cara">page = &lt;Page url='http://127.0.0.1:49738/'&gt;
+
+    def test_c_3_5_minimal_off_last_item_is_bob_pays_cara(page):
+        page.goto(BASE_URL + "/")
+        toggle = page.locator('[data-testid="toggle-minimal"]')
+        # Ensure we end in OFF: click twice
+        toggle.click()
+        toggle.click()
+        rows = page.locator('[data-testid="transfer-row"]')
+        expect(rows).to_have_count(4)
+        last_text = rows.nth(3).inner_text().strip()
+&gt;       assert last_text == "Bob pays Cara $4.00"
+E       AssertionError: assert 'Bob pays Cara' == 'Bob pays Cara $4.00'
+E         
+E         - Bob pays Cara $4.00
+E         ?              ------
+E         + Bob pays Cara
+
+verify\test_ui_session3.py:63: AssertionError</failure></testcase></testsuite></testsuites>

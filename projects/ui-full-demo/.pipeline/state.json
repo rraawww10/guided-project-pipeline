@@ -1,0 +1,112 @@
+{
+  "slug": "ui-full-demo",
+  "created": "2026-09-04T09:12:02+00:00",
+  "flow": 2,
+  "phase": "spec",
+  "retries": {
+    "idea": 0,
+    "spec": 1,
+    "code": 0,
+    "pack": 0
+  },
+  "step_runs": {
+    "stack": 1,
+    "ideas": 1,
+    "pick": 1,
+    "lint": 5,
+    "breaker": 3
+  },
+  "gates": {
+    "gate0": {
+      "approved": true,
+      "at": "2026-09-04T09:32:26+00:00",
+      "note": "Liked the spec",
+      "picked": "idea-01.md"
+    },
+    "gate1": null,
+    "gate2": null,
+    "gate3": null
+  },
+  "steps": [
+    {
+      "step": "stack",
+      "ok": true,
+      "at": "2026-09-04T09:12:03+00:00",
+      "detail": "next, react, typescript",
+      "run": 1
+    },
+    {
+      "step": "ideas",
+      "ok": false,
+      "at": "2026-09-04T09:13:19+00:00",
+      "detail": "0 ideas",
+      "run": 1
+    },
+    {
+      "step": "pick",
+      "ok": true,
+      "at": "2026-09-04T09:32:26+00:00",
+      "detail": "idea-01.md",
+      "run": 1
+    },
+    {
+      "step": "lint",
+      "ok": false,
+      "at": "2026-09-04T09:43:26+00:00",
+      "detail": "",
+      "run": 1
+    },
+    {
+      "step": "lint",
+      "ok": true,
+      "at": "2026-09-04T09:46:43+00:00",
+      "detail": "",
+      "run": 2
+    },
+    {
+      "step": "breaker",
+      "ok": true,
+      "at": "2026-09-04T10:07:33+00:00",
+      "detail": "44bdbdd29f5e",
+      "run": 1
+    },
+    {
+      "step": "breaker",
+      "ok": true,
+      "at": "2026-09-04T10:23:59+00:00",
+      "detail": "44bdbdd29f5e",
+      "run": 2
+    },
+    {
+      "step": "lint",
+      "ok": true,
+      "at": "2026-09-04T10:41:25+00:00",
+      "detail": "",
+      "run": 3
+    },
+    {
+      "step": "lint",
+      "ok": true,
+      "at": "2026-09-04T10:42:12+00:00",
+      "detail": "",
+      "run": 4
+    },
+    {
+      "step": "lint",
+      "ok": true,
+      "at": "2026-09-04T10:56:45+00:00",
+      "detail": "",
+      "run": 5
+    },
+    {
+      "step": "breaker",
+      "ok": true,
+      "at": "2026-09-04T12:38:20+00:00",
+      "detail": "fd12fe24e5d3",
+      "run": 3
+    }
+  ],
+  "ticket": null,
+  "dry_run": null,
+  "feedback": []
+}

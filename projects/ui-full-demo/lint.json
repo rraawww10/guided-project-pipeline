@@ -1,0 +1,111 @@
+{
+  "ok": true,
+  "errors": [],
+  "warnings": [
+    {
+      "code": "W112",
+      "where": "session 2",
+      "message": "estimated 48.1 teaching minutes against a 40 minute cap. Nothing before step 9 measures this, so decide it here: 4 cuts, 1 builds, 4 concepts."
+    }
+  ],
+  "counts": {
+    "errors": 0,
+    "warnings": 1
+  },
+  "session_minutes": [
+    {
+      "n": 1,
+      "minutes": 35.5,
+      "cuts": 2,
+      "builds": 1,
+      "concepts": 3,
+      "carries_setup": true,
+      "over_cap": false,
+      "weighted": true,
+      "cut_minutes": [
+        {
+          "id": "cut-stats-from-matches",
+          "minutes": 6.0,
+          "decisions": 0,
+          "hint_words": 35
+        },
+        {
+          "id": "cut-page-rows-render",
+          "minutes": 6.0,
+          "decisions": 0,
+          "hint_words": 32
+        }
+      ],
+      "largest_cut_share": 0.5
+    },
+    {
+      "n": 2,
+      "minutes": 48.1,
+      "cuts": 4,
+      "builds": 1,
+      "concepts": 4,
+      "carries_setup": false,
+      "over_cap": true,
+      "weighted": true,
+      "cut_minutes": [
+        {
+          "id": "cut-rank-sort",
+          "minutes": 9.4,
+          "decisions": 2,
+          "hint_words": 24
+        },
+        {
+          "id": "cut-rank-assign",
+          "minutes": 7.7,
+          "decisions": 1,
+          "hint_words": 48
+        },
+        {
+          "id": "cut-page-load-from-api",
+          "minutes": 6.0,
+          "decisions": 0,
+          "hint_words": 16
+        },
+        {
+          "id": "cut-api-standings",
+          "minutes": 6.0,
+          "decisions": 0,
+          "hint_words": 14
+        }
+      ],
+      "largest_cut_share": 0.32
+    },
+    {
+      "n": 3,
+      "minutes": 34.2,
+      "cuts": 3,
+      "builds": 0,
+      "concepts": 3,
+      "carries_setup": false,
+      "over_cap": false,
+      "weighted": true,
+      "cut_minutes": [
+        {
+          "id": "cut-render-rationale",
+          "minutes": 7.7,
+          "decisions": 1,
+          "hint_words": 41
+        },
+        {
+          "id": "cut-toggle-expand",
+          "minutes": 6.0,
+          "decisions": 0,
+          "hint_words": 21
+        },
+        {
+          "id": "cut-build-rationale",
+          "minutes": 6.0,
+          "decisions": 0,
+          "hint_words": 44
+        }
+      ],
+      "largest_cut_share": 0.39
+    }
+  ],
+  "spec_hash": "fd12fe24e5d3fa739e5ff550b1412f3363cb51198c42fd5b9848ba11564ef88e"
+}

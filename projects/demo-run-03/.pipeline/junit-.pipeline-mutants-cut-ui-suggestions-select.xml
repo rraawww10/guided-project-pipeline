@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="14" time="15.581" timestamp="2026-09-07T02:21:34.813905+05:30" hostname="HERO"><testcase classname="verify.test_api_purchase_orders" name="test_c_3_1_ep_po_create_returns_summary" time="0.658" /><testcase classname="verify.test_api_purchase_orders" name="test_c_4_1_ep_po_list_returns_summaries" time="0.497" /><testcase classname="verify.test_api_purchase_orders" name="test_c_4_3_ep_po_detail_returns_detail" time="0.488" /><testcase classname="verify.test_api_skus" name="test_c_1_1_ep_skus_list_returns_8" time="0.329" /><testcase classname="verify.test_api_suggestions" name="test_c_2_1_ep_reorder_suggestions_qty_formula" time="0.347" /><testcase classname="verify.test_smoke" name="test_smoke_always_passes" time="0.001" /><testcase classname="verify.test_ui_purchase_orders" name="test_c_3_2_sc_suggestions_button_counts_checked" time="2.160"><failure message="AssertionError: button text should include '(2)' after two selections, got: 'Create Purchase Order (0)'&#10;assert '(2)' in 'Create Purchase Order (0)'">base_url = 'http://127.0.0.1:53129'
+page = &lt;Page url='http://127.0.0.1:53129/suggestions'&gt;
+
+    def test_c_3_2_sc_suggestions_button_counts_checked(base_url, page):
+        page.goto("/suggestions")
+        page.wait_for_selector('[data-testid="suggestion-row"]', timeout=10000)
+        rows = page.locator('[data-testid="suggestion-row"]')
+        assert rows.count() &gt;= 2, "need at least two suggestions to test selection"
+        # Check the first two checkboxes
+        rows.nth(0).locator('input[type="checkbox"]').check()
+        rows.nth(1).locator('input[type="checkbox"]').check()
+        btn = page.locator('[data-testid="po-submit"]')
+        expect(btn).to_be_visible()
+        text = btn.inner_text()
+&gt;       assert "(2)" in text, f"button text should include '(2)' after two selections, got: {text!r}"
+E       AssertionError: button text should include '(2)' after two selections, got: 'Create Purchase Order (0)'
+E       assert '(2)' in 'Create Purchase Order (0)'
+
+verify\test_ui_purchase_orders.py:23: AssertionError</failure></testcase><testcase classname="verify.test_ui_purchase_orders" name="test_c_3_3_sc_suggestions_navigates_to_created_with_counts" time="1.502"><failure message="AssertionError: assert '0' == '2'&#10;  &#10;  - 2&#10;  + 0">base_url = 'http://127.0.0.1:53129'
+page = &lt;Page url='http://127.0.0.1:53129/purchase-orders/created?items=0&amp;total=0'&gt;
+
+    def test_c_3_3_sc_suggestions_navigates_to_created_with_counts(base_url, page):
+        page.goto("/suggestions")
+        page.wait_for_selector('[data-testid="suggestion-row"]', timeout=essential_wait)
+        rows = page.locator('[data-testid="suggestion-row"]')
+        assert rows.count() &gt;= 2
+        # Read the qty_to_order of first two rows so we know the expected total
+        q1 = _parse_int(rows.nth(0).locator('[data-testid="qty-to-order"]').inner_text())
+        q2 = _parse_int(rows.nth(1).locator('[data-testid="qty-to-order"]').inner_text())
+        expected_items = 2
+        expected_total = q1 + q2
+        # Select them and submit
+        rows.nth(0).locator('input[type="checkbox"]').check()
+        rows.nth(1).locator('input[type="checkbox"]').check()
+        page.locator('[data-testid="po-submit"]').click()
+        # Wait for navigation and assert URL params
+        page.wait_for_url("**/purchase-orders/created**", timeout=essential_wait)
+        parsed = urlparse(page.url)
+        qs = parse_qs(parsed.query)
+&gt;       assert qs.get("items", [None])[0] == str(expected_items)
+E       AssertionError: assert '0' == '2'
+E         
+E         - 2
+E         + 0
+
+verify\test_ui_purchase_orders.py:47: AssertionError</failure></testcase><testcase classname="verify.test_ui_purchase_orders" name="test_c_3_4_sc_po_created_renders_numbers_from_url" time="1.378" /><testcase classname="verify.test_ui_purchase_orders" name="test_c_4_2_sc_po_history_renders_rows_with_counts" time="1.998" /><testcase classname="verify.test_ui_purchase_orders" name="test_c_4_4_sc_po_detail_renders_lines" time="1.805" /><testcase classname="verify.test_ui_skus" name="test_c_1_2_sc_skus_list_renders_8_rows" time="1.200" /><testcase classname="verify.test_ui_suggestions" name="test_c_2_2_sc_suggestions_renders_only_positive" time="1.414" /><testcase classname="verify.test_ui_suggestions" name="test_c_2_3_sc_suggestions_shows_qty_in_cell" time="1.464" /></testsuite></testsuites>

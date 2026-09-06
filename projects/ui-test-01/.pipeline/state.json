@@ -1,0 +1,75 @@
+{
+  "slug": "ui-test-01",
+  "created": "2026-09-03T20:29:27+00:00",
+  "flow": 2,
+  "phase": "spec",
+  "retries": {
+    "idea": 0,
+    "spec": 3,
+    "code": 0,
+    "pack": 0
+  },
+  "step_runs": {
+    "stack": 1,
+    "pick": 1,
+    "lint": 4
+  },
+  "gates": {
+    "gate0": {
+      "approved": true,
+      "at": "2026-09-03T20:50:15+00:00",
+      "note": "Liked the spec",
+      "picked": "idea-01.md"
+    },
+    "gate1": null,
+    "gate2": null,
+    "gate3": null
+  },
+  "steps": [
+    {
+      "step": "stack",
+      "ok": true,
+      "at": "2026-09-03T20:29:27+00:00",
+      "detail": "next, react, typescript",
+      "run": 1
+    },
+    {
+      "step": "pick",
+      "ok": true,
+      "at": "2026-09-03T20:50:15+00:00",
+      "detail": "idea-01.md",
+      "run": 1
+    },
+    {
+      "step": "lint",
+      "ok": false,
+      "at": "2026-09-03T20:56:31+00:00",
+      "detail": "",
+      "run": 1
+    },
+    {
+      "step": "lint",
+      "ok": false,
+      "at": "2026-09-03T20:56:38+00:00",
+      "detail": "",
+      "run": 2
+    },
+    {
+      "step": "lint",
+      "ok": false,
+      "at": "2026-09-03T21:00:49+00:00",
+      "detail": "",
+      "run": 3
+    },
+    {
+      "step": "lint",
+      "ok": true,
+      "at": "2026-09-03T21:04:01+00:00",
+      "detail": "",
+      "run": 4
+    }
+  ],
+  "ticket": null,
+  "dry_run": null,
+  "feedback": []
+}

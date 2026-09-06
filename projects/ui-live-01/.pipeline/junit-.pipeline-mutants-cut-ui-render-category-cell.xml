@@ -1,0 +1,268 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="3" skipped="0" tests="14" time="37.407" timestamp="2026-09-05T14:01:16.508429+05:30" hostname="HERO"><testcase classname="verify.test_api_transactions" name="test_c_1_1_get_transactions_returns_array_with_required_fields" time="0.495" /><testcase classname="verify.test_ui_session1" name="test_c_1_2_ui_renders_one_row_per_transaction" time="3.149" /><testcase classname="verify.test_ui_session1" name="test_c_1_3_ui_renders_each_row_memo" time="2.115" /><testcase classname="verify.test_ui_session2" name="test_c_2_1_category_transport_for_uber_trip_downtown" time="7.163"><failure message="AssertionError: Locator expected to have text 'Transport'&#10;Actual value: None&#10;Error: element(s) not found &#10;Call log:&#10;  - Expect &quot;to_have_text&quot; with timeout 5000ms&#10;  - waiting for locator(&quot;[data-testid=\&quot;tx-row\&quot;]&quot;).filter(has=get_by_test_id(&quot;tx-memo&quot;).filter(has_text=&quot;Uber trip downtown&quot;)).get_by_test_id(&quot;tx-category&quot;)&#10;&#10;Aria snapshot:&#10;- main:&#10;  - main:&#10;    - heading &quot;Transactions&quot; [level=1]&#10;    - table:&#10;      - rowgroup:&#10;        - row &quot;Memo Category Rule&quot;:&#10;          - columnheader &quot;Memo&quot;&#10;          - columnheader &quot;Category&quot;&#10;          - columnheader &quot;Rule&quot;&#10;      - rowgroup:&#10;        - row &quot;Uber trip downtown&quot;:&#10;          - cell &quot;Uber trip downtown&quot;&#10;        - row &quot;Groceries - FreshFarm&quot;:&#10;          - cell &quot;Groceries - FreshFarm&quot;&#10;        - row &quot;ACME paper&quot;:&#10;          - cell &quot;ACME paper&quot;&#10;        - row &quot;Refund - FreshFarm&quot;:&#10;          - cell &quot;Refund - FreshFarm&quot;&#10;        - row &quot;Uber refund&quot;:&#10;          - cell &quot;Uber refund&quot;&#10;        - row &quot;Coffee&quot;:&#10;          - cell &quot;Coffee&quot;&#10;        - row &quot;Office chair&quot;:&#10;          - cell &quot;Office chair&quot;&#10;        - row &quot;Snacks&quot;:&#10;          - cell &quot;Snacks&quot;&#10;        - row &quot;Train to office&quot;:&#10;          - cell &quot;Train to office&quot;&#10;        - row &quot;Tea&quot;:&#10;          - cell &quot;Tea&quot;&#10;    - heading &quot;Summary by category&quot; [level=2]&#10;    - button &quot;Sort by delta&quot;&#10;    - checkbox &quot;Over budget only&quot;&#10;    - text: Over budget only&#10;    - table:&#10;      - rowgroup:&#10;        - row &quot;Category Total Delta Percent&quot;:&#10;          - columnheader &quot;Category&quot;&#10;          - columnheader &quot;Total&quot;&#10;          - columnheader &quot;Delta&quot;&#10;          - columnheader &quot;Percent&quot;&#10;      - rowgroup:&#10;        - row &quot;Expense 204.25 204.25 0.0%&quot;:&#10;          - cell &quot;Expense&quot;&#10;          - cell &quot;204.25&quot;&#10;          - cell &quot;204.25&quot;&#10;          - cell &quot;0.0%&quot;&#10;        - row &quot;Income -10 -10 0.0%&quot;:&#10;          - cell &quot;Income&quot;&#10;          - cell &quot;-10&quot;&#10;          - cell &quot;-10&quot;&#10;          - cell &quot;0.0%&quot;&#10;        - row &quot;Supplies 25 25 0.0%&quot;:&#10;          - cell &quot;Supplies&quot;&#10;          - cell &quot;25&quot;&#10;          - cell &quot;25&quot;&#10;          - cell &quot;0.0%&quot;&#10;        - row &quot;Transport 20 20 0.0%&quot;:&#10;          - cell &quot;Transport&quot;&#10;          - cell &quot;20&quot;&#10;          - cell &quot;20&quot;&#10;          - cell &quot;0.0%&quot;&#10;    - text: Transport&#10;    - spinbutton &quot;Transport&quot;: &quot;0&quot;&#10;    - text: Expense&#10;    - spinbutton &quot;Expense&quot;: &quot;0&quot;&#10;    - text: Supplies&#10;    - spinbutton &quot;Supplies&quot;: &quot;0&quot;&#10;    - text: Income&#10;    - spinbutton &quot;Income&quot;: &quot;0&quot;&#10;- alert">page = &lt;Page url='http://127.0.0.1:50976/'&gt;, base_url = 'http://127.0.0.1:50976'
+
+    def test_c_2_1_category_transport_for_uber_trip_downtown(page, base_url):
+        page.goto(base_url)
+        page.wait_for_selector('[data-testid="tx-row"]')
+        row = find_row_by_memo(page, "Uber trip downtown")
+        expect(row).to_have_count(1)
+        cat = row.get_by_test_id('tx-category')
+&gt;       expect(cat).to_have_text("Transport")
+E       AssertionError: Locator expected to have text 'Transport'
+E       Actual value: None
+E       Error: element(s) not found 
+E       Call log:
+E         - Expect "to_have_text" with timeout 5000ms
+E         - waiting for locator("[data-testid=\"tx-row\"]").filter(has=get_by_test_id("tx-memo").filter(has_text="Uber trip downtown")).get_by_test_id("tx-category")
+E       
+E       Aria snapshot:
+E       - main:
+E         - main:
+E           - heading "Transactions" [level=1]
+E           - table:
+E             - rowgroup:
+E               - row "Memo Category Rule":
+E                 - columnheader "Memo"
+E                 - columnheader "Category"
+E                 - columnheader "Rule"
+E             - rowgroup:
+E               - row "Uber trip downtown":
+E                 - cell "Uber trip downtown"
+E               - row "Groceries - FreshFarm":
+E                 - cell "Groceries - FreshFarm"
+E               - row "ACME paper":
+E                 - cell "ACME paper"
+E               - row "Refund - FreshFarm":
+E                 - cell "Refund - FreshFarm"
+E               - row "Uber refund":
+E                 - cell "Uber refund"
+E               - row "Coffee":
+E                 - cell "Coffee"
+E               - row "Office chair":
+E                 - cell "Office chair"
+E               - row "Snacks":
+E                 - cell "Snacks"
+E               - row "Train to office":
+E                 - cell "Train to office"
+E               - row "Tea":
+E                 - cell "Tea"
+E           - heading "Summary by category" [level=2]
+E           - button "Sort by delta"
+E           - checkbox "Over budget only"
+E           - text: Over budget only
+E           - table:
+E             - rowgroup:
+E               - row "Category Total Delta Percent":
+E                 - columnheader "Category"
+E                 - columnheader "Total"
+E                 - columnheader "Delta"
+E                 - columnheader "Percent"
+E             - rowgroup:
+E               - row "Expense 204.25 204.25 0.0%":
+E                 - cell "Expense"
+E                 - cell "204.25"
+E                 - cell "204.25"
+E                 - cell "0.0%"
+E               - row "Income -10 -10 0.0%":
+E                 - cell "Income"
+E                 - cell "-10"
+E                 - cell "-10"
+E                 - cell "0.0%"
+E               - row "Supplies 25 25 0.0%":
+E                 - cell "Supplies"
+E                 - cell "25"
+E                 - cell "25"
+E                 - cell "0.0%"
+E               - row "Transport 20 20 0.0%":
+E                 - cell "Transport"
+E                 - cell "20"
+E                 - cell "20"
+E                 - cell "0.0%"
+E           - text: Transport
+E           - spinbutton "Transport": "0"
+E           - text: Expense
+E           - spinbutton "Expense": "0"
+E           - text: Supplies
+E           - spinbutton "Supplies": "0"
+E           - text: Income
+E           - spinbutton "Income": "0"
+E       - alert
+
+verify\test_ui_session2.py:29: AssertionError</failure></testcase><testcase classname="verify.test_ui_session2" name="test_c_2_2_rule_label_for_uber_trip_downtown" time="6.858"><failure message="AssertionError: Locator expected to have text 'memo contains 'uber''&#10;Actual value: None&#10;Error: element(s) not found &#10;Call log:&#10;  - Expect &quot;to_have_text&quot; with timeout 5000ms&#10;  - waiting for locator(&quot;[data-testid=\&quot;tx-row\&quot;]&quot;).filter(has=get_by_test_id(&quot;tx-memo&quot;).filter(has_text=&quot;Uber trip downtown&quot;)).get_by_test_id(&quot;tx-rule&quot;)&#10;&#10;Aria snapshot:&#10;- main:&#10;  - main:&#10;    - heading &quot;Transactions&quot; [level=1]&#10;    - table:&#10;      - rowgroup:&#10;        - row &quot;Memo Category Rule&quot;:&#10;          - columnheader &quot;Memo&quot;&#10;          - columnheader &quot;Category&quot;&#10;          - columnheader &quot;Rule&quot;&#10;      - rowgroup:&#10;        - row &quot;Uber trip downtown&quot;:&#10;          - cell &quot;Uber trip downtown&quot;&#10;        - row &quot;Groceries - FreshFarm&quot;:&#10;          - cell &quot;Groceries - FreshFarm&quot;&#10;        - row &quot;ACME paper&quot;:&#10;          - cell &quot;ACME paper&quot;&#10;        - row &quot;Refund - FreshFarm&quot;:&#10;          - cell &quot;Refund - FreshFarm&quot;&#10;        - row &quot;Uber refund&quot;:&#10;          - cell &quot;Uber refund&quot;&#10;        - row &quot;Coffee&quot;:&#10;          - cell &quot;Coffee&quot;&#10;        - row &quot;Office chair&quot;:&#10;          - cell &quot;Office chair&quot;&#10;        - row &quot;Snacks&quot;:&#10;          - cell &quot;Snacks&quot;&#10;        - row &quot;Train to office&quot;:&#10;          - cell &quot;Train to office&quot;&#10;        - row &quot;Tea&quot;:&#10;          - cell &quot;Tea&quot;&#10;    - heading &quot;Summary by category&quot; [level=2]&#10;    - button &quot;Sort by delta&quot;&#10;    - checkbox &quot;Over budget only&quot;&#10;    - text: Over budget only&#10;    - table:&#10;      - rowgroup:&#10;        - row &quot;Category Total Delta Percent&quot;:&#10;          - columnheader &quot;Category&quot;&#10;          - columnheader &quot;Total&quot;&#10;          - columnheader &quot;Delta&quot;&#10;          - columnheader &quot;Percent&quot;&#10;      - rowgroup:&#10;        - row &quot;Expense 204.25 204.25 0.0%&quot;:&#10;          - cell &quot;Expense&quot;&#10;          - cell &quot;204.25&quot;&#10;          - cell &quot;204.25&quot;&#10;          - cell &quot;0.0%&quot;&#10;        - row &quot;Income -10 -10 0.0%&quot;:&#10;          - cell &quot;Income&quot;&#10;          - cell &quot;-10&quot;&#10;          - cell &quot;-10&quot;&#10;          - cell &quot;0.0%&quot;&#10;        - row &quot;Supplies 25 25 0.0%&quot;:&#10;          - cell &quot;Supplies&quot;&#10;          - cell &quot;25&quot;&#10;          - cell &quot;25&quot;&#10;          - cell &quot;0.0%&quot;&#10;        - row &quot;Transport 20 20 0.0%&quot;:&#10;          - cell &quot;Transport&quot;&#10;          - cell &quot;20&quot;&#10;          - cell &quot;20&quot;&#10;          - cell &quot;0.0%&quot;&#10;    - text: Transport&#10;    - spinbutton &quot;Transport&quot;: &quot;0&quot;&#10;    - text: Expense&#10;    - spinbutton &quot;Expense&quot;: &quot;0&quot;&#10;    - text: Supplies&#10;    - spinbutton &quot;Supplies&quot;: &quot;0&quot;&#10;    - text: Income&#10;    - spinbutton &quot;Income&quot;: &quot;0&quot;&#10;- alert">page = &lt;Page url='http://127.0.0.1:50976/'&gt;, base_url = 'http://127.0.0.1:50976'
+
+    def test_c_2_2_rule_label_for_uber_trip_downtown(page, base_url):
+        page.goto(base_url)
+        page.wait_for_selector('[data-testid="tx-row"]')
+        row = find_row_by_memo(page, "Uber trip downtown")
+        expect(row).to_have_count(1)
+        rule = row.get_by_test_id('tx-rule')
+&gt;       expect(rule).to_have_text("memo contains 'uber'")
+E       AssertionError: Locator expected to have text 'memo contains 'uber''
+E       Actual value: None
+E       Error: element(s) not found 
+E       Call log:
+E         - Expect "to_have_text" with timeout 5000ms
+E         - waiting for locator("[data-testid=\"tx-row\"]").filter(has=get_by_test_id("tx-memo").filter(has_text="Uber trip downtown")).get_by_test_id("tx-rule")
+E       
+E       Aria snapshot:
+E       - main:
+E         - main:
+E           - heading "Transactions" [level=1]
+E           - table:
+E             - rowgroup:
+E               - row "Memo Category Rule":
+E                 - columnheader "Memo"
+E                 - columnheader "Category"
+E                 - columnheader "Rule"
+E             - rowgroup:
+E               - row "Uber trip downtown":
+E                 - cell "Uber trip downtown"
+E               - row "Groceries - FreshFarm":
+E                 - cell "Groceries - FreshFarm"
+E               - row "ACME paper":
+E                 - cell "ACME paper"
+E               - row "Refund - FreshFarm":
+E                 - cell "Refund - FreshFarm"
+E               - row "Uber refund":
+E                 - cell "Uber refund"
+E               - row "Coffee":
+E                 - cell "Coffee"
+E               - row "Office chair":
+E                 - cell "Office chair"
+E               - row "Snacks":
+E                 - cell "Snacks"
+E               - row "Train to office":
+E                 - cell "Train to office"
+E               - row "Tea":
+E                 - cell "Tea"
+E           - heading "Summary by category" [level=2]
+E           - button "Sort by delta"
+E           - checkbox "Over budget only"
+E           - text: Over budget only
+E           - table:
+E             - rowgroup:
+E               - row "Category Total Delta Percent":
+E                 - columnheader "Category"
+E                 - columnheader "Total"
+E                 - columnheader "Delta"
+E                 - columnheader "Percent"
+E             - rowgroup:
+E               - row "Expense 204.25 204.25 0.0%":
+E                 - cell "Expense"
+E                 - cell "204.25"
+E                 - cell "204.25"
+E                 - cell "0.0%"
+E               - row "Income -10 -10 0.0%":
+E                 - cell "Income"
+E                 - cell "-10"
+E                 - cell "-10"
+E                 - cell "0.0%"
+E               - row "Supplies 25 25 0.0%":
+E                 - cell "Supplies"
+E                 - cell "25"
+E                 - cell "25"
+E                 - cell "0.0%"
+E               - row "Transport 20 20 0.0%":
+E                 - cell "Transport"
+E                 - cell "20"
+E                 - cell "20"
+E                 - cell "0.0%"
+E           - text: Transport
+E           - spinbutton "Transport": "0"
+E           - text: Expense
+E           - spinbutton "Expense": "0"
+E           - text: Supplies
+E           - spinbutton "Supplies": "0"
+E           - text: Income
+E           - spinbutton "Income": "0"
+E       - alert
+
+verify\test_ui_session2.py:38: AssertionError</failure></testcase><testcase classname="verify.test_ui_session2" name="test_c_2_3_summary_has_supplies_total_25" time="1.133" /><testcase classname="verify.test_ui_session2" name="test_c_2_4_category_transport_for_uber_refund_not_income" time="6.759"><failure message="AssertionError: Locator expected to have text 'Transport'&#10;Actual value: None&#10;Error: element(s) not found &#10;Call log:&#10;  - Expect &quot;to_have_text&quot; with timeout 5000ms&#10;  - waiting for locator(&quot;[data-testid=\&quot;tx-row\&quot;]&quot;).filter(has=get_by_test_id(&quot;tx-memo&quot;).filter(has_text=&quot;Uber refund&quot;)).get_by_test_id(&quot;tx-category&quot;)&#10;&#10;Aria snapshot:&#10;- main:&#10;  - main:&#10;    - heading &quot;Transactions&quot; [level=1]&#10;    - table:&#10;      - rowgroup:&#10;        - row &quot;Memo Category Rule&quot;:&#10;          - columnheader &quot;Memo&quot;&#10;          - columnheader &quot;Category&quot;&#10;          - columnheader &quot;Rule&quot;&#10;      - rowgroup:&#10;        - row &quot;Uber trip downtown&quot;:&#10;          - cell &quot;Uber trip downtown&quot;&#10;        - row &quot;Groceries - FreshFarm&quot;:&#10;          - cell &quot;Groceries - FreshFarm&quot;&#10;        - row &quot;ACME paper&quot;:&#10;          - cell &quot;ACME paper&quot;&#10;        - row &quot;Refund - FreshFarm&quot;:&#10;          - cell &quot;Refund - FreshFarm&quot;&#10;        - row &quot;Uber refund&quot;:&#10;          - cell &quot;Uber refund&quot;&#10;        - row &quot;Coffee&quot;:&#10;          - cell &quot;Coffee&quot;&#10;        - row &quot;Office chair&quot;:&#10;          - cell &quot;Office chair&quot;&#10;        - row &quot;Snacks&quot;:&#10;          - cell &quot;Snacks&quot;&#10;        - row &quot;Train to office&quot;:&#10;          - cell &quot;Train to office&quot;&#10;        - row &quot;Tea&quot;:&#10;          - cell &quot;Tea&quot;&#10;    - heading &quot;Summary by category&quot; [level=2]&#10;    - button &quot;Sort by delta&quot;&#10;    - checkbox &quot;Over budget only&quot;&#10;    - text: Over budget only&#10;    - table:&#10;      - rowgroup:&#10;        - row &quot;Category Total Delta Percent&quot;:&#10;          - columnheader &quot;Category&quot;&#10;          - columnheader &quot;Total&quot;&#10;          - columnheader &quot;Delta&quot;&#10;          - columnheader &quot;Percent&quot;&#10;      - rowgroup:&#10;        - row &quot;Expense 204.25 204.25 0.0%&quot;:&#10;          - cell &quot;Expense&quot;&#10;          - cell &quot;204.25&quot;&#10;          - cell &quot;204.25&quot;&#10;          - cell &quot;0.0%&quot;&#10;        - row &quot;Income -10 -10 0.0%&quot;:&#10;          - cell &quot;Income&quot;&#10;          - cell &quot;-10&quot;&#10;          - cell &quot;-10&quot;&#10;          - cell &quot;0.0%&quot;&#10;        - row &quot;Supplies 25 25 0.0%&quot;:&#10;          - cell &quot;Supplies&quot;&#10;          - cell &quot;25&quot;&#10;          - cell &quot;25&quot;&#10;          - cell &quot;0.0%&quot;&#10;        - row &quot;Transport 20 20 0.0%&quot;:&#10;          - cell &quot;Transport&quot;&#10;          - cell &quot;20&quot;&#10;          - cell &quot;20&quot;&#10;          - cell &quot;0.0%&quot;&#10;    - text: Transport&#10;    - spinbutton &quot;Transport&quot;: &quot;0&quot;&#10;    - text: Expense&#10;    - spinbutton &quot;Expense&quot;: &quot;0&quot;&#10;    - text: Supplies&#10;    - spinbutton &quot;Supplies&quot;: &quot;0&quot;&#10;    - text: Income&#10;    - spinbutton &quot;Income&quot;: &quot;0&quot;&#10;- alert">page = &lt;Page url='http://127.0.0.1:50976/'&gt;, base_url = 'http://127.0.0.1:50976'
+
+    def test_c_2_4_category_transport_for_uber_refund_not_income(page, base_url):
+        page.goto(base_url)
+        page.wait_for_selector('[data-testid="tx-row"]')
+        row = find_row_by_memo(page, "Uber refund")
+        expect(row).to_have_count(1)
+        cat = row.get_by_test_id('tx-category')
+&gt;       expect(cat).to_have_text("Transport")
+E       AssertionError: Locator expected to have text 'Transport'
+E       Actual value: None
+E       Error: element(s) not found 
+E       Call log:
+E         - Expect "to_have_text" with timeout 5000ms
+E         - waiting for locator("[data-testid=\"tx-row\"]").filter(has=get_by_test_id("tx-memo").filter(has_text="Uber refund")).get_by_test_id("tx-category")
+E       
+E       Aria snapshot:
+E       - main:
+E         - main:
+E           - heading "Transactions" [level=1]
+E           - table:
+E             - rowgroup:
+E               - row "Memo Category Rule":
+E                 - columnheader "Memo"
+E                 - columnheader "Category"
+E                 - columnheader "Rule"
+E             - rowgroup:
+E               - row "Uber trip downtown":
+E                 - cell "Uber trip downtown"
+E               - row "Groceries - FreshFarm":
+E                 - cell "Groceries - FreshFarm"
+E               - row "ACME paper":
+E                 - cell "ACME paper"
+E               - row "Refund - FreshFarm":
+E                 - cell "Refund - FreshFarm"
+E               - row "Uber refund":
+E                 - cell "Uber refund"
+E               - row "Coffee":
+E                 - cell "Coffee"
+E               - row "Office chair":
+E                 - cell "Office chair"
+E               - row "Snacks":
+E                 - cell "Snacks"
+E               - row "Train to office":
+E                 - cell "Train to office"
+E               - row "Tea":
+E                 - cell "Tea"
+E           - heading "Summary by category" [level=2]
+E           - button "Sort by delta"
+E           - checkbox "Over budget only"
+E           - text: Over budget only
+E           - table:
+E             - rowgroup:
+E               - row "Category Total Delta Percent":
+E                 - columnheader "Category"
+E                 - columnheader "Total"
+E                 - columnheader "Delta"
+E                 - columnheader "Percent"
+E             - rowgroup:
+E               - row "Expense 204.25 204.25 0.0%":
+E                 - cell "Expense"
+E                 - cell "204.25"
+E                 - cell "204.25"
+E                 - cell "0.0%"
+E               - row "Income -10 -10 0.0%":
+E                 - cell "Income"
+E                 - cell "-10"
+E                 - cell "-10"
+E                 - cell "0.0%"
+E               - row "Supplies 25 25 0.0%":
+E                 - cell "Supplies"
+E                 - cell "25"
+E                 - cell "25"
+E                 - cell "0.0%"
+E               - row "Transport 20 20 0.0%":
+E                 - cell "Transport"
+E                 - cell "20"
+E                 - cell "20"
+E                 - cell "0.0%"
+E           - text: Transport
+E           - spinbutton "Transport": "0"
+E           - text: Expense
+E           - spinbutton "Expense": "0"
+E           - text: Supplies
+E           - spinbutton "Supplies": "0"
+E           - text: Income
+E           - spinbutton "Income": "0"
+E       - alert
+
+verify\test_ui_session2.py:57: AssertionError</failure></testcase><testcase classname="verify.test_ui_session2" name="test_c_2_5_summary_heading_visible_once" time="1.074" /><testcase classname="verify.test_ui_session2" name="test_c_2_6_summary_transport_total_20" time="1.199" /><testcase classname="verify.test_ui_session3" name="test_c_3_1_delta_updates_after_setting_transport_budget_30" time="1.303" /><testcase classname="verify.test_ui_session3" name="test_c_3_2_sort_by_delta_places_expense_first_after_budget" time="1.790" /><testcase classname="verify.test_ui_session3" name="test_c_3_3_toggle_overbudget_hides_transport_and_keeps_expense" time="1.209" /><testcase classname="verify.test_ui_session3" name="test_c_3_4_percent_shows_one_decimal_transport_66_7" time="1.245" /><testcase classname="verify.test_ui_session3" name="test_c_3_5_delta_header_visible_once" time="1.436" /></testsuite></testsuites>

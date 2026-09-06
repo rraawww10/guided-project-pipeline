@@ -1,0 +1,14 @@
+{
+  "c-1-1": {"test": "verify/test_api.py::test_c_1_1_get_expenses_returns_4_items"},
+  "c-1-2": {"test": "verify/test_ui_session1.py::test_c_1_2_home_renders_4_expense_rows"},
+  "c-1-3": {"test": "verify/test_ui_session1.py::test_c_1_3_totals_paid_summary_5_rows_with_exact_amounts"},
+  "c-2-1": {"test": "verify/test_ui_session2.py::test_c_2_1_balances_name_order_and_exact_texts"},
+  "c-2-2": {"test": "verify/test_ui_session2.py::test_c_2_2_transfers_first_item_text"},
+  "c-2-3": {"test": "verify/test_ui_session2.py::test_c_2_3_transfers_total_amount"},
+  "c-2-4": {"test": "verify/test_api.py::test_c_2_4_naive_settlement_api_first_item"},
+  "c-3-1": {"test": "verify/test_ui_session3.py::test_c_3_1_money_sample_shows_negative_format"},
+  "c-3-2": {"test": "verify/test_ui_session3.py::test_c_3_2_minimal_on_orders_transfers_by_amount_then_payer_payee"},
+  "c-3-3": {"test": "verify/test_ui_session3.py::test_c_3_3_unchecking_eve_excludes_from_balances_and_transfers"},
+  "c-3-4": {"test": "verify/test_ui_session3.py::test_c_3_4_minimal_on_renders_4_transfer_rows"},
+  "c-3-5": {"test": "verify/test_ui_session3.py::test_c_3_5_minimal_off_last_item_is_bob_pays_cara"}
+}

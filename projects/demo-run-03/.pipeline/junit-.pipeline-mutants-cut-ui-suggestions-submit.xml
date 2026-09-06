@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="14" time="31.445" timestamp="2026-09-07T02:22:18.894817+05:30" hostname="HERO"><testcase classname="verify.test_api_purchase_orders" name="test_c_3_1_ep_po_create_returns_summary" time="0.643" /><testcase classname="verify.test_api_purchase_orders" name="test_c_4_1_ep_po_list_returns_summaries" time="0.529" /><testcase classname="verify.test_api_purchase_orders" name="test_c_4_3_ep_po_detail_returns_detail" time="0.514" /><testcase classname="verify.test_api_skus" name="test_c_1_1_ep_skus_list_returns_8" time="0.336" /><testcase classname="verify.test_api_suggestions" name="test_c_2_1_ep_reorder_suggestions_qty_formula" time="0.337" /><testcase classname="verify.test_smoke" name="test_smoke_always_passes" time="0.001" /><testcase classname="verify.test_ui_purchase_orders" name="test_c_3_2_sc_suggestions_button_counts_checked" time="2.225" /><testcase classname="verify.test_ui_purchase_orders" name="test_c_3_3_sc_suggestions_navigates_to_created_with_counts" time="17.623"><failure message="playwright._impl._errors.TimeoutError: Timeout 15000ms exceeded.&#10;=========================== logs ===========================&#10;waiting for navigation to &quot;**/purchase-orders/created**&quot; until 'load'&#10;============================================================">base_url = 'http://127.0.0.1:62105'
+page = &lt;Page url='http://127.0.0.1:62105/suggestions'&gt;
+
+    def test_c_3_3_sc_suggestions_navigates_to_created_with_counts(base_url, page):
+        page.goto("/suggestions")
+        page.wait_for_selector('[data-testid="suggestion-row"]', timeout=essential_wait)
+        rows = page.locator('[data-testid="suggestion-row"]')
+        assert rows.count() &gt;= 2
+        # Read the qty_to_order of first two rows so we know the expected total
+        q1 = _parse_int(rows.nth(0).locator('[data-testid="qty-to-order"]').inner_text())
+        q2 = _parse_int(rows.nth(1).locator('[data-testid="qty-to-order"]').inner_text())
+        expected_items = 2
+        expected_total = q1 + q2
+        # Select them and submit
+        rows.nth(0).locator('input[type="checkbox"]').check()
+        rows.nth(1).locator('input[type="checkbox"]').check()
+        page.locator('[data-testid="po-submit"]').click()
+        # Wait for navigation and assert URL params
+&gt;       page.wait_for_url("**/purchase-orders/created**", timeout=essential_wait)
+
+verify\test_ui_purchase_orders.py:44: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+.pipeline\venv\Lib\site-packages\playwright\sync_api\_generated.py:10029: in wait_for_url
+    self._sync(
+.pipeline\venv\Lib\site-packages\playwright\_impl\_page.py:588: in wait_for_url
+    return await self._main_frame.wait_for_url(**locals_to_params(locals()))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.pipeline\venv\Lib\site-packages\playwright\_impl\_frame.py:288: in wait_for_url
+    async with self.expect_navigation(
+.pipeline\venv\Lib\site-packages\playwright\_impl\_event_context_manager.py:33: in __aexit__
+    await self._future
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    async def continuation() -&gt; Optional[Response]:
+&gt;       event = await waiter.result()
+                ^^^^^^^^^^^^^^^^^^^^^
+E       playwright._impl._errors.TimeoutError: Timeout 15000ms exceeded.
+E       =========================== logs ===========================
+E       waiting for navigation to "**/purchase-orders/created**" until 'load'
+E       ============================================================
+
+.pipeline\venv\Lib\site-packages\playwright\_impl\_frame.py:264: TimeoutError</failure></testcase><testcase classname="verify.test_ui_purchase_orders" name="test_c_3_4_sc_po_created_renders_numbers_from_url" time="1.144" /><testcase classname="verify.test_ui_purchase_orders" name="test_c_4_2_sc_po_history_renders_rows_with_counts" time="1.741" /><testcase classname="verify.test_ui_purchase_orders" name="test_c_4_4_sc_po_detail_renders_lines" time="1.792" /><testcase classname="verify.test_ui_skus" name="test_c_1_2_sc_skus_list_renders_8_rows" time="1.367" /><testcase classname="verify.test_ui_suggestions" name="test_c_2_2_sc_suggestions_renders_only_positive" time="1.437" /><testcase classname="verify.test_ui_suggestions" name="test_c_2_3_sc_suggestions_shows_qty_in_cell" time="1.228" /></testsuite></testsuites>

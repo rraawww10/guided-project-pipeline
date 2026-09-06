@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="3" skipped="0" tests="14" time="24.880" timestamp="2026-09-05T13:56:58.666874+05:30" hostname="HERO"><testcase classname="verify.test_api_transactions" name="test_c_1_1_get_transactions_returns_array_with_required_fields" time="0.451" /><testcase classname="verify.test_ui_session1" name="test_c_1_2_ui_renders_one_row_per_transaction" time="2.611" /><testcase classname="verify.test_ui_session1" name="test_c_1_3_ui_renders_each_row_memo" time="1.937" /><testcase classname="verify.test_ui_session2" name="test_c_2_1_category_transport_for_uber_trip_downtown" time="1.255" /><testcase classname="verify.test_ui_session2" name="test_c_2_2_rule_label_for_uber_trip_downtown" time="1.150" /><testcase classname="verify.test_ui_session2" name="test_c_2_3_summary_has_supplies_total_25" time="1.226" /><testcase classname="verify.test_ui_session2" name="test_c_2_4_category_transport_for_uber_refund_not_income" time="1.188" /><testcase classname="verify.test_ui_session2" name="test_c_2_5_summary_heading_visible_once" time="1.147" /><testcase classname="verify.test_ui_session2" name="test_c_2_6_summary_transport_total_20" time="1.400" /><testcase classname="verify.test_ui_session3" name="test_c_3_1_delta_updates_after_setting_transport_budget_30" time="1.526"><failure message="AssertionError: assert 20.0 == -10&#10; +  where 20.0 = parse_number('20')">page = &lt;Page url='http://127.0.0.1:51798/'&gt;, base_url = 'http://127.0.0.1:51798'
+
+    def test_c_3_1_delta_updates_after_setting_transport_budget_30(page, base_url):
+        page.goto(base_url)
+        page.wait_for_selector('[data-testid="summary"]')
+        set_budget(page, "Transport", "30")
+        row = get_summary_row(page, "Transport")
+        expect(row).to_have_count(1)
+        delta_text = row.get_by_test_id('summary-delta').inner_text()
+&gt;       assert parse_number(delta_text) == -10
+E       AssertionError: assert 20.0 == -10
+E        +  where 20.0 = parse_number('20')
+
+verify\test_ui_session3.py:32: AssertionError</failure></testcase><testcase classname="verify.test_ui_session3" name="test_c_3_2_sort_by_delta_places_expense_first_after_budget" time="1.332" /><testcase classname="verify.test_ui_session3" name="test_c_3_3_toggle_overbudget_hides_transport_and_keeps_expense" time="6.922"><failure message="AssertionError: Locator expected to have count '0'&#10;Actual value: 1 &#10;Call log:&#10;  - Expect &quot;to_have_count&quot; with timeout 5000ms&#10;  - waiting for locator(&quot;[data-testid=\&quot;summary-row\&quot;]&quot;).filter(has=get_by_test_id(&quot;summary-cat&quot;).filter(has_text=&quot;Transport&quot;))&#10;    14 × locator resolved to 1 element&#10;       - unexpected value &quot;1&quot;">page = &lt;Page url='http://127.0.0.1:51798/'&gt;, base_url = 'http://127.0.0.1:51798'
+
+    def test_c_3_3_toggle_overbudget_hides_transport_and_keeps_expense(page, base_url):
+        page.goto(base_url)
+        page.wait_for_selector('[data-testid="summary"]')
+        set_budget(page, "Transport", "30")
+        toggle = page.get_by_test_id('toggle-over')
+        expect(toggle).to_have_count(1)
+        toggle.check()
+        # Transport has delta -10 after budget 30 -&gt; should disappear
+&gt;       expect(get_summary_row(page, "Transport")).to_have_count(0)
+E       AssertionError: Locator expected to have count '0'
+E       Actual value: 1 
+E       Call log:
+E         - Expect "to_have_count" with timeout 5000ms
+E         - waiting for locator("[data-testid=\"summary-row\"]").filter(has=get_by_test_id("summary-cat").filter(has_text="Transport"))
+E           14 × locator resolved to 1 element
+E              - unexpected value "1"
+
+verify\test_ui_session3.py:71: AssertionError</failure></testcase><testcase classname="verify.test_ui_session3" name="test_c_3_4_percent_shows_one_decimal_transport_66_7" time="1.173"><failure message="AssertionError: assert '0.0%' == '66.7%'&#10;  &#10;  - 66.7%&#10;  + 0.0%">page = &lt;Page url='http://127.0.0.1:51798/'&gt;, base_url = 'http://127.0.0.1:51798'
+
+    def test_c_3_4_percent_shows_one_decimal_transport_66_7(page, base_url):
+        page.goto(base_url)
+        page.wait_for_selector('[data-testid="summary"]')
+        set_budget(page, "Transport", "30")
+        row = get_summary_row(page, "Transport")
+        expect(row).to_have_count(1)
+        pct_text = row.get_by_test_id('summary-pct').inner_text().strip()
+&gt;       assert pct_text == "66.7%"
+E       AssertionError: assert '0.0%' == '66.7%'
+E         
+E         - 66.7%
+E         + 0.0%
+
+verify\test_ui_session3.py:83: AssertionError</failure></testcase><testcase classname="verify.test_ui_session3" name="test_c_3_5_delta_header_visible_once" time="1.159" /></testsuite></testsuites>

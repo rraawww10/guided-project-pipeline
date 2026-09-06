@@ -1,0 +1,15 @@
+{
+  "ok": false,
+  "verdict": "reject",
+  "spec_hash": "cbb2e601f7a220bd24e624c636533c7732d14eb2a669314a02a301136fd69688",
+  "findings": [],
+  "counts": {
+    "blocking": 0,
+    "worth_a_look": 0,
+    "unowned_blocking": 0
+  },
+  "reasons": [
+    "ambiguity.md has no .pipeline/ambiguity-meta.json, so nothing ties it to the spec it reviewed. Re-run the Spec Breaker between `pipeline breaker <slug> begin` and `pipeline breaker <slug> end`."
+  ],
+  "rule": "reject when any blocking finding is owned by 'nothing'; approve when every remaining finding sits in a column a downstream checker owns. An owner that can pass by not running is owned only conditionally: it approves, and the confirmation it actually ran is listed in verify_later"
+}

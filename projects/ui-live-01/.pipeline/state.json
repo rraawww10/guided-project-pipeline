@@ -1,0 +1,264 @@
+{
+  "slug": "ui-live-01",
+  "created": "2026-09-04T20:57:43+00:00",
+  "flow": 2,
+  "phase": "pack",
+  "retries": {
+    "idea": 0,
+    "spec": 1,
+    "code": 8,
+    "pack": 1
+  },
+  "step_runs": {
+    "stack": 1,
+    "ideas": 1,
+    "pick": 1,
+    "lint": 3,
+    "breaker": 2,
+    "redfirst": 1,
+    "test:app": 9,
+    "mutation": 2,
+    "cut": 1,
+    "leak-scan": 1,
+    "guide-lint": 2,
+    "deploy": 2,
+    "dryrun": 1,
+    "ship": 1
+  },
+  "gates": {
+    "gate0": {
+      "approved": true,
+      "at": "2026-09-04T21:00:41+00:00",
+      "note": "UI live test - picking idea 2",
+      "picked": "idea-02.md"
+    },
+    "gate1": {
+      "approved": true,
+      "at": "2026-09-04T21:17:04+00:00",
+      "note": "UI live test: spec linted clean, ambiguity report bound to the spec hash, Gate 1 stopping rule passed with no unowned blocking findings, tests written before any code and proven red.",
+      "spec_hash": "b07b28533759a4d675f7fd4e8f621f918481b351db030a464ea47cde2e731666",
+      "verify_hash": "8b653f777cd3470afadb6f404951dae795cb568b65b1c523588dcc9dab4492bc",
+      "override": false
+    },
+    "gate2": {
+      "approved": true,
+      "at": "2026-09-05T09:40:13+00:00",
+      "note": "All 14 criteria pass and mutation is green: 12 of 12 cut markers graded, no ungraded tasks. Two defects were repaired by hand between steps after mutation caught them - cut-ui-render-summary was dead code (the session-3 delta block reassigned summaryView instead of extending it, so the session-2 block never ran) and c-3-2 could not fail (delta order and alphabetical order agreed on the first row). app/page.tsx was restructured so the delta cut contributes headers and cells into the session-2 section, and verify/test_ui_session3.py now asserts the whole delta sequence is non-increasing. verify/ has therefore moved since Gate 1; both edits only tighten, and mutation is the independent proof that the suite bites. spec.json is untouched and still matches the Gate 1 freeze.",
+      "verify_hash": "5325c95658cd9d4e60d37c12873019bdd942f2619a1270b837c5b579281b3140",
+      "verify_moved": true
+    },
+    "gate3": {
+      "approved": true,
+      "at": "2026-09-05T11:18:26+00:00",
+      "note": "Pack approved. All five Gate 3 conditions green with no blockers: leak scan passed (41 answer lines across 11 tasks, nothing in the student tree or its history), guide linter passed with 0 errors, skeleton-check passed (14 checked, no mismatches, skeleton typechecks and fails all 14 tests as intended), pack/ holds README plus three session guides and troubleshooting, and the dry run is on record.\n\nDry run: priya taught session 1 from pack/session-1.md using only the student skeleton, in 40 minutes, and reported the students were able to understand.\n\nApproved with three things understood rather than resolved:\n\n1. Timing has no slack. The dry run finished at exactly 40 minutes, which is the cap and not inside it. Guide-lint raised G033 three times because no session file carries a Time line, so the linter guessed 40 for each session from the largest duration mentioned in the text - the guide never states a budget of its own. Sessions 2 and 3 have not been taught by a person; session 2's guide is the longest of the three.\n\n2. The project ships a known advisory deliberately. next 15.1.6 carries CVE-2025-66478 and deploy ran with --allow-advisories; deploy.json records advisories_allowed true and the advisory text. A probe confirmed next 15.5.25 installs with zero advisories and passes all 14 tests unchanged, so the upgrade path is proven and available whenever it is wanted.\n\n3. Two defects mutation caught at step 8 were repaired by hand between steps, and verify/ moved from its Gate 1 hash as a result. cut-ui-render-summary was dead code because the session 3 delta block reassigned summaryView instead of extending it, and c-3-2 could not fail because delta order and alphabetical order agreed on the first row. Both edits only tighten; mutation then passed 12 of 12 with no ungraded tasks, which is the independent proof.\n"
+    }
+  },
+  "steps": [
+    {
+      "step": "stack",
+      "ok": true,
+      "at": "2026-09-04T20:57:43+00:00",
+      "detail": "next, react, typescript",
+      "run": 1
+    },
+    {
+      "step": "ideas",
+      "ok": true,
+      "at": "2026-09-04T20:59:55+00:00",
+      "detail": "5 ideas",
+      "run": 1
+    },
+    {
+      "step": "pick",
+      "ok": true,
+      "at": "2026-09-04T21:00:41+00:00",
+      "detail": "idea-02.md",
+      "run": 1
+    },
+    {
+      "step": "lint",
+      "ok": false,
+      "at": "2026-09-04T21:05:09+00:00",
+      "detail": "",
+      "run": 1
+    },
+    {
+      "step": "lint",
+      "ok": true,
+      "at": "2026-09-04T21:07:12+00:00",
+      "detail": "",
+      "run": 2
+    },
+    {
+      "step": "breaker",
+      "ok": true,
+      "at": "2026-09-04T21:09:33+00:00",
+      "detail": "409d2ff97d46",
+      "run": 1
+    },
+    {
+      "step": "lint",
+      "ok": true,
+      "at": "2026-09-04T21:10:59+00:00",
+      "detail": "",
+      "run": 3
+    },
+    {
+      "step": "breaker",
+      "ok": true,
+      "at": "2026-09-04T21:13:16+00:00",
+      "detail": "b07b28533759",
+      "run": 2
+    },
+    {
+      "step": "redfirst",
+      "ok": true,
+      "at": "2026-09-04T21:16:05+00:00",
+      "detail": "",
+      "run": 1
+    },
+    {
+      "step": "test:app",
+      "ok": false,
+      "at": "2026-09-04T21:22:33+00:00",
+      "detail": "",
+      "run": 1
+    },
+    {
+      "step": "test:app",
+      "ok": false,
+      "at": "2026-09-04T21:29:38+00:00",
+      "detail": "",
+      "run": 2
+    },
+    {
+      "step": "test:app",
+      "ok": false,
+      "at": "2026-09-04T21:34:07+00:00",
+      "detail": "",
+      "run": 3
+    },
+    {
+      "step": "test:app",
+      "ok": false,
+      "at": "2026-09-04T21:36:38+00:00",
+      "detail": "",
+      "run": 4
+    },
+    {
+      "step": "test:app",
+      "ok": false,
+      "at": "2026-09-04T21:39:14+00:00",
+      "detail": "",
+      "run": 5
+    },
+    {
+      "step": "test:app",
+      "ok": false,
+      "at": "2026-09-04T21:43:50+00:00",
+      "detail": "",
+      "run": 6
+    },
+    {
+      "step": "test:app",
+      "ok": false,
+      "at": "2026-09-04T21:46:19+00:00",
+      "detail": "",
+      "run": 7
+    },
+    {
+      "step": "test:app",
+      "ok": true,
+      "at": "2026-09-04T21:49:13+00:00",
+      "detail": "",
+      "run": 8
+    },
+    {
+      "step": "mutation",
+      "ok": false,
+      "at": "2026-09-05T07:11:43+00:00",
+      "detail": "",
+      "run": 1
+    },
+    {
+      "step": "test:app",
+      "ok": true,
+      "at": "2026-09-05T08:15:58+00:00",
+      "detail": "",
+      "run": 9
+    },
+    {
+      "step": "mutation",
+      "ok": true,
+      "at": "2026-09-05T08:41:27+00:00",
+      "detail": "",
+      "run": 2
+    },
+    {
+      "step": "cut",
+      "ok": true,
+      "at": "2026-09-05T09:43:14+00:00",
+      "detail": "",
+      "run": 1
+    },
+    {
+      "step": "leak-scan",
+      "ok": true,
+      "at": "2026-09-05T09:43:26+00:00",
+      "detail": "",
+      "run": 1
+    },
+    {
+      "step": "guide-lint",
+      "ok": false,
+      "at": "2026-09-05T09:46:57+00:00",
+      "detail": "",
+      "run": 1
+    },
+    {
+      "step": "guide-lint",
+      "ok": true,
+      "at": "2026-09-05T09:47:53+00:00",
+      "detail": "",
+      "run": 2
+    },
+    {
+      "step": "deploy",
+      "ok": false,
+      "at": "2026-09-05T09:48:41+00:00",
+      "detail": "",
+      "run": 1
+    },
+    {
+      "step": "deploy",
+      "ok": true,
+      "at": "2026-09-05T10:06:56+00:00",
+      "detail": "",
+      "run": 2
+    },
+    {
+      "step": "dryrun",
+      "ok": true,
+      "at": "2026-09-05T10:43:29+00:00",
+      "detail": "session 1, 40 min, priya",
+      "run": 1
+    },
+    {
+      "step": "ship",
+      "ok": true,
+      "at": "2026-09-05T11:18:34+00:00",
+      "detail": "",
+      "run": 1
+    }
+  ],
+  "ticket": null,
+  "dry_run": {
+    "at": "2026-09-05T10:43:29+00:00",
+    "session": 1,
+    "minutes": 40,
+    "by": "priya",
+    "taught_without_the_code": true,
+    "note": "Taught session 1 from pack/session-1.md using only the student skeleton. Finished inside the 40-minute budget. The students were able to understand."
+  },
+  "feedback": []
+}

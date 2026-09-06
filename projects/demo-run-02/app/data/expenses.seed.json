@@ -1,0 +1,51 @@
+{
+  "people": ["Alice", "Bob", "Cara", "Dan", "Eve"],
+  "expenses": [
+    {
+      "id": "e1",
+      "description": "Lunch",
+      "amountCents": 5200,
+      "paidBy": "Alice",
+      "participants": [
+        { "person": "Alice" },
+        { "person": "Bob" },
+        { "person": "Cara" },
+        { "person": "Dan" }
+      ]
+    },
+    {
+      "id": "e2",
+      "description": "Groceries",
+      "amountCents": 3000,
+      "paidBy": "Bob",
+      "participants": [
+        { "person": "Bob" },
+        { "person": "Cara" }
+      ]
+    },
+    {
+      "id": "e3",
+      "description": "Taxi",
+      "amountCents": 1500,
+      "paidBy": "Dan",
+      "participants": [
+        { "person": "Alice" },
+        { "person": "Dan" },
+        { "person": "Eve" }
+      ]
+    },
+    {
+      "id": "e4",
+      "description": "Tickets",
+      "amountCents": 4000,
+      "paidBy": "Cara",
+      "participants": [
+        { "person": "Alice" },
+        { "person": "Bob" },
+        { "person": "Cara" },
+        { "person": "Dan" },
+        { "person": "Eve" }
+      ]
+    }
+  ]
+}

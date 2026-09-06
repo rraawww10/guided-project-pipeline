@@ -1,0 +1,173 @@
+{
+  "ok": true,
+  "verdict": "approve-eligible",
+  "spec_hash": "05a2438f4f7bb2d80b385291be1071bee59ec90eb0b6c97e4b5bd1a1c1817fc4",
+  "findings": [
+    {
+      "id": "W1",
+      "title": "Rounding/tie-break for weighted shares and after exclusions",
+      "section": "worth a look",
+      "owner": "test-runner",
+      "line": "\"Hint: Compute each person's net in cents into `out` by adding amounts they paid and subtracting their share of each expense; divide an expense by the sum of participant weights (default 1) and subtract each share from that participant.\"",
+      "where": "spec.md, Session 2, cut `cut-lib-compute-balances` hint",
+      "line_key": "02fc49a0221c92a4",
+      "subject": [
+        "cut-lib-compute-balances"
+      ],
+      "blocking": false,
+      "owner_declared": "test-runner",
+      "owner_valid": true,
+      "owner_downgraded": null,
+      "fail_open": false,
+      "caught_by": "step 6 - the Builder/test-runner loop fixes this for free",
+      "must_fix_now": false
+    },
+    {
+      "id": "W2",
+      "title": "Include/exclude semantics when an excluded person is a payer/participant",
+      "section": "worth a look",
+      "owner": "test-runner",
+      "line": "\"Unchecking [data-testid=\\\"include-Eve\\\"] removes Eve from balances and no [data-testid=\\\"transfer-row\\\"] contains \\\"Eve\\\"\"",
+      "where": "spec.md, Session 3, criterion c-3-3",
+      "line_key": "a684e525d3be8144",
+      "subject": [
+        "c-3-3"
+      ],
+      "blocking": false,
+      "owner_declared": "test-runner",
+      "owner_valid": true,
+      "owner_downgraded": null,
+      "fail_open": false,
+      "caught_by": "step 6 - the Builder/test-runner loop fixes this for free",
+      "must_fix_now": false
+    },
+    {
+      "id": "W3",
+      "title": "Naive transfers order is underspecified",
+      "section": "worth a look",
+      "owner": "test-runner",
+      "line": "c-2-2: \"the first item reads \\\"Eve pays Alice $13.00\\\"\"; hint: \"make it stable across renders.\"",
+      "where": "spec.md, Session 2, criterion c-2-2 and cut `cut-ui-set-transfers` hint",
+      "line_key": "072569af79da4ccd",
+      "subject": [
+        "c-2-2",
+        "cut-ui-set-transfers"
+      ],
+      "blocking": false,
+      "owner_declared": "test-runner",
+      "owner_valid": true,
+      "owner_downgraded": null,
+      "fail_open": false,
+      "caught_by": "step 6 - the Builder/test-runner loop fixes this for free",
+      "must_fix_now": false
+    },
+    {
+      "id": "W4",
+      "title": "Screen elements omit the transfers total hook used by a criterion",
+      "section": "worth a look",
+      "owner": "test-runner",
+      "line": "spec.json elements list lacks `[data-testid=transfers-total]`; c-2-3 asserts an element `[data-testid=\\\"transfers-total\\\"]` equals \"$30.00\".",
+      "where": "spec.json, Screens -> sc-home elements; and spec.md, Session 2, criterion c-2-3",
+      "line_key": "ef15f92f70f4a929",
+      "subject": [
+        "c-2-3",
+        "sc-home"
+      ],
+      "blocking": false,
+      "owner_declared": "test-runner",
+      "owner_valid": true,
+      "owner_downgraded": null,
+      "fail_open": false,
+      "caught_by": "step 6 - the Builder/test-runner loop fixes this for free",
+      "must_fix_now": false
+    },
+    {
+      "id": "W5",
+      "title": "Session 2 \u2018builds\u2019 omits the screen it modifies",
+      "section": "worth a look",
+      "owner": "pack-writer",
+      "line": "\"\\\"builds\\\": [\\\"ep-naive-settlement\\\"]\"",
+      "where": "spec.json, Session 2, \"builds\": [\"ep-naive-settlement\"] while criteria target sc-home",
+      "line_key": "013772253e88a096",
+      "subject": [
+        "ep-naive-settlement",
+        "sc-home"
+      ],
+      "blocking": false,
+      "owner_declared": "pack-writer",
+      "owner_valid": true,
+      "owner_downgraded": null,
+      "fail_open": false,
+      "caught_by": "step 9 - a person reads the guide at Gate 3",
+      "must_fix_now": false
+    },
+    {
+      "id": "W6",
+      "title": "Session 3 declares no builds despite UI/lib changes",
+      "section": "worth a look",
+      "owner": "pack-writer",
+      "line": "\"\\\"builds\\\": [],\"",
+      "where": "spec.json, Session 3, \"builds\": []",
+      "line_key": "15d11f7a88a61c5e",
+      "subject": [],
+      "blocking": false,
+      "owner_declared": "pack-writer",
+      "owner_valid": true,
+      "owner_downgraded": null,
+      "fail_open": false,
+      "caught_by": "step 9 - a person reads the guide at Gate 3",
+      "must_fix_now": false
+    },
+    {
+      "id": "W7",
+      "title": "Positive balance formatting vs formatMoney guidance",
+      "section": "worth a look",
+      "owner": "test-runner",
+      "line": "c-2-1 pins texts like \"Alice +$26.00\"; the formatting hint gives only a negative example \"-615 \u2192 \\\"-$6.15\\\"\".",
+      "where": "spec.md, Session 2, criterion c-2-1; and Session 3, cut `cut-lib-format-money` hint",
+      "line_key": "30553463b57aa5a4",
+      "subject": [
+        "c-2-1",
+        "cut-lib-format-money"
+      ],
+      "blocking": false,
+      "owner_declared": "test-runner",
+      "owner_valid": true,
+      "owner_downgraded": null,
+      "fail_open": false,
+      "caught_by": "step 6 - the Builder/test-runner loop fixes this for free",
+      "must_fix_now": false
+    },
+    {
+      "id": "W8",
+      "title": "Name sort collation for \u201cname-ASC\u201d",
+      "section": "worth a look",
+      "owner": "test-runner",
+      "line": "\"in name-ASC order, with exact texts: Alice +$26.00; Bob -$6.00; Cara +$4.00; Dan -$11.00; Eve -$13.00\"",
+      "where": "spec.md, Session 2, criterion c-2-1",
+      "line_key": "5fa236fc3aec3b1a",
+      "subject": [
+        "c-2-1"
+      ],
+      "blocking": false,
+      "owner_declared": "test-runner",
+      "owner_valid": true,
+      "owner_downgraded": null,
+      "fail_open": false,
+      "caught_by": "step 6 - the Builder/test-runner loop fixes this for free",
+      "must_fix_now": false
+    }
+  ],
+  "counts": {
+    "blocking": 0,
+    "worth_a_look": 8,
+    "unowned_blocking": 0
+  },
+  "reasons": [
+    "0 blocking finding(s), all owned by a downstream checker; 8 worth a look. Nothing here escapes to the shipped project."
+  ],
+  "rule": "reject when any blocking finding is owned by 'nothing'; approve when every remaining finding sits in a column a downstream checker owns. An owner that can pass by not running is owned only conditionally: it approves, and the confirmation it actually ran is listed in verify_later",
+  "reviewed_spec_hash": "05a2438f4f7bb2d80b385291be1071bee59ec90eb0b6c97e4b5bd1a1c1817fc4",
+  "drift": [],
+  "verify_later": []
+}

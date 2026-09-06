@@ -1,0 +1,296 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="11" skipped="0" tests="12" time="165.683" timestamp="2026-09-06T21:51:25.174827+05:30" hostname="HERO"><testcase classname="verify.test_api" name="test_c_1_1_get_expenses_returns_4_items[/api/expenses-4]" time="0.452"><failure message="AssertionError: expected 200, got 501: []&#10;assert 501 == 200&#10; +  where 501 = &lt;Response [501 Not Implemented]&gt;.status_code">path = '/api/expenses', expected_len = 4
+
+    @pytest.mark.parametrize("path,expected_len", [
+        ("/api/expenses", 4),
+    ])
+    def test_c_1_1_get_expenses_returns_4_items(path, expected_len):
+        url = BASE_URL.rstrip("/") + path
+        resp = httpx.get(url, timeout=10.0)
+&gt;       assert resp.status_code == 200, f"expected 200, got {resp.status_code}: {resp.text}"
+E       AssertionError: expected 200, got 501: []
+E       assert 501 == 200
+E        +  where 501 = &lt;Response [501 Not Implemented]&gt;.status_code
+
+verify\test_api.py:16: AssertionError</failure></testcase><testcase classname="verify.test_api" name="test_c_2_4_naive_settlement_api_first_item" time="0.428" /><testcase classname="verify.test_ui_session1" name="test_c_1_2_home_renders_4_expense_rows" time="6.691"><failure message="AssertionError: Locator expected to have count '4'&#10;Actual value: 0 &#10;Call log:&#10;  - Expect &quot;to_have_count&quot; with timeout 5000ms&#10;  - waiting for locator(&quot;[data-testid=\&quot;expense-row\&quot;]&quot;)&#10;    13 × locator resolved to 0 elements&#10;       - unexpected value &quot;0&quot;">page = &lt;Page url='http://127.0.0.1:49670/'&gt;
+
+    def test_c_1_2_home_renders_4_expense_rows(page):
+        page.goto(BASE_URL + "/")
+        rows = page.locator('[data-testid="expense-row"]')
+&gt;       expect(rows).to_have_count(4)
+E       AssertionError: Locator expected to have count '4'
+E       Actual value: 0 
+E       Call log:
+E         - Expect "to_have_count" with timeout 5000ms
+E         - waiting for locator("[data-testid=\"expense-row\"]")
+E           13 × locator resolved to 0 elements
+E              - unexpected value "0"
+
+verify\test_ui_session1.py:11: AssertionError</failure></testcase><testcase classname="verify.test_ui_session1" name="test_c_1_3_totals_paid_summary_5_rows_with_exact_amounts" time="6.167"><failure message="AssertionError: Locator expected to be visible&#10;Actual value: None&#10;Error: element(s) not found &#10;Call log:&#10;  - Expect &quot;to_be_visible&quot; with timeout 5000ms&#10;  - waiting for get_by_text(&quot;Alice $52.00&quot;, exact=True)&#10;&#10;Aria snapshot:&#10;- main: &quot;Error: HTTP 501&quot;&#10;- alert">page = &lt;Page url='http://127.0.0.1:49670/'&gt;
+
+    def test_c_1_3_totals_paid_summary_5_rows_with_exact_amounts(page):
+        page.goto(BASE_URL + "/")
+        # Assert each expected totals-paid line is rendered exactly somewhere on the page
+        expected = [
+            "Alice $52.00",
+            "Bob $30.00",
+            "Cara $40.00",
+            "Dan $15.00",
+            "Eve $0.00",
+        ]
+        for text in expected:
+            loc = page.get_by_text(text, exact=True)
+&gt;           expect(loc).to_be_visible()
+E           AssertionError: Locator expected to be visible
+E           Actual value: None
+E           Error: element(s) not found 
+E           Call log:
+E             - Expect "to_be_visible" with timeout 5000ms
+E             - waiting for get_by_text("Alice $52.00", exact=True)
+E           
+E           Aria snapshot:
+E           - main: "Error: HTTP 501"
+E           - alert
+
+verify\test_ui_session1.py:26: AssertionError</failure></testcase><testcase classname="verify.test_ui_session2" name="test_c_2_1_balances_name_order_and_exact_texts" time="6.108"><failure message="AssertionError: Locator expected to have count '5'&#10;Actual value: 0 &#10;Call log:&#10;  - Expect &quot;to_have_count&quot; with timeout 5000ms&#10;  - waiting for locator(&quot;[data-testid=\&quot;balance-row\&quot;]&quot;)&#10;    14 × locator resolved to 0 elements&#10;       - unexpected value &quot;0&quot;">page = &lt;Page url='http://127.0.0.1:49670/'&gt;
+
+    def test_c_2_1_balances_name_order_and_exact_texts(page):
+        page.goto(BASE_URL + "/")
+        rows = page.locator('[data-testid="balance-row"]')
+&gt;       expect(rows).to_have_count(5)
+E       AssertionError: Locator expected to have count '5'
+E       Actual value: 0 
+E       Call log:
+E         - Expect "to_have_count" with timeout 5000ms
+E         - waiting for locator("[data-testid=\"balance-row\"]")
+E           14 × locator resolved to 0 elements
+E              - unexpected value "0"
+
+verify\test_ui_session2.py:10: AssertionError</failure></testcase><testcase classname="verify.test_ui_session2" name="test_c_2_2_transfers_first_item_text" time="6.121"><failure message="AssertionError: Locator expected to have count '4'&#10;Actual value: 0 &#10;Call log:&#10;  - Expect &quot;to_have_count&quot; with timeout 5000ms&#10;  - waiting for locator(&quot;[data-testid=\&quot;transfer-row\&quot;]&quot;)&#10;    14 × locator resolved to 0 elements&#10;       - unexpected value &quot;0&quot;">page = &lt;Page url='http://127.0.0.1:49670/'&gt;
+
+    def test_c_2_2_transfers_first_item_text(page):
+        page.goto(BASE_URL + "/")
+        rows = page.locator('[data-testid="transfer-row"]')
+&gt;       expect(rows).to_have_count(4)
+E       AssertionError: Locator expected to have count '4'
+E       Actual value: 0 
+E       Call log:
+E         - Expect "to_have_count" with timeout 5000ms
+E         - waiting for locator("[data-testid=\"transfer-row\"]")
+E           14 × locator resolved to 0 elements
+E              - unexpected value "0"
+
+verify\test_ui_session2.py:25: AssertionError</failure></testcase><testcase classname="verify.test_ui_session2" name="test_c_2_3_transfers_total_amount" time="6.082"><failure message="AssertionError: Locator expected to be visible&#10;Actual value: None&#10;Error: element(s) not found &#10;Call log:&#10;  - Expect &quot;to_be_visible&quot; with timeout 5000ms&#10;  - waiting for locator(&quot;[data-testid=\&quot;transfers-total\&quot;]&quot;)&#10;&#10;Aria snapshot:&#10;- main: &quot;Error: HTTP 501&quot;&#10;- alert">page = &lt;Page url='http://127.0.0.1:49670/'&gt;
+
+    def test_c_2_3_transfers_total_amount(page):
+        page.goto(BASE_URL + "/")
+        total = page.locator('[data-testid="transfers-total"]')
+&gt;       expect(total).to_be_visible()
+E       AssertionError: Locator expected to be visible
+E       Actual value: None
+E       Error: element(s) not found 
+E       Call log:
+E         - Expect "to_be_visible" with timeout 5000ms
+E         - waiting for locator("[data-testid=\"transfers-total\"]")
+E       
+E       Aria snapshot:
+E       - main: "Error: HTTP 501"
+E       - alert
+
+verify\test_ui_session2.py:33: AssertionError</failure></testcase><testcase classname="verify.test_ui_session3" name="test_c_3_1_money_sample_shows_negative_format" time="6.094"><failure message="AssertionError: Locator expected to be visible&#10;Actual value: None&#10;Error: element(s) not found &#10;Call log:&#10;  - Expect &quot;to_be_visible&quot; with timeout 5000ms&#10;  - waiting for locator(&quot;[data-testid=\&quot;money-sample\&quot;]&quot;)&#10;&#10;Aria snapshot:&#10;- main: &quot;Error: HTTP 501&quot;&#10;- alert">page = &lt;Page url='http://127.0.0.1:49670/'&gt;
+
+    def test_c_3_1_money_sample_shows_negative_format(page):
+        page.goto(BASE_URL + "/")
+        sample = page.locator('[data-testid="money-sample"]')
+&gt;       expect(sample).to_be_visible()
+E       AssertionError: Locator expected to be visible
+E       Actual value: None
+E       Error: element(s) not found 
+E       Call log:
+E         - Expect "to_be_visible" with timeout 5000ms
+E         - waiting for locator("[data-testid=\"money-sample\"]")
+E       
+E       Aria snapshot:
+E       - main: "Error: HTTP 501"
+E       - alert
+
+verify\test_ui_session3.py:10: AssertionError</failure></testcase><testcase classname="verify.test_ui_session3" name="test_c_3_2_minimal_on_orders_transfers_by_amount_then_payer_payee" time="31.513"><failure message="playwright._impl._errors.TimeoutError: Locator.click: Timeout 30000ms exceeded.&#10;Call log:&#10;  - waiting for locator(&quot;[data-testid=\&quot;toggle-minimal\&quot;]&quot;)">page = &lt;Page url='http://127.0.0.1:49670/'&gt;
+
+    def test_c_3_2_minimal_on_orders_transfers_by_amount_then_payer_payee(page):
+        page.goto(BASE_URL + "/")
+        toggle = page.locator('[data-testid="toggle-minimal"]')
+        # Turn minimal mode ON by clicking once
+&gt;       toggle.click()
+
+verify\test_ui_session3.py:18: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+.pipeline\venv\Lib\site-packages\playwright\sync_api\_generated.py:17876: in click
+    self._sync(
+.pipeline\venv\Lib\site-packages\playwright\_impl\_locator.py:165: in click
+    return await self._frame._click(self._selector, strict=True, **params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.pipeline\venv\Lib\site-packages\playwright\_impl\_frame.py:593: in _click
+    await self._channel.send("click", self._timeout, locals_to_params(locals()))
+.pipeline\venv\Lib\site-packages\playwright\_impl\_connection.py:76: in send
+    return await self._connection.wrap_api_call(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = &lt;playwright._impl._connection.Connection object at 0x00000216F3061160&gt;
+cb = &lt;function Channel.send.&lt;locals&gt;.&lt;lambda&gt; at 0x00000216F33C8510&gt;
+is_internal = False, title = None
+
+    async def wrap_api_call(
+        self, cb: Callable[[], Any], is_internal: bool = False, title: str = None
+    ) -&gt; Any:
+        if self._api_zone.get():
+            return await cb()
+        task = asyncio.current_task(self._loop)
+        parsed_st = _attach_api_call_information(
+            getattr(task, "__pw_stack__", None) or _capture_stack_trace(),
+            is_internal,
+            title,
+        )
+        self._api_zone.set(parsed_st)
+        try:
+            return await cb()
+        except Exception as error:
+&gt;           raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+E           playwright._impl._errors.TimeoutError: Locator.click: Timeout 30000ms exceeded.
+E           Call log:
+E             - waiting for locator("[data-testid=\"toggle-minimal\"]")
+
+.pipeline\venv\Lib\site-packages\playwright\_impl\_connection.py:632: TimeoutError</failure></testcase><testcase classname="verify.test_ui_session3" name="test_c_3_3_unchecking_eve_excludes_from_balances_and_transfers" time="31.552"><failure message="playwright._impl._errors.TimeoutError: Locator.click: Timeout 30000ms exceeded.&#10;Call log:&#10;  - waiting for locator(&quot;[data-testid=\&quot;include-Eve\&quot;]&quot;)">page = &lt;Page url='http://127.0.0.1:49670/'&gt;
+
+    def test_c_3_3_unchecking_eve_excludes_from_balances_and_transfers(page):
+        page.goto(BASE_URL + "/")
+        eve_box = page.locator('[data-testid="include-Eve"]')
+        # Ensure unchecked: click if it's checked or just click once (idempotent UI should handle)
+&gt;       eve_box.click()
+
+verify\test_ui_session3.py:35: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+.pipeline\venv\Lib\site-packages\playwright\sync_api\_generated.py:17876: in click
+    self._sync(
+.pipeline\venv\Lib\site-packages\playwright\_impl\_locator.py:165: in click
+    return await self._frame._click(self._selector, strict=True, **params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.pipeline\venv\Lib\site-packages\playwright\_impl\_frame.py:593: in _click
+    await self._channel.send("click", self._timeout, locals_to_params(locals()))
+.pipeline\venv\Lib\site-packages\playwright\_impl\_connection.py:76: in send
+    return await self._connection.wrap_api_call(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = &lt;playwright._impl._connection.Connection object at 0x00000216F3061160&gt;
+cb = &lt;function Channel.send.&lt;locals&gt;.&lt;lambda&gt; at 0x00000216F3059430&gt;
+is_internal = False, title = None
+
+    async def wrap_api_call(
+        self, cb: Callable[[], Any], is_internal: bool = False, title: str = None
+    ) -&gt; Any:
+        if self._api_zone.get():
+            return await cb()
+        task = asyncio.current_task(self._loop)
+        parsed_st = _attach_api_call_information(
+            getattr(task, "__pw_stack__", None) or _capture_stack_trace(),
+            is_internal,
+            title,
+        )
+        self._api_zone.set(parsed_st)
+        try:
+            return await cb()
+        except Exception as error:
+&gt;           raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+E           playwright._impl._errors.TimeoutError: Locator.click: Timeout 30000ms exceeded.
+E           Call log:
+E             - waiting for locator("[data-testid=\"include-Eve\"]")
+
+.pipeline\venv\Lib\site-packages\playwright\_impl\_connection.py:632: TimeoutError</failure></testcase><testcase classname="verify.test_ui_session3" name="test_c_3_4_minimal_on_renders_4_transfer_rows" time="31.497"><failure message="playwright._impl._errors.TimeoutError: Locator.click: Timeout 30000ms exceeded.&#10;Call log:&#10;  - waiting for locator(&quot;[data-testid=\&quot;toggle-minimal\&quot;]&quot;)">page = &lt;Page url='http://127.0.0.1:49670/'&gt;
+
+    def test_c_3_4_minimal_on_renders_4_transfer_rows(page):
+        page.goto(BASE_URL + "/")
+        toggle = page.locator('[data-testid="toggle-minimal"]')
+&gt;       toggle.click()  # turn ON
+        ^^^^^^^^^^^^^^
+
+verify\test_ui_session3.py:49: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+.pipeline\venv\Lib\site-packages\playwright\sync_api\_generated.py:17876: in click
+    self._sync(
+.pipeline\venv\Lib\site-packages\playwright\_impl\_locator.py:165: in click
+    return await self._frame._click(self._selector, strict=True, **params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.pipeline\venv\Lib\site-packages\playwright\_impl\_frame.py:593: in _click
+    await self._channel.send("click", self._timeout, locals_to_params(locals()))
+.pipeline\venv\Lib\site-packages\playwright\_impl\_connection.py:76: in send
+    return await self._connection.wrap_api_call(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = &lt;playwright._impl._connection.Connection object at 0x00000216F3061160&gt;
+cb = &lt;function Channel.send.&lt;locals&gt;.&lt;lambda&gt; at 0x00000216F35266C0&gt;
+is_internal = False, title = None
+
+    async def wrap_api_call(
+        self, cb: Callable[[], Any], is_internal: bool = False, title: str = None
+    ) -&gt; Any:
+        if self._api_zone.get():
+            return await cb()
+        task = asyncio.current_task(self._loop)
+        parsed_st = _attach_api_call_information(
+            getattr(task, "__pw_stack__", None) or _capture_stack_trace(),
+            is_internal,
+            title,
+        )
+        self._api_zone.set(parsed_st)
+        try:
+            return await cb()
+        except Exception as error:
+&gt;           raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+E           playwright._impl._errors.TimeoutError: Locator.click: Timeout 30000ms exceeded.
+E           Call log:
+E             - waiting for locator("[data-testid=\"toggle-minimal\"]")
+
+.pipeline\venv\Lib\site-packages\playwright\_impl\_connection.py:632: TimeoutError</failure></testcase><testcase classname="verify.test_ui_session3" name="test_c_3_5_minimal_off_last_item_is_bob_pays_cara" time="31.509"><failure message="playwright._impl._errors.TimeoutError: Locator.click: Timeout 30000ms exceeded.&#10;Call log:&#10;  - waiting for locator(&quot;[data-testid=\&quot;toggle-minimal\&quot;]&quot;)">page = &lt;Page url='http://127.0.0.1:49670/'&gt;
+
+    def test_c_3_5_minimal_off_last_item_is_bob_pays_cara(page):
+        page.goto(BASE_URL + "/")
+        toggle = page.locator('[data-testid="toggle-minimal"]')
+        # Ensure we end in OFF: click twice
+&gt;       toggle.click()
+
+verify\test_ui_session3.py:58: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+.pipeline\venv\Lib\site-packages\playwright\sync_api\_generated.py:17876: in click
+    self._sync(
+.pipeline\venv\Lib\site-packages\playwright\_impl\_locator.py:165: in click
+    return await self._frame._click(self._selector, strict=True, **params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.pipeline\venv\Lib\site-packages\playwright\_impl\_frame.py:593: in _click
+    await self._channel.send("click", self._timeout, locals_to_params(locals()))
+.pipeline\venv\Lib\site-packages\playwright\_impl\_connection.py:76: in send
+    return await self._connection.wrap_api_call(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = &lt;playwright._impl._connection.Connection object at 0x00000216F3061160&gt;
+cb = &lt;function Channel.send.&lt;locals&gt;.&lt;lambda&gt; at 0x00000216F3679900&gt;
+is_internal = False, title = None
+
+    async def wrap_api_call(
+        self, cb: Callable[[], Any], is_internal: bool = False, title: str = None
+    ) -&gt; Any:
+        if self._api_zone.get():
+            return await cb()
+        task = asyncio.current_task(self._loop)
+        parsed_st = _attach_api_call_information(
+            getattr(task, "__pw_stack__", None) or _capture_stack_trace(),
+            is_internal,
+            title,
+        )
+        self._api_zone.set(parsed_st)
+        try:
+            return await cb()
+        except Exception as error:
+&gt;           raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+E           playwright._impl._errors.TimeoutError: Locator.click: Timeout 30000ms exceeded.
+E           Call log:
+E             - waiting for locator("[data-testid=\"toggle-minimal\"]")
+
+.pipeline\venv\Lib\site-packages\playwright\_impl\_connection.py:632: TimeoutError</failure></testcase></testsuite></testsuites>

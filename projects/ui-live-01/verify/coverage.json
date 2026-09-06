@@ -1,0 +1,16 @@
+{
+  "c-1-1": {"test": "verify/test_api_transactions.py::test_c_1_1_get_transactions_returns_array_with_required_fields"},
+  "c-1-2": {"test": "verify/test_ui_session1.py::test_c_1_2_ui_renders_one_row_per_transaction"},
+  "c-1-3": {"test": "verify/test_ui_session1.py::test_c_1_3_ui_renders_each_row_memo"},
+  "c-2-1": {"test": "verify/test_ui_session2.py::test_c_2_1_category_transport_for_uber_trip_downtown"},
+  "c-2-2": {"test": "verify/test_ui_session2.py::test_c_2_2_rule_label_for_uber_trip_downtown"},
+  "c-2-3": {"test": "verify/test_ui_session2.py::test_c_2_3_summary_has_supplies_total_25"},
+  "c-2-4": {"test": "verify/test_ui_session2.py::test_c_2_4_category_transport_for_uber_refund_not_income"},
+  "c-2-5": {"test": "verify/test_ui_session2.py::test_c_2_5_summary_heading_visible_once"},
+  "c-2-6": {"test": "verify/test_ui_session2.py::test_c_2_6_summary_transport_total_20"},
+  "c-3-1": {"test": "verify/test_ui_session3.py::test_c_3_1_delta_updates_after_setting_transport_budget_30"},
+  "c-3-2": {"test": "verify/test_ui_session3.py::test_c_3_2_sort_by_delta_places_expense_first_after_budget"},
+  "c-3-3": {"test": "verify/test_ui_session3.py::test_c_3_3_toggle_overbudget_hides_transport_and_keeps_expense"},
+  "c-3-4": {"test": "verify/test_ui_session3.py::test_c_3_4_percent_shows_one_decimal_transport_66_7"},
+  "c-3-5": {"test": "verify/test_ui_session3.py::test_c_3_5_delta_header_visible_once"}
+}

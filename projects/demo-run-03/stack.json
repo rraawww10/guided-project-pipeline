@@ -1,0 +1,15 @@
+{
+  "stack": [
+    "next",
+    "react",
+    "typescript",
+    "prisma",
+    "sqlite"
+  ],
+  "sessions": 4,
+  "minutes_per_session": 40,
+  "track": "fullstack",
+  "limits": " must persist to the database across restarts; migrations and seed must run from a clean checkout; no external network at run time",
+  "given_by": "pizza-hut",
+  "at": "2026-09-06T19:16:12+00:00"
+}

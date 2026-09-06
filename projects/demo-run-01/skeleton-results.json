@@ -1,0 +1,115 @@
+{
+  "ok": false,
+  "target": "skeleton",
+  "code_checks": {
+    "ok": true,
+    "checks": {}
+  },
+  "stack_check": {
+    "ok": true,
+    "violations": []
+  },
+  "seconds": 96.7,
+  "counts": {
+    "pass": 0,
+    "fail": 13,
+    "skip": 0,
+    "missing": 0
+  },
+  "criteria": {
+    "c-1-1": {
+      "status": "fail",
+      "check": "GET /api/candidates returns 200 with a JSON array of 10 Candidate items",
+      "session": 1,
+      "test": "verify/test_api_candidates.py::test_c_1_1_candidates_list_has_10_items",
+      "message": "assert 501 == 200\n +  where 501 = <Response [501 Not Implemented]>.status_code"
+    },
+    "c-1-2": {
+      "status": "fail",
+      "check": "sc-main renders 10 elements with data-testid=card on /",
+      "session": 1,
+      "test": "verify/test_ui_main.py::test_c_1_2_renders_10_cards",
+      "message": "playwright._impl._errors.TimeoutError: Locator.wait_for: Timeout 5000ms exceeded.\nCall log:\n  - waiting for get_by_test_id(\"card\").first to be visible"
+    },
+    "c-1-3": {
+      "status": "fail",
+      "check": "sc-main renders checkboxes with data-testids toggle-years and toggle-tag",
+      "session": 1,
+      "test": "verify/test_ui_main.py::test_c_1_3_renders_both_toggles",
+      "message": "assert True is False\n +  where True = is_checked()\n +    where is_checked = <Locator frame=<Frame name= url='http://127.0.0.1:58394/'> selector='internal:testid=[data-testid=\"toggle-years\"s]'>.is_checked"
+    },
+    "c-1-4": {
+      "status": "fail",
+      "check": "The /api/candidates JSON contains at least one pair of candidates with the same years value",
+      "session": 1,
+      "test": "verify/test_api_candidates.py::test_c_1_4_candidates_list_has_duplicate_years",
+      "message": "assert 501 == 200\n +  where 501 = <Response [501 Not Implemented]>.status_code"
+    },
+    "c-1-5": {
+      "status": "fail",
+      "check": "GET /api/candidates returns 200 with a JSON array that includes at least one item whose tags contain 'typescript'",
+      "session": 1,
+      "test": "verify/test_api_candidates.py::test_c_1_5_candidates_list_has_typescript_tag",
+      "message": "assert 501 == 200\n +  where 501 = <Response [501 Not Implemented]>.status_code"
+    },
+    "c-2-1": {
+      "status": "fail",
+      "check": "GET /api/rank?active=years returns 200 with a JSON array of 10 RankItem having id, name, score (number), and reasons (string[])",
+      "session": 2,
+      "test": "verify/test_api_rank.py::test_c_2_1_rank_years_returns_10_items_with_shape",
+      "message": "assert 501 == 200\n +  where 501 = <Response [501 Not Implemented]>.status_code"
+    },
+    "c-2-2": {
+      "status": "fail",
+      "check": "With active=years only, GET /api/rank returns items ordered by unrounded score in descending order",
+      "session": 2,
+      "test": "verify/test_api_rank.py::test_c_2_2_rank_years_orders_by_unrounded_score_desc",
+      "message": "assert 501 == 200\n +  where 501 = <Response [501 Not Implemented]>.status_code"
+    },
+    "c-2-3": {
+      "status": "fail",
+      "check": "On / with years toggle on, each card renders a score text data-testid=score formatted to two decimals",
+      "session": 2,
+      "test": "verify/test_ui_rank.py::test_c_2_3_years_toggle_shows_two_decimal_scores",
+      "message": "playwright._impl._errors.TimeoutError: Locator.wait_for: Timeout 5000ms exceeded.\nCall log:\n  - waiting for get_by_test_id(\"score\").first to be visible"
+    },
+    "c-2-4": {
+      "status": "fail",
+      "check": "On / with years toggle on, at least one card's data-testid=reasons contains the word 'years'",
+      "session": 2,
+      "test": "verify/test_ui_rank.py::test_c_2_4_years_toggle_reasons_contains_years",
+      "message": "playwright._impl._errors.TimeoutError: Locator.wait_for: Timeout 5000ms exceeded.\nCall log:\n  - waiting for get_by_test_id(\"reasons\").first to be visible"
+    },
+    "c-3-1": {
+      "status": "fail",
+      "check": "With no active tokens (?active=), if two items have equal unrounded scores then name ASC by ASCII order decides; GET /api/rank reflects that order",
+      "session": 3,
+      "test": "verify/test_sort_and_filter.py::test_c_3_1_no_active_orders_by_name_ascii",
+      "message": "assert 501 == 200\n +  where 501 = <Response [501 Not Implemented]>.status_code"
+    },
+    "c-3-2": {
+      "status": "fail",
+      "check": "With active=tag, GET /api/rank returns 200 with items ordered so that when two candidates have equal years and both either have or both lack the preferred tag, the tie is broken by name ASC (ASCII)",
+      "session": 3,
+      "test": "verify/test_sort_and_filter.py::test_c_3_2_tag_active_same_years_same_tag_break_ties_by_name",
+      "message": "assert 501 == 200\n +  where 501 = <Response [501 Not Implemented]>.status_code"
+    },
+    "c-3-3": {
+      "status": "fail",
+      "check": "With active=tag, when two candidates have equal years and exactly one has the preferred tag, the tagged candidate appears first in GET /api/rank",
+      "session": 3,
+      "test": "verify/test_sort_and_filter.py::test_c_3_3_tag_active_one_tagged_comes_first",
+      "message": "assert 501 == 200\n +  where 501 = <Response [501 Not Implemented]>.status_code"
+    },
+    "c-3-4": {
+      "status": "fail",
+      "check": "GET /api/rank?active=years&min=100 returns 200 with an empty JSON array",
+      "session": 3,
+      "test": "verify/test_api_rank.py::test_c_3_4_rank_years_min_100_returns_empty_array",
+      "message": "assert 501 == 200\n +  where 501 = <Response [501 Not Implemented]>.status_code"
+    }
+  },
+  "pytest_returncode": 1,
+  "stdout_tail": "imeout 5000ms exceeded.\nE           Call log:\nE             - waiting for get_by_test_id(\"reasons\").first to be visible\n\n.pipeline\\venv\\Lib\\site-packages\\playwright\\_impl\\_connection.py:632: TimeoutError\n============================== warnings summary ===============================\nskeleton\\verify\\test_ui_main.py:10\n  D:\\project_creation_workflow\\projects\\demo-run-01\\skeleton\\verify\\test_ui_main.py:10: PytestUnknownMarkWarning: Unknown pytest.mark.sync - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html\n    @pytest.mark.sync\n\nskeleton\\verify\\test_ui_main.py:30\n  D:\\project_creation_workflow\\projects\\demo-run-01\\skeleton\\verify\\test_ui_main.py:30: PytestUnknownMarkWarning: Unknown pytest.mark.sync - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html\n    @pytest.mark.sync\n\nskeleton\\verify\\test_ui_rank.py:11\n  D:\\project_creation_workflow\\projects\\demo-run-01\\skeleton\\verify\\test_ui_rank.py:11: PytestUnknownMarkWarning: Unknown pytest.mark.sync - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html\n    @pytest.mark.sync\n\nskeleton\\verify\\test_ui_rank.py:34\n  D:\\project_creation_workflow\\projects\\demo-run-01\\skeleton\\verify\\test_ui_rank.py:34: PytestUnknownMarkWarning: Unknown pytest.mark.sync - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html\n    @pytest.mark.sync\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n=========================== short test summary info ===========================\nFAILED skeleton/verify/test_api_candidates.py::test_c_1_1_candidates_list_has_10_items\nFAILED skeleton/verify/test_api_candidates.py::test_c_1_4_candidates_list_has_duplicate_years\nFAILED skeleton/verify/test_api_candidates.py::test_c_1_5_candidates_list_has_typescript_tag\nFAILED skeleton/verify/test_api_rank.py::test_c_2_1_rank_years_returns_10_items_with_shape\nFAILED skeleton/verify/test_api_rank.py::test_c_2_2_rank_years_orders_by_unrounded_score_desc\nFAILED skeleton/verify/test_api_rank.py::test_c_3_4_rank_years_min_100_returns_empty_array\nFAILED skeleton/verify/test_sort_and_filter.py::test_c_3_1_no_active_orders_by_name_ascii\nFAILED skeleton/verify/test_sort_and_filter.py::test_c_3_2_tag_active_same_years_same_tag_break_ties_by_name\nFAILED skeleton/verify/test_sort_and_filter.py::test_c_3_3_tag_active_one_tagged_comes_first\nFAILED skeleton/verify/test_ui_main.py::test_c_1_2_renders_10_cards - playwri...\nFAILED skeleton/verify/test_ui_main.py::test_c_1_3_renders_both_toggles - ass...\nFAILED skeleton/verify/test_ui_rank.py::test_c_2_3_years_toggle_shows_two_decimal_scores\nFAILED skeleton/verify/test_ui_rank.py::test_c_2_4_years_toggle_reasons_contains_years\n13 failed, 4 warnings in 27.30s\n",
+  "stderr_tail": ""
+}

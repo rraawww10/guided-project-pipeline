@@ -1,0 +1,9 @@
+{
+  "ok": true,
+  "checked": 13,
+  "mismatches": [],
+  "partial_state_risks": [],
+  "blind_spot": "",
+  "typecheck_fail_open": false,
+  "app_hash": "e8233f9283567c44ddb2ca9ba3d26cbcd70bb0df4b75b762a389a71e202ab812"
+}

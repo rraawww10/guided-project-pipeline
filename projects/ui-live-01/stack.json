@@ -1,0 +1,13 @@
+{
+  "stack": [
+    "next",
+    "react",
+    "typescript"
+  ],
+  "sessions": 3,
+  "minutes_per_session": 40,
+  "track": "fullstack",
+  "limits": "no database, no network at run time",
+  "given_by": "rishuraj",
+  "at": "2026-09-04T20:57:43+00:00"
+}
