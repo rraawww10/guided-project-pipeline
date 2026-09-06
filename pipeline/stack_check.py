@@ -26,8 +26,11 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import sys
+import urllib.error
+import urllib.request
 from pathlib import Path
 
 # Stack tokens that name a runtime or a language rather than an npm package.
@@ -88,6 +91,35 @@ INERT_BUILD = re.compile(
     r"|printf\b"
     r")",
     re.IGNORECASE)
+
+
+# The deploy check already refuses an install that prints a deprecation warning.
+# It refuses it at STEP 12, after the code phase, both gates, the skeleton and
+# the guide - and each failure sends the Builder back to guess another version.
+# demo-run-03 spent five deploy runs and four Builder calls cycling 14.2.12 ->
+# 14.2.16 -> 15.5.7 -> 16.0.0, all flagged. The same fact is available from the
+# registry in two seconds at step 7, before any of that is built.
+REGISTRY = os.environ.get("NPM_REGISTRY", "https://registry.npmjs.org")
+REGISTRY_TIMEOUT = float(os.environ.get("STACK_CHECK_TIMEOUT", "10"))
+
+
+def deprecated_version(package: str, spec: str) -> tuple[str, str] | None:
+    """(version, message) when an EXACT pin is deprecated. None otherwise.
+
+    Only exact pins are judged. `^15.5.4` resolves at install time to whatever
+    is newest then, which this cannot know and must not guess about.
+    """
+    version = spec.strip()
+    if not re.fullmatch(r"\d+\.\d+\.\d+", version):
+        return None
+    url = f"{REGISTRY}/{package}/{version}"
+    try:
+        with urllib.request.urlopen(url, timeout=REGISTRY_TIMEOUT) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+    except (urllib.error.URLError, OSError, ValueError, json.JSONDecodeError):
+        return None                      # offline, or the registry is unwell
+    message = data.get("deprecated")
+    return (version, str(message)[:200]) if message else None
 
 
 def normalise(token: str) -> str:
@@ -197,6 +229,30 @@ def check(project: Path, target: str = "app") -> dict:
                            f"{script!r}. With a fallback it succeeds whichever way "
                            f"it goes, so it is no longer a check.",
             })
+
+    # S007 last: it is the only rule that reaches the network, and a project that
+    # already fails S001-S006 does not need it to make the point.
+    # A person may decide to ship a known advisory - `pipeline deploy
+    # --allow-advisories` is that decision, and it leaves this marker. Without
+    # honouring it here, step 7 would block at step 7 what step 12 was told to
+    # permit, and there would be no way to take the decision at all.
+    if (project / ".pipeline" / "ALLOW_ADVISORIES").exists():
+        return {"ok": not violations, "target": target, "stack": raw,
+                "declared": sorted(declared_names), "build": build, "start": start,
+                "advisories_allowed": True, "violations": violations}
+    if not violations:
+        for name, spec in sorted(declared.items()):
+            hit = deprecated_version(name, str(spec))
+            if hit:
+                version, message = hit
+                violations.append({
+                    "code": "S007",
+                    "message": f"{name}@{version} is deprecated on the registry: "
+                               f"{message} The step 12 deploy check refuses an "
+                               f"install that prints this. Pick a version that "
+                               f"`npm view {name}@<version> deprecated` reports "
+                               f"nothing for.",
+                })
 
     return {"ok": not violations, "target": target, "stack": raw,
             "declared": sorted(declared_names), "build": build, "start": start,

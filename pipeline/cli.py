@@ -279,6 +279,11 @@ def cmd_deploy(a) -> int:
     # accounting and the step log this function exists to keep.
     if getattr(a, "allow_advisories", False):
         argv.append("--allow-advisories")
+        # Record the decision where step 7 can see it too. stack_check S007 asks
+        # the registry the same question the install answers, and would other-
+        # wise refuse at step 7 what this call was explicitly told to permit.
+        (st.dir / ".pipeline" / "ALLOW_ADVISORIES").write_text(
+            "deploy --allow-advisories" + chr(10), encoding="utf-8")
     rc = _checker(st, "deploy", "pack", lambda: deploy_check.main(argv))
     st.log_step("deploy", rc == 0)
     return rc
