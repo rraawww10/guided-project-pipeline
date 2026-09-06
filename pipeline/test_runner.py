@@ -38,7 +38,7 @@ def free_port() -> int:
 
 
 def run(cmd: list[str], cwd: Path, timeout: int = 600) -> subprocess.CompletedProcess:
-    return subprocess.run(cmd, cwd=cwd, capture_output=True, text=True, timeout=timeout)
+    return subprocess.run(cmd, cwd=cwd, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=timeout)
 
 
 GET_PIP = "https://bootstrap.pypa.io/get-pip.py"
@@ -83,15 +83,15 @@ def _make_venv(venv: Path) -> Path:
     """uv if it is here, then the stdlib, then the stdlib without pip."""
     venv.parent.mkdir(parents=True, exist_ok=True)
     if shutil.which("uv"):
-        r = subprocess.run(["uv", "venv", str(venv)], capture_output=True, text=True)
+        r = subprocess.run(["uv", "venv", str(venv)], capture_output=True, text=True, encoding="utf-8", errors="replace")
         if r.returncode == 0:
             return venv_bin(venv, "python")
     r = subprocess.run([sys.executable, "-m", "venv", str(venv)],
-                       capture_output=True, text=True)
+                       capture_output=True, text=True, encoding="utf-8", errors="replace")
     if r.returncode != 0:
         shutil.rmtree(venv, ignore_errors=True)
         r = subprocess.run([sys.executable, "-m", "venv", "--without-pip", str(venv)],
-                           capture_output=True, text=True)
+                           capture_output=True, text=True, encoding="utf-8", errors="replace")
         if r.returncode != 0:
             raise RuntimeError(
                 "could not create a virtualenv for the test runner.\n"
@@ -119,7 +119,7 @@ def ensure_venv(project: Path) -> Path:
             "Fix it once with:  sudo apt install python3-venv")
 
     r = subprocess.run([str(py), "-m", "pip", "install", "-q", *PYTEST_DEPS],
-                       capture_output=True, text=True, timeout=1800)
+                       capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=1800)
     if r.returncode != 0:
         raise RuntimeError(f"could not install {PYTEST_DEPS}:\n{r.stderr[-1500:]}")
 
@@ -380,7 +380,7 @@ def main(argv: list[str] | None = None) -> int:
             raise RuntimeError(f"app did not answer on {base} within {BOOT_TIMEOUT}s")
         proc = subprocess.run(
             [str(py), "-m", "pytest", str(verify_dir), "-q", f"--junit-xml={xml}"],
-            cwd=project, capture_output=True, text=True, timeout=TEST_TIMEOUT,
+            cwd=project, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=TEST_TIMEOUT,
             # APP_DIR is the target actually under test - app/ or skeleton/.
             # Without it a test cannot find the running app's own files: the
             # suite runs with cwd=project from project/verify for app/, with

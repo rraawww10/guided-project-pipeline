@@ -65,6 +65,24 @@ gets a strikethrough and a date.
   failed `npm ci` leaves the directory behind holding only `.bin`, so the
   existence check in `boot()` skipped the install and `next build` died with
   "'next' is not recognized". Dotted entries do not count as packages.
+- **Generate clients in `postinstall`, not in `build`.** 2026-09-07,
+  demo-run-03: `build` was `prisma generate && prisma migrate deploy && ...`, and
+  `prisma generate` rewrites a 19MB native query engine. On Windows anything
+  holding that file for a moment - a virus scanner reading what it was just
+  handed - fails the whole build with `EPERM: operation not permitted, unlink
+  query_engine-windows.dll.node`. No node process was running; the lock was
+  transient. The pipeline builds 14+ times in a row (once for the test runner,
+  once per mutant), so a 1-in-20 collision is a near-certain failure somewhere in
+  the run. `postinstall` runs it once per install, and still covers the deploy
+  check's clean copy because `npm ci` triggers postinstall.
+- **A framework major version changes the code the Builder already wrote.**
+  2026-09-07, demo-run-03: the Builder wrote Next 14 route handlers - `{ params
+  }: { params: { id: string } }` - and separately pinned next 16, where params
+  is a Promise. It compiled locally against the old node_modules and failed only
+  in the deploy check's clean `npm ci` copy: the textbook works-on-my-machine,
+  caught exactly where step 12 is meant to catch it. Fix it OUTSIDE the cut
+  markers where possible - awaiting `ctx.params` in the wrapper left the cut
+  body byte-identical, so the skeleton and every student task were unaffected.
 - **A stale `package-lock.json` passes locally and fails on a clean machine.**
   2026-09-06, demo-run-01: the lock was 90 minutes older than package.json.
   Locally `node_modules` was already populated so the install was skipped
@@ -98,6 +116,16 @@ gets a strikethrough and a date.
   fail the criterion, which is what the skeleton needs. A fallback that returns
   plausible-looking data makes the test green on an empty skeleton.
 
+- **The skeleton is a snapshot, and nothing used to say when it was taken.**
+  2026-09-07, demo-run-03 shipped with app/ on next 16.1.1 and an awaited
+  `params`, while skeleton/ - cut twenty minutes earlier, before those fixes -
+  still pinned next@14.2.5, which npm flags as vulnerable. Every gate was
+  truthful when it ran: Gate 2 was approved before the fix, `cut` ran before the
+  fix, and `deploy` only ever builds app/ unless you pass `--target skeleton`.
+  Rule 8 says a later edit re-enters at step 7, but that was a rule for people.
+  `cut` now records the app hash it cut from and Gate 3 and `ship` refuse a
+  skeleton whose app has moved since - the same binding ambiguity.md has to a
+  spec hash. If you fix app/ after step 10, re-run `cut` and `leak`.
 - **A lesson in this file is not a rule in the agent's brief.** 2026-09-06,
   demo-run-01: `lib/sort.ts` put all 9 returns inside one pair - the same defect
   as recipe-box above, written down here since 2026-08-26 and read by every

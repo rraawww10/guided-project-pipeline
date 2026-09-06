@@ -41,7 +41,8 @@ from pathlib import Path
 from . import (cutter, deploy_check, gate1, guide_linter, leak_scan, mutation,
                redfirst, spec_linter, test_runner, watchdog)
 from .state import (GATES, RETRY_LIMIT, STEP_RUN_LIMIT, State, frozen_hash,
-                    project_dir, spec_drift, spec_hash, verify_hash)
+                    project_dir, skeleton_stale, spec_drift, spec_hash,
+                    verify_hash)
 
 HERE = Path(__file__).parent
 
@@ -491,11 +492,18 @@ def _gate_blockers(st: State, n: int, override: bool = False) -> list[str]:
         chk = d / "skeleton-check.json"
         if not chk.exists() or not json.loads(chk.read_text(encoding="utf-8"))["ok"]:
             out.append("skeleton does not fail the right tests (run: pipeline cut)")
+        # A green skeleton-check is only evidence about the app it was cut from.
+        stale = skeleton_stale(d)
+        if stale:
+            out.append(stale)
         if not (d / "pack").exists():
             out.append("pack-writer has not run (pack/ missing)")
         dep = d / "deploy.json"
         if not dep.exists() or not json.loads(dep.read_text(encoding="utf-8"))["ok"]:
             out.append("deploy check has not passed (run: pipeline deploy)")
+        stale = skeleton_stale(d)
+        if stale:
+            out.append(stale)
     return out
 
 

@@ -115,6 +115,59 @@ def verify_hash(project: Path) -> str | None:
     return h.hexdigest()
 
 
+def app_hash(project: Path) -> str | None:
+    """A stable digest of app/ source, ignoring build and install output.
+
+    The skeleton is a snapshot of app/ taken at step 10, and nothing bound the
+    two. demo-run-03 shipped with app/ on next 16.1.1 and an awaited `params`,
+    while skeleton/ - cut twenty minutes earlier - still pinned next@14.2.5,
+    which npm flags as vulnerable. Every gate was truthful when it ran: Gate 2
+    was approved before the fix, `cut` ran before the fix, and `deploy` only
+    ever builds app/. Rule 8 says a later edit re-enters at step 7, but that was
+    a rule for people and nothing enforced it.
+
+    Same idea as ambiguity.md bound to a spec hash (rule 7): a report has to
+    name the thing it read.
+    """
+    root = project / "app"
+    if not root.is_dir():
+        return None
+    skip = {"node_modules", ".next", "__pycache__", ".turbo", "dist", "build",
+            ".git", "coverage"}
+    h = hashlib.sha256()
+    for f in sorted(q for q in root.rglob("*") if q.is_file()):
+        rel = f.relative_to(root)
+        if skip & set(rel.parts):
+            continue
+        if rel.suffix in {".db", ".sqlite", ".sqlite3", ".log", ".tsbuildinfo"}:
+            continue          # runtime state, not source
+        h.update(str(rel).replace(chr(92), "/").encode())
+        h.update(b"\0")
+        h.update(f.read_bytes())
+        h.update(b"\0")
+    return h.hexdigest()
+
+
+def skeleton_stale(project: Path) -> str:
+    """'' when the skeleton was cut from the app that is on disk now."""
+    import json as _json
+    report = project / "skeleton-check.json"
+    if not (project / "skeleton").is_dir() or not report.exists():
+        return ""
+    try:
+        was = (_json.loads(report.read_text(encoding="utf-8")) or {}).get("app_hash")
+    except Exception:
+        return ""
+    if not was:
+        return ""                     # cut before this check existed
+    now = app_hash(project)
+    if now and was != now:
+        return (f"skeleton/ was cut from app {was[:12]} but app/ is now {now[:12]} - "
+                f"the student tree is a snapshot of code that has since changed. "
+                f"Re-run `pipeline cut`.")
+    return ""
+
+
 def frozen_hash(project: Path) -> str | None:
     """The spec hash recorded when Gate 1 was approved, if it was."""
     marker = project / ".pipeline" / "SPEC_FROZEN"

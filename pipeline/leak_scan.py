@@ -104,7 +104,7 @@ def scan_git_history(repo_root: Path, student: Path,
         return []
     try:
         r = subprocess.run(["git", "log", "--all", "-p", "--unified=0", "--", rel],
-                           cwd=repo_root, capture_output=True, text=True, timeout=120)
+                           cwd=repo_root, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=120)
     except (OSError, subprocess.SubprocessError):
         return []
     if r.returncode != 0:

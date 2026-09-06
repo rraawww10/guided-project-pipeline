@@ -313,7 +313,7 @@ def typecheck(project: Path) -> dict:
     cmd = [str(tsc)] if tsc else ["npx", "--no-install", "tsc"]
     try:
         r = subprocess.run([*cmd, "--noEmit", "-p", "tsconfig.json"],
-                           cwd=skel, capture_output=True, text=True, timeout=300)
+                           cwd=skel, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=300)
         out = (r.stdout + r.stderr).strip()
         rc = r.returncode
     except (OSError, subprocess.TimeoutExpired) as e:
@@ -610,6 +610,14 @@ def verify(project: Path) -> dict:
             "those by hand, or fix the spec (linter E110)." if risks else ""),
         "typecheck_fail_open": fail_open,
     }
+    # Name the app this skeleton was cut from, so a later edit to app/ makes the
+    # staleness visible instead of silently shipping a student tree built from
+    # code that no longer exists.
+    try:
+        from .state import app_hash
+        report["app_hash"] = app_hash(project)
+    except Exception:
+        report["app_hash"] = None
     (project / "skeleton-check.json").write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
     return report
 

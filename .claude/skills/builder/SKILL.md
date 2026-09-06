@@ -44,11 +44,22 @@ stack, the AI does not choose it.**
   hand-written server, do not make `build` print a string, and never add a `||`
   fallback so that the build cannot fail. A build that cannot fail is not a
   build.
-- Pin versions npm does not flag. `next@15.1.6` carries CVE-2025-66478 and
-  `npm install` prints a deprecation warning for it, which fails the step 12
-  deploy check outright - see `learning/lessons.md`. Choose the newest patch of
-  the line you want (15.5.x for Next 15) rather than a release you happen to
-  remember.
+- **Check every version you pin. Do not pin one from memory.** npm prints a
+  deprecation warning for a release with a published advisory, and the step 12
+  deploy check fails the step on it outright. Before writing a version into
+  package.json, confirm it:
+
+      npm view <package>@<version> deprecated
+
+  Silence means clean; any output means pick another. Guessing does not
+  converge - demo-run-03 cycled 15.5.7 -> 14.2.16 -> 16.0.0, all flagged, one
+  deploy failure and one Builder call each, because the flagged releases of a
+  package far outnumber the clean ones. Naming a line does not help either:
+  14.2.12 and 14.2.35 sit in the same line and only one is clean.
+
+  Prefer the newest patch that checks clean, and keep it inside the peer range
+  of everything else you pinned - `npm view <package>@<version> peerDependencies`
+  says what it needs.
 - If you cannot make the stack work, **stop and say so**, naming the exact
   error. Do not substitute something adjacent that happens to pass the tests.
 
@@ -88,6 +99,16 @@ YAML use `#`.
 - Markers must be balanced and must never nest.
 - What is left after the cut must still parse. Do not cut a closing brace, half
   a function signature, or an import.
+- **Never cut a binding that code outside the pair still uses.** The block may
+  parse perfectly and the cut still break the build, because the reference that
+  survives it no longer resolves. demo-run-03 wrapped whole `function toggle()`
+  and `function submit()` declarations while the JSX below still called them:
+  cut, TypeScript could not find the names, the mutant would not compile, and
+  the mutation check could only report INCONCLUSIVE - it proved nothing, and the
+  skeleton would not have built either. Declare the binding ABOVE the marker
+  with an inert body and assign the real one inside:
+  `let toggle: (id: number) => void = () => {}`. Cut, the name still exists and
+  does nothing, which is what the criterion should catch.
 - **Never put a function's only `return` inside a pair.** Cut it and the
   signature stays behind returning nothing, which does not compile - so the
   mutant cannot be built, every criterion reports `missing`, and the mutation
