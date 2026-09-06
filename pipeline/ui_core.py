@@ -644,34 +644,64 @@ def persist_run(record: dict) -> None:
         pass
 
 
+# Which slugs' ledgers this process has already read off disk. Double-reading is
+# harmless - absorb_runs skips ids already registered - so this needs no lock of
+# its own beyond the one absorb_runs takes.
+LEDGERS_READ: set[str] = set()
+
+
+def absorb_runs(slug: str, path: Path) -> None:
+    """Merge one project's ledger into the registry, without disturbing live runs.
+
+    A run that was still `running` when the process that owned it stopped is
+    recorded as interrupted, never as succeeded: nobody watched it finish.
+    """
+    if not path.exists():
+        return
+    rows: dict[str, dict] = {}
+    for line in path.read_text(encoding="utf-8", errors="replace").splitlines():
+        try:
+            row = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        if row.get("id"):
+            rows[row["id"]] = row
+    with RUNS_LOCK:
+        for run_id, row in rows.items():
+            if run_id in RUNS:
+                continue
+            row.setdefault("slug", slug)
+            if row.get("status") == "running":
+                row["status"] = "interrupted"
+                row["finished"] = row.get("finished") or row.get("started")
+            row["stdout"] = row.pop("stdout_tail", "")
+            row["stderr"] = row.pop("stderr_tail", "")
+            row["restored"] = True
+            RUNS[run_id] = row
+
+
+def ensure_ledger_read(slug: str) -> None:
+    """Make this project's ledger visible before anything queries the registry.
+
+    ui.py calls load_persisted_runs() at startup, so the UI has always had the
+    whole ledger. Nothing else does. Drive `orchestrator.step_once` from a
+    script - or import ui_core from any other entry point - and the registry
+    starts empty, so agent_ran answers "no" for a Verifier that has already run
+    and step 8 runs it again: a real agent call, real money, no warning. The
+    ledger is on disk either way; only this process had not looked.
+    """
+    if slug in LEDGERS_READ:
+        return
+    LEDGERS_READ.add(slug)
+    absorb_runs(slug, runs_file(slug))
+
+
 def load_persisted_runs() -> None:
-    """Rebuild the registry after a restart. A run that was live when the server
-    stopped is recorded as interrupted, never as succeeded."""
+    """Rebuild the registry after a restart, for every project at once."""
     for state_path in project_state_paths():
         slug = state_path.parents[1].name
-        path = state_path.parents[1] / ".pipeline" / "ui-runs.jsonl"
-        if not path.exists():
-            continue
-        rows: dict[str, dict] = {}
-        for line in path.read_text(encoding="utf-8", errors="replace").splitlines():
-            try:
-                row = json.loads(line)
-            except json.JSONDecodeError:
-                continue
-            if row.get("id"):
-                rows[row["id"]] = row
-        with RUNS_LOCK:
-            for run_id, row in rows.items():
-                if run_id in RUNS:
-                    continue
-                row.setdefault("slug", slug)
-                if row.get("status") == "running":
-                    row["status"] = "interrupted"
-                    row["finished"] = row.get("finished") or row.get("started")
-                row["stdout"] = row.pop("stdout_tail", "")
-                row["stderr"] = row.pop("stderr_tail", "")
-                row["restored"] = True
-                RUNS[run_id] = row
+        absorb_runs(slug, state_path.parents[1] / ".pipeline" / "ui-runs.jsonl")
+        LEDGERS_READ.add(slug)
 
 
 def register_run(record: dict) -> dict:
@@ -756,6 +786,7 @@ def agent_ran(slug: str, step: int | None, agent: str) -> bool:
     already checks - in practice the Verifier, which strengthens a suite that
     already exists. Everything else is answered by a file on disk.
     """
+    ensure_ledger_read(slug)
     with RUNS_LOCK:
         for record in RUNS.values():
             if (record.get("slug") == slug and record.get("kind") == "agent"
@@ -772,6 +803,7 @@ def succeeded_after(slug: str, component: str, when: float) -> bool:
     owner has already answered. The second kind must not re-trigger the owner -
     what it needs is the checker, run again.
     """
+    ensure_ledger_read(slug)
     with RUNS_LOCK:
         for record in RUNS.values():
             if (record.get("slug") == slug and record.get("component") == component
@@ -782,6 +814,7 @@ def succeeded_after(slug: str, component: str, when: float) -> bool:
 
 
 def attempt_number(slug: str, component: str) -> int:
+    ensure_ledger_read(slug)
     with RUNS_LOCK:
         return 1 + sum(1 for r in RUNS.values()
                        if r.get("slug") == slug and r.get("component") == component)
