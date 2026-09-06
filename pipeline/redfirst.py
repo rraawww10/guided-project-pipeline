@@ -22,7 +22,9 @@ from __future__ import annotations
 import argparse
 import ast
 import json
+import os
 import re
+import subprocess
 import sys
 from pathlib import Path
 
@@ -100,12 +102,70 @@ def check_all_red(project: Path, target: str = "app") -> dict:
     }
 
 
+def check_runnable(project: Path) -> dict:
+    """Can pytest resolve every test's fixtures, with no app in existence?
+
+    The dynamic half cannot answer this. At step 5 there is no app/, so the
+    server never boots, every criterion comes back `missing`, and check_all_red
+    reads that as "no test passed early" and approves - the same all-missing
+    shape mutation.py already learned to distrust. ui-live-01 and demo-run-01
+    both looked exactly like this with sound suites, so the shape alone proves
+    nothing either way.
+
+    demo-run-02 is what that costs. Its Test Writer wrote no conftest.py, so
+    `page` did not exist and all ten UI tests errored on setup. Red-first passed,
+    Gate 1 approved, and the break only surfaced at step 7 - as ten red criteria
+    routed to the Builder, which rule 3 forbids from touching verify/. A red
+    nobody in the loop can clear.
+
+    `--setup-plan` resolves fixtures without running anything, so it needs no
+    app: BASE_URL is set to a dead address only because suites read it at import
+    time. It found all ten in 0.42 seconds.
+    """
+    verify = project / "verify"
+    if not verify.exists():
+        return {"ran": False, "ok": False, "why": "verify/ does not exist"}
+    try:
+        py = test_runner.ensure_venv(project)
+    except Exception as exc:                      # a venv we cannot build is a
+        return {"ran": False, "ok": True,         # pipeline fault, not a verdict
+                "why": f"could not prepare an interpreter: {type(exc).__name__}: {exc}"}
+    env = {**os.environ, "BASE_URL": "http://127.0.0.1:1",
+           "APP_DIR": str(project / "app"), "PYTHONDONTWRITEBYTECODE": "1"}
+    try:
+        proc = subprocess.run(
+            [str(py), "-m", "pytest", str(verify), "--setup-plan", "-q",
+             "-p", "no:cacheprovider"],
+            cwd=str(project), env=env, capture_output=True, text=True,
+            encoding="utf-8", errors="replace", timeout=300)
+    except Exception as exc:
+        return {"ran": False, "ok": True,
+                "why": f"could not run the fixture plan: {type(exc).__name__}: {exc}"}
+    text = (proc.stdout or "") + (proc.stderr or "")
+    broken = sorted({ln.split(" ", 1)[1].strip()
+                     for ln in text.splitlines()
+                     if ln.startswith("ERROR ") and " " in ln})
+    return {
+        "ran": True,
+        "ok": not broken,
+        "broken": broken[:40],
+        "count": len(broken),
+        "why": ("every test's fixtures resolve" if not broken else
+                "these tests cannot run at all - a fixture or import is missing, "
+                "and the Builder cannot fix it because rule 3 forbids it editing "
+                "verify/"),
+        "detail": "" if not broken else text[-1500:],
+    }
+
+
 def run(project: Path, target: str = "app", static_only: bool = False) -> dict:
     vacuous = scan_assertions(project, target)
+    runnable = check_runnable(project)
     report: dict = {
-        "ok": not vacuous,
+        "ok": not vacuous and runnable.get("ok", True),
         "target": target,
         "vacuous_tests": vacuous,
+        "runnable": runnable,
         "dynamic": None,
     }
     if not static_only:
