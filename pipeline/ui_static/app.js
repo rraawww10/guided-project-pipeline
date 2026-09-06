@@ -470,6 +470,7 @@ function viewProject() {
       <div id="pd-runs">${runList(detail.runs)}</div>
     </div>
   </div>
+  <div id="pd-preview">${previewPanel()}</div>
   <div id="pd-steps">${stepPanel()}</div>
   <div class="panel">
     <div class="live-head"><h2>Artifacts</h2>
@@ -503,6 +504,41 @@ function projectHeader() {
       ${field("Spec frozen", d.spec_frozen ? "yes - Gate 1 approved it" : "no")}
       ${field("Shipped", d.shipped ? "yes" : "no")}
     </div>
+  </div>`;
+}
+
+// The built project, served so a person can look at it. deploy_check builds and
+// serves too, but tears the server down the moment its check passes - the URL in
+// deploy.json answers nothing by the time anyone reads it.
+function previewPanel() {
+  const pv = detail.preview || {};
+  const slug = esc(detail.slug);
+  const has = (detail.artifacts || []).some(a => a.path.startsWith("app/"));
+  const hasSkeleton = (detail.artifacts || []).some(a => a.path.startsWith("skeleton/"));
+  if (!has && !hasSkeleton) return "";
+  const starting = pv.running && pv.status === "starting";
+  return `<div class="panel">
+    <div class="live-head"><h2>Preview</h2>${
+      pv.status ? chip(pv.status.toUpperCase()) : ""}</div>
+    <p class="muted">Installs, builds and serves the project, the same way the
+      test runner does. First start takes a minute or so.</p>
+    <div class="control-row">
+      <button class="button primary" data-preview-start="${slug}" data-preview-target="app"
+        ${!has || pv.running ? "disabled" : ""}>${
+        starting && pv.target === "app" ? "Building..." : "Preview app"}</button>
+      <button class="button" data-preview-start="${slug}" data-preview-target="skeleton"
+        ${!hasSkeleton || pv.running ? "disabled" : ""}>${
+        starting && pv.target === "skeleton" ? "Building..." : "Preview skeleton"}</button>
+      <button class="button ghost" data-preview-stop="${slug}"
+        ${pv.running ? "" : "disabled"}>Stop</button>
+    </div>
+    ${pv.url ? `<div class="reason completed">Serving <code>${esc(pv.target)}/</code> at
+      <a href="${esc(pv.url)}" target="_blank" rel="noopener">${esc(pv.url)}</a>
+      - it stops when you press Stop or the UI shuts down.</div>` : ""}
+    ${starting ? `<div class="reason">Building <code>${esc(pv.target)}/</code> -
+      the link appears here when it answers.</div>` : ""}
+    ${pv.error ? `<div class="reason">${esc(pv.error)}</div>` : ""}
+    ${!has ? `<div class="muted">No app/ yet - the Builder has not run.</div>` : ""}
   </div>`;
 }
 
@@ -930,6 +966,18 @@ function wire(root) {
   root.querySelectorAll("[data-pause-workflow]").forEach(b =>
     b.onclick = () => act(b, () => api(
       `/api/projects/${encodeURIComponent(b.dataset.pauseWorkflow)}/pause`, { method: "POST" })));
+  root.querySelectorAll("[data-preview-start]").forEach(b =>
+    b.onclick = () => act(b, async () => {
+      await api(`/api/projects/${encodeURIComponent(b.dataset.previewStart)}/preview`,
+        { method: "POST", body: JSON.stringify({ action: "start", target: b.dataset.previewTarget }) });
+      await loadDetail();
+    }));
+  root.querySelectorAll("[data-preview-stop]").forEach(b =>
+    b.onclick = () => act(b, async () => {
+      await api(`/api/projects/${encodeURIComponent(b.dataset.previewStop)}/preview`,
+        { method: "POST", body: JSON.stringify({ action: "stop" }) });
+      await loadDetail();
+    }));
   root.querySelectorAll("[data-refresh-project]").forEach(b =>
     b.onclick = () => act(b, async () => { await loadDetail(); }));
 
@@ -1267,6 +1315,7 @@ async function pollProject() {
 
   patch("pd-timeline", timelinePanel());
   patch("pd-current", currentPanel());
+  patch("pd-preview", previewPanel());
   patch("pd-runs", runList(detail.runs));
   patch("pd-controls", projectControls());
   patch("pd-error", errorPanel());

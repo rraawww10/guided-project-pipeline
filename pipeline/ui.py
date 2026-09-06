@@ -59,7 +59,9 @@ def dispatch_get(path: str, query: dict):
             project = core.project_path(slug)
             return core.plan_entries(project, core.read_state(slug))
         if not tail:
-            return core.project_detail(slug)
+            detail = core.project_detail(slug)
+            detail["preview"] = runner.preview_state(slug)
+            return detail
     raise FileNotFoundError(path)
 
 
@@ -76,6 +78,10 @@ def dispatch_post(path: str, payload: dict):
             return 200, orchestrator.stop(slug)
         if verb == "step":
             return 202, orchestrator.start(slug, single=True)
+        if verb == "preview":
+            if (payload.get("action") or "start") == "stop":
+                return 200, runner.stop_preview(slug)
+            return 202, runner.start_preview(slug, payload.get("target") or "app")
     if path == "/api/run":
         action = payload.get("action")
         if action == "agent":
@@ -263,6 +269,11 @@ def main(argv: list[str] | None = None) -> int:
     except KeyboardInterrupt:
         print("\nstopping")
     finally:
+        # A preview is a node server this process started.
+        # stop_server kills the whole tree, and nothing may
+        # outlive the UI that launched it - an orphan holds
+        # its port and, on Windows, the directory it served.
+        runner.stop_all_previews()
         httpd.server_close()
     return 0
 

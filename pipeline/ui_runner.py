@@ -32,6 +32,7 @@ from urllib import request
 from urllib.error import HTTPError, URLError
 
 from . import ui_core as core
+from . import test_runner
 from .test_runner import PYTEST_DEPS
 from .ui_core import (AGENT_PHASES, DEFAULT_OPENROUTER_MODEL, OPENROUTER_URL,
                       PROJECTS, ROOT, SCRIPT_COMMANDS, STEP_AGENT_ALIASES)
@@ -594,6 +595,107 @@ def command_refusal(command: str) -> str:
                 return (f"`pipeline {word}` is a human decision or an orchestrator "
                         f"step, not an agent's")
     return ""
+
+
+# --------------------------------------------------------------------------
+# preview - serve a built project so a person can look at it
+# --------------------------------------------------------------------------
+# deploy_check already builds and serves, but it tears the server down the
+# moment the check passes: deploy.json records the URL it used, which then
+# answers nothing. `--hold` keeps it up but blocks the call for its whole
+# duration and writes the report only afterwards, so the UI could not show a
+# link while it mattered. This owns the server instead - start it, keep the
+# handle, hand back the URL, stop it on request or at shutdown.
+PREVIEWS: dict[str, dict] = {}
+PREVIEW_LOCK = threading.Lock()
+PREVIEW_TARGETS = ("app", "skeleton")
+
+
+def preview_state(slug: str) -> dict:
+    """What the UI shows: never the Popen handle, and never a dead server."""
+    with PREVIEW_LOCK:
+        entry = PREVIEWS.get(slug)
+        if not entry:
+            return {"running": False}
+        server = entry.get("server")
+        if server is not None and server.poll() is not None:
+            PREVIEWS.pop(slug, None)
+            return {"running": False,
+                    "error": f"the {entry['target']} preview exited on its own "
+                             f"(code {server.returncode}) - see its log"}
+        return {k: v for k, v in entry.items() if k != "server"}
+
+
+def start_preview(slug: str, target: str = "app") -> dict:
+    slug = core.slugify(slug)
+    if target not in PREVIEW_TARGETS:
+        raise ValueError(f"preview target is one of {', '.join(PREVIEW_TARGETS)}")
+    live = preview_state(slug)
+    if live.get("running"):
+        if live.get("target") == target:
+            return live
+        stop_preview(slug)
+    root = core.project_path(slug) / target
+    if not root.exists():
+        raise ValueError(f"{slug} has no {target}/ to preview yet")
+
+    port = test_runner.free_port()
+    url = f"http://127.0.0.1:{port}"
+    log = core.pipeline_dir(slug) / f"preview-{target}.log"
+    with PREVIEW_LOCK:
+        PREVIEWS[slug] = {"running": True, "status": "starting", "target": target,
+                          "url": "", "port": port, "started": time.time(),
+                          "log": str(log), "server": None}
+
+    def work() -> None:
+        try:
+            # boot() installs if needed, builds, then serves - the same path the
+            # test runner uses, so a preview cannot pass where a test could not.
+            server = test_runner.boot(root, port, log)
+            up = test_runner.wait_for(url, 120)
+            with PREVIEW_LOCK:
+                entry = PREVIEWS.get(slug)
+                if entry is None:                 # stopped while it was building
+                    test_runner.stop_server(server)
+                    return
+                entry["server"] = server
+                entry["status"] = "live" if up else "failed"
+                entry["url"] = url if up else ""
+                if not up:
+                    entry["running"] = False
+                    entry["error"] = f"built, but nothing answered on {url}"
+            core.log_event(slug, f"{target} preview {'live at ' + url if up else 'failed to answer'}",
+                           level="ok" if up else "warn", kind="preview", component="preview")
+        except Exception as exc:
+            with PREVIEW_LOCK:
+                PREVIEWS[slug] = {"running": False, "status": "failed",
+                                  "target": target, "url": "", "log": str(log),
+                                  "error": f"{type(exc).__name__}: {exc}"}
+            core.log_event(slug, f"{target} preview failed: {type(exc).__name__}: {exc}",
+                           level="error", kind="preview", component="preview")
+
+    threading.Thread(target=work, daemon=True).start()
+    return preview_state(slug)
+
+
+def stop_preview(slug: str) -> dict:
+    slug = core.slugify(slug)
+    with PREVIEW_LOCK:
+        entry = PREVIEWS.pop(slug, None)
+    if entry and entry.get("server") is not None:
+        test_runner.stop_server(entry["server"])
+        core.log_event(slug, f"{entry.get('target', 'app')} preview stopped",
+                       level="info", kind="preview", component="preview")
+    return {"running": False}
+
+
+def stop_all_previews() -> None:
+    """Nothing may outlive the server that started it."""
+    for slug in list(PREVIEWS):
+        try:
+            stop_preview(slug)
+        except Exception:
+            pass
 
 
 # --------------------------------------------------------------------------
