@@ -1,0 +1,285 @@
+{
+  "slug": "stock-tracker",
+  "created": "2026-09-07T09:40:51+00:00",
+  "flow": 2,
+  "phase": "pack",
+  "retries": {
+    "idea": 0,
+    "spec": 1,
+    "code": 7,
+    "pack": 0
+  },
+  "step_runs": {
+    "stack": 1,
+    "ideas": 1,
+    "pick": 1,
+    "lint": 3,
+    "breaker": 2,
+    "redfirst": 1,
+    "test:app": 5,
+    "mutation": 4,
+    "cut": 7,
+    "leak-scan": 1,
+    "guide-lint": 2,
+    "deploy": 1,
+    "dryrun": 1,
+    "ship": 1
+  },
+  "gates": {
+    "gate0": {
+      "approved": true,
+      "at": "2026-09-07T09:45:44+00:00",
+      "note": "picked idea-01",
+      "picked": "idea-01.md"
+    },
+    "gate1": {
+      "approved": true,
+      "at": "2026-09-07T10:10:01+00:00",
+      "note": "Approved on the rule's own verdict, no --override.\n\nEvidence: 5 blocking findings, unowned_blocking 0, verify_later empty (no\nfail-open owner), reviewed_spec_hash == spec_hash, drift []. Linter 0 errors.\nRed-first ok with dynamic.ran true, 21/21 tests red, vacuous_tests [], every\nfixture resolves. 21 criteria, 21 tests, 1:1 coverage. E113 satisfied (setup\nsession 3 cuts vs 4/4/4/5); W114 clear (largest cut share 0.33 vs 0.45).\n\nThe 5 blocking findings are unit/semantics ambiguities and the tests have\nalready fixed a reading: budget in raw cents, apply-plan takes no body and\nreads persisted budgetCents, plan allocates single shares. The Builder\nconverges on the tests.\n\nW112 on all five sessions (44.5 / 43 / 43 / 46.2 / 49.0) accepted deliberately.\nThis is not the W114 \"one oversized cut\" shape that caused the five previous\noverruns - every cut is a flat 6.0 min with 0 stated decisions and hints of\n9-28 words. Per blockers_round_3.md the weighted model scored +5.1 against a\nreal measurement (said 52.1, Pack Writer 48, measured 47), so these estimates\nare expected to run high. Re-read at step 9 and confirm at the step 13 dry run.\n\nNOTE 1 - A2 is only nominally owned. The target-weight percent-vs-fraction\nambiguity is assigned to test-runner, but test_ui_edit_recompute.py reads the\ncurrent input value, adds 0.05, clamps to [0.01, 0.99] and asserts only that\nshares changed - it passes under either reading. Builder: treat target inputs\nas a fraction 0..1.\n\nNOTE 2 - c-3-3 asserts plan[0] only, not the whole sequence, and the seed is\nnot pinned in the spec. Confirm cut-plan-rank is genuinely graded by reading\nmutation.json at step 8 rather than assuming it.\n\nNOTE 3 - the session 5 apply tests mutate shared DB state (PUT /api/targets\nthen POST /api/apply-plan; c-5-4 asserts after < before on average drift). If\nthey go red in ways unrelated to the Builder's code, suspect test order before\nburning retries on the Builder.\n",
+      "spec_hash": "5d4ab97236ed350bc0377701c110d8588d4b7a7765cd35c1badba84811f3ccb5",
+      "verify_hash": "d9511b2c349f3246aa77134e845ef51925486cbffdb0aec790c0ce3c862a3af2",
+      "override": false
+    },
+    "gate2": {
+      "approved": true,
+      "at": "2026-09-07T11:41:57+00:00",
+      "note": "",
+      "verify_hash": "4bdcef9b05dd726393bf6e38f1ce5ab8f328619c71c842be5f499e85bf04592c",
+      "verify_moved": true
+    },
+    "gate3": {
+      "approved": true,
+      "at": "2026-09-07T12:43:59+00:00",
+      "note": ""
+    }
+  },
+  "steps": [
+    {
+      "step": "stack",
+      "ok": true,
+      "at": "2026-09-07T09:40:51+00:00",
+      "detail": "next, react, typescript, prisma, sqlite",
+      "run": 1
+    },
+    {
+      "step": "ideas",
+      "ok": true,
+      "at": "2026-09-07T09:42:12+00:00",
+      "detail": "5 ideas",
+      "run": 1
+    },
+    {
+      "step": "pick",
+      "ok": true,
+      "at": "2026-09-07T09:45:44+00:00",
+      "detail": "idea-01.md",
+      "run": 1
+    },
+    {
+      "step": "lint",
+      "ok": false,
+      "at": "2026-09-07T09:48:36+00:00",
+      "detail": "",
+      "run": 1
+    },
+    {
+      "step": "lint",
+      "ok": true,
+      "at": "2026-09-07T09:50:26+00:00",
+      "detail": "",
+      "run": 2
+    },
+    {
+      "step": "breaker",
+      "ok": true,
+      "at": "2026-09-07T09:52:16+00:00",
+      "detail": "a27b122720db",
+      "run": 1
+    },
+    {
+      "step": "lint",
+      "ok": true,
+      "at": "2026-09-07T09:53:44+00:00",
+      "detail": "",
+      "run": 3
+    },
+    {
+      "step": "breaker",
+      "ok": true,
+      "at": "2026-09-07T09:55:58+00:00",
+      "detail": "5d4ab97236ed",
+      "run": 2
+    },
+    {
+      "step": "redfirst",
+      "ok": true,
+      "at": "2026-09-07T09:59:25+00:00",
+      "detail": "",
+      "run": 1
+    },
+    {
+      "step": "test:app",
+      "ok": false,
+      "at": "2026-09-07T10:13:27+00:00",
+      "detail": "",
+      "run": 1
+    },
+    {
+      "step": "test:app",
+      "ok": false,
+      "at": "2026-09-07T10:18:43+00:00",
+      "detail": "",
+      "run": 2
+    },
+    {
+      "step": "test:app",
+      "ok": false,
+      "at": "2026-09-07T10:28:04+00:00",
+      "detail": "",
+      "run": 3
+    },
+    {
+      "step": "test:app",
+      "ok": false,
+      "at": "2026-09-07T10:32:54+00:00",
+      "detail": "",
+      "run": 4
+    },
+    {
+      "step": "test:app",
+      "ok": true,
+      "at": "2026-09-07T10:35:34+00:00",
+      "detail": "",
+      "run": 5
+    },
+    {
+      "step": "mutation",
+      "ok": false,
+      "at": "2026-09-07T11:00:54+00:00",
+      "detail": "",
+      "run": 1
+    },
+    {
+      "step": "mutation",
+      "ok": false,
+      "at": "2026-09-07T11:10:54+00:00",
+      "detail": "",
+      "run": 2
+    },
+    {
+      "step": "mutation",
+      "ok": false,
+      "at": "2026-09-07T11:20:27+00:00",
+      "detail": "",
+      "run": 3
+    },
+    {
+      "step": "mutation",
+      "ok": true,
+      "at": "2026-09-07T11:37:11+00:00",
+      "detail": "",
+      "run": 4
+    },
+    {
+      "step": "cut",
+      "ok": false,
+      "at": "2026-09-07T11:42:07+00:00",
+      "detail": "",
+      "run": 1
+    },
+    {
+      "step": "cut",
+      "ok": false,
+      "at": "2026-09-07T11:42:09+00:00",
+      "detail": "",
+      "run": 2
+    },
+    {
+      "step": "cut",
+      "ok": false,
+      "at": "2026-09-07T11:42:11+00:00",
+      "detail": "",
+      "run": 3
+    },
+    {
+      "step": "cut",
+      "ok": false,
+      "at": "2026-09-07T11:42:13+00:00",
+      "detail": "",
+      "run": 4
+    },
+    {
+      "step": "cut",
+      "ok": false,
+      "at": "2026-09-07T12:16:18+00:00",
+      "detail": "",
+      "run": 5
+    },
+    {
+      "step": "cut",
+      "ok": false,
+      "at": "2026-09-07T12:17:13+00:00",
+      "detail": "",
+      "run": 6
+    },
+    {
+      "step": "cut",
+      "ok": false,
+      "at": "2026-09-07T12:18:08+00:00",
+      "detail": "",
+      "run": 7
+    },
+    {
+      "step": "leak-scan",
+      "ok": true,
+      "at": "2026-09-07T12:32:21+00:00",
+      "detail": "",
+      "run": 1
+    },
+    {
+      "step": "guide-lint",
+      "ok": false,
+      "at": "2026-09-07T12:37:32+00:00",
+      "detail": "",
+      "run": 1
+    },
+    {
+      "step": "guide-lint",
+      "ok": true,
+      "at": "2026-09-07T12:40:11+00:00",
+      "detail": "",
+      "run": 2
+    },
+    {
+      "step": "deploy",
+      "ok": true,
+      "at": "2026-09-07T12:40:19+00:00",
+      "detail": "",
+      "run": 1
+    },
+    {
+      "step": "dryrun",
+      "ok": true,
+      "at": "2026-09-07T12:41:41+00:00",
+      "detail": "session 1, 40 min, priya",
+      "run": 1
+    },
+    {
+      "step": "ship",
+      "ok": true,
+      "at": "2026-09-07T12:44:00+00:00",
+      "detail": "",
+      "run": 1
+    }
+  ],
+  "ticket": null,
+  "dry_run": {
+    "at": "2026-09-07T12:41:41+00:00",
+    "session": 1,
+    "minutes": 40,
+    "by": "priya",
+    "taught_without_the_code": true,
+    "note": "the students were able to grasp the concept taught"
+  },
+  "feedback": []
+}

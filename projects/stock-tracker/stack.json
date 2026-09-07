@@ -1,0 +1,15 @@
+{
+  "stack": [
+    "next",
+    "react",
+    "typescript",
+    "prisma",
+    "sqlite"
+  ],
+  "sessions": 5,
+  "minutes_per_session": 40,
+  "track": "fullstack",
+  "limits": " no network at run time, no API key",
+  "given_by": "",
+  "at": "2026-09-07T09:40:51+00:00"
+}

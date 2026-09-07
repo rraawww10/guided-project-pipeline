@@ -1,0 +1,36 @@
+5d4ab97236ed350bc0377701c110d8588d4b7a7765cd35c1badba84811f3ccb5
+Approved on the rule's own verdict, no --override.
+
+Evidence: 5 blocking findings, unowned_blocking 0, verify_later empty (no
+fail-open owner), reviewed_spec_hash == spec_hash, drift []. Linter 0 errors.
+Red-first ok with dynamic.ran true, 21/21 tests red, vacuous_tests [], every
+fixture resolves. 21 criteria, 21 tests, 1:1 coverage. E113 satisfied (setup
+session 3 cuts vs 4/4/4/5); W114 clear (largest cut share 0.33 vs 0.45).
+
+The 5 blocking findings are unit/semantics ambiguities and the tests have
+already fixed a reading: budget in raw cents, apply-plan takes no body and
+reads persisted budgetCents, plan allocates single shares. The Builder
+converges on the tests.
+
+W112 on all five sessions (44.5 / 43 / 43 / 46.2 / 49.0) accepted deliberately.
+This is not the W114 "one oversized cut" shape that caused the five previous
+overruns - every cut is a flat 6.0 min with 0 stated decisions and hints of
+9-28 words. Per blockers_round_3.md the weighted model scored +5.1 against a
+real measurement (said 52.1, Pack Writer 48, measured 47), so these estimates
+are expected to run high. Re-read at step 9 and confirm at the step 13 dry run.
+
+NOTE 1 - A2 is only nominally owned. The target-weight percent-vs-fraction
+ambiguity is assigned to test-runner, but test_ui_edit_recompute.py reads the
+current input value, adds 0.05, clamps to [0.01, 0.99] and asserts only that
+shares changed - it passes under either reading. Builder: treat target inputs
+as a fraction 0..1.
+
+NOTE 2 - c-3-3 asserts plan[0] only, not the whole sequence, and the seed is
+not pinned in the spec. Confirm cut-plan-rank is genuinely graded by reading
+mutation.json at step 8 rather than assuming it.
+
+NOTE 3 - the session 5 apply tests mutate shared DB state (PUT /api/targets
+then POST /api/apply-plan; c-5-4 asserts after < before on average drift). If
+they go red in ways unrelated to the Builder's code, suspect test order before
+burning retries on the Builder.
+

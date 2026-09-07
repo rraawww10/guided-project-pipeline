@@ -1,0 +1,565 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="21" skipped="0" tests="21" time="65.159" timestamp="2026-09-07T18:00:07.335209+05:30" hostname="nxtwave-Z790-D-AX"><testcase classname="skeleton.verify.test_api_allocation" name="test_c_2_1_get_allocation_returns_expected_fields" time="0.073"><failure message="assert 501 == 200&#10; +  where 501 = &lt;Response [501 Not Implemented]&gt;.status_code">def test_c_2_1_get_allocation_returns_expected_fields():
+        base = _base_url()
+        with httpx.Client(base_url=base, timeout=10.0) as client:
+            resp = client.get("/api/allocation")
+&gt;       assert resp.status_code == 200
+E       assert 501 == 200
+E        +  where 501 = &lt;Response [501 Not Implemented]&gt;.status_code
+
+skeleton/verify/test_api_allocation.py:16: AssertionError</failure></testcase><testcase classname="skeleton.verify.test_api_allocation" name="test_c_2_5_allocation_weights_sum_to_one_rounded_3dp" time="0.068"><failure message="assert 501 == 200&#10; +  where 501 = &lt;Response [501 Not Implemented]&gt;.status_code">def test_c_2_5_allocation_weights_sum_to_one_rounded_3dp():
+        base = _base_url()
+        with httpx.Client(base_url=base, timeout=10.0) as client:
+            resp = client.get("/api/allocation")
+&gt;       assert resp.status_code == 200
+E       assert 501 == 200
+E        +  where 501 = &lt;Response [501 Not Implemented]&gt;.status_code
+
+skeleton/verify/test_api_allocation.py:30: AssertionError</failure></testcase><testcase classname="skeleton.verify.test_api_apply" name="test_c_5_1_post_apply_plan_returns_applied_greater_than_zero" time="0.081"><failure message="KeyError: 0">def test_c_5_1_post_apply_plan_returns_applied_greater_than_zero():
+        base = _base_url()
+        with httpx.Client(base_url=base, timeout=15.0) as client:
+            # Ensure there is something to apply: tweak a target slightly
+            alloc = client.get("/api/allocation").json()
+&gt;           sym = alloc[0]["symbol"]
+                  ^^^^^^^^
+E           KeyError: 0
+
+skeleton/verify/test_api_apply.py:23: KeyError</failure></testcase><testcase classname="skeleton.verify.test_api_apply" name="test_c_5_3_get_trades_returns_trade_objects_after_apply" time="0.066"><failure message="assert 501 == 200&#10; +  where 501 = &lt;Response [501 Not Implemented]&gt;.status_code">def test_c_5_3_get_trades_returns_trade_objects_after_apply():
+        base = _base_url()
+        with httpx.Client(base_url=base, timeout=15.0) as client:
+            # Read current trades (should be 0 after reseed/clear, but do not rely on it)
+            before_resp = client.get("/api/trades")
+&gt;           assert before_resp.status_code == 200
+E           assert 501 == 200
+E            +  where 501 = &lt;Response [501 Not Implemented]&gt;.status_code
+
+skeleton/verify/test_api_apply.py:38: AssertionError</failure></testcase><testcase classname="skeleton.verify.test_api_apply" name="test_c_5_4_apply_reduces_average_abs_drift" time="0.057"><failure message="AttributeError: 'str' object has no attribute 'get'">def test_c_5_4_apply_reduces_average_abs_drift():
+        base = _base_url()
+        with httpx.Client(base_url=base, timeout=15.0) as client:
+            # conftest.py reseeds first, so `before` is the seeded 4.78% and the
+            # comparison is against a known state. The original snapshotted before
+            # its own nudge, so the nudge's drift sat outside the comparison and an
+            # apply that merely undid it read as no improvement.
+&gt;           before = _avg_abs_drift(client)
+                     ^^^^^^^^^^^^^^^^^^^^^^
+
+skeleton/verify/test_api_apply.py:59: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;httpx.Client object at 0x732b12c18aa0&gt;
+
+    def _avg_abs_drift(client: httpx.Client) -&gt; float:
+        alloc = client.get("/api/allocation").json()
+&gt;       vals = [abs(float(it.get("driftPercent", 0))) for it in alloc]
+                          ^^^^^^
+E       AttributeError: 'str' object has no attribute 'get'
+
+skeleton/verify/test_api_apply.py:14: AttributeError</failure></testcase><testcase classname="skeleton.verify.test_api_apply" name="test_c_5_5_apply_returns_updated_holdings_length_equals_assets_count" time="0.063"><failure message="KeyError: 0">def test_c_5_5_apply_returns_updated_holdings_length_equals_assets_count():
+        base = _base_url()
+        with httpx.Client(base_url=base, timeout=15.0) as client:
+            positions = client.get("/api/positions").json()
+            n_assets = len(positions)
+            # Ensure a plan exists, then apply
+            alloc = client.get("/api/allocation").json()
+&gt;           sym = alloc[0]["symbol"]
+                  ^^^^^^^^
+E           KeyError: 0
+
+skeleton/verify/test_api_apply.py:74: KeyError</failure></testcase><testcase classname="skeleton.verify.test_api_plan" name="test_c_3_1_post_trade_plan_returns_items_with_symbol_and_integer_shares" time="0.063"><failure message="assert 501 == 200&#10; +  where 501 = &lt;Response [501 Not Implemented]&gt;.status_code">def test_c_3_1_post_trade_plan_returns_items_with_symbol_and_integer_shares():
+        base = _base_url()
+        with httpx.Client(base_url=base, timeout=10.0) as client:
+            resp = client.post("/api/trade-plan", json={"budgetCents": BUDGET})
+&gt;       assert resp.status_code == 200
+E       assert 501 == 200
+E        +  where 501 = &lt;Response [501 Not Implemented]&gt;.status_code
+
+skeleton/verify/test_api_plan.py:18: AssertionError</failure></testcase><testcase classname="skeleton.verify.test_api_plan" name="test_c_3_2_post_trade_plan_respects_budget" time="0.071"><failure message="assert 501 == 200&#10; +  where 501 = &lt;Response [501 Not Implemented]&gt;.status_code">def test_c_3_2_post_trade_plan_respects_budget():
+        base = _base_url()
+        with httpx.Client(base_url=base, timeout=10.0) as client:
+            resp = client.post("/api/trade-plan", json={"budgetCents": BUDGET})
+&gt;       assert resp.status_code == 200
+E       assert 501 == 200
+E        +  where 501 = &lt;Response [501 Not Implemented]&gt;.status_code
+
+skeleton/verify/test_api_plan.py:31: AssertionError</failure></testcase><testcase classname="skeleton.verify.test_api_plan" name="test_c_3_3_first_plan_item_is_largest_positive_drift" time="0.055"><failure message="AssertionError: assert (False)&#10; +  where False = isinstance({'error': 'Not implemented'}, list)">def test_c_3_3_first_plan_item_is_largest_positive_drift():
+        """c-3-3: plan[0] is the candidate with the largest absolute POSITIVE drift.
+    
+        Both reads come from the same live state, and conftest.py reseeds first, so
+        this no longer depends on what an earlier test file did to the database -
+        which is why it once compared MSFT against a GOOGL computed from mutated
+        holdings.
+    
+        One row is enough to grade cut-plan-rank here: the seed lists AAPL first
+        but the expected leader is GOOGL, so an unranked plan does not start with
+        GOOGL. lessons.md's rule is that seed order must differ from the order the
+        spec asks for, and it does.
+        """
+        base = _base_url()
+        with httpx.Client(base_url=base, timeout=10.0) as client:
+            alloc = client.get("/api/allocation").json()
+            plan = client.post("/api/trade-plan", json={"budgetCents": BUDGET}).json()
+&gt;       assert isinstance(plan, list) and len(plan) &gt; 0
+E       AssertionError: assert (False)
+E        +  where False = isinstance({'error': 'Not implemented'}, list)
+
+skeleton/verify/test_api_plan.py:54: AssertionError</failure></testcase><testcase classname="skeleton.verify.test_api_positions" name="test_c_1_1_get_positions_returns_required_fields" time="0.072"><failure message="assert 501 == 200&#10; +  where 501 = &lt;Response [501 Not Implemented]&gt;.status_code">def test_c_1_1_get_positions_returns_required_fields():
+        base = _base_url()
+        with httpx.Client(base_url=base, timeout=10.0) as client:
+            resp = client.get("/api/positions")
+&gt;       assert resp.status_code == 200
+E       assert 501 == 200
+E        +  where 501 = &lt;Response [501 Not Implemented]&gt;.status_code
+
+skeleton/verify/test_api_positions.py:15: AssertionError</failure></testcase><testcase classname="skeleton.verify.test_api_settings_targets" name="test_c_4_1_put_targets_returns_200_for_changed_weight" time="0.064"><failure message="AssertionError: assert (False)&#10; +  where False = isinstance({'error': 'Not implemented'}, list)">def test_c_4_1_put_targets_returns_200_for_changed_weight():
+        base = _base_url()
+        with httpx.Client(base_url=base, timeout=10.0) as client:
+            # Read current allocation to pick a symbol and target weight
+            alloc = client.get("/api/allocation").json()
+&gt;           assert isinstance(alloc, list) and len(alloc) &gt; 0
+E           AssertionError: assert (False)
+E            +  where False = isinstance({'error': 'Not implemented'}, list)
+
+skeleton/verify/test_api_settings_targets.py:16: AssertionError</failure></testcase><testcase classname="skeleton.verify.test_api_settings_targets" name="test_c_4_2_put_settings_returns_200_for_changed_budget" time="0.086"><failure message="assert 501 == 200&#10; +  where 501 = &lt;Response [501 Not Implemented]&gt;.status_code">def test_c_4_2_put_settings_returns_200_for_changed_budget():
+        base = _base_url()
+        with httpx.Client(base_url=base, timeout=10.0) as client:
+            resp = client.put("/api/settings", json={"budgetCents": 543210})
+&gt;       assert resp.status_code == 200
+E       assert 501 == 200
+E        +  where 501 = &lt;Response [501 Not Implemented]&gt;.status_code
+
+skeleton/verify/test_api_settings_targets.py:29: AssertionError</failure></testcase><testcase classname="skeleton.verify.test_ui_allocation" name="test_c_2_2_ui_shows_over_badge_for_overweight" time="5.390"><failure message="playwright._impl._errors.TimeoutError: Page.wait_for_selector: Timeout 5000ms exceeded.&#10;Call log:&#10;  - waiting for locator(&quot;[data-testid^=\&quot;drift-\&quot;]&quot;) to be visible">def test_c_2_2_ui_shows_over_badge_for_overweight():
+        base = _base_url()
+        with sync_playwright() as p:
+            browser = p.chromium.launch()
+            page = browser.new_page()
+            page.goto(base + "/")
+&gt;           page.wait_for_selector('[data-testid^="drift-"]', timeout=5000)
+
+skeleton/verify/test_ui_allocation.py:18: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+.pipeline/venv/lib/python3.12/site-packages/playwright/sync_api/_generated.py:9033: in wait_for_selector
+    self._sync(
+.pipeline/venv/lib/python3.12/site-packages/playwright/_impl/_page.py:427: in wait_for_selector
+    return await self._main_frame.wait_for_selector(**locals_to_params(locals()))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.pipeline/venv/lib/python3.12/site-packages/playwright/_impl/_frame.py:394: in wait_for_selector
+    await self._channel.send(
+.pipeline/venv/lib/python3.12/site-packages/playwright/_impl/_connection.py:76: in send
+    return await self._connection.wrap_api_call(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;playwright._impl._connection.Connection object at 0x732b12c58530&gt;
+cb = &lt;function Channel.send.&lt;locals&gt;.&lt;lambda&gt; at 0x732b12c11620&gt;
+is_internal = False, title = None
+
+    async def wrap_api_call(
+        self, cb: Callable[[], Any], is_internal: bool = False, title: str = None
+    ) -&gt; Any:
+        if self._api_zone.get():
+            return await cb()
+        task = asyncio.current_task(self._loop)
+        parsed_st = _attach_api_call_information(
+            getattr(task, "__pw_stack__", None) or _capture_stack_trace(),
+            is_internal,
+            title,
+        )
+        self._api_zone.set(parsed_st)
+        try:
+            return await cb()
+        except Exception as error:
+&gt;           raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+E           playwright._impl._errors.TimeoutError: Page.wait_for_selector: Timeout 5000ms exceeded.
+E           Call log:
+E             - waiting for locator("[data-testid^=\"drift-\"]") to be visible
+
+.pipeline/venv/lib/python3.12/site-packages/playwright/_impl/_connection.py:632: TimeoutError</failure></testcase><testcase classname="skeleton.verify.test_ui_allocation" name="test_c_2_3_ui_shows_under_badge_for_underweight" time="5.382"><failure message="playwright._impl._errors.TimeoutError: Page.wait_for_selector: Timeout 5000ms exceeded.&#10;Call log:&#10;  - waiting for locator(&quot;[data-testid^=\&quot;drift-\&quot;]&quot;) to be visible">def test_c_2_3_ui_shows_under_badge_for_underweight():
+        base = _base_url()
+        with sync_playwright() as p:
+            browser = p.chromium.launch()
+            page = browser.new_page()
+            page.goto(base + "/")
+&gt;           page.wait_for_selector('[data-testid^="drift-"]', timeout=5000)
+
+skeleton/verify/test_ui_allocation.py:30: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+.pipeline/venv/lib/python3.12/site-packages/playwright/sync_api/_generated.py:9033: in wait_for_selector
+    self._sync(
+.pipeline/venv/lib/python3.12/site-packages/playwright/_impl/_page.py:427: in wait_for_selector
+    return await self._main_frame.wait_for_selector(**locals_to_params(locals()))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.pipeline/venv/lib/python3.12/site-packages/playwright/_impl/_frame.py:394: in wait_for_selector
+    await self._channel.send(
+.pipeline/venv/lib/python3.12/site-packages/playwright/_impl/_connection.py:76: in send
+    return await self._connection.wrap_api_call(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;playwright._impl._connection.Connection object at 0x732b12c58350&gt;
+cb = &lt;function Channel.send.&lt;locals&gt;.&lt;lambda&gt; at 0x732b129680e0&gt;
+is_internal = False, title = None
+
+    async def wrap_api_call(
+        self, cb: Callable[[], Any], is_internal: bool = False, title: str = None
+    ) -&gt; Any:
+        if self._api_zone.get():
+            return await cb()
+        task = asyncio.current_task(self._loop)
+        parsed_st = _attach_api_call_information(
+            getattr(task, "__pw_stack__", None) or _capture_stack_trace(),
+            is_internal,
+            title,
+        )
+        self._api_zone.set(parsed_st)
+        try:
+            return await cb()
+        except Exception as error:
+&gt;           raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+E           playwright._impl._errors.TimeoutError: Page.wait_for_selector: Timeout 5000ms exceeded.
+E           Call log:
+E             - waiting for locator("[data-testid^=\"drift-\"]") to be visible
+
+.pipeline/venv/lib/python3.12/site-packages/playwright/_impl/_connection.py:632: TimeoutError</failure></testcase><testcase classname="skeleton.verify.test_ui_allocation" name="test_c_2_4_ui_shows_loading_text_while_fetching" time="20.364"><failure message="playwright._impl._errors.TimeoutError: Page.wait_for_selector: Timeout 20000ms exceeded.&#10;Call log:&#10;  - waiting for locator(&quot;[data-testid^=\&quot;drift-\&quot;]&quot;) to be visible">def test_c_2_4_ui_shows_loading_text_while_fetching():
+        """c-2-4: the loading text shows *while* fetching - so it must also stop.
+    
+        Asserting only that "Loading..." appears passes on the skeleton and is
+        therefore no test at all. `{!reportState &amp;&amp; &lt;div&gt;Loading...&lt;/div&gt;}` sits
+        outside cut-ui-fetch-allocation, so it survives the cut, and with the fetch
+        removed `reportState` is never set and the text is permanent - the fallback
+        accidentally satisfying the criterion (lessons.md). The transition is the
+        part only a real fetch can produce.
+    
+        The response is held open first so the appearance cannot be raced against
+        local SQLite, then released so the disappearance is a real resolution.
+        """
+        base = _base_url()
+        with sync_playwright() as p:
+            browser = p.chromium.launch()
+            page = browser.new_page()
+            held = {"once": False}
+    
+            def _hold(route):
+                if not held["once"]:
+                    held["once"] = True
+                    time.sleep(1.5)
+                route.continue_()
+    
+            page.route("**/api/allocation*", _hold)
+            page.goto(base + "/", wait_until="commit")
+            page.wait_for_selector("text=Loading...", timeout=15000)
+            # The report itself has to arrive. This is the half the skeleton cannot
+            # satisfy: reportState is only set by the fetch inside
+            # cut-ui-fetch-allocation, and line 96 renders the drift container only
+            # when it is set. Measured on the skeleton - the SSR html carries
+            # "Loading..." and React drops it at hydration, so appear-then-clear
+            # alone passed there on a page that never fetched anything.
+&gt;           page.wait_for_selector('[data-testid^="drift-"]', timeout=20000)
+
+skeleton/verify/test_ui_allocation.py:70: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+.pipeline/venv/lib/python3.12/site-packages/playwright/sync_api/_generated.py:9033: in wait_for_selector
+    self._sync(
+.pipeline/venv/lib/python3.12/site-packages/playwright/_impl/_page.py:427: in wait_for_selector
+    return await self._main_frame.wait_for_selector(**locals_to_params(locals()))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.pipeline/venv/lib/python3.12/site-packages/playwright/_impl/_frame.py:394: in wait_for_selector
+    await self._channel.send(
+.pipeline/venv/lib/python3.12/site-packages/playwright/_impl/_connection.py:76: in send
+    return await self._connection.wrap_api_call(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;playwright._impl._connection.Connection object at 0x732b12c197f0&gt;
+cb = &lt;function Channel.send.&lt;locals&gt;.&lt;lambda&gt; at 0x732b12968900&gt;
+is_internal = False, title = None
+
+    async def wrap_api_call(
+        self, cb: Callable[[], Any], is_internal: bool = False, title: str = None
+    ) -&gt; Any:
+        if self._api_zone.get():
+            return await cb()
+        task = asyncio.current_task(self._loop)
+        parsed_st = _attach_api_call_information(
+            getattr(task, "__pw_stack__", None) or _capture_stack_trace(),
+            is_internal,
+            title,
+        )
+        self._api_zone.set(parsed_st)
+        try:
+            return await cb()
+        except Exception as error:
+&gt;           raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+E           playwright._impl._errors.TimeoutError: Page.wait_for_selector: Timeout 20000ms exceeded.
+E           Call log:
+E             - waiting for locator("[data-testid^=\"drift-\"]") to be visible
+
+.pipeline/venv/lib/python3.12/site-packages/playwright/_impl/_connection.py:632: TimeoutError</failure></testcase><testcase classname="skeleton.verify.test_ui_apply" name="test_c_5_2_click_apply_shows_applied_notice" time="5.411"><failure message="playwright._impl._errors.TimeoutError: Page.wait_for_selector: Timeout 5000ms exceeded.&#10;Call log:&#10;  - waiting for locator(&quot;[data-testid=\&quot;apply-plan\&quot;]&quot;) to be visible">def test_c_5_2_click_apply_shows_applied_notice():
+        base = _base_url()
+        with sync_playwright() as p:
+            browser = p.chromium.launch()
+            page = browser.new_page()
+            page.goto(base + "/")
+&gt;           page.wait_for_selector('[data-testid="apply-plan"]', timeout=5000)
+
+skeleton/verify/test_ui_apply.py:17: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+.pipeline/venv/lib/python3.12/site-packages/playwright/sync_api/_generated.py:9033: in wait_for_selector
+    self._sync(
+.pipeline/venv/lib/python3.12/site-packages/playwright/_impl/_page.py:427: in wait_for_selector
+    return await self._main_frame.wait_for_selector(**locals_to_params(locals()))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.pipeline/venv/lib/python3.12/site-packages/playwright/_impl/_frame.py:394: in wait_for_selector
+    await self._channel.send(
+.pipeline/venv/lib/python3.12/site-packages/playwright/_impl/_connection.py:76: in send
+    return await self._connection.wrap_api_call(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;playwright._impl._connection.Connection object at 0x732b12c48a10&gt;
+cb = &lt;function Channel.send.&lt;locals&gt;.&lt;lambda&gt; at 0x732b129716c0&gt;
+is_internal = False, title = None
+
+    async def wrap_api_call(
+        self, cb: Callable[[], Any], is_internal: bool = False, title: str = None
+    ) -&gt; Any:
+        if self._api_zone.get():
+            return await cb()
+        task = asyncio.current_task(self._loop)
+        parsed_st = _attach_api_call_information(
+            getattr(task, "__pw_stack__", None) or _capture_stack_trace(),
+            is_internal,
+            title,
+        )
+        self._api_zone.set(parsed_st)
+        try:
+            return await cb()
+        except Exception as error:
+&gt;           raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+E           playwright._impl._errors.TimeoutError: Page.wait_for_selector: Timeout 5000ms exceeded.
+E           Call log:
+E             - waiting for locator("[data-testid=\"apply-plan\"]") to be visible
+
+.pipeline/venv/lib/python3.12/site-packages/playwright/_impl/_connection.py:632: TimeoutError</failure></testcase><testcase classname="skeleton.verify.test_ui_edit_recompute" name="test_c_4_3_edit_target_and_save_updates_shares_for_that_symbol" time="5.388"><failure message="playwright._impl._errors.TimeoutError: Page.wait_for_selector: Timeout 5000ms exceeded.&#10;Call log:&#10;  - waiting for locator(&quot;[data-testid^=\&quot;plan-row-\&quot;]&quot;) to be visible">def test_c_4_3_edit_target_and_save_updates_shares_for_that_symbol():
+        base = _base_url()
+        with sync_playwright() as p:
+            browser = p.chromium.launch()
+            page = browser.new_page()
+            page.goto(base + "/")
+            # Pick a symbol that already appears in the plan table
+&gt;           page.wait_for_selector('[data-testid^="plan-row-"]', timeout=5000)
+
+skeleton/verify/test_ui_edit_recompute.py:35: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+.pipeline/venv/lib/python3.12/site-packages/playwright/sync_api/_generated.py:9033: in wait_for_selector
+    self._sync(
+.pipeline/venv/lib/python3.12/site-packages/playwright/_impl/_page.py:427: in wait_for_selector
+    return await self._main_frame.wait_for_selector(**locals_to_params(locals()))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.pipeline/venv/lib/python3.12/site-packages/playwright/_impl/_frame.py:394: in wait_for_selector
+    await self._channel.send(
+.pipeline/venv/lib/python3.12/site-packages/playwright/_impl/_connection.py:76: in send
+    return await self._connection.wrap_api_call(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;playwright._impl._connection.Connection object at 0x732b12c483b0&gt;
+cb = &lt;function Channel.send.&lt;locals&gt;.&lt;lambda&gt; at 0x732b129c31a0&gt;
+is_internal = False, title = None
+
+    async def wrap_api_call(
+        self, cb: Callable[[], Any], is_internal: bool = False, title: str = None
+    ) -&gt; Any:
+        if self._api_zone.get():
+            return await cb()
+        task = asyncio.current_task(self._loop)
+        parsed_st = _attach_api_call_information(
+            getattr(task, "__pw_stack__", None) or _capture_stack_trace(),
+            is_internal,
+            title,
+        )
+        self._api_zone.set(parsed_st)
+        try:
+            return await cb()
+        except Exception as error:
+&gt;           raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+E           playwright._impl._errors.TimeoutError: Page.wait_for_selector: Timeout 5000ms exceeded.
+E           Call log:
+E             - waiting for locator("[data-testid^=\"plan-row-\"]") to be visible
+
+.pipeline/venv/lib/python3.12/site-packages/playwright/_impl/_connection.py:632: TimeoutError</failure></testcase><testcase classname="skeleton.verify.test_ui_edit_recompute" name="test_c_4_4_save_without_changes_shows_saved_notice_and_plan_unchanged" time="5.402"><failure message="playwright._impl._errors.TimeoutError: Page.wait_for_selector: Timeout 5000ms exceeded.&#10;Call log:&#10;  - waiting for locator(&quot;[data-testid^=\&quot;plan-row-\&quot;]&quot;) to be visible">def test_c_4_4_save_without_changes_shows_saved_notice_and_plan_unchanged():
+        base = _base_url()
+        with sync_playwright() as p:
+            browser = p.chromium.launch()
+            page = browser.new_page()
+            page.goto(base + "/")
+            # Snapshot current plan rows content
+&gt;           page.wait_for_selector('[data-testid^="plan-row-"]', timeout=5000)
+
+skeleton/verify/test_ui_edit_recompute.py:98: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+.pipeline/venv/lib/python3.12/site-packages/playwright/sync_api/_generated.py:9033: in wait_for_selector
+    self._sync(
+.pipeline/venv/lib/python3.12/site-packages/playwright/_impl/_page.py:427: in wait_for_selector
+    return await self._main_frame.wait_for_selector(**locals_to_params(locals()))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.pipeline/venv/lib/python3.12/site-packages/playwright/_impl/_frame.py:394: in wait_for_selector
+    await self._channel.send(
+.pipeline/venv/lib/python3.12/site-packages/playwright/_impl/_connection.py:76: in send
+    return await self._connection.wrap_api_call(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;playwright._impl._connection.Connection object at 0x732b129bc800&gt;
+cb = &lt;function Channel.send.&lt;locals&gt;.&lt;lambda&gt; at 0x732b129c1300&gt;
+is_internal = False, title = None
+
+    async def wrap_api_call(
+        self, cb: Callable[[], Any], is_internal: bool = False, title: str = None
+    ) -&gt; Any:
+        if self._api_zone.get():
+            return await cb()
+        task = asyncio.current_task(self._loop)
+        parsed_st = _attach_api_call_information(
+            getattr(task, "__pw_stack__", None) or _capture_stack_trace(),
+            is_internal,
+            title,
+        )
+        self._api_zone.set(parsed_st)
+        try:
+            return await cb()
+        except Exception as error:
+&gt;           raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+E           playwright._impl._errors.TimeoutError: Page.wait_for_selector: Timeout 5000ms exceeded.
+E           Call log:
+E             - waiting for locator("[data-testid^=\"plan-row-\"]") to be visible
+
+.pipeline/venv/lib/python3.12/site-packages/playwright/_impl/_connection.py:632: TimeoutError</failure></testcase><testcase classname="skeleton.verify.test_ui_plan" name="test_c_3_4_ui_renders_one_row_per_plan_item" time="5.384"><failure message="playwright._impl._errors.TimeoutError: Page.wait_for_selector: Timeout 5000ms exceeded.&#10;Call log:&#10;  - waiting for locator(&quot;[data-testid^=\&quot;plan-row-\&quot;]&quot;) to be visible">def test_c_3_4_ui_renders_one_row_per_plan_item():
+        base = _base_url()
+        with sync_playwright() as p:
+            browser = p.chromium.launch()
+            page = browser.new_page()
+            page.goto(base + "/")
+&gt;           el = page.wait_for_selector('[data-testid^="plan-row-"]', timeout=5000)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+skeleton/verify/test_ui_plan.py:17: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+.pipeline/venv/lib/python3.12/site-packages/playwright/sync_api/_generated.py:9033: in wait_for_selector
+    self._sync(
+.pipeline/venv/lib/python3.12/site-packages/playwright/_impl/_page.py:427: in wait_for_selector
+    return await self._main_frame.wait_for_selector(**locals_to_params(locals()))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.pipeline/venv/lib/python3.12/site-packages/playwright/_impl/_frame.py:394: in wait_for_selector
+    await self._channel.send(
+.pipeline/venv/lib/python3.12/site-packages/playwright/_impl/_connection.py:76: in send
+    return await self._connection.wrap_api_call(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;playwright._impl._connection.Connection object at 0x732b129db950&gt;
+cb = &lt;function Channel.send.&lt;locals&gt;.&lt;lambda&gt; at 0x732b129c4680&gt;
+is_internal = False, title = None
+
+    async def wrap_api_call(
+        self, cb: Callable[[], Any], is_internal: bool = False, title: str = None
+    ) -&gt; Any:
+        if self._api_zone.get():
+            return await cb()
+        task = asyncio.current_task(self._loop)
+        parsed_st = _attach_api_call_information(
+            getattr(task, "__pw_stack__", None) or _capture_stack_trace(),
+            is_internal,
+            title,
+        )
+        self._api_zone.set(parsed_st)
+        try:
+            return await cb()
+        except Exception as error:
+&gt;           raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+E           playwright._impl._errors.TimeoutError: Page.wait_for_selector: Timeout 5000ms exceeded.
+E           Call log:
+E             - waiting for locator("[data-testid^=\"plan-row-\"]") to be visible
+
+.pipeline/venv/lib/python3.12/site-packages/playwright/_impl/_connection.py:632: TimeoutError</failure></testcase><testcase classname="skeleton.verify.test_ui_positions" name="test_c_1_2_sc_dashboard_renders_one_row_per_position" time="5.388"><failure message="playwright._impl._errors.TimeoutError: Page.wait_for_selector: Timeout 5000ms exceeded.&#10;Call log:&#10;  - waiting for locator(&quot;[data-testid^=\&quot;pos-row-\&quot;]&quot;) to be visible">def test_c_1_2_sc_dashboard_renders_one_row_per_position():
+        base = _base_url()
+        with sync_playwright() as p:
+            browser = p.chromium.launch()
+            page = browser.new_page()
+            page.goto(base + "/")
+&gt;           page.wait_for_selector('[data-testid^="pos-row-"]', timeout=5000)
+
+skeleton/verify/test_ui_positions.py:18: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+.pipeline/venv/lib/python3.12/site-packages/playwright/sync_api/_generated.py:9033: in wait_for_selector
+    self._sync(
+.pipeline/venv/lib/python3.12/site-packages/playwright/_impl/_page.py:427: in wait_for_selector
+    return await self._main_frame.wait_for_selector(**locals_to_params(locals()))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.pipeline/venv/lib/python3.12/site-packages/playwright/_impl/_frame.py:394: in wait_for_selector
+    await self._channel.send(
+.pipeline/venv/lib/python3.12/site-packages/playwright/_impl/_connection.py:76: in send
+    return await self._connection.wrap_api_call(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;playwright._impl._connection.Connection object at 0x732b11521790&gt;
+cb = &lt;function Channel.send.&lt;locals&gt;.&lt;lambda&gt; at 0x732b129c34c0&gt;
+is_internal = False, title = None
+
+    async def wrap_api_call(
+        self, cb: Callable[[], Any], is_internal: bool = False, title: str = None
+    ) -&gt; Any:
+        if self._api_zone.get():
+            return await cb()
+        task = asyncio.current_task(self._loop)
+        parsed_st = _attach_api_call_information(
+            getattr(task, "__pw_stack__", None) or _capture_stack_trace(),
+            is_internal,
+            title,
+        )
+        self._api_zone.set(parsed_st)
+        try:
+            return await cb()
+        except Exception as error:
+&gt;           raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+E           playwright._impl._errors.TimeoutError: Page.wait_for_selector: Timeout 5000ms exceeded.
+E           Call log:
+E             - waiting for locator("[data-testid^=\"pos-row-\"]") to be visible
+
+.pipeline/venv/lib/python3.12/site-packages/playwright/_impl/_connection.py:632: TimeoutError</failure></testcase><testcase classname="skeleton.verify.test_ui_positions" name="test_c_1_3_sc_dashboard_shows_weight_percentage_cell" time="5.386"><failure message="playwright._impl._errors.TimeoutError: Page.wait_for_selector: Timeout 5000ms exceeded.&#10;Call log:&#10;  - waiting for locator(&quot;[data-testid^=\&quot;pos-weight-\&quot;]&quot;) to be visible">def test_c_1_3_sc_dashboard_shows_weight_percentage_cell():
+        base = _base_url()
+        with sync_playwright() as p:
+            browser = p.chromium.launch()
+            page = browser.new_page()
+            page.goto(base + "/")
+&gt;           page.wait_for_selector('[data-testid^="pos-weight-"]', timeout=5000)
+
+skeleton/verify/test_ui_positions.py:30: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+.pipeline/venv/lib/python3.12/site-packages/playwright/sync_api/_generated.py:9033: in wait_for_selector
+    self._sync(
+.pipeline/venv/lib/python3.12/site-packages/playwright/_impl/_page.py:427: in wait_for_selector
+    return await self._main_frame.wait_for_selector(**locals_to_params(locals()))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.pipeline/venv/lib/python3.12/site-packages/playwright/_impl/_frame.py:394: in wait_for_selector
+    await self._channel.send(
+.pipeline/venv/lib/python3.12/site-packages/playwright/_impl/_connection.py:76: in send
+    return await self._connection.wrap_api_call(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;playwright._impl._connection.Connection object at 0x732b129d87a0&gt;
+cb = &lt;function Channel.send.&lt;locals&gt;.&lt;lambda&gt; at 0x732b129e7600&gt;
+is_internal = False, title = None
+
+    async def wrap_api_call(
+        self, cb: Callable[[], Any], is_internal: bool = False, title: str = None
+    ) -&gt; Any:
+        if self._api_zone.get():
+            return await cb()
+        task = asyncio.current_task(self._loop)
+        parsed_st = _attach_api_call_information(
+            getattr(task, "__pw_stack__", None) or _capture_stack_trace(),
+            is_internal,
+            title,
+        )
+        self._api_zone.set(parsed_st)
+        try:
+            return await cb()
+        except Exception as error:
+&gt;           raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+E           playwright._impl._errors.TimeoutError: Page.wait_for_selector: Timeout 5000ms exceeded.
+E           Call log:
+E             - waiting for locator("[data-testid^=\"pos-weight-\"]") to be visible
+
+.pipeline/venv/lib/python3.12/site-packages/playwright/_impl/_connection.py:632: TimeoutError</failure></testcase></testsuite></testsuites>

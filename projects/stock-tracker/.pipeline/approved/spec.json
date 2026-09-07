@@ -1,0 +1,340 @@
+{
+  "slug": "stock-tracker",
+  "title": "Portfolio Rebalancer",
+  "track": "fullstack",
+  "sessions_planned": 5,
+  "stack": ["next", "react", "typescript", "prisma", "sqlite"],
+  "source": null,
+  "code_checks": [],
+  "endpoints": [
+    {"id": "ep-positions-list", "method": "GET", "path": "/api/positions", "request": null, "response": "Position[]", "status": [200]},
+    {"id": "ep-allocation-report", "method": "GET", "path": "/api/allocation", "request": null, "response": "AllocationRow[]", "status": [200]},
+    {"id": "ep-plan-generate", "method": "POST", "path": "/api/trade-plan", "request": "{budgetCents: number}", "response": "TradeItem[]", "status": [200]},
+    {"id": "ep-targets-update", "method": "PUT", "path": "/api/targets", "request": "TargetUpdate[]", "response": "{ok: true}", "status": [200]},
+    {"id": "ep-settings-update", "method": "PUT", "path": "/api/settings", "request": "{budgetCents: number}", "response": "{ok: true}", "status": [200]},
+    {"id": "ep-apply-plan", "method": "POST", "path": "/api/apply-plan", "request": null, "response": "{applied: number, updatedHoldings: Holding[]}", "status": [200]},
+    {"id": "ep-trades-list", "method": "GET", "path": "/api/trades", "request": null, "response": "Trade[]", "status": [200]}
+  ],
+  "screens": [
+    {
+      "id": "sc-dashboard",
+      "route": "/",
+      "elements": [
+        "positions table",
+        "current weight cell",
+        "drift badge OVER/UNDER",
+        "plan table",
+        "target inputs",
+        "budget input",
+        "save button",
+        "apply button",
+        "applied notice",
+        "loading state"
+      ],
+      "states": ["empty", "loaded", "loading", "saving", "applied"]
+    }
+  ],
+  "sessions": [
+    {
+      "n": 1,
+      "title": "Seed, positions API, and table",
+      "goal": "Create schema and seed, expose positions via API, and render them in a table.",
+      "teaches": ["Prisma schema", "Next.js route handler (GET)", "Mapping data to JSX rows"],
+      "builds": ["ep-positions-list", "sc-dashboard"],
+      "criteria": [
+        {
+          "id": "c-1-1",
+          "check": "GET /api/positions returns 200 with a JSON array of Position including symbol, shares, priceCents and targetWeight",
+          "target": "ep-positions-list",
+          "cuts": ["cut-ep-positions-body"]
+        },
+        {
+          "id": "c-1-2",
+          "check": "sc-dashboard renders one row per position with data-testid 'pos-row-<SYMBOL>'",
+          "target": "sc-dashboard",
+          "cuts": ["cut-ui-positions-rows"]
+        },
+        {
+          "id": "c-1-3",
+          "check": "sc-dashboard shows current weight as a percentage in cell data-testid 'pos-weight-<SYMBOL>'",
+          "target": "sc-dashboard",
+          "cuts": ["cut-ui-positions-rows", "cut-ui-weight-cell"]
+        }
+      ],
+      "cuts": [
+        {
+          "id": "cut-ep-positions-body",
+          "file": "app/api/positions/route.ts",
+          "writes_into": "body",
+          "hint": "Put every position with symbol, name, shares, priceCents and targetWeight into `body` and set `status` to 200"
+        },
+        {
+          "id": "cut-ui-positions-rows",
+          "file": "app/(dashboard)/page.tsx",
+          "writes_into": "rows",
+          "hint": "Build `rows` so it renders one <tr> per position with data-testid `pos-row-${symbol}` and cells for symbol, shares, price and target weight"
+        },
+        {
+          "id": "cut-ui-weight-cell",
+          "file": "app/(dashboard)/page.tsx",
+          "writes_into": "weightText",
+          "hint": "Compute `weightText` for a row as the current weight percentage to one decimal place (e.g. '12.3%') and render it in the cell with data-testid `pos-weight-${symbol}`"
+        }
+      ]
+    },
+    {
+      "n": 2,
+      "title": "Allocation report and drift highlight",
+      "goal": "Compute weights and drift and expose them via an API; highlight over/under-weight rows.",
+      "teaches": ["Normalise by total value", "Pure calculation module", "Client data fetching", "Conditional rendering"],
+      "builds": ["ep-allocation-report"],
+      "criteria": [
+        {
+          "id": "c-2-1",
+          "check": "GET /api/allocation returns 200 with a JSON array whose items include symbol, currentWeight, targetWeight and driftPercent (positive for overweight, negative for underweight)",
+          "target": "ep-allocation-report",
+          "cuts": ["cut-calc-weights", "cut-ep-allocation-body"]
+        },
+        {
+          "id": "c-2-2",
+          "check": "sc-dashboard shows an 'OVER' badge (data-testid 'drift-<SYMBOL>') for at least one overweight symbol",
+          "target": "sc-dashboard",
+          "cuts": ["cut-ui-fetch-allocation", "cut-ui-drift-badge"]
+        },
+        {
+          "id": "c-2-3",
+          "check": "sc-dashboard shows an 'UNDER' badge (data-testid 'drift-<SYMBOL>') for at least one underweight symbol",
+          "target": "sc-dashboard",
+          "cuts": ["cut-ui-fetch-allocation", "cut-ui-drift-badge"]
+        },
+        {
+          "id": "c-2-4",
+          "check": "While the allocation report is loading, the page shows the text 'Loading...'",
+          "target": "sc-dashboard",
+          "cuts": ["cut-ui-fetch-allocation"]
+        },
+        {
+          "id": "c-2-5",
+          "check": "GET /api/allocation returns 200 and the sum of all currentWeight values across items equals 1.000 when rounded to three decimal places",
+          "target": "ep-allocation-report",
+          "cuts": ["cut-calc-weights"]
+        }
+      ],
+      "cuts": [
+        {
+          "id": "cut-calc-weights",
+          "file": "lib/allocation.ts",
+          "writes_into": "weights",
+          "hint": "Build `weights` as an array of {symbol, valueCents, currentWeight, targetWeight, driftPercent} by dividing each position's value by the portfolio total and subtracting the target weight"
+        },
+        {
+          "id": "cut-ep-allocation-body",
+          "file": "app/api/allocation/route.ts",
+          "writes_into": "body",
+          "hint": "Put every allocation row computed from the store into `body` and set `status` to 200"
+        },
+        {
+          "id": "cut-ui-fetch-allocation",
+          "file": "app/(dashboard)/page.tsx",
+          "writes_into": "report",
+          "hint": "Load the allocation report into `report` and render a visible 'Loading...' text while `report` is undefined"
+        },
+        {
+          "id": "cut-ui-drift-badge",
+          "file": "app/(dashboard)/page.tsx",
+          "writes_into": "driftClass",
+          "hint": "Set `driftClass`/label on each row so overweight shows a badge with text 'OVER' and underweight shows 'UNDER' at data-testid `drift-${symbol}`"
+        }
+      ]
+    },
+    {
+      "n": 3,
+      "title": "Trade plan under budget",
+      "goal": "Generate a deterministic integer-share trade plan given a budget, and show it.",
+      "teaches": ["Rank by drift", "Greedy allocation under cap", "Integer rounding to whole shares", "POST JSON body"],
+      "builds": ["ep-plan-generate"],
+      "criteria": [
+        {
+          "id": "c-3-1",
+          "check": "POST /api/trade-plan with {budgetCents} returns 200 with a JSON array whose items include symbol and an integer shares field",
+          "target": "ep-plan-generate",
+          "cuts": ["cut-plan-allocate", "cut-ep-plan-body"]
+        },
+        {
+          "id": "c-3-2",
+          "check": "POST /api/trade-plan with {budgetCents} returns 200 and the sum of costCents across BUY items is less than or equal to budgetCents",
+          "target": "ep-plan-generate",
+          "cuts": ["cut-plan-allocate"]
+        },
+        {
+          "id": "c-3-3",
+          "check": "POST /api/trade-plan with {budgetCents} returns 200 and the first plan item's symbol corresponds to the candidate with the largest absolute positive drift",
+          "target": "ep-plan-generate",
+          "cuts": ["cut-plan-rank"]
+        },
+        {
+          "id": "c-3-4",
+          "check": "sc-dashboard renders one row per plan item with data-testid 'plan-row-<SYMBOL>'",
+          "target": "sc-dashboard",
+          "cuts": ["cut-ui-plan-rows"]
+        }
+      ],
+      "cuts": [
+        {
+          "id": "cut-plan-rank",
+          "file": "lib/plan.ts",
+          "writes_into": "ranked",
+          "hint": "Build `ranked` as symbols ordered by absolute drift descending, breaking ties by symbol ascending to be deterministic"
+        },
+        {
+          "id": "cut-plan-allocate",
+          "file": "lib/plan.ts",
+          "writes_into": "plan",
+          "hint": "Build `plan` by allocating integer share quantities that reduce drift, not exceeding `budgetCents`, and computing costCents per item from priceCents"
+        },
+        {
+          "id": "cut-ep-plan-body",
+          "file": "app/api/trade-plan/route.ts",
+          "writes_into": "body",
+          "hint": "Read `budgetCents` from the request, generate the plan, write it into `body` and set `status` to 200"
+        },
+        {
+          "id": "cut-ui-plan-rows",
+          "file": "app/(dashboard)/page.tsx",
+          "writes_into": "planRows",
+          "hint": "Map the computed plan into `planRows` with data-testid `plan-row-${symbol}` and cells for side, shares and cost"
+        }
+      ]
+    },
+    {
+      "n": 4,
+      "title": "What‑if: edit targets and budget, persist and recompute",
+      "goal": "Allow editing target weights and budget, persist them, and recompute the plan.",
+      "teaches": ["Controlled inputs", "PUT via Prisma", "Refetch after save"],
+      "builds": ["ep-targets-update", "ep-settings-update"],
+      "criteria": [
+        {
+          "id": "c-4-1",
+          "check": "PUT /api/targets with a changed {symbol, weight} returns 200",
+          "target": "ep-targets-update",
+          "cuts": ["cut-ep-targets-update"]
+        },
+        {
+          "id": "c-4-2",
+          "check": "PUT /api/settings with a changed {budgetCents} returns 200",
+          "target": "ep-settings-update",
+          "cuts": ["cut-ep-settings-update"]
+        },
+        {
+          "id": "c-4-3",
+          "check": "After editing a target weight and clicking save, sc-dashboard renders a different shares value for that symbol in the plan table",
+          "target": "sc-dashboard",
+          "cuts": ["cut-ui-target-inputs", "cut-ui-apply-edits"]
+        },
+        {
+          "id": "c-4-4",
+          "check": "Clicking save with no changes shows a visible 'Saved' notice and does not change the plan rows",
+          "target": "sc-dashboard",
+          "cuts": ["cut-ui-apply-edits"]
+        }
+      ],
+      "cuts": [
+        {
+          "id": "cut-ep-targets-update",
+          "file": "app/api/targets/route.ts",
+          "writes_into": "status",
+          "hint": "Upsert incoming target weights and set `status` to 200"
+        },
+        {
+          "id": "cut-ep-settings-update",
+          "file": "app/api/settings/route.ts",
+          "writes_into": "status",
+          "hint": "Persist the incoming `budgetCents` setting and set `status` to 200"
+        },
+        {
+          "id": "cut-ui-target-inputs",
+          "file": "app/(dashboard)/page.tsx",
+          "writes_into": "targetsState",
+          "hint": "Keep edited weights in `targetsState` per symbol and bind each to an input with data-testid `target-input-${symbol}`"
+        },
+        {
+          "id": "cut-ui-apply-edits",
+          "file": "app/(dashboard)/page.tsx",
+          "writes_into": "planRefresh",
+          "hint": "On save, send edited targets and budget, then refresh `planRefresh` by refetching the plan so the rows reflect the new values, and show a 'Saved' notice (data-testid 'applied')"
+        }
+      ]
+    },
+    {
+      "n": 5,
+      "title": "Apply plan and reconcile",
+      "goal": "Apply the proposed plan to holdings, write trades, refresh and show reduced drift.",
+      "teaches": ["Server-side reconciliation", "Posting actions from UI"],
+      "builds": ["ep-apply-plan", "ep-trades-list"],
+      "criteria": [
+        {
+          "id": "c-5-1",
+          "check": "POST /api/apply-plan returns 200 with a JSON body that includes an 'applied' count greater than 0",
+          "target": "ep-apply-plan",
+          "cuts": ["cut-ep-apply-plan", "cut-ep-trade-record"]
+        },
+        {
+          "id": "c-5-2",
+          "check": "After clicking Apply Plan, sc-dashboard refreshes and shows a visible notice (data-testid 'applied')",
+          "target": "sc-dashboard",
+          "cuts": ["cut-ui-apply-click"]
+        },
+        {
+          "id": "c-5-3",
+          "check": "GET /api/trades returns 200 with a JSON array of Trade objects that include symbol and shares",
+          "target": "ep-trades-list",
+          "cuts": ["cut-ep-trades-list-body"]
+        },
+        {
+          "id": "c-5-4",
+          "check": "After applying, the average absolute drift from GET /api/allocation is lower than before applying",
+          "target": "ep-allocation-report",
+          "cuts": ["cut-reconcile-holdings"]
+        },
+        {
+          "id": "c-5-5",
+          "check": "POST /api/apply-plan returns 200 with a JSON body that includes updatedHoldings whose length equals the number of assets",
+          "target": "ep-apply-plan",
+          "cuts": ["cut-ep-apply-plan"]
+        }
+      ],
+      "cuts": [
+        {
+          "id": "cut-ep-apply-plan",
+          "file": "app/api/apply-plan/route.ts",
+          "writes_into": "body",
+          "hint": "Compute the current plan, apply it, write `{ applied, updatedHoldings }` into `body` and set `status` to 200"
+        },
+        {
+          "id": "cut-reconcile-holdings",
+          "file": "lib/reconcile.ts",
+          "writes_into": "updatedHoldings",
+          "hint": "Build `updatedHoldings` by applying each TradeItem's integer shares to the corresponding Holding and persisting the new share counts"
+        },
+        {
+          "id": "cut-ui-apply-click",
+          "file": "app/(dashboard)/page.tsx",
+          "writes_into": "afterState",
+          "hint": "On click of the apply button, call the apply endpoint, refresh the positions/allocation, set `afterState` so the notice (data-testid 'applied') is visible, and re-render the tables"
+        },
+        {
+          "id": "cut-ep-trade-record",
+          "file": "app/api/apply-plan/route.ts",
+          "writes_into": "created",
+          "hint": "Insert one Trade per plan item and set `created` to the number inserted"
+        },
+        {
+          "id": "cut-ep-trades-list-body",
+          "file": "app/api/trades/route.ts",
+          "writes_into": "body",
+          "hint": "Put every recorded Trade into `body` and set `status` to 200"
+        }
+      ]
+    }
+  ]
+}

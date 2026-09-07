@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="3" skipped="0" tests="21" time="20.435" timestamp="2026-09-07T17:05:58.799014+05:30" hostname="nxtwave-Z790-D-AX"><testcase classname="verify.test_api_allocation" name="test_c_2_1_get_allocation_returns_expected_fields" time="0.099" /><testcase classname="verify.test_api_allocation" name="test_c_2_5_allocation_weights_sum_to_one_rounded_3dp" time="0.124" /><testcase classname="verify.test_api_apply" name="test_c_5_1_post_apply_plan_returns_applied_greater_than_zero" time="0.107" /><testcase classname="verify.test_api_apply" name="test_c_5_3_get_trades_returns_trade_objects_after_apply" time="0.109" /><testcase classname="verify.test_api_apply" name="test_c_5_4_apply_reduces_average_abs_drift" time="0.106" /><testcase classname="verify.test_api_apply" name="test_c_5_5_apply_returns_updated_holdings_length_equals_assets_count" time="0.095" /><testcase classname="verify.test_api_plan" name="test_c_3_1_post_trade_plan_returns_items_with_symbol_and_integer_shares" time="0.089" /><testcase classname="verify.test_api_plan" name="test_c_3_2_post_trade_plan_respects_budget" time="0.082" /><testcase classname="verify.test_api_plan" name="test_c_3_3_first_plan_item_is_largest_positive_drift" time="0.059" /><testcase classname="verify.test_api_positions" name="test_c_1_1_get_positions_returns_required_fields" time="0.058" /><testcase classname="verify.test_api_settings_targets" name="test_c_4_1_put_targets_returns_200_for_changed_weight" time="0.077" /><testcase classname="verify.test_api_settings_targets" name="test_c_4_2_put_settings_returns_200_for_changed_budget" time="0.071" /><testcase classname="verify.test_ui_allocation" name="test_c_2_2_ui_shows_over_badge_for_overweight" time="0.599" /><testcase classname="verify.test_ui_allocation" name="test_c_2_3_ui_shows_under_badge_for_underweight" time="0.542" /><testcase classname="verify.test_ui_allocation" name="test_c_2_4_ui_shows_loading_text_while_fetching" time="0.410" /><testcase classname="verify.test_ui_apply" name="test_c_5_2_click_apply_shows_applied_notice" time="0.546" /><testcase classname="verify.test_ui_edit_recompute" name="test_c_4_3_edit_target_and_save_updates_shares_for_that_symbol" time="5.362"><failure message="playwright._impl._errors.TimeoutError: Page.wait_for_selector: Timeout 5000ms exceeded.&#10;Call log:&#10;  - waiting for locator(&quot;[data-testid^=\&quot;plan-row-\&quot;]&quot;) to be visible">def test_c_4_3_edit_target_and_save_updates_shares_for_that_symbol():
+        base = _base_url()
+        with sync_playwright() as p:
+            browser = p.chromium.launch()
+            page = browser.new_page()
+            page.goto(base + "/")
+            # Pick a symbol that already appears in the plan table
+&gt;           page.wait_for_selector('[data-testid^="plan-row-"]', timeout=5000)
+
+verify/test_ui_edit_recompute.py:35: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+.pipeline/venv/lib/python3.12/site-packages/playwright/sync_api/_generated.py:9033: in wait_for_selector
+    self._sync(
+.pipeline/venv/lib/python3.12/site-packages/playwright/_impl/_page.py:427: in wait_for_selector
+    return await self._main_frame.wait_for_selector(**locals_to_params(locals()))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.pipeline/venv/lib/python3.12/site-packages/playwright/_impl/_frame.py:394: in wait_for_selector
+    await self._channel.send(
+.pipeline/venv/lib/python3.12/site-packages/playwright/_impl/_connection.py:76: in send
+    return await self._connection.wrap_api_call(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;playwright._impl._connection.Connection object at 0x7fb4347fb740&gt;
+cb = &lt;function Channel.send.&lt;locals&gt;.&lt;lambda&gt; at 0x7fb43430efc0&gt;
+is_internal = False, title = None
+
+    async def wrap_api_call(
+        self, cb: Callable[[], Any], is_internal: bool = False, title: str = None
+    ) -&gt; Any:
+        if self._api_zone.get():
+            return await cb()
+        task = asyncio.current_task(self._loop)
+        parsed_st = _attach_api_call_information(
+            getattr(task, "__pw_stack__", None) or _capture_stack_trace(),
+            is_internal,
+            title,
+        )
+        self._api_zone.set(parsed_st)
+        try:
+            return await cb()
+        except Exception as error:
+&gt;           raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+E           playwright._impl._errors.TimeoutError: Page.wait_for_selector: Timeout 5000ms exceeded.
+E           Call log:
+E             - waiting for locator("[data-testid^=\"plan-row-\"]") to be visible
+
+.pipeline/venv/lib/python3.12/site-packages/playwright/_impl/_connection.py:632: TimeoutError</failure></testcase><testcase classname="verify.test_ui_edit_recompute" name="test_c_4_4_save_without_changes_shows_saved_notice_and_plan_unchanged" time="5.409"><failure message="playwright._impl._errors.TimeoutError: Page.wait_for_selector: Timeout 5000ms exceeded.&#10;Call log:&#10;  - waiting for locator(&quot;[data-testid^=\&quot;plan-row-\&quot;]&quot;) to be visible">def test_c_4_4_save_without_changes_shows_saved_notice_and_plan_unchanged():
+        base = _base_url()
+        with sync_playwright() as p:
+            browser = p.chromium.launch()
+            page = browser.new_page()
+            page.goto(base + "/")
+            # Snapshot current plan rows content
+&gt;           page.wait_for_selector('[data-testid^="plan-row-"]', timeout=5000)
+
+verify/test_ui_edit_recompute.py:98: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+.pipeline/venv/lib/python3.12/site-packages/playwright/sync_api/_generated.py:9033: in wait_for_selector
+    self._sync(
+.pipeline/venv/lib/python3.12/site-packages/playwright/_impl/_page.py:427: in wait_for_selector
+    return await self._main_frame.wait_for_selector(**locals_to_params(locals()))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.pipeline/venv/lib/python3.12/site-packages/playwright/_impl/_frame.py:394: in wait_for_selector
+    await self._channel.send(
+.pipeline/venv/lib/python3.12/site-packages/playwright/_impl/_connection.py:76: in send
+    return await self._connection.wrap_api_call(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;playwright._impl._connection.Connection object at 0x7fb43461ca70&gt;
+cb = &lt;function Channel.send.&lt;locals&gt;.&lt;lambda&gt; at 0x7fb4347ffa60&gt;
+is_internal = False, title = None
+
+    async def wrap_api_call(
+        self, cb: Callable[[], Any], is_internal: bool = False, title: str = None
+    ) -&gt; Any:
+        if self._api_zone.get():
+            return await cb()
+        task = asyncio.current_task(self._loop)
+        parsed_st = _attach_api_call_information(
+            getattr(task, "__pw_stack__", None) or _capture_stack_trace(),
+            is_internal,
+            title,
+        )
+        self._api_zone.set(parsed_st)
+        try:
+            return await cb()
+        except Exception as error:
+&gt;           raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+E           playwright._impl._errors.TimeoutError: Page.wait_for_selector: Timeout 5000ms exceeded.
+E           Call log:
+E             - waiting for locator("[data-testid^=\"plan-row-\"]") to be visible
+
+.pipeline/venv/lib/python3.12/site-packages/playwright/_impl/_connection.py:632: TimeoutError</failure></testcase><testcase classname="verify.test_ui_plan" name="test_c_3_4_ui_renders_one_row_per_plan_item" time="5.377"><failure message="playwright._impl._errors.TimeoutError: Page.wait_for_selector: Timeout 5000ms exceeded.&#10;Call log:&#10;  - waiting for locator(&quot;[data-testid^=\&quot;plan-row-\&quot;]&quot;) to be visible">def test_c_3_4_ui_renders_one_row_per_plan_item():
+        base = _base_url()
+        with sync_playwright() as p:
+            browser = p.chromium.launch()
+            page = browser.new_page()
+            page.goto(base + "/")
+&gt;           el = page.wait_for_selector('[data-testid^="plan-row-"]', timeout=5000)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+verify/test_ui_plan.py:17: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+.pipeline/venv/lib/python3.12/site-packages/playwright/sync_api/_generated.py:9033: in wait_for_selector
+    self._sync(
+.pipeline/venv/lib/python3.12/site-packages/playwright/_impl/_page.py:427: in wait_for_selector
+    return await self._main_frame.wait_for_selector(**locals_to_params(locals()))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.pipeline/venv/lib/python3.12/site-packages/playwright/_impl/_frame.py:394: in wait_for_selector
+    await self._channel.send(
+.pipeline/venv/lib/python3.12/site-packages/playwright/_impl/_connection.py:76: in send
+    return await self._connection.wrap_api_call(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;playwright._impl._connection.Connection object at 0x7fb434662de0&gt;
+cb = &lt;function Channel.send.&lt;locals&gt;.&lt;lambda&gt; at 0x7fb43430fd80&gt;
+is_internal = False, title = None
+
+    async def wrap_api_call(
+        self, cb: Callable[[], Any], is_internal: bool = False, title: str = None
+    ) -&gt; Any:
+        if self._api_zone.get():
+            return await cb()
+        task = asyncio.current_task(self._loop)
+        parsed_st = _attach_api_call_information(
+            getattr(task, "__pw_stack__", None) or _capture_stack_trace(),
+            is_internal,
+            title,
+        )
+        self._api_zone.set(parsed_st)
+        try:
+            return await cb()
+        except Exception as error:
+&gt;           raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+E           playwright._impl._errors.TimeoutError: Page.wait_for_selector: Timeout 5000ms exceeded.
+E           Call log:
+E             - waiting for locator("[data-testid^=\"plan-row-\"]") to be visible
+
+.pipeline/venv/lib/python3.12/site-packages/playwright/_impl/_connection.py:632: TimeoutError</failure></testcase><testcase classname="verify.test_ui_positions" name="test_c_1_2_sc_dashboard_renders_one_row_per_position" time="0.363" /><testcase classname="verify.test_ui_positions" name="test_c_1_3_sc_dashboard_shows_weight_percentage_cell" time="0.402" /></testsuite></testsuites>

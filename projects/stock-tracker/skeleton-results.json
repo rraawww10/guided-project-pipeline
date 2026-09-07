@@ -1,0 +1,171 @@
+{
+  "ok": false,
+  "target": "skeleton",
+  "code_checks": {
+    "ok": true,
+    "checks": {}
+  },
+  "stack_check": {
+    "ok": true,
+    "violations": []
+  },
+  "seconds": 69.3,
+  "counts": {
+    "pass": 0,
+    "fail": 21,
+    "skip": 0,
+    "missing": 0
+  },
+  "criteria": {
+    "c-1-1": {
+      "status": "fail",
+      "check": "GET /api/positions returns 200 with a JSON array of Position including symbol, shares, priceCents and targetWeight",
+      "session": 1,
+      "test": "verify/test_api_positions.py::test_c_1_1_get_positions_returns_required_fields",
+      "message": "assert 501 == 200\n +  where 501 = <Response [501 Not Implemented]>.status_code"
+    },
+    "c-1-2": {
+      "status": "fail",
+      "check": "sc-dashboard renders one row per position with data-testid 'pos-row-<SYMBOL>'",
+      "session": 1,
+      "test": "verify/test_ui_positions.py::test_c_1_2_sc_dashboard_renders_one_row_per_position",
+      "message": "playwright._impl._errors.TimeoutError: Page.wait_for_selector: Timeout 5000ms exceeded.\nCall log:\n  - waiting for locator(\"[data-testid^=\\\"pos-row-\\\"]\") to be visible"
+    },
+    "c-1-3": {
+      "status": "fail",
+      "check": "sc-dashboard shows current weight as a percentage in cell data-testid 'pos-weight-<SYMBOL>'",
+      "session": 1,
+      "test": "verify/test_ui_positions.py::test_c_1_3_sc_dashboard_shows_weight_percentage_cell",
+      "message": "playwright._impl._errors.TimeoutError: Page.wait_for_selector: Timeout 5000ms exceeded.\nCall log:\n  - waiting for locator(\"[data-testid^=\\\"pos-weight-\\\"]\") to be visible"
+    },
+    "c-2-1": {
+      "status": "fail",
+      "check": "GET /api/allocation returns 200 with a JSON array whose items include symbol, currentWeight, targetWeight and driftPercent (positive for overweight, negative for underweight)",
+      "session": 2,
+      "test": "verify/test_api_allocation.py::test_c_2_1_get_allocation_returns_expected_fields",
+      "message": "assert 501 == 200\n +  where 501 = <Response [501 Not Implemented]>.status_code"
+    },
+    "c-2-2": {
+      "status": "fail",
+      "check": "sc-dashboard shows an 'OVER' badge (data-testid 'drift-<SYMBOL>') for at least one overweight symbol",
+      "session": 2,
+      "test": "verify/test_ui_allocation.py::test_c_2_2_ui_shows_over_badge_for_overweight",
+      "message": "playwright._impl._errors.TimeoutError: Page.wait_for_selector: Timeout 5000ms exceeded.\nCall log:\n  - waiting for locator(\"[data-testid^=\\\"drift-\\\"]\") to be visible"
+    },
+    "c-2-3": {
+      "status": "fail",
+      "check": "sc-dashboard shows an 'UNDER' badge (data-testid 'drift-<SYMBOL>') for at least one underweight symbol",
+      "session": 2,
+      "test": "verify/test_ui_allocation.py::test_c_2_3_ui_shows_under_badge_for_underweight",
+      "message": "playwright._impl._errors.TimeoutError: Page.wait_for_selector: Timeout 5000ms exceeded.\nCall log:\n  - waiting for locator(\"[data-testid^=\\\"drift-\\\"]\") to be visible"
+    },
+    "c-2-4": {
+      "status": "fail",
+      "check": "While the allocation report is loading, the page shows the text 'Loading...'",
+      "session": 2,
+      "test": "verify/test_ui_allocation.py::test_c_2_4_ui_shows_loading_text_while_fetching",
+      "message": "playwright._impl._errors.TimeoutError: Page.wait_for_selector: Timeout 20000ms exceeded.\nCall log:\n  - waiting for locator(\"[data-testid^=\\\"drift-\\\"]\") to be visible"
+    },
+    "c-2-5": {
+      "status": "fail",
+      "check": "GET /api/allocation returns 200 and the sum of all currentWeight values across items equals 1.000 when rounded to three decimal places",
+      "session": 2,
+      "test": "verify/test_api_allocation.py::test_c_2_5_allocation_weights_sum_to_one_rounded_3dp",
+      "message": "assert 501 == 200\n +  where 501 = <Response [501 Not Implemented]>.status_code"
+    },
+    "c-3-1": {
+      "status": "fail",
+      "check": "POST /api/trade-plan with {budgetCents} returns 200 with a JSON array whose items include symbol and an integer shares field",
+      "session": 3,
+      "test": "verify/test_api_plan.py::test_c_3_1_post_trade_plan_returns_items_with_symbol_and_integer_shares",
+      "message": "assert 501 == 200\n +  where 501 = <Response [501 Not Implemented]>.status_code"
+    },
+    "c-3-2": {
+      "status": "fail",
+      "check": "POST /api/trade-plan with {budgetCents} returns 200 and the sum of costCents across BUY items is less than or equal to budgetCents",
+      "session": 3,
+      "test": "verify/test_api_plan.py::test_c_3_2_post_trade_plan_respects_budget",
+      "message": "assert 501 == 200\n +  where 501 = <Response [501 Not Implemented]>.status_code"
+    },
+    "c-3-3": {
+      "status": "fail",
+      "check": "POST /api/trade-plan with {budgetCents} returns 200 and the first plan item's symbol corresponds to the candidate with the largest absolute positive drift",
+      "session": 3,
+      "test": "verify/test_api_plan.py::test_c_3_3_first_plan_item_is_largest_positive_drift",
+      "message": "AssertionError: assert (False)\n +  where False = isinstance({'error': 'Not implemented'}, list)"
+    },
+    "c-3-4": {
+      "status": "fail",
+      "check": "sc-dashboard renders one row per plan item with data-testid 'plan-row-<SYMBOL>'",
+      "session": 3,
+      "test": "verify/test_ui_plan.py::test_c_3_4_ui_renders_one_row_per_plan_item",
+      "message": "playwright._impl._errors.TimeoutError: Page.wait_for_selector: Timeout 5000ms exceeded.\nCall log:\n  - waiting for locator(\"[data-testid^=\\\"plan-row-\\\"]\") to be visible"
+    },
+    "c-4-1": {
+      "status": "fail",
+      "check": "PUT /api/targets with a changed {symbol, weight} returns 200",
+      "session": 4,
+      "test": "verify/test_api_settings_targets.py::test_c_4_1_put_targets_returns_200_for_changed_weight",
+      "message": "AssertionError: assert (False)\n +  where False = isinstance({'error': 'Not implemented'}, list)"
+    },
+    "c-4-2": {
+      "status": "fail",
+      "check": "PUT /api/settings with a changed {budgetCents} returns 200",
+      "session": 4,
+      "test": "verify/test_api_settings_targets.py::test_c_4_2_put_settings_returns_200_for_changed_budget",
+      "message": "assert 501 == 200\n +  where 501 = <Response [501 Not Implemented]>.status_code"
+    },
+    "c-4-3": {
+      "status": "fail",
+      "check": "After editing a target weight and clicking save, sc-dashboard renders a different shares value for that symbol in the plan table",
+      "session": 4,
+      "test": "verify/test_ui_edit_recompute.py::test_c_4_3_edit_target_and_save_updates_shares_for_that_symbol",
+      "message": "playwright._impl._errors.TimeoutError: Page.wait_for_selector: Timeout 5000ms exceeded.\nCall log:\n  - waiting for locator(\"[data-testid^=\\\"plan-row-\\\"]\") to be visible"
+    },
+    "c-4-4": {
+      "status": "fail",
+      "check": "Clicking save with no changes shows a visible 'Saved' notice and does not change the plan rows",
+      "session": 4,
+      "test": "verify/test_ui_edit_recompute.py::test_c_4_4_save_without_changes_shows_saved_notice_and_plan_unchanged",
+      "message": "playwright._impl._errors.TimeoutError: Page.wait_for_selector: Timeout 5000ms exceeded.\nCall log:\n  - waiting for locator(\"[data-testid^=\\\"plan-row-\\\"]\") to be visible"
+    },
+    "c-5-1": {
+      "status": "fail",
+      "check": "POST /api/apply-plan returns 200 with a JSON body that includes an 'applied' count greater than 0",
+      "session": 5,
+      "test": "verify/test_api_apply.py::test_c_5_1_post_apply_plan_returns_applied_greater_than_zero",
+      "message": "KeyError: 0"
+    },
+    "c-5-2": {
+      "status": "fail",
+      "check": "After clicking Apply Plan, sc-dashboard refreshes and shows a visible notice (data-testid 'applied')",
+      "session": 5,
+      "test": "verify/test_ui_apply.py::test_c_5_2_click_apply_shows_applied_notice",
+      "message": "playwright._impl._errors.TimeoutError: Page.wait_for_selector: Timeout 5000ms exceeded.\nCall log:\n  - waiting for locator(\"[data-testid=\\\"apply-plan\\\"]\") to be visible"
+    },
+    "c-5-3": {
+      "status": "fail",
+      "check": "GET /api/trades returns 200 with a JSON array of Trade objects that include symbol and shares",
+      "session": 5,
+      "test": "verify/test_api_apply.py::test_c_5_3_get_trades_returns_trade_objects_after_apply",
+      "message": "assert 501 == 200\n +  where 501 = <Response [501 Not Implemented]>.status_code"
+    },
+    "c-5-4": {
+      "status": "fail",
+      "check": "After applying, the average absolute drift from GET /api/allocation is lower than before applying",
+      "session": 5,
+      "test": "verify/test_api_apply.py::test_c_5_4_apply_reduces_average_abs_drift",
+      "message": "AttributeError: 'str' object has no attribute 'get'"
+    },
+    "c-5-5": {
+      "status": "fail",
+      "check": "POST /api/apply-plan returns 200 with a JSON body that includes updatedHoldings whose length equals the number of assets",
+      "session": 5,
+      "test": "verify/test_api_apply.py::test_c_5_5_apply_returns_updated_holdings_length_equals_assets_count",
+      "message": "KeyError: 0"
+    }
+  },
+  "pytest_returncode": 1,
+  "stdout_tail": "tr = None\n    ) -> Any:\n        if self._api_zone.get():\n            return await cb()\n        task = asyncio.current_task(self._loop)\n        parsed_st = _attach_api_call_information(\n            getattr(task, \"__pw_stack__\", None) or _capture_stack_trace(),\n            is_internal,\n            title,\n        )\n        self._api_zone.set(parsed_st)\n        try:\n            return await cb()\n        except Exception as error:\n>           raise rewrite_error(error, f\"{parsed_st['apiName']}: {error}\") from None\nE           playwright._impl._errors.TimeoutError: Page.wait_for_selector: Timeout 5000ms exceeded.\nE           Call log:\nE             - waiting for locator(\"[data-testid^=\\\"pos-weight-\\\"]\") to be visible\n\n.pipeline/venv/lib/python3.12/site-packages/playwright/_impl/_connection.py:632: TimeoutError\n=========================== short test summary info ============================\nFAILED skeleton/verify/test_api_allocation.py::test_c_2_1_get_allocation_returns_expected_fields\nFAILED skeleton/verify/test_api_allocation.py::test_c_2_5_allocation_weights_sum_to_one_rounded_3dp\nFAILED skeleton/verify/test_api_apply.py::test_c_5_1_post_apply_plan_returns_applied_greater_than_zero\nFAILED skeleton/verify/test_api_apply.py::test_c_5_3_get_trades_returns_trade_objects_after_apply\nFAILED skeleton/verify/test_api_apply.py::test_c_5_4_apply_reduces_average_abs_drift\nFAILED skeleton/verify/test_api_apply.py::test_c_5_5_apply_returns_updated_holdings_length_equals_assets_count\nFAILED skeleton/verify/test_api_plan.py::test_c_3_1_post_trade_plan_returns_items_with_symbol_and_integer_shares\nFAILED skeleton/verify/test_api_plan.py::test_c_3_2_post_trade_plan_respects_budget\nFAILED skeleton/verify/test_api_plan.py::test_c_3_3_first_plan_item_is_largest_positive_drift\nFAILED skeleton/verify/test_api_positions.py::test_c_1_1_get_positions_returns_required_fields\nFAILED skeleton/verify/test_api_settings_targets.py::test_c_4_1_put_targets_returns_200_for_changed_weight\nFAILED skeleton/verify/test_api_settings_targets.py::test_c_4_2_put_settings_returns_200_for_changed_budget\nFAILED skeleton/verify/test_ui_allocation.py::test_c_2_2_ui_shows_over_badge_for_overweight\nFAILED skeleton/verify/test_ui_allocation.py::test_c_2_3_ui_shows_under_badge_for_underweight\nFAILED skeleton/verify/test_ui_allocation.py::test_c_2_4_ui_shows_loading_text_while_fetching\nFAILED skeleton/verify/test_ui_apply.py::test_c_5_2_click_apply_shows_applied_notice\nFAILED skeleton/verify/test_ui_edit_recompute.py::test_c_4_3_edit_target_and_save_updates_shares_for_that_symbol\nFAILED skeleton/verify/test_ui_edit_recompute.py::test_c_4_4_save_without_changes_shows_saved_notice_and_plan_unchanged\nFAILED skeleton/verify/test_ui_plan.py::test_c_3_4_ui_renders_one_row_per_plan_item\nFAILED skeleton/verify/test_ui_positions.py::test_c_1_2_sc_dashboard_renders_one_row_per_position\nFAILED skeleton/verify/test_ui_positions.py::test_c_1_3_sc_dashboard_shows_weight_percentage_cell\n21 failed in 65.16s (0:01:05)\n",
+  "stderr_tail": ""
+}

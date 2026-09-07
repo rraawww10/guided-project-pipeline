@@ -1,0 +1,173 @@
+{
+  "slug": "stock-tracker",
+  "cuts": [
+    {
+      "id": "cut-ui-weight-cell",
+      "file": "app/(dashboard)/page.tsx",
+      "line": 24,
+      "lines_removed": 4
+    },
+    {
+      "id": "cut-ui-positions-rows",
+      "file": "app/(dashboard)/page.tsx",
+      "line": 32,
+      "lines_removed": 12
+    },
+    {
+      "id": "cut-ui-fetch-allocation",
+      "file": "app/(dashboard)/page.tsx",
+      "line": 50,
+      "lines_removed": 18
+    },
+    {
+      "id": "cut-ui-drift-badge",
+      "file": "app/(dashboard)/page.tsx",
+      "line": 74,
+      "lines_removed": 2
+    },
+    {
+      "id": "cut-ui-target-inputs",
+      "file": "app/(dashboard)/page.tsx",
+      "line": 87,
+      "lines_removed": 7
+    },
+    {
+      "id": "cut-ui-plan-rows",
+      "file": "app/(dashboard)/page.tsx",
+      "line": 102,
+      "lines_removed": 8
+    },
+    {
+      "id": "cut-ui-apply-edits",
+      "file": "app/(dashboard)/page.tsx",
+      "line": 126,
+      "lines_removed": 18
+    },
+    {
+      "id": "cut-ui-apply-click",
+      "file": "app/(dashboard)/page.tsx",
+      "line": 151,
+      "lines_removed": 13
+    },
+    {
+      "id": "cut-ep-allocation-body",
+      "file": "app/api/allocation/route.ts",
+      "line": 10,
+      "lines_removed": 3
+    },
+    {
+      "id": "cut-ep-trade-record",
+      "file": "app/api/apply-plan/route.ts",
+      "line": 13,
+      "lines_removed": 15
+    },
+    {
+      "id": "cut-ep-apply-plan",
+      "file": "app/api/apply-plan/route.ts",
+      "line": 33,
+      "lines_removed": 9
+    },
+    {
+      "id": "cut-ep-positions-body",
+      "file": "app/api/positions/route.ts",
+      "line": 10,
+      "lines_removed": 9
+    },
+    {
+      "id": "cut-ep-settings-update",
+      "file": "app/api/settings/route.ts",
+      "line": 7,
+      "lines_removed": 11
+    },
+    {
+      "id": "cut-ep-targets-update",
+      "file": "app/api/targets/route.ts",
+      "line": 7,
+      "lines_removed": 11
+    },
+    {
+      "id": "cut-ep-plan-body",
+      "file": "app/api/trade-plan/route.ts",
+      "line": 7,
+      "lines_removed": 5
+    },
+    {
+      "id": "cut-ep-trades-list-body",
+      "file": "app/api/trades/route.ts",
+      "line": 10,
+      "lines_removed": 3
+    },
+    {
+      "id": "cut-calc-weights",
+      "file": "lib/allocation.ts",
+      "line": 15,
+      "lines_removed": 7
+    },
+    {
+      "id": "cut-plan-rank",
+      "file": "lib/plan.ts",
+      "line": 16,
+      "lines_removed": 11
+    },
+    {
+      "id": "cut-plan-allocate",
+      "file": "lib/plan.ts",
+      "line": 31,
+      "lines_removed": 37
+    },
+    {
+      "id": "cut-reconcile-holdings",
+      "file": "lib/reconcile.ts",
+      "line": 8,
+      "lines_removed": 14
+    }
+  ],
+  "count": 20,
+  "by_session": {
+    "1": [
+      "cut-ep-positions-body",
+      "cut-ui-positions-rows",
+      "cut-ui-weight-cell"
+    ],
+    "2": [
+      "cut-calc-weights",
+      "cut-ep-allocation-body",
+      "cut-ui-drift-badge",
+      "cut-ui-fetch-allocation"
+    ],
+    "3": [
+      "cut-ep-plan-body",
+      "cut-plan-allocate",
+      "cut-plan-rank",
+      "cut-ui-plan-rows"
+    ],
+    "4": [
+      "cut-ep-settings-update",
+      "cut-ep-targets-update",
+      "cut-ui-apply-edits",
+      "cut-ui-target-inputs"
+    ],
+    "5": [
+      "cut-ep-apply-plan",
+      "cut-ep-trade-record",
+      "cut-ep-trades-list-body",
+      "cut-reconcile-holdings",
+      "cut-ui-apply-click"
+    ]
+  },
+  "return_safety": {
+    "ok": true,
+    "checked": 20,
+    "violations": []
+  },
+  "partial_state_risks": [],
+  "typecheck": {
+    "ran": true,
+    "ok": true,
+    "error_count": 0,
+    "errors": [],
+    "missing_return": [],
+    "hint": ""
+  },
+  "ok": true
+}

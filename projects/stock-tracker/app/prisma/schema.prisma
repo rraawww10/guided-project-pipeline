@@ -1,0 +1,53 @@
+// Prisma schema for Portfolio Rebalancer
+// SQLite database lives at prisma/dev.db within the app directory.
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Asset {
+  symbol   String   @id
+  name     String
+  lotSize  Int
+  holding  Holding?
+  price    Price?
+  target   Target?
+  trades   Trade[]
+}
+
+model Holding {
+  assetSymbol String @id
+  asset       Asset  @relation(fields: [assetSymbol], references: [symbol])
+  shares      Int
+}
+
+model Price {
+  assetSymbol String @id
+  asset       Asset  @relation(fields: [assetSymbol], references: [symbol])
+  priceCents  Int
+}
+
+model Target {
+  assetSymbol String @id
+  asset       Asset  @relation(fields: [assetSymbol], references: [symbol])
+  weight      Float
+}
+
+model Trade {
+  id          Int    @id @default(autoincrement())
+  assetSymbol String
+  asset       Asset  @relation(fields: [assetSymbol], references: [symbol])
+  shares      Int    // positive = buy, negative = sell
+  priceCents  Int
+  createdNote String
+}
+
+model Setting {
+  key   String @id
+  value String
+}

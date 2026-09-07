@@ -1,0 +1,223 @@
+{
+  "ok": true,
+  "errors": [],
+  "warnings": [
+    {
+      "code": "W112",
+      "where": "session 1",
+      "message": "estimated 44.5 teaching minutes against a 40 minute cap. Nothing before step 9 measures this, so decide it here: 3 cuts, 2 builds, 3 concepts plus the project setup."
+    },
+    {
+      "code": "W112",
+      "where": "session 2",
+      "message": "estimated 43 teaching minutes against a 40 minute cap. Nothing before step 9 measures this, so decide it here: 4 cuts, 1 builds, 4 concepts."
+    },
+    {
+      "code": "W112",
+      "where": "session 3",
+      "message": "estimated 43 teaching minutes against a 40 minute cap. Nothing before step 9 measures this, so decide it here: 4 cuts, 1 builds, 4 concepts."
+    },
+    {
+      "code": "W112",
+      "where": "session 4",
+      "message": "estimated 46.2 teaching minutes against a 40 minute cap. Nothing before step 9 measures this, so decide it here: 4 cuts, 2 builds, 3 concepts."
+    },
+    {
+      "code": "W112",
+      "where": "session 5",
+      "message": "estimated 49 teaching minutes against a 40 minute cap. Nothing before step 9 measures this, so decide it here: 5 cuts, 2 builds, 2 concepts."
+    }
+  ],
+  "counts": {
+    "errors": 0,
+    "warnings": 5
+  },
+  "session_minutes": [
+    {
+      "n": 1,
+      "minutes": 44.5,
+      "cuts": 3,
+      "builds": 2,
+      "concepts": 3,
+      "carries_setup": true,
+      "over_cap": true,
+      "weighted": true,
+      "cut_minutes": [
+        {
+          "id": "cut-ui-weight-cell",
+          "minutes": 6.0,
+          "decisions": 0,
+          "hint_words": 25
+        },
+        {
+          "id": "cut-ui-positions-rows",
+          "minutes": 6.0,
+          "decisions": 0,
+          "hint_words": 21
+        },
+        {
+          "id": "cut-ep-positions-body",
+          "minutes": 6.0,
+          "decisions": 0,
+          "hint_words": 17
+        }
+      ],
+      "largest_cut_share": 0.33
+    },
+    {
+      "n": 2,
+      "minutes": 43.0,
+      "cuts": 4,
+      "builds": 1,
+      "concepts": 4,
+      "carries_setup": false,
+      "over_cap": true,
+      "weighted": true,
+      "cut_minutes": [
+        {
+          "id": "cut-ui-fetch-allocation",
+          "minutes": 6.0,
+          "decisions": 0,
+          "hint_words": 16
+        },
+        {
+          "id": "cut-ui-drift-badge",
+          "minutes": 6.0,
+          "decisions": 0,
+          "hint_words": 20
+        },
+        {
+          "id": "cut-ep-allocation-body",
+          "minutes": 6.0,
+          "decisions": 0,
+          "hint_words": 15
+        },
+        {
+          "id": "cut-calc-weights",
+          "minutes": 6.0,
+          "decisions": 0,
+          "hint_words": 25
+        }
+      ],
+      "largest_cut_share": 0.25
+    },
+    {
+      "n": 3,
+      "minutes": 43.0,
+      "cuts": 4,
+      "builds": 1,
+      "concepts": 4,
+      "carries_setup": false,
+      "over_cap": true,
+      "weighted": true,
+      "cut_minutes": [
+        {
+          "id": "cut-ui-plan-rows",
+          "minutes": 6.0,
+          "decisions": 0,
+          "hint_words": 16
+        },
+        {
+          "id": "cut-plan-rank",
+          "minutes": 6.0,
+          "decisions": 0,
+          "hint_words": 17
+        },
+        {
+          "id": "cut-plan-allocate",
+          "minutes": 6.0,
+          "decisions": 0,
+          "hint_words": 20
+        },
+        {
+          "id": "cut-ep-plan-body",
+          "minutes": 6.0,
+          "decisions": 0,
+          "hint_words": 17
+        }
+      ],
+      "largest_cut_share": 0.25
+    },
+    {
+      "n": 4,
+      "minutes": 46.2,
+      "cuts": 4,
+      "builds": 2,
+      "concepts": 3,
+      "carries_setup": false,
+      "over_cap": true,
+      "weighted": true,
+      "cut_minutes": [
+        {
+          "id": "cut-ui-apply-edits",
+          "minutes": 7.7,
+          "decisions": 1,
+          "hint_words": 28
+        },
+        {
+          "id": "cut-ui-target-inputs",
+          "minutes": 6.0,
+          "decisions": 0,
+          "hint_words": 16
+        },
+        {
+          "id": "cut-ep-targets-update",
+          "minutes": 6.0,
+          "decisions": 0,
+          "hint_words": 9
+        },
+        {
+          "id": "cut-ep-settings-update",
+          "minutes": 6.0,
+          "decisions": 0,
+          "hint_words": 10
+        }
+      ],
+      "largest_cut_share": 0.3
+    },
+    {
+      "n": 5,
+      "minutes": 49.0,
+      "cuts": 5,
+      "builds": 2,
+      "concepts": 2,
+      "carries_setup": false,
+      "over_cap": true,
+      "weighted": true,
+      "cut_minutes": [
+        {
+          "id": "cut-ui-apply-click",
+          "minutes": 6.0,
+          "decisions": 0,
+          "hint_words": 26
+        },
+        {
+          "id": "cut-reconcile-holdings",
+          "minutes": 6.0,
+          "decisions": 0,
+          "hint_words": 18
+        },
+        {
+          "id": "cut-ep-trades-list-body",
+          "minutes": 6.0,
+          "decisions": 0,
+          "hint_words": 11
+        },
+        {
+          "id": "cut-ep-trade-record",
+          "minutes": 6.0,
+          "decisions": 0,
+          "hint_words": 13
+        },
+        {
+          "id": "cut-ep-apply-plan",
+          "minutes": 6.0,
+          "decisions": 0,
+          "hint_words": 18
+        }
+      ],
+      "largest_cut_share": 0.2
+    }
+  ],
+  "spec_hash": "5d4ab97236ed350bc0377701c110d8588d4b7a7765cd35c1badba84811f3ccb5"
+}

@@ -1,0 +1,35 @@
+{
+  "ok": true,
+  "target": "app",
+  "preview": "http://127.0.0.1:33761",
+  "advisories": [],
+  "advisories_allowed": false,
+  "seconds": 8.2,
+  "steps": [
+    {
+      "step": "fresh copy",
+      "ok": true,
+      "detail": "/tmp/gp-deploy-stock-tracker-xymniqqp/app"
+    },
+    {
+      "step": "install",
+      "ok": true,
+      "detail": "\n> stock-tracker@1.0.0 postinstall\n> prisma generate && prisma db push && node prisma/seed.js\n\nPrisma schema loaded from prisma/schema.prisma\n\n\u2714 Generated Prisma Client (v5.16.1) to ./node_modules/@prisma/client in 27ms\n\nStart using Prisma Client in Node.js (See: https://pris.ly/d/client)\n```\nimport { PrismaClient } from '@prisma/client'\nconst prisma = new PrismaClient()\n```\nor start using Prisma Client at the edge (See: https://pris.ly/d/accelerate)\n```\nimport { PrismaClient } from '@prisma/client/edge'\nconst prisma = new PrismaClient()\n```\n\nSee other ways of importing Prisma Client: http://pris.ly/d/importing-client\n\n\u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510\n\u2502  Deploying your app to serverless or edge functions?        \u2502\n\u2502  Try Prisma Accelerate for connection pooling and caching.  \u2502\n\u2502  https://pris.ly/cli/--accelerate                           \u2502\n\u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518\n\nPrisma schema loaded from prisma/schema.prisma\nDatasource \"db\": SQLite database \"dev.db\" at \"file:./dev.db\"\n\nSQLite database dev.db created at file:./dev.db\n\n\ud83d\ude80  Your database is now in sync with your Prisma schema. Done in 14ms\n\nRunning generate... (Use --skip-generate to skip the generators)\n\u001b[2K\u001b[1A\u001b[2K\u001b[GRunning generate... - Prisma Client\n\u001b[2K\u001b[1A\u001b[2K\u001b[G\u2714 Generated Prisma Client (v5.16.1) to ./node_modules/@prisma/client in 28ms\n\n\nadded 41 packages in 4s\n"
+    },
+    {
+      "step": "install advisories",
+      "ok": true,
+      "detail": "none"
+    },
+    {
+      "step": "build",
+      "ok": true,
+      "detail": "\n> stock-tracker@1.0.0 build\n> next build\n\n\u25b2 Next.js 16.1.1 (Turbopack)\n\n  Creating an optimized production build ...\n\u2713 Compiled successfully in 679.3ms\n  Running TypeScript ...\n\n  We detected TypeScript in your project and reconfigured your tsconfig.json file for you.\n  The following suggested values were added to your tsconfig.json. These values can be changed to fit your project's needs:\n\n  \t- include was updated to add '.next/dev/types/**/*.ts'\n\n  The following mandatory changes were made to your tsconfig.json:\n\n  \t- jsx was set to react-jsx (next.js uses the React automatic runtime)\n\n  Collecting page data using 27 workers ...\n  Generating static pages using 27 workers (0/7) ...\n  Generating static pages using 27 workers (1/7) \n  Generating static pages using 27 workers (3/7) \n  Generating static pages using 27 workers (5/7) \n\u2713 Generating static pages using 27 workers (7/7) in 172.8ms\n  Finalizing page optimization ...\n\nRoute (app)\n\u250c \u25cb /\n\u251c \u25cb /_not-found\n\u251c \u0192 /api/allocation\n\u251c \u0192 /api/apply-plan\n\u251c \u0192 /api/positions\n\u251c \u0192 /api/settings\n\u251c \u0192 /api/targets\n\u251c \u0192 /api/trade-plan\n\u2514 \u0192 /api/trades\n\n\n\u25cb  (Static)   prerendered as static content\n\u0192  (Dynamic)  server-rendered on demand\n\n"
+    },
+    {
+      "step": "preview",
+      "ok": true,
+      "detail": "http://127.0.0.1:33761"
+    }
+  ]
+}

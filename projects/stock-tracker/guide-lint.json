@@ -1,0 +1,55 @@
+{
+  "ok": true,
+  "errors": [],
+  "warnings": [],
+  "counts": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "files": [
+    "README.md",
+    "session-1.md",
+    "session-2.md",
+    "session-3.md",
+    "session-4.md",
+    "session-5.md",
+    "troubleshooting.md"
+  ],
+  "sessions": [
+    {
+      "n": 1,
+      "file": "session-1.md",
+      "minutes": 40,
+      "over_cap": false,
+      "disclosed": false
+    },
+    {
+      "n": 2,
+      "file": "session-2.md",
+      "minutes": 40,
+      "over_cap": false,
+      "disclosed": false
+    },
+    {
+      "n": 3,
+      "file": "session-3.md",
+      "minutes": 40,
+      "over_cap": false,
+      "disclosed": true
+    },
+    {
+      "n": 4,
+      "file": "session-4.md",
+      "minutes": 40,
+      "over_cap": false,
+      "disclosed": false
+    },
+    {
+      "n": 5,
+      "file": "session-5.md",
+      "minutes": 40,
+      "over_cap": false,
+      "disclosed": false
+    }
+  ]
+}

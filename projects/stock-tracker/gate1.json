@@ -1,0 +1,236 @@
+{
+  "ok": true,
+  "verdict": "approve-eligible",
+  "spec_hash": "5d4ab97236ed350bc0377701c110d8588d4b7a7765cd35c1badba84811f3ccb5",
+  "findings": [
+    {
+      "id": "A1",
+      "title": "Lot size vs single-share allocation",
+      "section": "blocking",
+      "owner": "test-runner",
+      "line": "\"Asset: symbol (PK, string), name (string), lotSize (integer, shares per lot).\" and \"Build `plan` by allocating integer share quantities that reduce drift, not exceeding `budgetCents`\"",
+      "where": "spec.md, Data model; Session 3 cut points (cut-plan-allocate)",
+      "line_key": "71109cc64e336913",
+      "subject": [
+        "cut-plan-allocate"
+      ],
+      "blocking": true,
+      "owner_declared": "test-runner",
+      "owner_valid": true,
+      "owner_downgraded": null,
+      "fail_open": false,
+      "caught_by": "step 6 - the Builder/test-runner loop fixes this for free",
+      "must_fix_now": false
+    },
+    {
+      "id": "A2",
+      "title": "Target weight input units (percent vs fraction)",
+      "section": "blocking",
+      "owner": "test-runner",
+      "line": "\"Target: ... weight (decimal 0..1).\" and \"target weight inputs (data-testid=\\\"target-input-<SYMBOL>\\\")\"",
+      "where": "spec.md, Data model (Target.weight 0..1) and Session 4 (target inputs, c-4-1, cut-ui-target-inputs)",
+      "line_key": "26fdef10018716e2",
+      "subject": [
+        "c-4-1",
+        "cut-ui-target-inputs"
+      ],
+      "blocking": true,
+      "owner_declared": "test-runner",
+      "owner_valid": true,
+      "owner_downgraded": null,
+      "fail_open": false,
+      "caught_by": "step 6 - the Builder/test-runner loop fixes this for free",
+      "must_fix_now": false
+    },
+    {
+      "id": "A3",
+      "title": "Budget input units (cents vs dollars)",
+      "section": "blocking",
+      "owner": "test-runner",
+      "line": "\"Setting: ... budgetCents (integer). Budget is also editable in the UI.\" and \"budget input (data-testid=\\\"budget-input\\\")\" / \"request\": \"{budgetCents: number}\"",
+      "where": "spec.md, Data model (Setting.budgetCents) and Screens; spec.json ep-settings-update request",
+      "line_key": "4ab91f4e51a438f5",
+      "subject": [
+        "ep-settings-update"
+      ],
+      "blocking": true,
+      "owner_declared": "test-runner",
+      "owner_valid": true,
+      "owner_downgraded": null,
+      "fail_open": false,
+      "caught_by": "step 6 - the Builder/test-runner loop fixes this for free",
+      "must_fix_now": false
+    },
+    {
+      "id": "A4",
+      "title": "Which budget ep-apply-plan uses",
+      "section": "blocking",
+      "owner": "test-runner",
+      "line": "\"ep-apply-plan: POST /api/apply-plan \u2192 200 with {applied, updatedHoldings}\" and \"Compute the current plan, apply it\" (no request body)",
+      "where": "spec.md, Endpoints (ep-apply-plan), Session 4 (settings), Session 5 cut-ep-apply-plan",
+      "line_key": "fc4c383b603c25d3",
+      "subject": [
+        "cut-ep-apply-plan",
+        "ep-apply-plan"
+      ],
+      "blocking": true,
+      "owner_declared": "test-runner",
+      "owner_valid": true,
+      "owner_downgraded": null,
+      "fail_open": false,
+      "caught_by": "step 6 - the Builder/test-runner loop fixes this for free",
+      "must_fix_now": false
+    },
+    {
+      "id": "A5",
+      "title": "SELL item semantics in TradeItem (signs and cost)",
+      "section": "blocking",
+      "owner": "test-runner",
+      "line": "\"TradeItem[]: {symbol, shares, side: \\\"BUY\\\"|\\\"SELL\\\", priceCents, costCents}\" and \"the sum of costCents across BUY items is \u2264 budgetCents\"",
+      "where": "spec.md, Endpoints (ep-plan-generate), Session 3 criteria c-3-1..c-3-2",
+      "line_key": "9e53618e14bba7ba",
+      "subject": [
+        "c-3-1",
+        "c-3-2",
+        "ep-plan-generate"
+      ],
+      "blocking": true,
+      "owner_declared": "test-runner",
+      "owner_valid": true,
+      "owner_downgraded": null,
+      "fail_open": false,
+      "caught_by": "step 6 - the Builder/test-runner loop fixes this for free",
+      "must_fix_now": false
+    },
+    {
+      "id": "W1",
+      "title": "Ranking phrase mixes \u201cabsolute\u201d and \u201cpositive\u201d",
+      "section": "worth a look",
+      "owner": "test-runner",
+      "line": "\"the first plan item's symbol corresponds to the candidate with the largest absolute positive drift\"",
+      "where": "spec.md, Session 3, criterion c-3-3; spec.json c-3-3",
+      "line_key": "c38ad353e97e9ca1",
+      "subject": [
+        "c-3-3"
+      ],
+      "blocking": false,
+      "owner_declared": "test-runner",
+      "owner_valid": true,
+      "owner_downgraded": null,
+      "fail_open": false,
+      "caught_by": "step 6 - the Builder/test-runner loop fixes this for free",
+      "must_fix_now": false
+    },
+    {
+      "id": "W2",
+      "title": "Positions endpoint: name required or not",
+      "section": "worth a look",
+      "owner": "nothing",
+      "line": "\"Position[]: {symbol, name, shares, priceCents, targetWeight}\" vs \"include symbol, shares, priceCents and targetWeight\" (c-1-1)",
+      "where": "spec.md, Endpoints (ep-positions-list) vs Session 1 c-1-1; Session 1 cut-ep-positions-body",
+      "line_key": "4267a828a4d380d2",
+      "subject": [
+        "c-1-1",
+        "cut-ep-positions-body",
+        "ep-positions-list"
+      ],
+      "blocking": false,
+      "owner_declared": "nothing",
+      "owner_valid": true,
+      "owner_downgraded": null,
+      "fail_open": false,
+      "caught_by": "NO downstream checker sees this - it ships as written",
+      "must_fix_now": false
+    },
+    {
+      "id": "W3",
+      "title": "Reusing data-testid \u201capplied\u201d for a Saved notice",
+      "section": "worth a look",
+      "owner": "test-runner",
+      "line": "\"show a 'Saved' notice (data-testid \\\"applied\\\")\" and screen element \"applied notice (data-testid=\\\"applied\\\")\"",
+      "where": "spec.md, Session 4 cut-ui-apply-edits; Screens; Session 5 c-5-2",
+      "line_key": "b33b9dda573bdeb8",
+      "subject": [
+        "c-5-2",
+        "cut-ui-apply-edits"
+      ],
+      "blocking": false,
+      "owner_declared": "test-runner",
+      "owner_valid": true,
+      "owner_downgraded": null,
+      "fail_open": false,
+      "caught_by": "step 6 - the Builder/test-runner loop fixes this for free",
+      "must_fix_now": false
+    },
+    {
+      "id": "W4",
+      "title": "Current weight formatting precision",
+      "section": "worth a look",
+      "owner": "test-runner",
+      "line": "c-1-3: \"(e.g. ends with \\\"%\\\")\"; cut hint: \"to one decimal place (e.g. \\\"12.3%\\\")\"",
+      "where": "spec.md, Session 1 c-1-3; Session 1 cut-ui-weight-cell",
+      "line_key": "ee037193f548c6a4",
+      "subject": [
+        "c-1-3",
+        "cut-ui-weight-cell"
+      ],
+      "blocking": false,
+      "owner_declared": "test-runner",
+      "owner_valid": true,
+      "owner_downgraded": null,
+      "fail_open": false,
+      "caught_by": "step 6 - the Builder/test-runner loop fixes this for free",
+      "must_fix_now": false
+    },
+    {
+      "id": "W5",
+      "title": "\u201cRefetch the plan\u201d vs POST-only API",
+      "section": "worth a look",
+      "owner": "test-runner",
+      "line": "\"refresh `planRefresh` by refetching the plan\" alongside \"POST /api/trade-plan with {budgetCents}\"",
+      "where": "spec.md, Session 4 cut-ui-apply-edits; spec.json Endpoints (only POST /api/trade-plan)",
+      "line_key": "4395c53b1b753dac",
+      "subject": [
+        "cut-ui-apply-edits"
+      ],
+      "blocking": false,
+      "owner_declared": "test-runner",
+      "owner_valid": true,
+      "owner_downgraded": null,
+      "fail_open": false,
+      "caught_by": "step 6 - the Builder/test-runner loop fixes this for free",
+      "must_fix_now": false
+    },
+    {
+      "id": "W6",
+      "title": "Weight-sum rounding rule",
+      "section": "worth a look",
+      "owner": "test-runner",
+      "line": "\"the sum of all currentWeight values across items equals 1.000 when rounded to three decimal places\"",
+      "where": "spec.md, Session 2, criterion c-2-5",
+      "line_key": "e4c144cfff0f3e30",
+      "subject": [
+        "c-2-5"
+      ],
+      "blocking": false,
+      "owner_declared": "test-runner",
+      "owner_valid": true,
+      "owner_downgraded": null,
+      "fail_open": false,
+      "caught_by": "step 6 - the Builder/test-runner loop fixes this for free",
+      "must_fix_now": false
+    }
+  ],
+  "counts": {
+    "blocking": 5,
+    "worth_a_look": 6,
+    "unowned_blocking": 0
+  },
+  "reasons": [
+    "5 blocking finding(s), all owned by a downstream checker; 6 worth a look. Nothing here escapes to the shipped project."
+  ],
+  "rule": "reject when any blocking finding is owned by 'nothing'; approve when every remaining finding sits in a column a downstream checker owns. An owner that can pass by not running is owned only conditionally: it approves, and the confirmation it actually ran is listed in verify_later",
+  "reviewed_spec_hash": "5d4ab97236ed350bc0377701c110d8588d4b7a7765cd35c1badba84811f3ccb5",
+  "drift": [],
+  "verify_later": []
+}
