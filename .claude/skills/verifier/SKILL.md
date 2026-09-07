@@ -79,6 +79,16 @@ the generated skeleton, and they must fail there, on purpose.
 **Seed your own data.** Never depend on data left by an earlier test. Tests run
 in any order and the nightly watchdog runs them on a cold app.
 
+**A loading, empty or error state is what an unwritten cut leaves behind.** The
+markup for it lives outside the cut - you never cut the render - so it survives
+into the skeleton with the fetch that would clear it removed, and asserting the
+state itself passes there. Nor is "it appears, then it goes" enough: a
+server-rendered page carries the text and React drops it at hydration, so the
+flash looks exactly like a resolved fetch (measured, 2026-09-07 stock-tracker
+c-2-4). Assert the transition INTO the loaded state - the element that only
+exists once the data arrived - and the interim state becomes evidence instead of
+decoration.
+
 **Wait for the app, never for the clock.** Playwright's `expect` and
 `wait_for_selector` retry. `sleep` is how a test becomes flaky at 2am.
 

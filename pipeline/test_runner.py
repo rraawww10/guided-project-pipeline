@@ -123,9 +123,19 @@ def ensure_venv(project: Path) -> Path:
     if r.returncode != 0:
         raise RuntimeError(f"could not install {PYTEST_DEPS}:\n{r.stderr[-1500:]}")
 
-    # chromium is ~150MB and only needed once per machine
-    subprocess.run([str(venv_bin(venv, "playwright")), "install", "chromium"],
-                   capture_output=True, timeout=1800)
+    # chromium is ~150MB and only needed once per machine. Check it: the stamp
+    # below is what stops this running again, so a browser install that failed -
+    # a fresh machine with a flaky network is the usual way - would leave the
+    # venv marked good with no browser, and every UI test would then fail on
+    # Playwright's "Executable doesn't exist" until someone deleted the venv by
+    # hand. No stamp unless the browser is really there.
+    b = subprocess.run([str(venv_bin(venv, "playwright")), "install", "chromium"],
+                       capture_output=True, text=True, encoding="utf-8",
+                       errors="replace", timeout=1800)
+    if b.returncode != 0:
+        raise RuntimeError(
+            "playwright could not install chromium, so no UI test can run:\n"
+            f"{(b.stderr or b.stdout or '')[-1500:]}")
     stamp.write_text("ok\n", encoding="utf-8")
     return py
 
@@ -188,12 +198,25 @@ def boot(target: Path, port: int, log: Path) -> subprocess.Popen:
     # node_modules holding no packages at all.
     installed = mods.is_dir() and any(
         not child.name.startswith(".") for child in mods.iterdir())
+    # The install's exit code used to be discarded and its output never logged,
+    # so a refused install fell through to `npm run build` and surfaced as
+    # `next: not found` - the symptom, one step from its cause. 2026-09-07,
+    # stock-tracker: `npm ci` failed EUSAGE on a lock still pinning next@14.2.13
+    # against a package.json on 16.1.1, and the only thing on record was the 127
+    # from the build. Fail where it failed, and keep what npm said.
+    install_log = ""
     if not installed:
         lock = target / "package-lock.json"
-        run([npm(), "ci" if lock.exists() else "install", "--no-audit", "--no-fund"],
-            target, timeout=900)
+        cmd = "ci" if lock.exists() else "install"
+        inst = run([npm(), cmd, "--no-audit", "--no-fund"], target, timeout=900)
+        install_log = (f"$ npm {cmd} --no-audit --no-fund\n"
+                       f"{inst.stdout}\n{inst.stderr}\n")
+        if inst.returncode != 0:
+            log.write_text(install_log, encoding="utf-8")
+            raise RuntimeError(f"npm {cmd} failed - see {log}")
     build = run([npm(), "run", "build"], target, timeout=900)
-    log.write_text(f"$ npm run build\n{build.stdout}\n{build.stderr}\n", encoding="utf-8")
+    log.write_text(f"{install_log}$ npm run build\n{build.stdout}\n{build.stderr}\n",
+                   encoding="utf-8")
     if build.returncode != 0:
         raise RuntimeError(f"npm run build failed - see {log}")
     handle = log.open("a")

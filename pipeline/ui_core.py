@@ -513,6 +513,55 @@ def suite_did_not_run(project: Path) -> bool:
     return ran == 0 and rc != 0
 
 
+def mutant_did_not_build(project: Path) -> bool:
+    """Is a red mutation.json red *only* because a mutant would not build?
+
+    mutation.py has three outcomes per task, not two. NOT GRADED means every
+    requirement declaring the task still passed with it removed - a weak suite,
+    and the Verifier's to strengthen. INCONCLUSIVE means the mutant never built,
+    so every criterion reported `missing` and nothing was proven either way; the
+    fault is a cut marker in `app/`, and the Verifier is hooked out of `app/`.
+    Routing that to the Verifier is a loop it cannot end at any price -
+    2026-09-07, stock-tracker burned three attempts on one undeclared local.
+
+    True only when inconclusive is the sole cause. With ungraded tasks present
+    the Verifier still has work it can do, and clearing those leaves an
+    inconclusive-only report next run, which lands here. So the two owners
+    converge instead of fighting.
+
+    This is `suite_did_not_run`'s distinction one step later: a build failure is
+    not a test failure, and step 8 had no equivalent.
+    """
+    report = safe_json(project / "mutation.json", {})
+    if not isinstance(report, dict) or report.get("ok"):
+        return False
+    inconclusive = report.get("inconclusive_tasks") or []
+    ungraded = report.get("ungraded_tasks") or []
+    return bool(inconclusive) and not ungraded
+
+
+def skeleton_did_not_build(project: Path) -> bool:
+    """Is a red skeleton-check red only because the skeleton would not build?
+
+    The check's rule is that a criterion whose cuts were removed must FAIL on
+    the skeleton. `missing` is not `fail` - it means the test never ran, so the
+    report says nothing about the cut markers at all. When the skeleton cannot
+    install or build, every criterion comes back missing and all 21 read as
+    mismatches, which looks exactly like 21 badly placed cuts.
+
+    Re-cutting cannot fix it: `cut` copies `app/` again, stale lock and all.
+    2026-09-07, stock-tracker looped the cutter four times in eight seconds over
+    a package-lock.json that disagreed with package.json.
+
+    Same distinction as `suite_did_not_run` and `mutant_did_not_build`: a build
+    failure is not a test failure, and it belongs to whoever owns `app/`.
+    """
+    report = safe_json(project / "skeleton-results.json", {})
+    if not isinstance(report, dict):
+        return False
+    return int(report.get("pytest_returncode") or 0) == BOOT_FAILED_RC
+
+
 def failed_repair(project: Path, state: dict) -> dict | None:
     """A red checker report re-opens the step that owns it.
 
@@ -544,6 +593,31 @@ def failed_repair(project: Path, state: dict) -> dict | None:
                           "about app/ can be drawn from it, and the Builder cannot "
                           "edit the tests (rule 3).",
                 "then": ["test"],
+            }
+        if filename == "mutation.json" and mutant_did_not_build(project):
+            meta = {
+                "kind": "agent", "component": "builder", "phase": "code",
+                "reason": "A mutant would not build, so every criterion reported "
+                          "missing and mutation could only say INCONCLUSIVE - "
+                          "nothing was proven about whether the task is graded. A "
+                          "cut that does not compile once removed is a marker "
+                          "problem in app/, and the Verifier cannot write there.",
+                "then": ["mutation"],
+            }
+        if filename == "skeleton-check.json" and skeleton_did_not_build(project):
+            meta = {
+                "kind": "agent", "component": "builder", "phase": "pack",
+                "reason": "The skeleton would not install or build, so every "
+                          "criterion came back missing rather than failing and "
+                          "the check says nothing about the cut markers. "
+                          "Re-cutting copies app/ again and cannot reach it - "
+                          "the fix is in app/ (rule 4: never edit skeleton/).",
+                # `test` first, deliberately: it is what runs stack_check, and
+                # S008 is the rule that catches the commonest cause of a
+                # skeleton that will not install - a package-lock.json left
+                # behind by a package.json edit. Re-cutting before verifying
+                # app/ copies the same fault into the skeleton again.
+                "then": ["test", "cut", "leak"],
             }
         # Rule 7 rejects a report the spec outran. The owner of a blocking
         # finding is the Spec Writer, but staleness is the one rejection the

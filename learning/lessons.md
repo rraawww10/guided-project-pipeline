@@ -115,6 +115,21 @@ gets a strikethrough and a date.
 - **The fallback must not accidentally pass the test.** A 501 and `ok: false`
   fail the criterion, which is what the skeleton needs. A fallback that returns
   plausible-looking data makes the test green on an empty skeleton.
+- **A criterion that asserts only a transient state cannot be graded by
+  asserting that state.** 2026-09-07, stock-tracker c-2-4, "while the allocation
+  report is loading, the page shows Loading...". The render
+  `{!reportState && <div>Loading...</div>}` correctly sits OUTSIDE
+  cut-ui-fetch-allocation - you do not cut the markup - so it survives into the
+  skeleton, where the fetch that would set `reportState` is gone and the loading
+  text is therefore permanent. Two test shapes graded nothing here:
+  "Loading appears" passes trivially, and so does "appears then clears" -
+  measured on the skeleton, the SSR html carries the text and React drops it at
+  hydration, so the flash is indistinguishable from a resolved fetch. What only
+  a live fetch produces is the fetch's RESULT: waiting for
+  `[data-testid^="drift-"]`, which renders only once `reportState` is set, made
+  c-2-4 pass on app/ and fail on skeleton/. **For a loading, empty or error
+  state, assert the transition into the loaded state, not the interim state** -
+  the interim one is what an unwritten cut leaves behind for free.
 
 - **The skeleton is a snapshot, and nothing used to say when it was taken.**
   2026-09-07, demo-run-03 shipped with app/ on next 16.1.1 and an awaited
@@ -141,6 +156,39 @@ gets a strikethrough and a date.
 - **INCONCLUSIVE is not a pass.** 2026-09-06: when a mutant will not build,
   every criterion returns `missing` and nothing passed, so the run says nothing
   about whether the task is graded. Read `inconclusive_tasks` as unproven.
+
+- **A cut must not declare what another cut reads, and the rule was written too
+  narrowly to say so.** 2026-09-07, stock-tracker: `apply-plan/route.ts`
+  declared `const plan` inside `cut-ep-trade-record` while `cut-ep-apply-plan`,
+  further down the same function, read it. Remove the first and `plan` is
+  undeclared, `next build` dies, every criterion reports `missing`, and mutation
+  returns INCONCLUSIVE - nothing proven, task ungraded. The Builder's skill
+  already carried "never put a function's only `return` inside a pair" *and*
+  named INCONCLUSIVE as the consequence, so the rule was in the right brief and
+  still did not fire: it named `return`, and this was a `const`. Generalised
+  there now - **nothing declared inside a pair may be read outside it**, and two
+  cuts in one function must each compile with the other removed, because that is
+  what mutation builds. Where a rule is broken by a case it does not literally
+  name, widen the rule rather than adding an instance.
+
+- **A stale lock hides in app/ and detonates in the skeleton, and re-cutting
+  cannot reach it.** 2026-09-07, stock-tracker: the Builder bumped next 14.2.13
+  -> 16.1.1 to clear an S007 advisory and left `package-lock.json` on 14.2.13.
+  `app/` still had a populated `node_modules`, so `boot()` skipped the install
+  and the suite went 21/21 green through Gate 2. `skeleton/` was the first clean
+  tree in the run: `npm ci` refused with EUSAGE, nothing installed, `next build`
+  exited 127 with `next: not found`, all 21 criteria came back `missing`, and
+  skeleton-check read that as 21 mismatched cuts. It routed to `cut`, which
+  copies `app/` again - four attempts in eight seconds over a fault no re-cut can
+  reach. The lesson "a stale package-lock.json passes locally and fails on a
+  clean machine" was already written down against step 12; it fires at step 10
+  first, because the skeleton is cleaner than the deploy check's copy is early.
+  Three fixes, one per layer: `stack_check` S008 fails the step 7 check when
+  package.json and the lock drift, `boot()` now checks and logs the install's
+  exit code instead of discarding it and letting `next build` report the
+  symptom, and a skeleton that never booted routes to the Builder. **`missing` is
+  not `fail`** - when every criterion is missing, read the return code before
+  believing anything the report says about cut markers.
 
 ## Tests
 
@@ -169,6 +217,22 @@ gets a strikethrough and a date.
   `mutation.py` reads the counts, so a mutant that failed to build would have
   looked green and its task scored as graded. The report is now deleted before
   each run.
+
+- **A suite with no reset is ordered by its filenames, and the Builder cannot
+  fix that.** 2026-09-07, stock-tracker: 21 tests, one long-lived server, one
+  SQLite file, and no `conftest.py` anywhere in `verify/`. pytest collects
+  alphabetically, so `test_api_apply.py` ran second and the drift its
+  `POST /api/apply-plan` consumed was gone before c-3-3, c-4-3, c-5-3 and c-5-4
+  read it; c-5-4 asserted 4.776995305164321 < 4.776995305164321. `redfirst` was
+  green and truthful - it checks assertions, all-red and fixture resolution, and
+  runs the suite exactly once in one order. The loop that followed was
+  unwinnable by construction: rule 3 locks `verify/` to the Builder, so it kept
+  succeeding at `app/` while the same four criteria stayed red, burning code
+  retries 2 -> 4. Fixed by a `verify/conftest.py` autouse fixture that re-runs
+  `prisma/seed.js` before every test, and the rule is now in the Test Writer's
+  own skill - it was only ever in the Verifier's, and in flow 2 the Test Writer
+  writes the suite. **A fresh browser page per test is not a reset**: demo-run-03
+  had that fixture and still shared its rows.
 
 ## Process
 
@@ -283,6 +347,21 @@ gets a strikethrough and a date.
   was flagged both times. Both transcripts show exactly one tool call,
   `python3 -m pipeline unlock <slug>`, and no file writes. Verify from the
   transcript rather than trusting or dismissing the warning, but expect it.
+
+- **INCONCLUSIVE is a build failure, and build failures are the Builder's - but
+  mutation.json routes to the Verifier either way.** 2026-09-07, stock-tracker:
+  `FAILED_REPORT_REPAIRS["mutation.json"]` sends every red report to the
+  verifier, with the reason "a student task grades nothing, so the verifier
+  strengthens the suite." That is right for NOT GRADED and wrong for
+  INCONCLUSIVE, where the mutant never built and the fault is a cut marker in
+  `app/` - a tree the Verifier is hooked out of. Attempts 1-3 cost real credits:
+  the Verifier correctly cleared the one NOT GRADED task on its first pass, then
+  looped on an INCONCLUSIVE one it could not reach at any price. This is the
+  `BOOT_FAILED_RC` lesson one step later - `suite_did_not_run()` already draws
+  exactly this distinction for `results.json` at step 7, and nothing draws it for
+  `mutation.json` at step 8. Until the routing is conditional, read
+  `inconclusive_tasks` before letting an auto-run repair a red mutation report,
+  and hand an inconclusive one to the Builder by hand.
 
 ## Building the checkers
 
@@ -548,6 +627,20 @@ guide alone. Three predictions were on record before it ran:
   check that can be skipped, fail open, or be configured out of existence is only
   conditionally an owner. Before adding a name to the OWNERS table, ask what
   happens when that checker cannot run.
+
+- **A downstream owner that surfaces a finding cannot always fix it.** Rule 8
+  approves when every blocking finding sits in a column a downstream checker
+  owns. 2026-09-07, stock-tracker: Gate 1's five blocking findings were all
+  owned by `test-runner`, `fail_open: false`, `verify_later` empty - the rule's
+  cleanest possible verdict - and two notes recorded that c-3-3 asserted one row
+  and that the apply tests mutated shared state. Both fired within the hour. The
+  test-runner did surface them, exactly as the rule promised, but the only
+  component that could have repaired them was the Builder, and Gate 1 had just
+  frozen `verify/` out of its reach. **Owned, live, and still unfixable.** A
+  finding whose remedy lives in `verify/` has to be settled before Gate 1
+  freezes it - by the Test Writer, or by a person, or by rejecting - because
+  after that the loop it causes cannot terminate on its own. Ask not only which
+  checker sees a finding, but which component is allowed to act on what it sees.
 
 ## Which findings can become linter rules
 

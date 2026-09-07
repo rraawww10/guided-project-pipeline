@@ -62,6 +62,22 @@ stack, the AI does not choose it.**
   says what it needs.
 - If you cannot make the stack work, **stop and say so**, naming the exact
   error. Do not substitute something adjacent that happens to pass the tests.
+- **Every time you touch `package.json`, regenerate the lock.** `npm ci`
+  refuses outright when the two disagree, and the tree that finds out is not
+  yours: `app/` keeps a populated `node_modules` from earlier steps, so the
+  install is skipped there and a stale lock passes 21/21 unnoticed. The first
+  clean tree is `skeleton/` at step 10, then the deploy check's fresh copy at
+  step 12. 2026-09-07, stock-tracker: bumping next 14.2.13 -> 16.1.1 to clear an
+  advisory left the lock on 14.2.13; the skeleton died with EUSAGE, `next build`
+  reported `next: not found`, all 21 criteria came back `missing`, and the
+  cutter was re-run four times over a fault no re-cut can reach. After any edit
+  to package.json, in `app/`:
+
+      npm install --package-lock-only
+
+  It rewrites `package-lock.json` from `package.json` without touching
+  `node_modules`. `stack_check` S008 now fails the step when they drift, so this
+  costs you a retry if you skip it.
 
 `stack_check` enforces every line of this at the test runner and fails the step.
 The suite passing does not save you: answering the assertions is not the same as
@@ -116,6 +132,19 @@ YAML use `#`.
   stays ungraded. Declare the value above the marker, assign inside it, and
   return below it - or put the whole function expression inside the pair, so
   the cut takes the signature and its returns away together.
+- **The same rule, generalised: nothing declared inside a pair may be read
+  outside it.** A `return` is only the commonest case. 2026-09-07,
+  stock-tracker: `apply-plan/route.ts` declared `const plan` inside
+  `cut-ep-trade-record`, and `cut-ep-apply-plan` further down the same function
+  read it. Removing the first cut left `plan` undeclared, `next build` failed,
+  every criterion reported `missing`, and mutation could only say INCONCLUSIVE -
+  and because a build failure lives in `app/`, the Verifier it was routed to
+  could not fix it at any price. Before you place a pair, check every symbol it
+  declares: if anything after the closing marker names it, hoist the
+  declaration above the opening marker with a safe default and assign inside.
+  **Two cuts in one function must not depend on each other's locals** - each has
+  to compile with the other removed, because that is exactly what the mutation
+  check builds.
 - What is left must not silently pass the test. If the criterion is "the list
   renders one row per todo", do not leave a hard-coded row behind.
 - Never cut imports, types, config, or styling. Those are given to the student.

@@ -60,6 +60,39 @@ session that introduced the writes. A suite that passes once and fails on the
 second run in the same working copy is a broken suite, and the nightly watchdog
 replays it forever.
 
+**Seed your own data, and never depend on what an earlier test left.** Tests run
+in any order, and the nightly watchdog runs them on a cold app. This is the same
+rule the Verifier works to; in this flow you write the suite, so it is yours.
+
+**A database is shared state too, and file order decides who sees it first.**
+2026-09-07, stock-tracker: 21 tests drove one long-lived server against one
+SQLite file with no reset anywhere in `verify/`. pytest collects alphabetically,
+so `test_api_apply.py` ran second and its `POST /api/apply-plan` consumed the
+drift that c-3-3, c-4-3, c-5-3 and c-5-4 each needed - c-5-4 compared
+4.776995305164321 against itself and read it as no improvement. The Builder then
+looped for two more retries: it cannot edit `verify/` (rule 3), so nothing it
+wrote into `app/` could ever turn those four green. Write `verify/conftest.py`
+with an autouse fixture that restores the seed before every test. Where the app
+has a seed script, running it *is* the reset - `prisma/seed.js` upserts every
+seeded row back to a fixed value, and the tree it lives in is `APP_DIR`. Skip
+the reset when that script is absent rather than failing, so a target that never
+had one behaves as before.
+
+**Isolating the browser is not isolating the database.** A fresh Playwright page
+or context per test - which is what a `conftest.py` usually gives you - leaves
+every row exactly as the previous test left it. demo-run-03 had that fixture and
+still shared its database with every test in the run.
+
+**A loading, empty or error state is what an unwritten cut leaves behind.** The
+markup for it lives outside the cut - you never cut the render - so it survives
+into the skeleton with the fetch that would clear it removed, and asserting the
+state itself passes there. Nor is "it appears, then it goes" enough: a
+server-rendered page carries the text and React drops it at hydration, so the
+flash looks exactly like a resolved fetch (measured, 2026-09-07 stock-tracker
+c-2-4). Assert the transition INTO the loaded state - the element that only
+exists once the data arrived - and the interim state becomes evidence instead of
+decoration.
+
 **Never assert a value the fallback also produces.** If an unwritten block
 leaves a count at 0, a test that asserts 0 is green on an empty project. Pick a
 case where the seeded answer differs from the fallback.

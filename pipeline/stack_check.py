@@ -230,6 +230,55 @@ def check(project: Path, target: str = "app") -> dict:
                            f"it goes, so it is no longer a check.",
             })
 
+    # S008: `npm ci` refuses outright when package.json and package-lock.json
+    # disagree, and it is the SKELETON that finds out. app/ keeps a populated
+    # node_modules from earlier steps, so `boot()` skips the install there and a
+    # stale lock never surfaces; skeleton/ is the first genuinely clean tree in
+    # the run. 2026-09-07, stock-tracker: the Builder bumped next 14.2.13 ->
+    # 16.1.1 to clear an S007 advisory and left the lock on 14.2.13. app/ went
+    # 21/21 green, then the skeleton died with EUSAGE, `next build` reported
+    # `next: not found`, all 21 criteria came back `missing`, and the cutter was
+    # re-run four times over a fault no re-cut can reach.
+    # Compared as spec strings, which is what npm reconciles first - no semver
+    # needed, and a lock regenerated from the same package.json always matches.
+    lock_path = root / "package-lock.json"
+    if lock_path.exists():
+        lock, lock_why = read_json(lock_path)
+        if lock is None:
+            violations.append({
+                "code": "S008",
+                "message": f"{target}/package-lock.json cannot be read "
+                           f"({lock_why}), so `npm ci` has nothing to install "
+                           f"from. Regenerate it with "
+                           f"`npm install --package-lock-only`.",
+            })
+        else:
+            locked_root = (lock.get("packages") or {}).get("", {})
+            locked = {}
+            for field in ("dependencies", "devDependencies", "peerDependencies"):
+                locked.update(locked_root.get(field) or {})
+            if locked:
+                drift = []
+                for name, spec in sorted(declared.items()):
+                    if name not in locked:
+                        drift.append(f"{name} is declared but absent from the lock")
+                    elif str(locked[name]) != str(spec):
+                        drift.append(f"{name}: package.json wants {spec}, "
+                                     f"the lock records {locked[name]}")
+                if drift:
+                    violations.append({
+                        "code": "S008",
+                        "message": f"{target}/package-lock.json is out of sync with "
+                                   f"package.json, so `npm ci` refuses to install on "
+                                   f"any tree without a populated node_modules - the "
+                                   f"skeleton at step 10, and the deploy check's "
+                                   f"clean copy at step 12. "
+                                   + "; ".join(drift)
+                                   + ". Run `npm install --package-lock-only` in "
+                                   + f"{target}/ and commit the lock with the "
+                                   + "package.json change.",
+                    })
+
     # S007 last: it is the only rule that reaches the network, and a project that
     # already fails S001-S006 does not need it to make the point.
     # A person may decide to ship a known advisory - `pipeline deploy

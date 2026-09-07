@@ -99,6 +99,30 @@ def snippets(md: str) -> list[tuple[int, str, list[str]]]:
     return out
 
 
+# "overrun" and "trim" are ordinary words in a guide about money and code, so
+# searching the whole file for them reads any of them as a timing disclosure.
+# 2026-09-07, stock-tracker: session-3.md was reported disclosed:true off
+#     - "Budget overrun" - They forgot to subtract cost from remaining
+# which is a troubleshooting note about the student's arithmetic. The verdict did
+# not change - the session stated exactly the cap, so `over` was false - but the
+# flag a person reads at Gate 3 was wrong. Phrases that can only be about time
+# stand alone; the ambiguous two need a timing word beside them.
+DISCLOSE_STRONG = re.compile(
+    r"does not fit|over the cap|overruns? the (?:cap|session|budget of)"
+    r"|over the \d+[- ]?minute", re.IGNORECASE)
+DISCLOSE_WEAK = re.compile(r"\boverruns?\b|\btrims?\b|\btrimmed\b", re.IGNORECASE)
+TIMING_WORD = re.compile(r"\bminutes?\b|\bmins?\b|\btime\b|\bcap\b|\bclock\b",
+                         re.IGNORECASE)
+
+
+def timing_disclosure(text: str) -> bool:
+    """Does the guide say, about TIME, that a session does not fit?"""
+    if DISCLOSE_STRONG.search(text):
+        return True
+    return any(DISCLOSE_WEAK.search(line) and TIMING_WORD.search(line)
+               for line in text.splitlines())
+
+
 def lint(project: Path, guide: str = "pack", cap: float = SESSION_MINUTES_CAP) -> dict:
     gdir = project / guide
     errors: list[dict] = []
@@ -159,8 +183,7 @@ def lint(project: Path, guide: str = "pack", cap: float = SESSION_MINUTES_CAP) -
                            "message": f"session {n} states no time - an instructor "
                                       f"cannot plan from it"})
         over = stated is not None and stated > cap
-        disclosed = bool(re.search(r"does not fit|over the cap|overrun|trim",
-                                   text, re.IGNORECASE))
+        disclosed = timing_disclosure(text)
         if over and not disclosed:
             errors.append({"code": "G031", "where": name,
                            "message": f"session {n} states {stated} minutes against a "

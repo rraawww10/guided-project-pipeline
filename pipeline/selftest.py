@@ -24,7 +24,8 @@ import tempfile
 from pathlib import Path
 
 from . import (cli, code_check, cutter, deploy_check, gate1, guard, guide_linter,
-               leak_scan, mutation, redfirst, spec_linter, test_runner, watchdog)
+               leak_scan, mutation, redfirst, spec_linter, stack_check,
+               test_runner, ui_core, watchdog)
 from .deploy_check import find_advisories
 from .spec_linter import Lint, _scan_placeholder, _scan_vague, lint_spec
 from .state import (GATES_BY_FLOW, PHASES_BY_FLOW, RETRY_LIMIT, STEP_RUN_LIMIT,
@@ -2172,6 +2173,105 @@ def test_readme_count() -> None:
               int(m.group(1)), CHECKS + 1)
 
 
+def test_mutation_inconclusive_owner(tmp: Path) -> None:
+    """An INCONCLUSIVE mutant is a build failure, and those belong to the Builder.
+
+    2026-09-07, stock-tracker: `cut-ep-trade-record` declared a local that
+    `cut-ep-apply-plan` read, so removing it would not compile, every criterion
+    reported `missing`, and mutation said INCONCLUSIVE. The report routed to the
+    Verifier - which is hooked out of `app/` and could not have fixed it at any
+    price - and three attempts were paid for before a person stopped it. This is
+    `suite_did_not_run`'s distinction one step later.
+    """
+    print("mutation inconclusive ownership")
+    tmp.mkdir(parents=True, exist_ok=True)
+
+    def report(**kw):
+        (tmp / "mutation.json").write_text(json.dumps(kw), encoding="utf-8")
+        return tmp
+
+    check("inconclusive alone is a build failure",
+          ui_core.mutant_did_not_build(
+              report(ok=False, inconclusive_tasks=["cut-a"], ungraded_tasks=[])), True)
+    check("an ungraded task beside it leaves work the Verifier can still do",
+          ui_core.mutant_did_not_build(
+              report(ok=False, inconclusive_tasks=["cut-a"], ungraded_tasks=["cut-b"])), False)
+    check("a green report is nobody's repair",
+          ui_core.mutant_did_not_build(
+              report(ok=True, inconclusive_tasks=[], ungraded_tasks=[])), False)
+    check("ungraded only stays with the Verifier",
+          ui_core.mutant_did_not_build(
+              report(ok=False, inconclusive_tasks=[], ungraded_tasks=["cut-b"])), False)
+
+
+def test_lock_sync_and_skeleton_owner(tmp: Path) -> None:
+    """A stale lock is caught at step 7, and a skeleton that will not build is
+    the Builder's, not the cutter's.
+
+    2026-09-07, stock-tracker: next bumped 14.2.13 -> 16.1.1 in package.json,
+    lock left on 14.2.13. app/ had node_modules so the install was skipped and
+    it went 21/21 green; skeleton/ was the first clean tree, `npm ci` refused
+    EUSAGE, `next build` said `next: not found`, all 21 criteria came back
+    `missing`, and skeleton-check routed to `cut` - which copies app/ again and
+    can never converge. Four attempts in eight seconds.
+    """
+    print("lock sync and skeleton ownership")
+    proj = tmp / "p"
+    (proj / "app").mkdir(parents=True, exist_ok=True)
+    (proj / ".pipeline").mkdir(parents=True, exist_ok=True)
+    (proj / "stack.json").write_text(json.dumps({"stack": ["next"]}), encoding="utf-8")
+
+    def write(pkg_next, lock_next):
+        (proj / "app" / "package.json").write_text(json.dumps({
+            "dependencies": {"next": pkg_next},
+            "scripts": {"build": "next build", "start": "next start"}}), encoding="utf-8")
+        (proj / "app" / "package-lock.json").write_text(json.dumps({
+            "packages": {"": {"dependencies": {"next": lock_next}}}}), encoding="utf-8")
+
+    write("16.1.1", "14.2.13")
+    r = stack_check.check(proj, "app")
+    codes = [v["code"] for v in r["violations"]]
+    check("a lock that disagrees with package.json fails the step", "S008" in codes, True)
+    check("and the drift is named in the message",
+          "16.1.1" in " ".join(v["message"] for v in r["violations"]), True)
+
+    write("16.1.1", "16.1.1")
+    r = stack_check.check(proj, "app")
+    check("a lock regenerated from the same package.json passes",
+          [v["code"] for v in r["violations"]], [])
+
+    def skel(rc):
+        (proj / "skeleton-results.json").write_text(
+            json.dumps({"ok": False, "pytest_returncode": rc}), encoding="utf-8")
+        return proj
+
+    check("a skeleton that never booted is a build failure",
+          ui_core.skeleton_did_not_build(skel(test_runner.BOOT_FAILED_RC)), True)
+    check("a skeleton whose suite really ran is not",
+          ui_core.skeleton_did_not_build(skel(1)), False)
+
+
+def test_guide_timing_disclosure(tmp: Path) -> None:
+    """"overrun" and "trim" are ordinary words in a guide about money and code.
+
+    2026-09-07, stock-tracker: session-3.md was reported disclosed:true off a
+    troubleshooting line - `- "Budget overrun" - They forgot to subtract cost` -
+    which is about the student's arithmetic, not the clock. The verdict did not
+    move (the session stated exactly the cap) but the flag a person reads at
+    Gate 3 was wrong.
+    """
+    print("guide timing disclosure")
+    d = guide_linter.timing_disclosure
+    check("a budget overrun in troubleshooting is not a timing disclosure",
+          d('- "Budget overrun" - They forgot to subtract cost from remaining.'), False)
+    check("trimming whitespace is not a timing disclosure",
+          d("Trim the whitespace in your JSON before pasting."), False)
+    check("an overrun stated in minutes is one",
+          d("This session runs 47 minutes against the 40 minute cap; trim the demo."), True)
+    check("'does not fit' stands on its own",
+          d("Session 5 does not fit. Drop the reconcile walkthrough."), True)
+
+
 def main() -> int:
     tmp = Path(tempfile.mkdtemp(prefix="gp-selftest-"))
     try:
@@ -2182,7 +2282,10 @@ def main() -> int:
                   test_deploy_advisories,
                   test_watchdog, test_code_checks, test_runtime_state,
                   test_relative_paths, test_flow2, test_flow2_next,
-                  test_new_checkers, test_doc_vocabulary):
+                  test_new_checkers, test_doc_vocabulary,
+                  test_mutation_inconclusive_owner,
+                  test_lock_sync_and_skeleton_owner,
+                  test_guide_timing_disclosure):
             t(tmp / t.__name__)
         test_readme_count()
     finally:
