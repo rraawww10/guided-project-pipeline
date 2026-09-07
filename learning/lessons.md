@@ -728,6 +728,39 @@ class once it recurs" needs someone to have counted.
   run disagrees with them - the estimate is reported in `lint.json` on every run
   precisely so the disagreement is visible.
 
+- **A trimmed session does land at 40, and that was the open question.** Six
+  projects, six measured sessions: 45, 45, 45, 50, 47, and now **40**.
+  2026-09-07, stock-tracker session 1, taught by Priya from the guide alone
+  (`taught_without_the_code: true`), spec estimate 44.5 with the setup on it.
+  This is the measurement `blockers_round_3.md` closed on - *"the next run's most
+  valuable measurement is not a better model, it is one dry run of session 1
+  with the trims pulled, to confirm a trimmed session actually lands at 40"* -
+  and the answer is yes. Note which session it was: session 1 carries the setup
+  and had been the worst offender (tip-split 45, recipe-box 45), so the cap is
+  reachable on the hardest one.
+
+- **A guide that states exactly the cap cannot fail the overrun rule.** Same
+  run: all five sessions wrote `**Time:** 40 minutes` and guide-lint returned 0
+  errors and 0 warnings, because `G031`/`G032` test `stated > cap` and 40 is not
+  greater than 40. The spec had estimated 44.5 / 43 / 43 / 46.2 / 49.0 for those
+  same sessions. So a clean guide-lint is not evidence the content fits - only a
+  dry run is, and only session 1 had one. **Read `lint.json`'s session_minutes
+  beside the guide's Time lines**; a guide claiming the cap against a spec
+  estimate 5-9 minutes above it is asserting a trim, not reporting one. Whether
+  the linter should distrust a stated time that exactly equals the cap, or
+  cross-check it against the spec estimate, is an open decision - the second is
+  better and needs a threshold nobody has picked.
+
+- **"overrun" and "trim" are ordinary words in a guide about money and code.**
+  Same run: session-3.md was reported `disclosed: true` off a troubleshooting
+  line - `- "Budget overrun" - They forgot to subtract cost from remaining` -
+  which is about the student's arithmetic, not the clock. The verdict did not
+  move, because the session stated exactly the cap and `over` was false, but the
+  flag a person reads at Gate 3 was wrong. Fixed: `guide_linter.timing_disclosure`
+  lets "does not fit" and "over the cap" stand alone and requires a timing word
+  on the same line for the ambiguous two. A checker that reports a field nobody
+  acts on today will be read as evidence the day someone does.
+
 ## Teaching
 
 <!-- Where students actually got stuck, from live sessions. -->
