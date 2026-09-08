@@ -142,6 +142,29 @@ be something a student types during the session.
 The estimate is in `lint.json` under `session_minutes`, broken down per cut with
 its decision count. Read it rather than counting in your head.
 
+**Run the linter on your own draft before you finish.** Not counting in your head
+is not enough - game-arcade had all of the guidance above and still submitted
+session 1 at 55.2 minutes, then 53.7 on the next round. Two rejections and two
+full passes for a number a script computes in under a second:
+
+```bash
+python3 -m pipeline.spec_linter projects/<slug> --no-report
+```
+
+`--no-report` prints the whole report - errors, warnings and `session_minutes` -
+and writes no `lint.json`, so it cannot be mistaken for the orchestrator's
+verdict. Fix every error it prints, then run it again. Arrive green.
+
+**One list, one order (`E115`).** If a screen shows a list, every hint and every
+criterion on that target must state the SAME order. game-arcade round 1 said
+"most-recent-first" in a Session 2 cut, "in order of play" in a Session 4 cut and
+"from the start of the game" in a Session 4 criterion - all about the same
+guesses list. A student follows the first and contradicts the second. It cost the
+whole round: the spec, the ambiguity report and the entire test suite were
+rebuilt. Note what did NOT save it - a suite that asserts a row *count* passes
+whatever the order is, so nothing downstream would have caught it before a
+student did.
+
 **Hints name something concrete, and never say "return" (`W066` / `W067`).**
 Name the symbol, the state value, the path, the status or the count the student
 is working towards - `` `scaleQuantity` ``, `the items state`, `200`, `one row

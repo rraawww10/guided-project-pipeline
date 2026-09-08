@@ -423,6 +423,81 @@ def _check_session_load(lint: Lint, sessions: list[dict], weighted: bool = False
                          f"against a 40 minute cap. Move a cut out of session {setup_n}.")
 
 
+# Ordering language, split by which end of the list comes first. Both halves
+# describe the SAME list in game-arcade round 1 - see _check_order_agreement.
+NEWEST_FIRST = re.compile(
+    r"most[- ]recent[- ]first|newest[- ]first|reverse[- ]chronological"
+    r"|latest[- ]first|descending order|most recent at the top", re.I)
+OLDEST_FIRST = re.compile(
+    r"in order of play|oldest[- ]first|from the start of|chronological order"
+    r"|in play order|earliest[- ]first|order they were (?:played|made|created)", re.I)
+
+
+def _check_order_agreement(lint: Lint, spec: dict) -> None:
+    """One list, one order. Three places disagreed and it cost a whole round.
+
+    2026-09-07, game-arcade round 1. Three statements about the guesses list on
+    sc-board:
+
+      cut-ui-render-rows  (S2)  "...in most-recent-first order"
+      cut-ui-replay-apply (S4)  "the first `step` guesses ... in order of play"
+      c-4-3               (S4)  "shows exactly K guess rows from the start"
+
+    A student follows the Session 2 hint and then contradicts it in Session 4.
+    The Spec Breaker did see it - W1, W2 and W3 all circle this list - but filed
+    it under "worth a look" and named `test-runner` as the owner. Both were
+    wrong, and neither is something gate1.py could have caught: rule 8 examines
+    ownership of BLOCKING findings only, so a contradiction parked in the soft
+    section is never asked who owns it. A person reading at Gate 1 found it,
+    rejected the round, and the spec, the ambiguity report and the whole test
+    suite were rebuilt from scratch.
+
+    Nothing downstream owns it either, which is what made it a rejection rather
+    than a note: no test in that suite asserted order at all - test_c_4_3 checked
+    the row count and nothing else - so a contradictory spec would have shipped
+    green.
+
+    Scoped by `target`, which is what makes it precise rather than a keyword
+    sweep: every criterion carries one, and a criterion pulls in the hints of the
+    cuts it declares. Two orders stated about two different lists are two
+    targets, and stay silent. The same list described both ways is one target
+    and is an error. Verified against every spec in projects/ - only the round
+    that a person actually rejected trips it.
+    """
+    cuts = {c["id"]: c for s in (spec.get("sessions") or [])
+            for c in (s.get("cuts") or []) if c.get("id")}
+    by_target: dict[str, list[tuple[str, str, str]]] = {}
+    for s in spec.get("sessions") or []:
+        for c in s.get("criteria") or []:
+            tgt = c.get("target")
+            if not tgt:
+                continue
+            bucket = by_target.setdefault(tgt, [])
+            bucket.append(("criterion", c.get("id", "?"), c.get("check") or ""))
+            for cid in c.get("cuts") or []:
+                if cid in cuts:
+                    bucket.append(("cut", cid, cuts[cid].get("hint") or ""))
+    for tgt, items in sorted(by_target.items()):
+        newest = [(k, i, x) for k, i, x in items if NEWEST_FIRST.search(x)]
+        oldest = [(k, i, x) for k, i, x in items if OLDEST_FIRST.search(x)]
+        if not (newest and oldest):
+            continue
+        seen, where = set(), []
+        for k, i, x in newest + oldest:
+            if i in seen:
+                continue
+            seen.add(i)
+            end = "newest first" if NEWEST_FIRST.search(x) else "oldest first"
+            where.append(f"{k} {i} says {end}")
+        lint.err("E115", f"target {tgt}",
+                 f"the same list is described in two orders - "
+                 + "; ".join(where)
+                 + ". A student follows one and contradicts the other, and no "
+                   "downstream checker owns this: a suite that asserts row COUNT "
+                   "still passes with the order wrong. Pick one order and make "
+                   "every hint and criterion on this target agree.")
+
+
 def lint_spec(project: Path) -> Lint:
     lint = Lint()
     sj, sm = project / "spec.json", project / "spec.md"
@@ -449,6 +524,8 @@ def lint_spec(project: Path) -> Lint:
         lint.err("E012", "track", f"track must be one of {sorted(TRACKS)}")
     if not isinstance(spec.get("stack"), list) or not spec["stack"]:
         lint.err("E013", "stack", "stack must be a non-empty list")
+
+    _check_order_agreement(lint, spec)
 
     for name in (spec.get("code_checks") or []):
         if name not in CODE_CHECKS:
@@ -714,10 +791,23 @@ def minute_estimates(project: Path) -> list[dict]:
 
 
 def main(argv: list[str]) -> int:
-    if len(argv) != 2:
-        print("usage: python -m pipeline.spec_linter <project-dir>", file=sys.stderr)
+    # Same split redfirst.py made, for the same reason: the CHECK is anyone's to
+    # run, the REPORT is the orchestrator's to write. E111 and E113 are a
+    # weighted arithmetic estimate - 10 minutes of base, then each cut at 6 plus
+    # 1.7 per branch, plus builds and concepts - and the Spec Writer cannot do
+    # that in its head. game-arcade proves it: the skill spells the formula out
+    # over fifty lines and session 1 still came in at 55.2 minutes, then 53.7 on
+    # the next round. Two rejections, two full Spec Writer passes, for a number
+    # a script computes in under a second. Let the writer run it on its own
+    # draft; without --no-report it would leave a lint.json behind that a reader
+    # could mistake for the orchestrator's verdict.
+    args = [a for a in argv[1:] if a != "--no-report"]
+    no_report = "--no-report" in argv[1:]
+    if len(args) != 1:
+        print("usage: python -m pipeline.spec_linter <project-dir> [--no-report]",
+              file=sys.stderr)
         return 2
-    project = Path(argv[1]).resolve()
+    project = Path(args[0]).resolve()
     lint = lint_spec(project)
     report = {
         "ok": not lint.errors,
@@ -727,7 +817,8 @@ def main(argv: list[str]) -> int:
         "session_minutes": minute_estimates(project),
         "spec_hash": spec_hash(project),
     }
-    (project / "lint.json").write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
+    if not no_report:
+        (project / "lint.json").write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
     print(json.dumps(report, indent=2))
     return 0 if report["ok"] else 1
 

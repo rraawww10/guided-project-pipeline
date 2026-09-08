@@ -9,6 +9,34 @@ gets a strikethrough and a date.
 
 ## Spec
 
+- **One list, one order - and check it at step 2, not at Gate 1.** 2026-09-07,
+  game-arcade round 1: three places described the same guesses list on `sc-board`
+  and disagreed. `cut-ui-render-rows` (S2) said "most-recent-first",
+  `cut-ui-replay-apply` (S4) said "in order of play", `c-4-3` (S4) said "from the
+  start of the game". A student follows the Session 2 hint and then contradicts
+  it in Session 4. A person caught it at Gate 1 and rejected the round; the spec,
+  the ambiguity report and the whole test suite were rebuilt.
+  Two things failed, and neither was the reviewer. The Spec Breaker *did* see it
+  - W1, W2 and W3 all circle this list - but filed it under "worth a look" and
+  named `test-runner` the owner. Rule 8 asks who owns **blocking** findings, so a
+  contradiction parked in the soft section is never asked. And `test-runner` did
+  not own it: `test_c_4_3` asserts the row *count*, and a count passes whatever
+  the order is. **Enforced** since 2026-09-08 by `spec_linter` `E115`, scoped by
+  criterion `target` so two lists with two orders stay legal. It fires on exactly
+  one of the 32 specs in `projects/` - the round a person rejected.
+
+- **Guidance a model cannot compute is not guidance - give it the script.**
+  2026-09-07, game-arcade: the Spec Writer skill spends fifty lines on the
+  session budget, including the formula (10 minutes base, each cut 6 plus 1.7 per
+  branch, plus builds and concepts). Session 1 still came in at 55.2 minutes
+  against a 40 cap, was rejected, and came back at 53.7. Two rejections and two
+  full Spec Writer passes for a number a script computes in under a second. The
+  fix is not more prose: `spec_linter --no-report` (2026-09-08) lets the writer
+  run the real check on its own draft and arrive green, the same split
+  `redfirst.py --no-report` already made. Before writing another paragraph of
+  guidance, ask whether the agent could instead just run the checker.
+
+
 - **A clean linter is not a clean spec.** 2026-08-26, recipe-box round 1 passed
   the linter with 0 errors and 0 warnings and was still rejected at Gate 1 on
   four blocking findings. The linter checks shape; only reading catches meaning.

@@ -2468,6 +2468,84 @@ def test_unwaited_assertions(tmp: Path) -> None:
         """)], [4])
 
 
+# ------------------------------------------- one list, one order -----------
+def test_order_agreement(tmp: Path) -> None:
+    """A spec that contradicts itself about order, caught at step 2.
+
+    game-arcade round 1 stated three orders for the guesses list on sc-board and
+    a person rejected the whole round for it. The Breaker had seen it and filed
+    it under "worth a look" with `test-runner` as the owner - and gate1.py asks
+    who owns BLOCKING findings only, so nothing examined it. Nothing downstream
+    owned it either: test_c_4_3 asserted the row count, and a count passes
+    whatever the order is.
+    """
+    print("one list, one order")
+
+    def lint_of(*items):
+        """items: (target, kind, id, text) - criteria carry the target, cuts hang
+        off the criterion that declares them."""
+        sess = {"n": 1, "criteria": [], "cuts": []}
+        for tgt, kind, cid, text in items:
+            if kind == "criterion":
+                sess["criteria"].append({"id": cid, "check": text, "target": tgt, "cuts": []})
+            else:
+                sess["cuts"].append({"id": cid, "hint": text})
+                if sess["criteria"]:
+                    sess["criteria"][-1]["cuts"].append(cid)
+        l = spec_linter.Lint()
+        spec_linter._check_order_agreement(l, {"sessions": [sess]})
+        return l.errors
+
+    clash = lint_of(
+        ("sc-board", "criterion", "c-1-1", "shows K guess rows from the start of the game"),
+        ("sc-board", "cut", "cut-rows", "Map guesses into rows in most-recent-first order"))
+    check("two orders on one target is an error", [e["code"] for e in clash], ["E115"])
+    check("and the message names both sides",
+          "cut-rows" in clash[0]["message"] and "c-1-1" in clash[0]["message"], True)
+    # The whole point of scoping by target: a project may legitimately show one
+    # list newest-first and another oldest-first.
+    check("two orders on DIFFERENT targets stay silent", lint_of(
+        ("sc-board", "criterion", "c-1-1", "renders guesses newest first"),
+        ("sc-log", "criterion", "c-2-1", "renders events in order of play")), [])
+    check("one order stated twice is fine", lint_of(
+        ("sc-board", "criterion", "c-1-1", "renders guesses newest first"),
+        ("sc-board", "cut", "cut-rows", "Map guesses into rows, newest-first")), [])
+    check("a spec that says nothing about order is fine", lint_of(
+        ("sc-board", "criterion", "c-1-1", "renders one row per guess")), [])
+    check("a criterion with no target is skipped", lint_of(
+        (None, "criterion", "c-1-1", "renders guesses newest first"),
+        (None, "criterion", "c-1-2", "renders guesses in order of play")), [])
+
+
+# ------------------------------------------- the linter self-check ---------
+def test_linter_no_report(tmp: Path) -> None:
+    """The check is anyone's to run; the report is the orchestrator's to write.
+
+    E111/E113 are arithmetic the Spec Writer cannot do in its head - game-arcade
+    submitted 55.2 then 53.7 against a 40 cap with the formula spelled out in
+    its skill. Letting it run the linter on its own draft turns two rejections
+    into two seconds, but only if self-checking leaves no lint.json behind for a
+    reader to mistake for a verdict. redfirst.py made this same split first.
+    """
+    print("the linter self-check")
+    d = tmp / "selfcheck"
+    (d / ".pipeline").mkdir(parents=True)
+    (d / "spec.json").write_text("{ not json", encoding="utf-8")
+
+    def quiet(*argv):
+        with contextlib.redirect_stdout(io.StringIO()):
+            return spec_linter.main(list(argv))
+
+    rc = quiet("x", str(d), "--no-report")
+    check("--no-report still returns the verdict as an exit code", rc, 1)
+    check("and writes no lint.json", (d / "lint.json").exists(), False)
+
+    rc = quiet("x", str(d))
+    check("without it the report is written", (d / "lint.json").exists(), True)
+    check("and the exit code is the same", rc, 1)
+    check("a bad argument count is still refused", quiet("x"), 2)
+
+
 def main() -> int:
     tmp = Path(tempfile.mkdtemp(prefix="gp-selftest-"))
     try:
@@ -2482,7 +2560,8 @@ def main() -> int:
                   test_mutation_inconclusive_owner,
                   test_lock_sync_and_skeleton_owner,
                   test_guide_timing_disclosure,
-                  test_dead_cuts, test_unwaited_assertions):
+                  test_dead_cuts, test_unwaited_assertions,
+                  test_order_agreement, test_linter_no_report):
             t(tmp / t.__name__)
         test_readme_count()
     finally:
