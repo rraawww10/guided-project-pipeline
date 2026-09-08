@@ -145,6 +145,20 @@ YAML use `#`.
   **Two cuts in one function must not depend on each other's locals** - each has
   to compile with the other removed, because that is exactly what the mutation
   check builds.
+- **A cut whose effect nothing can observe grades nothing.** The pair can be
+  balanced, correctly placed and compile perfectly, and the task still be free
+  to skip. 2026-09-07, game-arcade: `cut-ui-append-guess` assigned
+  `guessesState`, a symbol that appeared exactly once in the whole file - its
+  own declaration - while the board rendered from a second state that
+  `await loadGame()` refilled from the server on the very next line. Remove the
+  cut and the row still appeared, so the mutation check reported NOT GRADED: a
+  student could leave it empty and stay green. No test could have rescued it
+  either, because dead state gives a test nothing to assert on - and NOT GRADED
+  routes to the Verifier, which is hooked out of `app/` and could not have
+  fixed it at any price. Before you close a pair, ask what observable thing
+  breaks when the block is empty. If the answer is "nothing, the next line
+  refetches it", the block is decoration: make it the only path to the thing
+  the criterion looks at, and do not re-read the server underneath it.
 - What is left must not silently pass the test. If the criterion is "the list
   renders one row per todo", do not leave a hard-coded row behind.
 - Never cut imports, types, config, or styling. Those are given to the student.

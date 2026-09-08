@@ -93,6 +93,27 @@ c-2-4). Assert the transition INTO the loaded state - the element that only
 exists once the data arrived - and the interim state becomes evidence instead of
 decoration.
 
+**`count()` does not wait, and an assertion built on it does not either.**
+Playwright auto-waits for a locator to be *actionable* before a click or a fill,
+but `Locator.count()` answers immediately with whatever is on the page at that
+instant - and a list filled by a client-side fetch after navigation is empty at
+that instant. 2026-09-07, game-arcade: `page.goto("/games")` then
+`assert rows.count() == 2` read `0 == 2`, and stayed red across five Builder
+retries that could not have fixed it, because the app was right and the test
+never waited. Use `expect(rows).to_have_count(n)`, which retries until its
+deadline. A fixed `page.wait_for_timeout(300)` is the same bug with a longer
+fuse: green on a fast machine, red on the nightly watchdog.
+
+**A click that starts async work is not finished when `click()` returns.**
+Auto-waiting waits for the element, never for what the click set off. Same
+project, same day: clicking New Game fires `await fetch('/api/games')` and then
+clears any pending picks. The four colour buttons are static, so Playwright
+clicked all four before that fetch resolved and the app's own reset wiped them;
+the submit that followed returned early, and one criterion sat waiting the full
+30s for a row that could never appear. Wait for something the app only does once
+the work landed - the URL it routes to, or an element that exists only
+afterwards - before driving the next step.
+
 **Never assert a value the fallback also produces.** If an unwritten block
 leaves a count at 0, a test that asserts 0 is green on an empty project. Pick a
 case where the seeded answer differs from the fallback.

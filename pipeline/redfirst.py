@@ -33,6 +33,86 @@ from . import test_runner
 # `assert True`, `assert 1`, `assert x or True` - green whatever the code does.
 TRIVIAL = re.compile(r"^\s*assert\s+(True|1|-1|not\s+False|\"[^\"]*\"|'[^']*')\s*(,|$)")
 
+# A call that actually blocks until the page catches up. `expect(...)` is here
+# because its matchers retry to a deadline; `wait_for_timeout` is deliberately
+# NOT - it sleeps a fixed span and calls that waiting.
+WAITS = re.compile(r"^(wait_for_(selector|url|load_state|function|event|response|request)"
+                   r"|expect|to_have_\w+|to_be_\w+|not_to_\w+)$")
+
+
+def _call_names(node: ast.AST) -> list[str]:
+    """Every function name called anywhere under `node`, attribute or bare."""
+    out = []
+    for c in ast.walk(node):
+        if not isinstance(c, ast.Call):
+            continue
+        f = c.func
+        out.append(f.attr if isinstance(f, ast.Attribute) else
+                   f.id if isinstance(f, ast.Name) else "")
+    return out
+
+
+def scan_waits(project: Path, target: str = "app") -> list[dict]:
+    """A UI assertion that does not wait is red for reasons the Builder cannot fix.
+
+    2026-09-07, game-arcade: `page.goto("/games")` then `assert rows.count() == 2`
+    read `0 == 2` against a list a client-side fetch had not filled yet. Three
+    criteria stayed red across five Builder retries and the app was right every
+    time - but rule 3 forbids the Builder from touching verify/, so nobody in
+    the loop could clear it. Static, so it lands at step 5 with no code on disk,
+    which is a whole phase before that loop can start.
+
+    Two shapes, both from that run:
+
+    * `.count()` inside an assert, in a test that never waits for anything.
+      `Locator.count()` answers immediately. It is legitimate AFTER an explicit
+      wait - stock-tracker and demo-run-03 both do exactly that and must keep
+      passing - so the flag needs the test to contain no wait at all.
+    * `wait_for_timeout(...)` anywhere. A fixed sleep is the same bug with a
+      longer fuse: green on a fast machine, red on the nightly watchdog.
+
+    Blind spot, stated rather than hidden: this reads one test function at a
+    time. A wait parked in a fixture or a helper in another file counts as "no
+    wait here" and would be flagged.
+    """
+    out: list[dict] = []
+    for path in _test_files(project, target):
+        text = path.read_text(encoding="utf-8")
+        try:
+            tree = ast.parse(text)
+        except SyntaxError:
+            continue                      # scan_assertions already reports this
+        lines = text.splitlines()
+        for node in ast.walk(tree):
+            if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                continue
+            if not node.name.startswith("test"):
+                continue
+            names = _call_names(node)
+            for c in ast.walk(node):
+                if isinstance(c, ast.Call) and (
+                        (isinstance(c.func, ast.Attribute) and c.func.attr == "wait_for_timeout")
+                        or (isinstance(c.func, ast.Name) and c.func.id == "wait_for_timeout")):
+                    out.append({
+                        "test": f"{path.name}::{node.name}", "line": c.lineno,
+                        "problem": "wait_for_timeout() is a fixed sleep, not a wait",
+                        "fix": "wait for the thing itself - expect(locator).to_have_count(n), "
+                               "wait_for_selector(...), or the URL the app routes to"})
+            if any(WAITS.match(n) for n in names):
+                continue                  # this test does wait; count() is fine here
+            for a in ast.walk(node):
+                if not isinstance(a, ast.Assert):
+                    continue
+                src = "\n".join(lines[a.lineno - 1:getattr(a, "end_lineno", a.lineno)])
+                if ".count()" not in src:
+                    continue
+                out.append({
+                    "test": f"{path.name}::{node.name}", "line": a.lineno,
+                    "problem": "asserts on .count(), which does not wait, and this "
+                               "test never waits for anything",
+                    "fix": "expect(locator).to_have_count(n) - it retries to a deadline"})
+    return out
+
 
 def _test_files(project: Path, target: str) -> list[Path]:
     for d in ((project / target / "verify"), (project / "verify"),
@@ -160,11 +240,13 @@ def check_runnable(project: Path) -> dict:
 
 def run(project: Path, target: str = "app", static_only: bool = False) -> dict:
     vacuous = scan_assertions(project, target)
+    unwaited = scan_waits(project, target)
     runnable = check_runnable(project)
     report: dict = {
-        "ok": not vacuous and runnable.get("ok", True),
+        "ok": not vacuous and not unwaited and runnable.get("ok", True),
         "target": target,
         "vacuous_tests": vacuous,
+        "unwaited_assertions": unwaited,
         "runnable": runnable,
         "dynamic": None,
     }

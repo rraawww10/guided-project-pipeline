@@ -92,6 +92,22 @@ gets a strikethrough and a date.
 
 ## Cut points
 
+- **A cut whose effect nothing reads grades nothing, and no test can save it.**
+  2026-09-07, game-arcade: `cut-ui-append-guess` assigned `guessesState`, which
+  appeared exactly once in the file - its own declaration - while the board
+  rendered from a second state that `await loadGame()` refilled from the server
+  on the next line. The pair was balanced, placed correctly and compiled; the
+  mutant built and ran; and mutation still reported NOT GRADED, because removing
+  it changed nothing a criterion could see. This is a third outcome the routing
+  does not model: INCONCLUSIVE means a mutant would not build and belongs to the
+  Builder, NOT GRADED is assumed to mean a weak suite and routes to the
+  Verifier - but dead state gives a test nothing to assert on, and the Verifier
+  is hooked out of `app/`. It could not have fixed this at any price. Ask what
+  observable thing breaks when a block is empty before closing the pair.
+  **Enforced** since 2026-09-08 by `mutation.scan_dead_cuts()`, which runs
+  before the first build and names the Builder, not the Verifier.
+
+
 - **Never put a typed function's only `return` inside the markers.** 2026-08-26,
   recipe-box: six cuts did this. The skeleton fails to compile with TS2355 and
   the student's whole app stops building - not one red test, no build at all.
@@ -191,6 +207,22 @@ gets a strikethrough and a date.
   believing anything the report says about cut markers.
 
 ## Tests
+
+- **Playwright waits for elements, not for the work a click started.**
+  2026-09-07, game-arcade: three UI criteria stayed red across five Builder
+  retries and none of them was the app's fault. `Locator.count()` answers
+  immediately, so `page.goto("/games")` then `assert rows.count() == 2` read
+  `0 == 2` against a list a client-side fetch had not filled yet; and clicking
+  New Game returned before its `await fetch` resolved, so four colour clicks
+  landed and were then wiped by the app's own reset, leaving a criterion waiting
+  the full 30s for a row that could never appear. `expect(locator).to_have_count(n)`
+  retries; `wait_for_timeout(300)` is the same bug with a longer fuse. The
+  Builder cannot fix any of this - it cannot edit `verify/` (rule 3) - so a
+  suite that does not wait is a loop the code phase cannot end. Written into
+  `.claude/skills/test-writer/SKILL.md` the same day, and **enforced** since
+  2026-09-08 by `redfirst.scan_waits()` - static, so it lands at step 5,
+  a whole phase before the code loop can start.
+
 
 - **The skeleton check only sees the fully-open skeleton.** Known blind spot in
   `pipeline/cutter.py`: it proves that a criterion fails when *all* its cuts are

@@ -21,6 +21,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import textwrap
 from pathlib import Path
 
 from . import (cli, code_check, cutter, deploy_check, gate1, guard, guide_linter,
@@ -498,6 +499,70 @@ def test_cut_share(tmp: Path) -> None:
     check("the estimate reports the largest cut's share",
           est["largest_cut_share"] > spec_linter.CUT_SHARE_CAP, True)
     check("a project with no state file reads as flow 1", spec_linter._flow(tmp / "nope"), 1)
+
+
+# ------------------------------------------- mutation bundler selection ----
+def test_mutation_prefers_webpack(tmp: Path) -> None:
+    """A mutant borrows node_modules; Turbopack refuses a borrowed one.
+
+    game-arcade was the first project to actually install Next 16 - the earlier
+    ones declare it and resolved something older - and every one of its sixteen
+    mutants failed to build with "Symlink node_modules is invalid, it points out
+    of the filesystem root". All sixteen came back INCONCLUSIVE, so rule 3 could
+    not be checked at all. The flag does not exist before 16, so the gate is the
+    version of next actually installed, not the one package.json asks for.
+    """
+    print("mutation bundler selection")
+
+    def build_after(next_version: str, build: str) -> str:
+        d = tmp / f"webpack-{next_version}-{abs(hash(build))}"
+        app, out = d / "app", d / "m"
+        (app / "node_modules" / "next").mkdir(parents=True)
+        (app / "node_modules" / "next" / "package.json").write_text(
+            json.dumps({"version": next_version}), encoding="utf-8")
+        out.mkdir(parents=True)
+        (out / "package.json").write_text(
+            json.dumps({"scripts": {"build": build}}), encoding="utf-8")
+        mutation._prefer_webpack(app, out)
+        return json.loads((out / "package.json").read_text(encoding="utf-8"))["scripts"]["build"]
+
+    check("next 16 builds the mutant with webpack",
+          build_after("16.1.1", "next build"), "next build --webpack")
+    check("a chained build script keeps its chain",
+          build_after("16.1.1", "prisma migrate deploy && prisma db seed && next build"),
+          "prisma migrate deploy && prisma db seed && next build --webpack")
+    check("an explicit --turbopack is swapped, not honoured",
+          build_after("16.1.1", "next build --turbopack"), "next build --webpack")
+    check("a build already on webpack is left alone",
+          build_after("16.1.1", "next build --webpack"), "next build --webpack")
+    # Next 15.5 rejects --webpack outright, so adding it there would break every
+    # project that shipped before 16 - and 15 builds with webpack anyway.
+    check("next 15 is untouched - the flag does not exist there",
+          build_after("15.5.24", "next build"), "next build")
+    check("and neither is next 14",
+          build_after("14.2.5", "next build"), "next build")
+    # The app is what gets built for real; only the throwaway mutant is edited.
+    d = tmp / "webpack-app-untouched"
+    (d / "app" / "node_modules" / "next").mkdir(parents=True)
+    (d / "app" / "node_modules" / "next" / "package.json").write_text(
+        json.dumps({"version": "16.1.1"}), encoding="utf-8")
+    (d / "app" / "package.json").write_text(
+        json.dumps({"scripts": {"build": "next build"}}), encoding="utf-8")
+    (d / "m").mkdir(parents=True)
+    (d / "m" / "package.json").write_text(
+        json.dumps({"scripts": {"build": "next build"}}), encoding="utf-8")
+    mutation._prefer_webpack(d / "app", d / "m")
+    check("the app's own build script is never rewritten",
+          json.loads((d / "app" / "package.json").read_text(encoding="utf-8"))["scripts"]["build"],
+          "next build")
+    # A target with no next installed says nothing rather than guessing.
+    d2 = tmp / "webpack-no-next"
+    (d2 / "app").mkdir(parents=True)
+    (d2 / "m").mkdir(parents=True)
+    (d2 / "m" / "package.json").write_text(
+        json.dumps({"scripts": {"build": "next build"}}), encoding="utf-8")
+    check("no next installed means no opinion",
+          mutation._prefer_webpack(d2 / "app", d2 / "m"), "")
 
 
 # ------------------------------------------------- mutation run control ----
@@ -2272,10 +2337,141 @@ def test_guide_timing_disclosure(tmp: Path) -> None:
           d("Session 5 does not fit. Drop the reconcile walkthrough."), True)
 
 
+# ------------------------------------------- cuts nothing can observe ------
+def test_dead_cuts(tmp: Path) -> None:
+    """A balanced, compiling cut can still grade nothing.
+
+    game-arcade spent four attempts and one 2052-second run learning that
+    `cut-ui-append-guess` set state the file never read. The full run does find
+    it - but it charges a whole code phase for the answer and then routes it to
+    the Verifier, which rule 3 hooks out of app/ and which could not have fixed
+    it at any price. Static, before the first build, owner named correctly.
+    """
+    print("cuts nothing can observe")
+
+    def cuts(body: str, tasks=("cut-a",)):
+        d = tmp / f"dead-{abs(hash(body))}"
+        d.mkdir(parents=True, exist_ok=True)
+        (d / "page.tsx").write_text(body, encoding="utf-8")
+        return mutation.scan_dead_cuts(d, list(tasks))
+
+    dead = cuts("""
+const [rows, setRows] = useState([])
+const [fromServer, setFromServer] = useState([])
+function save(x) {
+  // >>> CUT cut-a
+  setRows((prev) => [...prev, x])
+  // <<< CUT cut-a
+}
+return fromServer.map(render)
+""")
+    check("a cut whose state nothing reads is dead", [d["symbol"] for d in dead], ["rows"])
+    check("and it is the Builder's, not the Verifier's",
+          [d["owner"] for d in dead], ["builder"])
+
+    check("a cut whose state the render reads is alive", cuts("""
+const [rows, setRows] = useState([])
+function save(x) {
+  // >>> CUT cut-a
+  setRows((prev) => [...prev, x])
+  // <<< CUT cut-a
+}
+return rows.map(render)
+"""), [])
+    # Mutation removes ONE task at a time, so a read parked inside a different
+    # cut is present exactly when this one is missing. That is a real read.
+    check("a read inside a DIFFERENT cut still counts", cuts("""
+const [rows, setRows] = useState([])
+function save(x) {
+  // >>> CUT cut-a
+  setRows((prev) => [...prev, x])
+  // <<< CUT cut-a
+}
+// >>> CUT cut-b
+return rows.map(render)
+// <<< CUT cut-b
+""", ("cut-a", "cut-b")), [])
+    check("the declaration alone is not a read", [d["symbol"] for d in cuts("""
+const [rows, setRows] = useState([])
+// >>> CUT cut-a
+setRows([1])
+// <<< CUT cut-a
+""")], ["rows"])
+    check("another setter call is not a read either", [d["symbol"] for d in cuts("""
+const [rows, setRows] = useState([])
+function reset() { setRows([]) }
+// >>> CUT cut-a
+setRows([1])
+// <<< CUT cut-a
+""")], ["rows"])
+    check("a task outside the run's list is not judged", cuts("""
+const [rows, setRows] = useState([])
+// >>> CUT cut-z
+setRows([1])
+// <<< CUT cut-z
+""", ("cut-a",)), [])
+
+
+# ------------------------------------------- assertions that do not wait ---
+def test_unwaited_assertions(tmp: Path) -> None:
+    """`count()` answers now; a list filled by a fetch is empty now.
+
+    game-arcade burned five Builder retries on three criteria the app got right
+    every time. Rule 3 forbids the Builder from touching verify/, so it was a
+    red nobody in the loop could clear. This is static and lands at step 5, a
+    whole phase before that loop can start.
+    """
+    print("assertions that do not wait")
+
+    def waits(body: str):
+        d = tmp / f"waits-{abs(hash(body))}"
+        (d / "verify").mkdir(parents=True, exist_ok=True)
+        (d / "verify" / "test_x.py").write_text(textwrap.dedent(body), encoding="utf-8")
+        return redfirst.scan_waits(d)
+
+    check("count() with no wait anywhere is flagged", len(waits("""
+        def test_a(page):
+            page.goto("/games")
+            assert page.locator(".row").count() == 2
+        """)), 1)
+    # stock-tracker and demo-run-03 both assert on count() AFTER an explicit
+    # wait and must keep passing; flagging them would be a false positive on
+    # shipped work.
+    check("count() after wait_for_selector is fine", waits("""
+        def test_a(page):
+            page.goto("/games")
+            page.wait_for_selector(".row")
+            assert page.locator(".row").count() == 2
+        """), [])
+    check("count() after an expect() matcher is fine", waits("""
+        def test_a(page):
+            expect(page.locator(".row")).to_have_count(2)
+            assert page.locator(".row").count() == 2
+        """), [])
+    check("wait_for_timeout is a sleep, not a wait", [h["problem"] for h in waits("""
+        def test_a(page):
+            page.wait_for_timeout(300)
+            expect(page.locator(".row")).to_have_count(2)
+        """)], ["wait_for_timeout() is a fixed sleep, not a wait"])
+    check("a non-test function is not scanned", waits("""
+        def helper(page):
+            assert page.locator(".row").count() == 2
+        """), [])
+    check("an API test with no locators is untouched", waits("""
+        def test_a(http_client):
+            assert http_client.get("/api/x").json()["n"] == 2
+        """), [])
+    check("the flag names the line", [h["line"] for h in waits("""
+        def test_a(page):
+            page.goto("/games")
+            assert page.locator(".row").count() == 2
+        """)], [4])
+
+
 def main() -> int:
     tmp = Path(tempfile.mkdtemp(prefix="gp-selftest-"))
     try:
-        for t in (test_linter, test_cut_share, test_mutation_run_control, test_stop_server, test_verify_moved, test_cutter, test_return_safety, test_skeleton_check,
+        for t in (test_linter, test_cut_share, test_mutation_run_control, test_mutation_prefers_webpack, test_stop_server, test_verify_moved, test_cutter, test_return_safety, test_skeleton_check,
                   test_gate1, test_spec_freeze, test_breaker_binding, test_state,
                   test_step_churn, test_guard, test_checker_crash_burns_a_retry,
                   test_revise, test_revise_flow2,
@@ -2285,7 +2481,8 @@ def main() -> int:
                   test_new_checkers, test_doc_vocabulary,
                   test_mutation_inconclusive_owner,
                   test_lock_sync_and_skeleton_owner,
-                  test_guide_timing_disclosure):
+                  test_guide_timing_disclosure,
+                  test_dead_cuts, test_unwaited_assertions):
             t(tmp / t.__name__)
         test_readme_count()
     finally:
