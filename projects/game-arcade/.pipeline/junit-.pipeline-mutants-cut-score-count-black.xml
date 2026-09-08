@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="4" skipped="0" tests="17" time="73.427" timestamp="2026-09-08T02:23:39.077905+05:30" hostname="HERO"><testcase classname="verify.test_api_core" name="test_c_1_1_post_games_creates_and_echoes_seed" time="3.617" /><testcase classname="verify.test_api_core" name="test_c_1_2_post_guess_persists_code_black_white_unscored_or_present" time="3.382" /><testcase classname="verify.test_api_core" name="test_c_2_1_get_game_returns_seed_and_empty_guesses_for_new_game" time="3.627" /><testcase classname="verify.test_api_core" name="test_c_2_2_post_guess_equal_to_secret_returns_black4_white0" time="3.484"><failure message="AssertionError: assert 0 == 4&#10; +  where 0 = &lt;built-in method get of dict object at 0x00000227103E4640&gt;('black')&#10; +    where &lt;built-in method get of dict object at 0x00000227103E4640&gt; = {'id': 'cmtrpxec50007143r6zt40ivd', 'gameId': 'cmtrpxe7s0005143rcyn8z1oz', 'code': [3, 3, 1, 3], 'black': 0, ...}.get">http_client = &lt;httpx.Client object at 0x0000022710182C40&gt;
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="5" skipped="0" tests="17" time="10.292" timestamp="2026-09-08T12:17:49.866372+05:30" hostname="nxtwave-Z790-D-AX"><testcase classname="verify.test_api_core" name="test_c_1_1_post_games_creates_and_echoes_seed" time="0.451" /><testcase classname="verify.test_api_core" name="test_c_1_2_post_guess_persists_code_black_white_unscored_or_present" time="0.398" /><testcase classname="verify.test_api_core" name="test_c_2_1_get_game_returns_seed_and_empty_guesses_for_new_game" time="0.397" /><testcase classname="verify.test_api_core" name="test_c_2_2_post_guess_equal_to_secret_returns_black4_white0" time="0.394"><failure message="AssertionError: assert 0 == 4&#10; +  where 0 = &lt;built-in method get of dict object at 0x7c93eb7a1000&gt;('black')&#10; +    where &lt;built-in method get of dict object at 0x7c93eb7a1000&gt; = {'id': 'cmtsb590v0007ifaw1lpnqnnn', 'gameId': 'cmtsb590q0005ifawzx12atef', 'code': [3, 3, 1, 3], 'black': 0, ...}.get">http_client = &lt;httpx.Client object at 0x7c93eb3234d0&gt;
 
     def test_c_2_2_post_guess_equal_to_secret_returns_black4_white0(http_client):
         # Choose a seed and compute its secret per spec's xorshift32.
@@ -10,10 +10,10 @@
         body = res.json()
 &gt;       assert body.get("black") == 4
 E       AssertionError: assert 0 == 4
-E        +  where 0 = &lt;built-in method get of dict object at 0x00000227103E4640&gt;('black')
-E        +    where &lt;built-in method get of dict object at 0x00000227103E4640&gt; = {'id': 'cmtrpxec50007143r6zt40ivd', 'gameId': 'cmtrpxe7s0005143rcyn8z1oz', 'code': [3, 3, 1, 3], 'black': 0, ...}.get
+E        +  where 0 = &lt;built-in method get of dict object at 0x7c93eb7a1000&gt;('black')
+E        +    where &lt;built-in method get of dict object at 0x7c93eb7a1000&gt; = {'id': 'cmtsb590v0007ifaw1lpnqnnn', 'gameId': 'cmtsb590q0005ifawzx12atef', 'code': [3, 3, 1, 3], 'black': 0, ...}.get
 
-verify\test_api_core.py:58: AssertionError</failure></testcase><testcase classname="verify.test_api_core" name="test_c_2_3_permuted_all_colours_black0_white4" time="3.447" /><testcase classname="verify.test_api_core" name="test_c_2_4_get_game_returns_guesses_with_numeric_scores" time="3.719"><failure message="AssertionError: assert (0 == 4)&#10; +  where 0 = &lt;built-in method get of dict object at 0x0000022710396D00&gt;('black')&#10; +    where &lt;built-in method get of dict object at 0x0000022710396D00&gt; = {'id': 'cmtrpxjxh000d143rnrmwhtji', 'gameId': 'cmtrpxjt4000b143rqidf22i1', 'code': [4, 0, 5, 1], 'black': 0, ...}.get">http_client = &lt;httpx.Client object at 0x000002271045D6D0&gt;
+verify/test_api_core.py:58: AssertionError</failure></testcase><testcase classname="verify.test_api_core" name="test_c_2_3_permuted_all_colours_black0_white4" time="0.403" /><testcase classname="verify.test_api_core" name="test_c_2_4_get_game_returns_guesses_with_numeric_scores" time="0.403"><failure message="AssertionError: assert (0 == 4)&#10; +  where 0 = &lt;built-in method get of dict object at 0x7c93eb789dc0&gt;('black')&#10; +    where &lt;built-in method get of dict object at 0x7c93eb789dc0&gt; = {'id': 'cmtsb59nf000difawogi1yoof', 'gameId': 'cmtsb59nc000bifawwoqu2jht', 'code': [4, 0, 5, 1], 'black': 0, ...}.get">http_client = &lt;httpx.Client object at 0x7c93eb342360&gt;
 
     def test_c_2_4_get_game_returns_guesses_with_numeric_scores(http_client):
         seed = 97531
@@ -39,10 +39,10 @@ verify\test_api_core.py:58: AssertionError</failure></testcase><testcase classna
                 assert isinstance(g.get("black"), int) and isinstance(g.get("white"), int)
 &gt;               assert g.get("black") == b and g.get("white") == w
 E               AssertionError: assert (0 == 4)
-E                +  where 0 = &lt;built-in method get of dict object at 0x0000022710396D00&gt;('black')
-E                +    where &lt;built-in method get of dict object at 0x0000022710396D00&gt; = {'id': 'cmtrpxjxh000d143rnrmwhtji', 'gameId': 'cmtrpxjt4000b143rqidf22i1', 'code': [4, 0, 5, 1], 'black': 0, ...}.get
+E                +  where 0 = &lt;built-in method get of dict object at 0x7c93eb789dc0&gt;('black')
+E                +    where &lt;built-in method get of dict object at 0x7c93eb789dc0&gt; = {'id': 'cmtsb59nf000difawogi1yoof', 'gameId': 'cmtsb59nc000bifawwoqu2jht', 'code': [4, 0, 5, 1], 'black': 0, ...}.get
 
-verify\test_api_core.py:97: AssertionError</failure></testcase><testcase classname="verify.test_api_hint" name="test_c_3_1_hint_no_guesses_remaining_1296_and_suggestion_zeros" time="3.673" /><testcase classname="verify.test_api_hint" name="test_c_3_2_hint_remaining_matches_consistent_set_for_one_guess" time="3.613"><failure message="AssertionError: assert 660 == 252&#10; +  where 660 = &lt;built-in method get of dict object at 0x000002271038DB40&gt;('remaining')&#10; +    where &lt;built-in method get of dict object at 0x000002271038DB40&gt; = {'remaining': 660, 'suggestion': [0, 0, 0, 1]}.get">http_client = &lt;httpx.Client object at 0x0000022710462470&gt;
+verify/test_api_core.py:97: AssertionError</failure></testcase><testcase classname="verify.test_api_hint" name="test_c_3_1_hint_no_guesses_remaining_1296_and_suggestion_zeros" time="0.391" /><testcase classname="verify.test_api_hint" name="test_c_3_2_hint_remaining_matches_consistent_set_for_one_guess" time="0.408"><failure message="AssertionError: assert 660 == 252&#10; +  where 660 = &lt;built-in method get of dict object at 0x7c93eb7dd880&gt;('remaining')&#10; +    where &lt;built-in method get of dict object at 0x7c93eb7dd880&gt; = {'remaining': 660, 'suggestion': [0, 0, 0, 1]}.get">http_client = &lt;httpx.Client object at 0x7c93eb341af0&gt;
 
     def test_c_3_2_hint_remaining_matches_consistent_set_for_one_guess(http_client):
         seed = 221144
@@ -66,11 +66,63 @@ verify\test_api_core.py:97: AssertionError</failure></testcase><testcase classna
         expected_remaining = sum(1 for code in space if score_guess(code, guess) == (b, w))
 &gt;       assert body.get("remaining") == expected_remaining
 E       AssertionError: assert 660 == 252
-E        +  where 660 = &lt;built-in method get of dict object at 0x000002271038DB40&gt;('remaining')
-E        +    where &lt;built-in method get of dict object at 0x000002271038DB40&gt; = {'remaining': 660, 'suggestion': [0, 0, 0, 1]}.get
+E        +  where 660 = &lt;built-in method get of dict object at 0x7c93eb7dd880&gt;('remaining')
+E        +    where &lt;built-in method get of dict object at 0x7c93eb7dd880&gt; = {'remaining': 660, 'suggestion': [0, 0, 0, 1]}.get
 
-verify\test_api_hint.py:37: AssertionError</failure></testcase><testcase classname="verify.test_api_hint" name="test_c_3_4_two_games_identical_histories_same_suggestion" time="3.814" /><testcase classname="verify.test_api_list_branch" name="test_c_4_1_games_list_returns_summaries_with_guess_counts" time="3.813" /><testcase classname="verify.test_api_list_branch" name="test_c_4_4_branch_endpoint_creates_new_game_with_k_copied_guesses" time="3.833" /><testcase classname="verify.test_ui_games" name="test_c_4_2_games_list_renders_one_row_per_game" time="5.168" /><testcase classname="verify.test_ui_games" name="test_c_4_3_resume_navigates_to_board_with_correct_guess_rows" time="5.127" /><testcase classname="verify.test_ui_play" name="test_c_1_3_submit_one_guess_renders_exactly_one_row" time="5.616" /><testcase classname="verify.test_ui_play" name="test_c_2_5_row_shows_black_and_white_counts_matching_secret" time="5.635"><failure message="AssertionError: assert '0' == '4'&#10;  &#10;  - 4&#10;  + 0">page = &lt;Page url='http://127.0.0.1:51925/?game=cmtrpyeks001s143rlkhbz74f'&gt;
-base_url = 'http://127.0.0.1:51925'
+verify/test_api_hint.py:37: AssertionError</failure></testcase><testcase classname="verify.test_api_hint" name="test_c_3_4_two_games_identical_histories_same_suggestion" time="0.403" /><testcase classname="verify.test_api_list_branch" name="test_c_4_1_games_list_returns_summaries_with_guess_counts" time="0.405" /><testcase classname="verify.test_api_list_branch" name="test_c_4_4_branch_endpoint_creates_new_game_with_k_copied_guesses" time="0.414" /><testcase classname="verify.test_ui_games" name="test_c_4_2_games_list_renders_one_row_per_game" time="0.812" /><testcase classname="verify.test_ui_games" name="test_c_4_3_resume_navigates_to_board_with_correct_guess_rows" time="0.885" /><testcase classname="verify.test_ui_play" name="test_c_1_3_submit_one_guess_renders_exactly_one_row" time="1.158"><failure message="AssertionError: UI re-fetched /api/games/:id; row must come from client append&#10;assert not True">page = &lt;Page url='http://127.0.0.1:56465/?game=cmtsb5d52001pifaw178om8rj'&gt;
+base_url = 'http://127.0.0.1:56465'
+
+    def test_c_1_3_submit_one_guess_renders_exactly_one_row(page, base_url: str):
+        seed = 3001
+    
+        # Install a strict network gate BEFORE creating the game so any fallback
+        # re-read path cannot populate rows. We only allow GET /api/games/:id calls
+        # and force them to return an empty guesses array; everything else continues.
+        seen_refetch = {"seen": False}
+    
+        def handle(route, request):
+            url = request.url
+            # Intercept any GET to /api/games/&lt;id&gt; (but not /api/games or /hint)
+            if request.method == "GET" and re.search(r"/api/games/[^/]+(?:[/?#]|$)", url):
+                seen_refetch["seen"] = True
+                # Extract an id-shaped suffix to echo back; fall back to a stub.
+                m = re.search(r"/api/games/([^/?#]+)", url)
+                gid = m.group(1) if m else "stub"
+                # Always answer with an empty guess list so only the client append
+                # can produce a visible row.
+                body = json.dumps({"id": gid, "seed": seed, "guesses": []})
+                route.fulfill(status=200, content_type="application/json", body=body)
+            else:
+                route.continue_()
+    
+        page.route("**/api/games/**", handle)
+    
+        _ui_new_game(page, base_url, seed)
+        # Capture the created game id from the URL (sanity check only).
+        m = re.search(r"[?&amp;]game=([^&amp;#]+)", page.url)
+        assert m, "game id not found in URL after New Game"
+    
+        code = [0, 1, 2, 3]
+        _ui_pick_code(page, code)
+        _ui_submit_guess(page)
+    
+        # Assert exactly one prior guess row renders, driven by the client append.
+        _expect_guess_rows(page, 1)
+        # And the row shows the four chosen values in its slots.
+        row = _guess_rows(page).nth(0)
+        for i, v in enumerate(code):
+            txt = row.get_by_test_id(f"slot-{i}").inner_text().strip()
+            assert txt == str(v)
+    
+        # Guardrail: the UI must NOT have re-fetched the game to populate the row.
+        # This makes the test fail if an implementation papers over the missing
+        # client append by re-reading from the server.
+&gt;       assert not seen_refetch["seen"], "UI re-fetched /api/games/:id; row must come from client append"
+E       AssertionError: UI re-fetched /api/games/:id; row must come from client append
+E       assert not True
+
+verify/test_ui_play.py:90: AssertionError</failure></testcase><testcase classname="verify.test_ui_play" name="test_c_2_5_row_shows_black_and_white_counts_matching_secret" time="1.071"><failure message="AssertionError: assert '0' == '4'&#10;  &#10;  - 4&#10;  + 0">page = &lt;Page url='http://127.0.0.1:56465/?game=cmtsb5e0n001sifaw8iq5rtsx'&gt;
+base_url = 'http://127.0.0.1:56465'
 
     def test_c_2_5_row_shows_black_and_white_counts_matching_secret(page, base_url: str):
         # Choose a seed and compute its secret, then submit that exact guess.
@@ -89,4 +141,4 @@ E
 E         - 4
 E         + 0
 
-verify\test_ui_play.py:66: AssertionError</failure></testcase><testcase classname="verify.test_ui_play" name="test_c_3_3_page_shows_hint_remaining_and_suggestion" time="5.221" /><testcase classname="verify.test_ui_play" name="test_c_4_5_branch_here_button_renders_k_rows" time="6.327" /></testsuite></testsuites>
+verify/test_ui_play.py:106: AssertionError</failure></testcase><testcase classname="verify.test_ui_play" name="test_c_3_3_page_shows_hint_remaining_and_suggestion" time="0.893" /><testcase classname="verify.test_ui_play" name="test_c_4_5_branch_here_button_renders_k_rows" time="0.943" /></testsuite></testsuites>

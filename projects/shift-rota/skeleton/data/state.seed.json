@@ -1,0 +1,6 @@
+{
+  "contacts": ["Alex", "Beth", "Chen"],
+  "mode": "idle",
+  "currentIndex": null,
+  "log": []
+}

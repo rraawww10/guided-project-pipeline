@@ -1,0 +1,86 @@
+{
+  "slug": "rota",
+  "title": "Leave Request Conflict Checker",
+  "track": "fullstack",
+  "sessions_planned": 4,
+  "stack": ["next", "react", "typescript"],
+  "source": null,
+  "code_checks": [],
+  "endpoints": [
+    {"id": "ep-apply-post", "method": "POST", "path": "/api/apply", "request": "{ id: string; employee: string; range: { start: number; end: number } }", "response": "Decision", "status": [200]},
+    {"id": "ep-state-get", "method": "GET", "path": "/api/state", "request": null, "response": "{ approvals: Approval[]; decisions: Decision[] }", "status": [200]},
+    {"id": "ep-overlaps-get", "method": "GET", "path": "/api/overlaps?start=NUMBER&end=NUMBER[&employee=STRING]", "request": null, "response": "Approval[]", "status": [200]},
+    {"id": "ep-undo-last", "method": "POST", "path": "/api/undo-last", "request": null, "response": "{ removed: Decision | null }", "status": [200]}
+  ],
+  "screens": [
+    {"id": "sc-home", "route": "/", "elements": ["employee input", "start input", "end input", "id input", "submit button", "undo button", "decisions list", "decision row"], "states": ["empty", "loaded", "after submit", "after undo", "error"]}
+  ],
+  "sessions": [
+    {
+      "n": 1,
+      "title": "Decision engine and basic POST",
+      "goal": "Compute a Decision from a request (invalid-range or Approved with reasons=[] when within caps) and expose it at POST /api/apply.",
+      "teaches": ["range math", "decision engine"],
+      "builds": ["ep-apply-post"],
+      "criteria": [
+        {"id": "c-1-1", "check": "POST /api/apply returns 200 with a JSON Decision whose status is 'Approved' and reasons is [] for a request whose days do not exceed any minima cap", "target": "ep-apply-post", "cuts": ["cut-lib-evaluate-request", "cut-ep-apply-assign"]},
+        {"id": "c-1-2", "check": "POST /api/apply returns 200 with a JSON Decision whose status is 'Denied' and reasons equals ['invalid-range'] when start > end", "target": "ep-apply-post", "cuts": ["cut-lib-evaluate-request", "cut-ep-apply-assign"]}
+      ],
+      "cuts": [
+        {"id": "cut-lib-evaluate-request", "file": "lib/apply.ts", "writes_into": "decision", "hint": "If `decision` is already Denied, keep it. Otherwise, build a reasons array by scanning every day d in the inclusive [start, end] and adding `minima-breach:day=<d>` for each day where count of existing approvals including d plus 1 would exceed the cap (use minima[d] when present, otherwise treat the cap as unlimited). Set `decision` to Denied with those reasons when the array is non-empty; set it to Approved with [] when it is empty."},
+        {"id": "cut-ep-apply-assign", "file": "app/api/apply/route.ts", "writes_into": "body", "hint": "Compute a Decision for the posted request using the engine and assign it to `body`, and set the HTTP `status` to 200."}
+      ]
+    },
+    {
+      "n": 2,
+      "title": "Persistence and idempotent POST, bootstrap state",
+      "goal": "Persist decisions and approvals to state.json, make POST /api/apply idempotent by id, and expose GET /api/state with bootstrap.",
+      "teaches": ["file-backed state", "idempotent upsert"],
+      "builds": ["ep-state-get"],
+      "criteria": [
+        {"id": "c-2-1", "check": "GET /api/state returns 200 with { approvals: [], decisions: [] } when state.json is absent on first run", "target": "ep-state-get", "cuts": ["cut-ep-state-read-or-init"]},
+        {"id": "c-2-2", "check": "POST /api/apply twice with the same id returns 200 both times with the exact first Decision body and does not create a second record for that id in persisted state", "target": "ep-apply-post", "cuts": ["cut-ep-apply-upsert"]},
+        {"id": "c-2-3", "check": "GET /api/state returns 200 with decisions ordered most-recent-first by append order after at least two different ids have been submitted", "target": "ep-state-get", "cuts": ["cut-ep-state-read-or-init"]}
+      ],
+      "cuts": [
+        {"id": "cut-ep-state-read-or-init", "file": "app/api/state/route.ts", "writes_into": "body", "hint": "Read APP_DIR/data/state.json; when the file is missing, create it with { approvals: [], decisions: [] }. Write that state's approvals and decisions into `body`, with `body.decisions` ordered most-recent-first by the file's append order, and set `status` to 200."},
+        {"id": "cut-ep-apply-upsert", "file": "app/api/apply/route.ts", "writes_into": "body", "hint": "Look up a persisted Decision by the posted id; when one exists set `body` to that exact Decision and perform no changes to state. When none exists, compute a new Decision, append it to state.decisions, append to state.approvals only when the Decision is Approved, then set `body` to the Decision with `status` 200."},
+        {"id": "cut-lib-overlaps", "file": "lib/range.ts", "writes_into": "overlap", "hint": "Set `overlap` to whether the two inclusive ranges share any day: a.start <= b.end AND b.start <= a.end."}
+      ]
+    },
+    {
+      "n": 3,
+      "title": "UI: hydrate and submit (most-recent-first)",
+      "goal": "Build the home page to hydrate from /api/state and submit requests, keeping one row per id with most-recent first.",
+      "teaches": ["client fetch", "list merge by id"],
+      "builds": ["sc-home"],
+      "criteria": [
+        {"id": "c-3-1", "check": "GET / renders one row per Decision in /api/state and the first row is the most-recent Decision as returned by /api/state", "target": "sc-home", "cuts": ["cut-ui-hydrate-state", "cut-ep-state-read-or-init"]},
+        {"id": "c-3-2", "check": "On /, submitting the same id twice shows exactly one row for that id and its status matches the server's Decision", "target": "sc-home", "cuts": ["cut-ui-submit-merge", "cut-ep-apply-upsert"]},
+        {"id": "c-3-3", "check": "From /, submitting a request that would exceed a day's cap renders a new Denied row containing a reason that starts with 'minima-breach:day='", "target": "sc-home", "cuts": ["cut-ui-submit-merge", "cut-lib-evaluate-request"]}
+      ],
+      "cuts": [
+        {"id": "cut-ui-hydrate-state", "file": "app/page.tsx", "writes_into": "decisions", "hint": "On mount, fetch /api/state and replace `decisions` with the response's decisions array as is so the first row is the most-recent; do not re-sort in the client."},
+        {"id": "cut-ui-submit-merge", "file": "app/page.tsx", "writes_into": "decisions", "hint": "On submit, POST /api/apply with the form values; put the returned Decision at the start of `decisions`, keeping only one row for that id by replacing the existing row when one was already present."}
+      ]
+    },
+    {
+      "n": 4,
+      "title": "Overlaps and Undo Last (end-to-end)",
+      "goal": "Expose overlaps and add Undo Last with a browser flow that persists across reloads.",
+      "teaches": ["safe revert"],
+      "builds": ["ep-overlaps-get", "ep-undo-last"],
+      "criteria": [
+        {"id": "c-4-1", "check": "GET /api/overlaps?start=NUMBER&end=NUMBER returns 200 with a JSON array of Approval whose ranges overlap [start, end] across all employees", "target": "ep-overlaps-get", "cuts": ["cut-ep-overlaps-build", "cut-lib-overlaps"]},
+        {"id": "c-4-2", "check": "POST /api/undo-last returns 200 with { removed: Decision|null } and, when an Approved decision exists, the removed Decision matches the most-recent Approved one in persisted state", "target": "ep-undo-last", "cuts": ["cut-ep-undo-last"]},
+        {"id": "c-4-3", "check": "GET /api/overlaps returns the same results whether or not the employee query parameter is present", "target": "ep-overlaps-get", "cuts": ["cut-ep-overlaps-build"]},
+        {"id": "c-4-4", "check": "Clicking Undo on / removes the most-recent Approved row and it stays removed after a reload", "target": "sc-home", "cuts": ["cut-ui-undo-apply", "cut-ep-undo-last", "cut-ui-hydrate-state", "cut-ep-state-read-or-init"]}
+      ],
+      "cuts": [
+        {"id": "cut-ep-overlaps-build", "file": "app/api/overlaps/route.ts", "writes_into": "body", "hint": "Read all persisted approvals and write into `body` the subset whose ranges overlap the requested [start, end]; ignore any employee filter and set `status` to 200."},
+        {"id": "cut-ep-undo-last", "file": "app/api/undo-last/route.ts", "writes_into": "body", "hint": "If an Approved decision exists in persisted state, remove the most-recent Approved decision and its matching approval from state and set `body` to { removed: that Decision } with `status` 200; otherwise leave state unchanged and set `body` to { removed: null } with `status` 200."},
+        {"id": "cut-ui-undo-apply", "file": "app/page.tsx", "writes_into": "decisions", "hint": "When [data-testid=\"undo-btn\"] is clicked, POST /api/undo-last; after it completes, fetch /api/state and replace `decisions` with its decisions array so the most-recent remains first."}
+      ]]
+    }
+  ]
+}

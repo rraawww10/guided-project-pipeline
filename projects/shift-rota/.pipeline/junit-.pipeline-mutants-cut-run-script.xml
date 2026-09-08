@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="5" skipped="0" tests="14" time="30.576" timestamp="2026-09-08T16:06:51.237101+05:30" hostname="nxtwave-Z790-D-AX"><testcase classname="verify.test_api_state" name="test_c_2_6_post_state_alerting_round_trips" time="0.046" /><testcase classname="verify.test_api_state" name="test_c_3_6_get_state_seed_is_idle_and_contacts" time="0.013" /><testcase classname="verify.test_ui_script" name="test_c_3_1_script_happy_path_runs_and_logs_4" time="5.419"><failure message="AssertionError: Locator expected to have text '4'&#10;Actual value: 0 &#10;Call log:&#10;  - Expect &quot;to_have_text&quot; with timeout 5000ms&#10;  - waiting for get_by_test_id(&quot;log-count&quot;)&#10;    14 × locator resolved to &lt;div data-testid=&quot;log-count&quot;&gt;0&lt;/div&gt;&#10;       - unexpected value &quot;0&quot;&#10;&#10;Aria snapshot:&#10;- text: &quot;0&quot;">page = &lt;Page url='http://127.0.0.1:50595/script'&gt;
+
+    def test_c_3_1_script_happy_path_runs_and_logs_4(page):
+        # Enter a 4-line script and run; expect idle, log-count 4, first row contains alert, last contains resolve
+        goto_script(page)
+        page.get_by_test_id("script-input").fill("alert\ntimeout\nack Beth\nresolve")
+        page.get_by_test_id("btn-run-script").click()
+        expect(page.get_by_test_id("mode")).to_have_text("idle")
+&gt;       expect(page.get_by_test_id("log-count")).to_have_text("4")
+E       AssertionError: Locator expected to have text '4'
+E       Actual value: 0 
+E       Call log:
+E         - Expect "to_have_text" with timeout 5000ms
+E         - waiting for get_by_test_id("log-count")
+E           14 × locator resolved to &lt;div data-testid="log-count"&gt;0&lt;/div&gt;
+E              - unexpected value "0"
+E       
+E       Aria snapshot:
+E       - text: "0"
+
+verify/test_ui_script.py:14: AssertionError</failure></testcase><testcase classname="verify.test_ui_script" name="test_c_3_2_script_unknown_actor_errors" time="5.473"><failure message="AssertionError: Locator expected to contain text 'unknown actor Dana'&#10;Actual value: error &#10;Call log:&#10;  - Expect &quot;to_contain_text&quot; with timeout 5000ms&#10;  - waiting for get_by_test_id(&quot;script-error&quot;)&#10;    14 × locator resolved to &lt;div data-testid=&quot;script-error&quot;&gt;error&lt;/div&gt;&#10;       - unexpected value &quot;error&quot;&#10;&#10;Aria snapshot:&#10;- text: error">page = &lt;Page url='http://127.0.0.1:50595/script'&gt;
+
+    def test_c_3_2_script_unknown_actor_errors(page):
+        goto_script(page)
+        page.get_by_test_id("script-input").fill("ack Dana")
+        page.get_by_test_id("btn-run-script").click()
+&gt;       expect(page.get_by_test_id("script-error")).to_contain_text("unknown actor Dana")
+E       AssertionError: Locator expected to contain text 'unknown actor Dana'
+E       Actual value: error 
+E       Call log:
+E         - Expect "to_contain_text" with timeout 5000ms
+E         - waiting for get_by_test_id("script-error")
+E           14 × locator resolved to &lt;div data-testid="script-error"&gt;error&lt;/div&gt;
+E              - unexpected value "error"
+E       
+E       Aria snapshot:
+E       - text: error
+
+verify/test_ui_script.py:26: AssertionError</failure></testcase><testcase classname="verify.test_ui_script" name="test_c_3_3_script_illegal_transition_resolve_errors" time="5.477"><failure message="AssertionError: Locator expected to contain text 'illegal transition'&#10;Actual value: error &#10;Call log:&#10;  - Expect &quot;to_contain_text&quot; with timeout 5000ms&#10;  - waiting for get_by_test_id(&quot;script-error&quot;)&#10;    14 × locator resolved to &lt;div data-testid=&quot;script-error&quot;&gt;error&lt;/div&gt;&#10;       - unexpected value &quot;error&quot;&#10;&#10;Aria snapshot:&#10;- text: error">page = &lt;Page url='http://127.0.0.1:50595/script'&gt;
+
+    def test_c_3_3_script_illegal_transition_resolve_errors(page):
+        goto_script(page)
+        page.get_by_test_id("script-input").fill("resolve")
+        page.get_by_test_id("btn-run-script").click()
+&gt;       expect(page.get_by_test_id("script-error")).to_contain_text("illegal transition")
+E       AssertionError: Locator expected to contain text 'illegal transition'
+E       Actual value: error 
+E       Call log:
+E         - Expect "to_contain_text" with timeout 5000ms
+E         - waiting for get_by_test_id("script-error")
+E           14 × locator resolved to &lt;div data-testid="script-error"&gt;error&lt;/div&gt;
+E              - unexpected value "error"
+E       
+E       Aria snapshot:
+E       - text: error
+
+verify/test_ui_script.py:33: AssertionError</failure></testcase><testcase classname="verify.test_ui_script" name="test_c_3_4_script_wrong_actor_ack_errors" time="5.468"><failure message="AssertionError: Locator expected to contain text 'only Alex can ack'&#10;Actual value: error &#10;Call log:&#10;  - Expect &quot;to_contain_text&quot; with timeout 5000ms&#10;  - waiting for get_by_test_id(&quot;script-error&quot;)&#10;    14 × locator resolved to &lt;div data-testid=&quot;script-error&quot;&gt;error&lt;/div&gt;&#10;       - unexpected value &quot;error&quot;&#10;&#10;Aria snapshot:&#10;- text: error">page = &lt;Page url='http://127.0.0.1:50595/script'&gt;
+
+    def test_c_3_4_script_wrong_actor_ack_errors(page):
+        goto_script(page)
+        page.get_by_test_id("script-input").fill("alert\nack Beth")
+        page.get_by_test_id("btn-run-script").click()
+&gt;       expect(page.get_by_test_id("script-error")).to_contain_text("only Alex can ack")
+E       AssertionError: Locator expected to contain text 'only Alex can ack'
+E       Actual value: error 
+E       Call log:
+E         - Expect "to_contain_text" with timeout 5000ms
+E         - waiting for get_by_test_id("script-error")
+E           14 × locator resolved to &lt;div data-testid="script-error"&gt;error&lt;/div&gt;
+E              - unexpected value "error"
+E       
+E       Aria snapshot:
+E       - text: error
+
+verify/test_ui_script.py:40: AssertionError</failure></testcase><testcase classname="verify.test_ui_script" name="test_c_3_5_script_stops_on_first_error_after_alert" time="5.421"><failure message="AssertionError: Locator expected to have text '1'&#10;Actual value: 0 &#10;Call log:&#10;  - Expect &quot;to_have_text&quot; with timeout 5000ms&#10;  - waiting for get_by_test_id(&quot;log-count&quot;)&#10;    14 × locator resolved to &lt;div data-testid=&quot;log-count&quot;&gt;0&lt;/div&gt;&#10;       - unexpected value &quot;0&quot;&#10;&#10;Aria snapshot:&#10;- text: &quot;0&quot;">page = &lt;Page url='http://127.0.0.1:50595/script'&gt;
+
+    def test_c_3_5_script_stops_on_first_error_after_alert(page):
+        goto_script(page)
+        page.get_by_test_id("script-input").fill("alert\nack Dana\ntimeout")
+        page.get_by_test_id("btn-run-script").click()
+&gt;       expect(page.get_by_test_id("log-count")).to_have_text("1")
+E       AssertionError: Locator expected to have text '1'
+E       Actual value: 0 
+E       Call log:
+E         - Expect "to_have_text" with timeout 5000ms
+E         - waiting for get_by_test_id("log-count")
+E           14 × locator resolved to &lt;div data-testid="log-count"&gt;0&lt;/div&gt;
+E              - unexpected value "0"
+E       
+E       Aria snapshot:
+E       - text: "0"
+
+verify/test_ui_script.py:47: AssertionError</failure></testcase><testcase classname="verify.test_ui_sim" name="test_c_1_1_initial_idle_no_current" time="0.342" /><testcase classname="verify.test_ui_sim" name="test_c_1_2_alert_sets_current_and_mode" time="0.446" /><testcase classname="verify.test_ui_sim" name="test_c_2_1_ack_by_alex_logs_and_keeps_current" time="0.471" /><testcase classname="verify.test_ui_sim" name="test_c_2_2_timeout_escalates_to_beth" time="0.450" /><testcase classname="verify.test_ui_sim" name="test_c_2_3_wrong_actor_ack_shows_error_and_keeps_current" time="0.452" /><testcase classname="verify.test_ui_sim" name="test_c_2_4_resolve_returns_to_idle_no_current" time="0.481" /><testcase classname="verify.test_ui_sim" name="test_c_2_5_timeout_at_end_shows_error_and_keeps_chen" time="0.549" /></testsuite></testsuites>

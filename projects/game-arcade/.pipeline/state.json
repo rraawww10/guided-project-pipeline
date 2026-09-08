@@ -2,7 +2,7 @@
   "slug": "game-arcade",
   "created": "2026-09-07T18:32:51+00:00",
   "flow": 2,
-  "phase": "code",
+  "phase": "pack",
   "retries": {
     "idea": 0,
     "spec": 2,
@@ -13,12 +13,18 @@
     "stack": 1,
     "ideas": 1,
     "pick": 1,
-    "lint": 4,
-    "breaker": 2,
+    "lint": 5,
+    "breaker": 3,
     "redfirst": 2,
     "revise:round-1": 1,
     "test:app": 6,
-    "mutation": 4
+    "mutation": 5,
+    "cut": 5,
+    "leak-scan": 3,
+    "guide-lint": 1,
+    "deploy": 1,
+    "dryrun": 1,
+    "ship": 1
   },
   "gates": {
     "gate0": {
@@ -29,14 +35,24 @@
     },
     "gate1": {
       "approved": true,
-      "at": "2026-09-07T19:28:11+00:00",
-      "note": "",
-      "spec_hash": "ef4030f864d7e323df9fdf474b29ef421e03784988d7aed58523607d3799443a",
-      "verify_hash": "2b49609202e53ac8dc38c14ade5159a2529b5fa9e43ccbc738a891af4ee7ca6b",
+      "at": "2026-09-08T06:40:47+00:00",
+      "note": "Re-approved on the current spec 0aeb4d6e to clear a drift that arrived with the\npull from the laptop.\n\nThe drift: SPEC_FROZEN and state.json recorded ef4030f8 while .pipeline/approved/\nalready held 0aeb4d6e, so the marker and the archive disagreed. The ef4030f8\nbytes exist nowhere on this machine - not in the archive, not in round-1\n(82fc5f78), not in the single git commit for this project - so restoring the\noriginally approved copy was not possible. This approval is of the spec as it\nnow stands, taken on its own merits.\n\nRule 7 was the blocker, not the spec: the Spec Breaker had run but\n`breaker end` never did, so ambiguity.md had no ambiguity-meta.json and nothing\ntied the report to the spec it read. Bound before approving. Linter and Breaker\nboth ran against 0aeb4d6e.\n\nStopping rule: 3 blocking, unowned_blocking 0, 5 worth a look, drift [],\nreviewed_spec_hash == spec_hash.\n\nverify_later carried one conditional owner and it is DISCHARGED, not deferred:\nA3 \"cut-ui-append-guess can be made toothless by a refetch\", owned by mutation,\nwhich can pass by not running. Step 8 shows checked == of_total == 16 and\ncut-ui-append-guess was among the mutants run. It came back NOT GRADED - so A3\nis confirmed real rather than skipped, and the Verifier owes a test that bites.\nThat is the outstanding work at step 8; results.json is 17/17 green.\n\nCARRIED RISK: app/ and verify/ were built against ef4030f8 and the diff against\n0aeb4d6e is unknowable. Nothing downstream can detect it. Read results.json and\nmutation.json as the evidence the code still matches this spec.\n",
+      "spec_hash": "0aeb4d6e3667f14eebb784d001d849ea7b90cf7c8331feef8572ce581bc996a5",
+      "verify_hash": "5a8ff201b21438ef03a0b09ce652aba38a7f1fd0201797c72450092a33080fa7",
       "override": false
     },
-    "gate2": null,
-    "gate3": null
+    "gate2": {
+      "approved": true,
+      "at": "2026-09-08T06:56:57+00:00",
+      "note": "",
+      "verify_hash": "5a8ff201b21438ef03a0b09ce652aba38a7f1fd0201797c72450092a33080fa7",
+      "verify_moved": false
+    },
+    "gate3": {
+      "approved": true,
+      "at": "2026-09-08T09:18:13+00:00",
+      "note": ""
+    }
   },
   "steps": [
     {
@@ -192,9 +208,121 @@
       "at": "2026-09-07T21:10:35+00:00",
       "detail": "",
       "run": 4
+    },
+    {
+      "step": "lint",
+      "ok": true,
+      "at": "2026-09-08T06:18:01+00:00",
+      "detail": "",
+      "run": 5
+    },
+    {
+      "step": "breaker",
+      "ok": true,
+      "at": "2026-09-08T06:40:08+00:00",
+      "detail": "0aeb4d6e3667",
+      "run": 3
+    },
+    {
+      "step": "mutation",
+      "ok": true,
+      "at": "2026-09-08T06:54:38+00:00",
+      "detail": "",
+      "run": 5
+    },
+    {
+      "step": "cut",
+      "ok": false,
+      "at": "2026-09-08T06:58:00+00:00",
+      "detail": "",
+      "run": 1
+    },
+    {
+      "step": "cut",
+      "ok": false,
+      "at": "2026-09-08T06:59:02+00:00",
+      "detail": "",
+      "run": 2
+    },
+    {
+      "step": "cut",
+      "ok": false,
+      "at": "2026-09-08T07:00:05+00:00",
+      "detail": "",
+      "run": 3
+    },
+    {
+      "step": "cut",
+      "ok": false,
+      "at": "2026-09-08T07:01:07+00:00",
+      "detail": "",
+      "run": 4
+    },
+    {
+      "step": "leak-scan",
+      "ok": false,
+      "at": "2026-09-08T08:53:04+00:00",
+      "detail": "",
+      "run": 1
+    },
+    {
+      "step": "leak-scan",
+      "ok": true,
+      "at": "2026-09-08T08:53:51+00:00",
+      "detail": "",
+      "run": 2
+    },
+    {
+      "step": "guide-lint",
+      "ok": true,
+      "at": "2026-09-08T08:57:55+00:00",
+      "detail": "",
+      "run": 1
+    },
+    {
+      "step": "deploy",
+      "ok": true,
+      "at": "2026-09-08T08:58:03+00:00",
+      "detail": "",
+      "run": 1
+    },
+    {
+      "step": "dryrun",
+      "ok": true,
+      "at": "2026-09-08T09:12:58+00:00",
+      "detail": "session 4, 40 min, priya",
+      "run": 1
+    },
+    {
+      "step": "cut",
+      "ok": true,
+      "at": "2026-09-08T09:17:23+00:00",
+      "detail": "",
+      "run": 5
+    },
+    {
+      "step": "leak-scan",
+      "ok": true,
+      "at": "2026-09-08T09:17:52+00:00",
+      "detail": "",
+      "run": 3
+    },
+    {
+      "step": "ship",
+      "ok": true,
+      "at": "2026-09-08T09:18:13+00:00",
+      "detail": "",
+      "run": 1
     }
   ],
   "ticket": null,
-  "dry_run": null,
+  "dry_run": {
+    "at": "2026-09-08T09:12:58+00:00",
+    "session": 4,
+    "minutes": 40,
+    "by": "priya",
+    "taught_without_the_code": true,
+    "note": "The ui should be more interactive and dynamic."
+  },
   "feedback": []
 }

@@ -1,0 +1,41 @@
+{
+  "slug": "ab",
+  "created": "2026-09-08T13:25:30+00:00",
+  "flow": 2,
+  "phase": "idea",
+  "retries": {
+    "idea": 0,
+    "spec": 0,
+    "code": 0,
+    "pack": 0
+  },
+  "step_runs": {
+    "stack": 1,
+    "ideas": 1
+  },
+  "gates": {
+    "gate0": null,
+    "gate1": null,
+    "gate2": null,
+    "gate3": null
+  },
+  "steps": [
+    {
+      "step": "stack",
+      "ok": true,
+      "at": "2026-09-08T13:25:30+00:00",
+      "detail": "next, react, typescript",
+      "run": 1
+    },
+    {
+      "step": "ideas",
+      "ok": true,
+      "at": "2026-09-08T13:28:46+00:00",
+      "detail": "5 ideas",
+      "run": 1
+    }
+  ],
+  "ticket": null,
+  "dry_run": null,
+  "feedback": []
+}

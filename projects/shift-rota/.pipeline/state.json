@@ -1,0 +1,208 @@
+{
+  "slug": "shift-rota",
+  "created": "2026-09-08T09:37:44+00:00",
+  "flow": 2,
+  "phase": "pack",
+  "retries": {
+    "idea": 0,
+    "spec": 2,
+    "code": 2,
+    "pack": 0
+  },
+  "step_runs": {
+    "stack": 1,
+    "ideas": 1,
+    "pick": 1,
+    "lint": 3,
+    "breaker": 1,
+    "redfirst": 1,
+    "test:app": 3,
+    "mutation": 1,
+    "cut": 3,
+    "leak-scan": 1,
+    "guide-lint": 1,
+    "deploy": 1,
+    "dryrun": 1,
+    "ship": 1
+  },
+  "gates": {
+    "gate0": {
+      "approved": true,
+      "at": "2026-09-08T09:41:37+00:00",
+      "note": "picked idea-05",
+      "picked": "idea-05.md"
+    },
+    "gate1": {
+      "approved": true,
+      "at": "2026-09-08T10:09:01+00:00",
+      "note": "",
+      "spec_hash": "b0096939782c5093aace8c859df2ab0a120648398476b247915614f8d644ee0d",
+      "verify_hash": "9794094ed72b0f1950a832c9e192dfe1b39595c9c32cefa8f405a810cc728d63",
+      "override": false
+    },
+    "gate2": {
+      "approved": true,
+      "at": "2026-09-08T10:37:44+00:00",
+      "note": "",
+      "verify_hash": "9794094ed72b0f1950a832c9e192dfe1b39595c9c32cefa8f405a810cc728d63",
+      "verify_moved": false
+    },
+    "gate3": {
+      "approved": true,
+      "at": "2026-09-08T11:14:41+00:00",
+      "note": ""
+    }
+  },
+  "steps": [
+    {
+      "step": "stack",
+      "ok": true,
+      "at": "2026-09-08T09:37:44+00:00",
+      "detail": "next, react, typescript",
+      "run": 1
+    },
+    {
+      "step": "ideas",
+      "ok": true,
+      "at": "2026-09-08T09:39:40+00:00",
+      "detail": "5 ideas",
+      "run": 1
+    },
+    {
+      "step": "pick",
+      "ok": true,
+      "at": "2026-09-08T09:41:37+00:00",
+      "detail": "idea-05.md",
+      "run": 1
+    },
+    {
+      "step": "lint",
+      "ok": false,
+      "at": "2026-09-08T09:46:11+00:00",
+      "detail": "",
+      "run": 1
+    },
+    {
+      "step": "lint",
+      "ok": false,
+      "at": "2026-09-08T09:50:57+00:00",
+      "detail": "",
+      "run": 2
+    },
+    {
+      "step": "lint",
+      "ok": true,
+      "at": "2026-09-08T09:54:10+00:00",
+      "detail": "",
+      "run": 3
+    },
+    {
+      "step": "breaker",
+      "ok": true,
+      "at": "2026-09-08T09:59:41+00:00",
+      "detail": "b0096939782c",
+      "run": 1
+    },
+    {
+      "step": "redfirst",
+      "ok": true,
+      "at": "2026-09-08T10:04:07+00:00",
+      "detail": "",
+      "run": 1
+    },
+    {
+      "step": "test:app",
+      "ok": false,
+      "at": "2026-09-08T10:14:46+00:00",
+      "detail": "",
+      "run": 1
+    },
+    {
+      "step": "test:app",
+      "ok": false,
+      "at": "2026-09-08T10:20:32+00:00",
+      "detail": "",
+      "run": 2
+    },
+    {
+      "step": "test:app",
+      "ok": true,
+      "at": "2026-09-08T10:29:26+00:00",
+      "detail": "",
+      "run": 3
+    },
+    {
+      "step": "mutation",
+      "ok": true,
+      "at": "2026-09-08T10:37:21+00:00",
+      "detail": "",
+      "run": 1
+    },
+    {
+      "step": "cut",
+      "ok": false,
+      "at": "2026-09-08T10:41:27+00:00",
+      "detail": "",
+      "run": 1
+    },
+    {
+      "step": "cut",
+      "ok": false,
+      "at": "2026-09-08T10:45:10+00:00",
+      "detail": "",
+      "run": 2
+    },
+    {
+      "step": "cut",
+      "ok": false,
+      "at": "2026-09-08T10:48:53+00:00",
+      "detail": "",
+      "run": 3
+    },
+    {
+      "step": "leak-scan",
+      "ok": true,
+      "at": "2026-09-08T11:07:32+00:00",
+      "detail": "",
+      "run": 1
+    },
+    {
+      "step": "guide-lint",
+      "ok": true,
+      "at": "2026-09-08T11:12:02+00:00",
+      "detail": "",
+      "run": 1
+    },
+    {
+      "step": "deploy",
+      "ok": true,
+      "at": "2026-09-08T11:12:09+00:00",
+      "detail": "",
+      "run": 1
+    },
+    {
+      "step": "dryrun",
+      "ok": true,
+      "at": "2026-09-08T11:14:37+00:00",
+      "detail": "session 3, 40 min, priya",
+      "run": 1
+    },
+    {
+      "step": "ship",
+      "ok": true,
+      "at": "2026-09-08T11:14:41+00:00",
+      "detail": "",
+      "run": 1
+    }
+  ],
+  "ticket": null,
+  "dry_run": {
+    "at": "2026-09-08T11:14:37+00:00",
+    "session": 3,
+    "minutes": 40,
+    "by": "priya",
+    "taught_without_the_code": true,
+    "note": "was delivered successfully"
+  },
+  "feedback": []
+}

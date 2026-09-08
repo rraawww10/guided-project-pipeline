@@ -1,2 +1,30 @@
-ef4030f864d7e323df9fdf474b29ef421e03784988d7aed58523607d3799443a
+0aeb4d6e3667f14eebb784d001d849ea7b90cf7c8331feef8572ce581bc996a5
+Re-approved on the current spec 0aeb4d6e to clear a drift that arrived with the
+pull from the laptop.
+
+The drift: SPEC_FROZEN and state.json recorded ef4030f8 while .pipeline/approved/
+already held 0aeb4d6e, so the marker and the archive disagreed. The ef4030f8
+bytes exist nowhere on this machine - not in the archive, not in round-1
+(82fc5f78), not in the single git commit for this project - so restoring the
+originally approved copy was not possible. This approval is of the spec as it
+now stands, taken on its own merits.
+
+Rule 7 was the blocker, not the spec: the Spec Breaker had run but
+`breaker end` never did, so ambiguity.md had no ambiguity-meta.json and nothing
+tied the report to the spec it read. Bound before approving. Linter and Breaker
+both ran against 0aeb4d6e.
+
+Stopping rule: 3 blocking, unowned_blocking 0, 5 worth a look, drift [],
+reviewed_spec_hash == spec_hash.
+
+verify_later carried one conditional owner and it is DISCHARGED, not deferred:
+A3 "cut-ui-append-guess can be made toothless by a refetch", owned by mutation,
+which can pass by not running. Step 8 shows checked == of_total == 16 and
+cut-ui-append-guess was among the mutants run. It came back NOT GRADED - so A3
+is confirmed real rather than skipped, and the Verifier owes a test that bites.
+That is the outstanding work at step 8; results.json is 17/17 green.
+
+CARRIED RISK: app/ and verify/ were built against ef4030f8 and the diff against
+0aeb4d6e is unknowable. Nothing downstream can detect it. Read results.json and
+mutation.json as the evidence the code still matches this spec.
 

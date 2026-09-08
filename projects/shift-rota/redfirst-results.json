@@ -1,0 +1,131 @@
+{
+  "ok": false,
+  "target": "app",
+  "code_checks": {
+    "ok": true,
+    "target": "app",
+    "declared": [],
+    "unknown": [],
+    "checks": {}
+  },
+  "stack_check": {
+    "ok": true,
+    "skipped": "app/ has not been built yet",
+    "stack": [
+      "next",
+      "react",
+      "typescript"
+    ],
+    "violations": []
+  },
+  "seconds": 0.0,
+  "counts": {
+    "pass": 0,
+    "fail": 0,
+    "skip": 0,
+    "missing": 14
+  },
+  "criteria": {
+    "c-1-1": {
+      "status": "missing",
+      "check": "On sc-sim initial load, the page shows data-testid=\\\"mode\\\" with text \"idle\" and no element with data-testid=\\\"current\\\"",
+      "session": 1,
+      "test": "verify/test_ui_sim.py::test_c_1_1_initial_idle_no_current",
+      "message": "test did not run"
+    },
+    "c-1-2": {
+      "status": "missing",
+      "check": "On sc-sim, after clicking btn-alert, the page shows data-testid=\\\"current\\\" with text \"Alex\" and data-testid=\\\"mode\\\" with text \"alerting\"",
+      "session": 1,
+      "test": "verify/test_ui_sim.py::test_c_1_2_alert_sets_current_and_mode",
+      "message": "test did not run"
+    },
+    "c-2-1": {
+      "status": "missing",
+      "check": "On sc-sim, after clicking Alert and selecting Alex in actor-select then clicking btn-ack, the page shows mode=\\\"alerting\\\", current=\\\"Alex\\\", and a new last log row includes \"ack by Alex\"",
+      "session": 2,
+      "test": "verify/test_ui_sim.py::test_c_2_1_ack_by_alex_logs_and_keeps_current",
+      "message": "test did not run"
+    },
+    "c-2-2": {
+      "status": "missing",
+      "check": "On sc-sim, after clicking Alert then btn-timeout, the page shows current contact \"Beth\"",
+      "session": 2,
+      "test": "verify/test_ui_sim.py::test_c_2_2_timeout_escalates_to_beth",
+      "message": "test did not run"
+    },
+    "c-2-3": {
+      "status": "missing",
+      "check": "On sc-sim, after clicking Alert, selecting Beth in actor-select and clicking btn-ack, the page shows an error containing \"only Alex can ack\" and still shows current \"Alex\"",
+      "session": 2,
+      "test": "verify/test_ui_sim.py::test_c_2_3_wrong_actor_ack_shows_error_and_keeps_current",
+      "message": "test did not run"
+    },
+    "c-2-4": {
+      "status": "missing",
+      "check": "On sc-sim, after clicking Alert then btn-resolve, the page shows mode=\\\"idle\\\" and no element with data-testid=\\\"current\\\"",
+      "session": 2,
+      "test": "verify/test_ui_sim.py::test_c_2_4_resolve_returns_to_idle_no_current",
+      "message": "test did not run"
+    },
+    "c-2-5": {
+      "status": "missing",
+      "check": "On sc-sim, after clicking Alert, then btn-timeout twice to reach \"Chen\", clicking btn-timeout again shows an error containing \"no further escalation\" and still shows current \"Chen\"",
+      "session": 2,
+      "test": "verify/test_ui_sim.py::test_c_2_5_timeout_at_end_shows_error_and_keeps_chen",
+      "message": "test did not run"
+    },
+    "c-2-6": {
+      "status": "missing",
+      "check": "POST /api/state with a JSON body where mode is \"alerting\" returns 200 with a JSON object whose mode equals \"alerting\"",
+      "session": 2,
+      "test": "verify/test_api_state.py::test_c_2_6_post_state_alerting_round_trips",
+      "message": "test did not run"
+    },
+    "c-3-1": {
+      "status": "missing",
+      "check": "On sc-script, entering 'alert\n timeout\n ack Beth\n resolve' then clicking btn-run-script shows mode=\\\"idle\\\", log-count \"4\", first log row includes \"alert\" and last row includes \"resolve\"",
+      "session": 3,
+      "test": "verify/test_ui_script.py::test_c_3_1_script_happy_path_runs_and_logs_4",
+      "message": "test did not run"
+    },
+    "c-3-2": {
+      "status": "missing",
+      "check": "On sc-script, entering 'ack Dana' then clicking btn-run-script shows script-error containing \"unknown actor Dana\"",
+      "session": 3,
+      "test": "verify/test_ui_script.py::test_c_3_2_script_unknown_actor_errors",
+      "message": "test did not run"
+    },
+    "c-3-3": {
+      "status": "missing",
+      "check": "On sc-script, entering 'resolve' then clicking btn-run-script shows script-error containing \"illegal transition\"",
+      "session": 3,
+      "test": "verify/test_ui_script.py::test_c_3_3_script_illegal_transition_resolve_errors",
+      "message": "test did not run"
+    },
+    "c-3-4": {
+      "status": "missing",
+      "check": "On sc-script, entering 'alert\n ack Beth' then clicking btn-run-script shows script-error containing \"only Alex can ack\"",
+      "session": 3,
+      "test": "verify/test_ui_script.py::test_c_3_4_script_wrong_actor_ack_errors",
+      "message": "test did not run"
+    },
+    "c-3-5": {
+      "status": "missing",
+      "check": "On sc-script, entering 'alert\n ack Dana\n timeout' then clicking btn-run-script shows log-count \"1\" and script-error containing \"unknown actor Dana\"",
+      "session": 3,
+      "test": "verify/test_ui_script.py::test_c_3_5_script_stops_on_first_error_after_alert",
+      "message": "test did not run"
+    },
+    "c-3-6": {
+      "status": "missing",
+      "check": "GET /api/state returns 200 with a JSON object whose contacts equal [\"Alex\", \"Beth\", \"Chen\"], mode is \"idle\", and log is an empty array",
+      "session": 3,
+      "test": "verify/test_api_state.py::test_c_3_6_get_state_seed_is_idle_and_contacts",
+      "message": "test did not run"
+    }
+  },
+  "pytest_returncode": 99,
+  "stdout_tail": "",
+  "stderr_tail": "[Errno 2] No such file or directory: PosixPath('/home/nxtwave/Desktop/updated_project_workflow/projects/shift-rota/app')"
+}

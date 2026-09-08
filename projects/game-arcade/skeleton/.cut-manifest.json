@@ -1,0 +1,143 @@
+{
+  "slug": "game-arcade",
+  "cuts": [
+    {
+      "id": "cut-ep-games-branch",
+      "file": "app/api/games/[id]/branch/route.ts",
+      "line": 10,
+      "lines_removed": 7
+    },
+    {
+      "id": "cut-ep-score-on-submit",
+      "file": "app/api/games/[id]/guesses/route.ts",
+      "line": 30,
+      "lines_removed": 2
+    },
+    {
+      "id": "cut-ep-guesses-create-save",
+      "file": "app/api/games/[id]/guesses/route.ts",
+      "line": 34,
+      "lines_removed": 3
+    },
+    {
+      "id": "cut-ep-hint-build",
+      "file": "app/api/games/[id]/hint/route.ts",
+      "line": 10,
+      "lines_removed": 5
+    },
+    {
+      "id": "cut-ep-games-create-save",
+      "file": "app/api/games/route.ts",
+      "line": 6,
+      "lines_removed": 4
+    },
+    {
+      "id": "cut-ep-games-list",
+      "file": "app/api/games/route.ts",
+      "line": 18,
+      "lines_removed": 6
+    },
+    {
+      "id": "cut-ui-games-fetch",
+      "file": "app/games/page.tsx",
+      "line": 16,
+      "lines_removed": 1
+    },
+    {
+      "id": "cut-ui-resume-select",
+      "file": "app/games/page.tsx",
+      "line": 27,
+      "lines_removed": 1
+    },
+    {
+      "id": "cut-ui-hint-fetch",
+      "file": "app/page.tsx",
+      "line": 60,
+      "lines_removed": 1
+    },
+    {
+      "id": "cut-ui-append-guess",
+      "file": "app/page.tsx",
+      "line": 83,
+      "lines_removed": 1
+    },
+    {
+      "id": "cut-ui-branch-here",
+      "file": "app/page.tsx",
+      "line": 103,
+      "lines_removed": 1
+    },
+    {
+      "id": "cut-ui-render-scores",
+      "file": "app/page.tsx",
+      "line": 112,
+      "lines_removed": 12
+    },
+    {
+      "id": "cut-filter-candidates",
+      "file": "lib/candidates.ts",
+      "line": 17,
+      "lines_removed": 7
+    },
+    {
+      "id": "cut-next-candidate",
+      "file": "lib/candidates.ts",
+      "line": 31,
+      "lines_removed": 7
+    },
+    {
+      "id": "cut-score-count-black",
+      "file": "lib/scoring.ts",
+      "line": 27,
+      "lines_removed": 3
+    },
+    {
+      "id": "cut-score-count-white",
+      "file": "lib/scoring.ts",
+      "line": 32,
+      "lines_removed": 6
+    }
+  ],
+  "count": 16,
+  "by_session": {
+    "1": [
+      "cut-ep-games-create-save",
+      "cut-ep-guesses-create-save",
+      "cut-ui-append-guess"
+    ],
+    "2": [
+      "cut-ep-score-on-submit",
+      "cut-score-count-black",
+      "cut-score-count-white",
+      "cut-ui-render-scores"
+    ],
+    "3": [
+      "cut-ep-hint-build",
+      "cut-filter-candidates",
+      "cut-next-candidate",
+      "cut-ui-hint-fetch"
+    ],
+    "4": [
+      "cut-ep-games-branch",
+      "cut-ep-games-list",
+      "cut-ui-branch-here",
+      "cut-ui-games-fetch",
+      "cut-ui-resume-select"
+    ]
+  },
+  "return_safety": {
+    "ok": true,
+    "checked": 16,
+    "violations": []
+  },
+  "partial_state_risks": [],
+  "typecheck": {
+    "ran": true,
+    "ok": true,
+    "error_count": 0,
+    "errors": [],
+    "missing_return": [],
+    "hint": ""
+  },
+  "ok": true
+}

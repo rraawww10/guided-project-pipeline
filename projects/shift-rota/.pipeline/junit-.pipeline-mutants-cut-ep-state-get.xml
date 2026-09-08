@@ -1,0 +1,418 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="13" skipped="0" tests="14" time="215.018" timestamp="2026-09-08T16:00:10.959234+05:30" hostname="nxtwave-Z790-D-AX"><testcase classname="verify.test_api_state" name="test_c_2_6_post_state_alerting_round_trips" time="0.047" /><testcase classname="verify.test_api_state" name="test_c_3_6_get_state_seed_is_idle_and_contacts" time="0.013"><failure message="assert 501 == 200&#10; +  where 501 = &lt;Response [501 Not Implemented]&gt;.status_code">http_client = &lt;httpx.Client object at 0x7300ef2e7fe0&gt;
+
+    def test_c_3_6_get_state_seed_is_idle_and_contacts(http_client):
+        resp = http_client.get("/api/state")
+&gt;       assert resp.status_code == 200
+E       assert 501 == 200
+E        +  where 501 = &lt;Response [501 Not Implemented]&gt;.status_code
+
+verify/test_api_state.py:19: AssertionError</failure></testcase><testcase classname="verify.test_ui_script" name="test_c_3_1_script_happy_path_runs_and_logs_4" time="5.430"><failure message="AssertionError: Locator expected to have text '4'&#10;Actual value: 0 &#10;Call log:&#10;  - Expect &quot;to_have_text&quot; with timeout 5000ms&#10;  - waiting for get_by_test_id(&quot;log-count&quot;)&#10;    14 × locator resolved to &lt;div data-testid=&quot;log-count&quot;&gt;0&lt;/div&gt;&#10;       - unexpected value &quot;0&quot;&#10;&#10;Aria snapshot:&#10;- text: &quot;0&quot;">page = &lt;Page url='http://127.0.0.1:59237/script'&gt;
+
+    def test_c_3_1_script_happy_path_runs_and_logs_4(page):
+        # Enter a 4-line script and run; expect idle, log-count 4, first row contains alert, last contains resolve
+        goto_script(page)
+        page.get_by_test_id("script-input").fill("alert\ntimeout\nack Beth\nresolve")
+        page.get_by_test_id("btn-run-script").click()
+        expect(page.get_by_test_id("mode")).to_have_text("idle")
+&gt;       expect(page.get_by_test_id("log-count")).to_have_text("4")
+E       AssertionError: Locator expected to have text '4'
+E       Actual value: 0 
+E       Call log:
+E         - Expect "to_have_text" with timeout 5000ms
+E         - waiting for get_by_test_id("log-count")
+E           14 × locator resolved to &lt;div data-testid="log-count"&gt;0&lt;/div&gt;
+E              - unexpected value "0"
+E       
+E       Aria snapshot:
+E       - text: "0"
+
+verify/test_ui_script.py:14: AssertionError</failure></testcase><testcase classname="verify.test_ui_script" name="test_c_3_2_script_unknown_actor_errors" time="5.443"><failure message="AssertionError: Locator expected to contain text 'unknown actor Dana'&#10;Actual value: None&#10;Error: element(s) not found &#10;Call log:&#10;  - Expect &quot;to_contain_text&quot; with timeout 5000ms&#10;  - waiting for get_by_test_id(&quot;script-error&quot;)&#10;&#10;Aria snapshot:&#10;- navigation:&#10;  - link &quot;Sim&quot;:&#10;    - /url: /&#10;  - link &quot;Script&quot;:&#10;    - /url: /script&#10;- heading &quot;Script Runner&quot; [level=1]&#10;- textbox: ack Dana&#10;- button &quot;Run Script&quot;&#10;- text: idle 0&#10;- heading &quot;Log&quot; [level=2]&#10;- list&#10;- alert">page = &lt;Page url='http://127.0.0.1:59237/script'&gt;
+
+    def test_c_3_2_script_unknown_actor_errors(page):
+        goto_script(page)
+        page.get_by_test_id("script-input").fill("ack Dana")
+        page.get_by_test_id("btn-run-script").click()
+&gt;       expect(page.get_by_test_id("script-error")).to_contain_text("unknown actor Dana")
+E       AssertionError: Locator expected to contain text 'unknown actor Dana'
+E       Actual value: None
+E       Error: element(s) not found 
+E       Call log:
+E         - Expect "to_contain_text" with timeout 5000ms
+E         - waiting for get_by_test_id("script-error")
+E       
+E       Aria snapshot:
+E       - navigation:
+E         - link "Sim":
+E           - /url: /
+E         - link "Script":
+E           - /url: /script
+E       - heading "Script Runner" [level=1]
+E       - textbox: ack Dana
+E       - button "Run Script"
+E       - text: idle 0
+E       - heading "Log" [level=2]
+E       - list
+E       - alert
+
+verify/test_ui_script.py:26: AssertionError</failure></testcase><testcase classname="verify.test_ui_script" name="test_c_3_3_script_illegal_transition_resolve_errors" time="5.416"><failure message="AssertionError: Locator expected to contain text 'illegal transition'&#10;Actual value: None&#10;Error: element(s) not found &#10;Call log:&#10;  - Expect &quot;to_contain_text&quot; with timeout 5000ms&#10;  - waiting for get_by_test_id(&quot;script-error&quot;)&#10;&#10;Aria snapshot:&#10;- navigation:&#10;  - link &quot;Sim&quot;:&#10;    - /url: /&#10;  - link &quot;Script&quot;:&#10;    - /url: /script&#10;- heading &quot;Script Runner&quot; [level=1]&#10;- textbox: resolve&#10;- button &quot;Run Script&quot;&#10;- text: idle 0&#10;- heading &quot;Log&quot; [level=2]&#10;- list&#10;- alert">page = &lt;Page url='http://127.0.0.1:59237/script'&gt;
+
+    def test_c_3_3_script_illegal_transition_resolve_errors(page):
+        goto_script(page)
+        page.get_by_test_id("script-input").fill("resolve")
+        page.get_by_test_id("btn-run-script").click()
+&gt;       expect(page.get_by_test_id("script-error")).to_contain_text("illegal transition")
+E       AssertionError: Locator expected to contain text 'illegal transition'
+E       Actual value: None
+E       Error: element(s) not found 
+E       Call log:
+E         - Expect "to_contain_text" with timeout 5000ms
+E         - waiting for get_by_test_id("script-error")
+E       
+E       Aria snapshot:
+E       - navigation:
+E         - link "Sim":
+E           - /url: /
+E         - link "Script":
+E           - /url: /script
+E       - heading "Script Runner" [level=1]
+E       - textbox: resolve
+E       - button "Run Script"
+E       - text: idle 0
+E       - heading "Log" [level=2]
+E       - list
+E       - alert
+
+verify/test_ui_script.py:33: AssertionError</failure></testcase><testcase classname="verify.test_ui_script" name="test_c_3_4_script_wrong_actor_ack_errors" time="5.412"><failure message="AssertionError: Locator expected to contain text 'only Alex can ack'&#10;Actual value: None&#10;Error: element(s) not found &#10;Call log:&#10;  - Expect &quot;to_contain_text&quot; with timeout 5000ms&#10;  - waiting for get_by_test_id(&quot;script-error&quot;)&#10;&#10;Aria snapshot:&#10;- navigation:&#10;  - link &quot;Sim&quot;:&#10;    - /url: /&#10;  - link &quot;Script&quot;:&#10;    - /url: /script&#10;- heading &quot;Script Runner&quot; [level=1]&#10;- textbox: alert ack Beth&#10;- button &quot;Run Script&quot;&#10;- text: idle 0&#10;- heading &quot;Log&quot; [level=2]&#10;- list&#10;- alert">page = &lt;Page url='http://127.0.0.1:59237/script'&gt;
+
+    def test_c_3_4_script_wrong_actor_ack_errors(page):
+        goto_script(page)
+        page.get_by_test_id("script-input").fill("alert\nack Beth")
+        page.get_by_test_id("btn-run-script").click()
+&gt;       expect(page.get_by_test_id("script-error")).to_contain_text("only Alex can ack")
+E       AssertionError: Locator expected to contain text 'only Alex can ack'
+E       Actual value: None
+E       Error: element(s) not found 
+E       Call log:
+E         - Expect "to_contain_text" with timeout 5000ms
+E         - waiting for get_by_test_id("script-error")
+E       
+E       Aria snapshot:
+E       - navigation:
+E         - link "Sim":
+E           - /url: /
+E         - link "Script":
+E           - /url: /script
+E       - heading "Script Runner" [level=1]
+E       - textbox: alert ack Beth
+E       - button "Run Script"
+E       - text: idle 0
+E       - heading "Log" [level=2]
+E       - list
+E       - alert
+
+verify/test_ui_script.py:40: AssertionError</failure></testcase><testcase classname="verify.test_ui_script" name="test_c_3_5_script_stops_on_first_error_after_alert" time="5.418"><failure message="AssertionError: Locator expected to have text '1'&#10;Actual value: 0 &#10;Call log:&#10;  - Expect &quot;to_have_text&quot; with timeout 5000ms&#10;  - waiting for get_by_test_id(&quot;log-count&quot;)&#10;    14 × locator resolved to &lt;div data-testid=&quot;log-count&quot;&gt;0&lt;/div&gt;&#10;       - unexpected value &quot;0&quot;&#10;&#10;Aria snapshot:&#10;- text: &quot;0&quot;">page = &lt;Page url='http://127.0.0.1:59237/script'&gt;
+
+    def test_c_3_5_script_stops_on_first_error_after_alert(page):
+        goto_script(page)
+        page.get_by_test_id("script-input").fill("alert\nack Dana\ntimeout")
+        page.get_by_test_id("btn-run-script").click()
+&gt;       expect(page.get_by_test_id("log-count")).to_have_text("1")
+E       AssertionError: Locator expected to have text '1'
+E       Actual value: 0 
+E       Call log:
+E         - Expect "to_have_text" with timeout 5000ms
+E         - waiting for get_by_test_id("log-count")
+E           14 × locator resolved to &lt;div data-testid="log-count"&gt;0&lt;/div&gt;
+E              - unexpected value "0"
+E       
+E       Aria snapshot:
+E       - text: "0"
+
+verify/test_ui_script.py:47: AssertionError</failure></testcase><testcase classname="verify.test_ui_sim" name="test_c_1_1_initial_idle_no_current" time="5.320"><failure message="AssertionError: Locator expected to have text 'idle'&#10;Actual value: None&#10;Error: element(s) not found &#10;Call log:&#10;  - Expect &quot;to_have_text&quot; with timeout 5000ms&#10;  - waiting for get_by_test_id(&quot;mode&quot;)&#10;&#10;Aria snapshot:&#10;- navigation:&#10;  - link &quot;Sim&quot;:&#10;    - /url: /&#10;  - link &quot;Script&quot;:&#10;    - /url: /script&#10;- text: Loading...&#10;- alert">page = &lt;Page url='http://127.0.0.1:59237/'&gt;
+
+    def test_c_1_1_initial_idle_no_current(page):
+        # sc-sim initial load shows mode "idle" and no current element
+        goto_sim(page)
+        mode = page.get_by_test_id("mode")
+&gt;       expect(mode).to_have_text("idle")
+E       AssertionError: Locator expected to have text 'idle'
+E       Actual value: None
+E       Error: element(s) not found 
+E       Call log:
+E         - Expect "to_have_text" with timeout 5000ms
+E         - waiting for get_by_test_id("mode")
+E       
+E       Aria snapshot:
+E       - navigation:
+E         - link "Sim":
+E           - /url: /
+E         - link "Script":
+E           - /url: /script
+E       - text: Loading...
+E       - alert
+
+verify/test_ui_sim.py:12: AssertionError</failure></testcase><testcase classname="verify.test_ui_sim" name="test_c_1_2_alert_sets_current_and_mode" time="30.304"><failure message="playwright._impl._errors.TimeoutError: Locator.click: Timeout 30000ms exceeded.&#10;Call log:&#10;  - waiting for get_by_test_id(&quot;btn-alert&quot;)">page = &lt;Page url='http://127.0.0.1:59237/'&gt;
+
+    def test_c_1_2_alert_sets_current_and_mode(page):
+        # After clicking Alert, current is Alex and mode is alerting
+        goto_sim(page)
+&gt;       page.get_by_test_id("btn-alert").click()
+
+verify/test_ui_sim.py:20: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+.pipeline/venv/lib/python3.12/site-packages/playwright/sync_api/_generated.py:17876: in click
+    self._sync(
+.pipeline/venv/lib/python3.12/site-packages/playwright/_impl/_locator.py:165: in click
+    return await self._frame._click(self._selector, strict=True, **params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.pipeline/venv/lib/python3.12/site-packages/playwright/_impl/_frame.py:593: in _click
+    await self._channel.send("click", self._timeout, locals_to_params(locals()))
+.pipeline/venv/lib/python3.12/site-packages/playwright/_impl/_connection.py:76: in send
+    return await self._connection.wrap_api_call(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;playwright._impl._connection.Connection object at 0x7300ee06f590&gt;
+cb = &lt;function Channel.send.&lt;locals&gt;.&lt;lambda&gt; at 0x7300ee0e04a0&gt;
+is_internal = False, title = None
+
+    async def wrap_api_call(
+        self, cb: Callable[[], Any], is_internal: bool = False, title: str = None
+    ) -&gt; Any:
+        if self._api_zone.get():
+            return await cb()
+        task = asyncio.current_task(self._loop)
+        parsed_st = _attach_api_call_information(
+            getattr(task, "__pw_stack__", None) or _capture_stack_trace(),
+            is_internal,
+            title,
+        )
+        self._api_zone.set(parsed_st)
+        try:
+            return await cb()
+        except Exception as error:
+&gt;           raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+E           playwright._impl._errors.TimeoutError: Locator.click: Timeout 30000ms exceeded.
+E           Call log:
+E             - waiting for get_by_test_id("btn-alert")
+
+.pipeline/venv/lib/python3.12/site-packages/playwright/_impl/_connection.py:632: TimeoutError</failure></testcase><testcase classname="verify.test_ui_sim" name="test_c_2_1_ack_by_alex_logs_and_keeps_current" time="30.332"><failure message="playwright._impl._errors.TimeoutError: Locator.click: Timeout 30000ms exceeded.&#10;Call log:&#10;  - waiting for get_by_test_id(&quot;btn-alert&quot;)">page = &lt;Page url='http://127.0.0.1:59237/'&gt;
+
+    def test_c_2_1_ack_by_alex_logs_and_keeps_current(page):
+        # Alert -&gt; select Alex -&gt; Ack keeps current Alex, mode alerting, and logs ack by Alex
+        goto_sim(page)
+&gt;       page.get_by_test_id("btn-alert").click()
+
+verify/test_ui_sim.py:30: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+.pipeline/venv/lib/python3.12/site-packages/playwright/sync_api/_generated.py:17876: in click
+    self._sync(
+.pipeline/venv/lib/python3.12/site-packages/playwright/_impl/_locator.py:165: in click
+    return await self._frame._click(self._selector, strict=True, **params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.pipeline/venv/lib/python3.12/site-packages/playwright/_impl/_frame.py:593: in _click
+    await self._channel.send("click", self._timeout, locals_to_params(locals()))
+.pipeline/venv/lib/python3.12/site-packages/playwright/_impl/_connection.py:76: in send
+    return await self._connection.wrap_api_call(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;playwright._impl._connection.Connection object at 0x7300ef2c28d0&gt;
+cb = &lt;function Channel.send.&lt;locals&gt;.&lt;lambda&gt; at 0x7300ee087ba0&gt;
+is_internal = False, title = None
+
+    async def wrap_api_call(
+        self, cb: Callable[[], Any], is_internal: bool = False, title: str = None
+    ) -&gt; Any:
+        if self._api_zone.get():
+            return await cb()
+        task = asyncio.current_task(self._loop)
+        parsed_st = _attach_api_call_information(
+            getattr(task, "__pw_stack__", None) or _capture_stack_trace(),
+            is_internal,
+            title,
+        )
+        self._api_zone.set(parsed_st)
+        try:
+            return await cb()
+        except Exception as error:
+&gt;           raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+E           playwright._impl._errors.TimeoutError: Locator.click: Timeout 30000ms exceeded.
+E           Call log:
+E             - waiting for get_by_test_id("btn-alert")
+
+.pipeline/venv/lib/python3.12/site-packages/playwright/_impl/_connection.py:632: TimeoutError</failure></testcase><testcase classname="verify.test_ui_sim" name="test_c_2_2_timeout_escalates_to_beth" time="30.354"><failure message="playwright._impl._errors.TimeoutError: Locator.click: Timeout 30000ms exceeded.&#10;Call log:&#10;  - waiting for get_by_test_id(&quot;btn-alert&quot;)">page = &lt;Page url='http://127.0.0.1:59237/'&gt;
+
+    def test_c_2_2_timeout_escalates_to_beth(page):
+        # Alert -&gt; Timeout escalates current to Beth
+        goto_sim(page)
+&gt;       page.get_by_test_id("btn-alert").click()
+
+verify/test_ui_sim.py:43: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+.pipeline/venv/lib/python3.12/site-packages/playwright/sync_api/_generated.py:17876: in click
+    self._sync(
+.pipeline/venv/lib/python3.12/site-packages/playwright/_impl/_locator.py:165: in click
+    return await self._frame._click(self._selector, strict=True, **params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.pipeline/venv/lib/python3.12/site-packages/playwright/_impl/_frame.py:593: in _click
+    await self._channel.send("click", self._timeout, locals_to_params(locals()))
+.pipeline/venv/lib/python3.12/site-packages/playwright/_impl/_connection.py:76: in send
+    return await self._connection.wrap_api_call(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;playwright._impl._connection.Connection object at 0x7300ee06f800&gt;
+cb = &lt;function Channel.send.&lt;locals&gt;.&lt;lambda&gt; at 0x7300ee0d7ce0&gt;
+is_internal = False, title = None
+
+    async def wrap_api_call(
+        self, cb: Callable[[], Any], is_internal: bool = False, title: str = None
+    ) -&gt; Any:
+        if self._api_zone.get():
+            return await cb()
+        task = asyncio.current_task(self._loop)
+        parsed_st = _attach_api_call_information(
+            getattr(task, "__pw_stack__", None) or _capture_stack_trace(),
+            is_internal,
+            title,
+        )
+        self._api_zone.set(parsed_st)
+        try:
+            return await cb()
+        except Exception as error:
+&gt;           raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+E           playwright._impl._errors.TimeoutError: Locator.click: Timeout 30000ms exceeded.
+E           Call log:
+E             - waiting for get_by_test_id("btn-alert")
+
+.pipeline/venv/lib/python3.12/site-packages/playwright/_impl/_connection.py:632: TimeoutError</failure></testcase><testcase classname="verify.test_ui_sim" name="test_c_2_3_wrong_actor_ack_shows_error_and_keeps_current" time="30.319"><failure message="playwright._impl._errors.TimeoutError: Locator.click: Timeout 30000ms exceeded.&#10;Call log:&#10;  - waiting for get_by_test_id(&quot;btn-alert&quot;)">page = &lt;Page url='http://127.0.0.1:59237/'&gt;
+
+    def test_c_2_3_wrong_actor_ack_shows_error_and_keeps_current(page):
+        # Alert -&gt; select Beth -&gt; Ack shows error and current stays Alex
+        goto_sim(page)
+&gt;       page.get_by_test_id("btn-alert").click()
+
+verify/test_ui_sim.py:51: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+.pipeline/venv/lib/python3.12/site-packages/playwright/sync_api/_generated.py:17876: in click
+    self._sync(
+.pipeline/venv/lib/python3.12/site-packages/playwright/_impl/_locator.py:165: in click
+    return await self._frame._click(self._selector, strict=True, **params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.pipeline/venv/lib/python3.12/site-packages/playwright/_impl/_frame.py:593: in _click
+    await self._channel.send("click", self._timeout, locals_to_params(locals()))
+.pipeline/venv/lib/python3.12/site-packages/playwright/_impl/_connection.py:76: in send
+    return await self._connection.wrap_api_call(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;playwright._impl._connection.Connection object at 0x7300ee06c380&gt;
+cb = &lt;function Channel.send.&lt;locals&gt;.&lt;lambda&gt; at 0x7300edf53ec0&gt;
+is_internal = False, title = None
+
+    async def wrap_api_call(
+        self, cb: Callable[[], Any], is_internal: bool = False, title: str = None
+    ) -&gt; Any:
+        if self._api_zone.get():
+            return await cb()
+        task = asyncio.current_task(self._loop)
+        parsed_st = _attach_api_call_information(
+            getattr(task, "__pw_stack__", None) or _capture_stack_trace(),
+            is_internal,
+            title,
+        )
+        self._api_zone.set(parsed_st)
+        try:
+            return await cb()
+        except Exception as error:
+&gt;           raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+E           playwright._impl._errors.TimeoutError: Locator.click: Timeout 30000ms exceeded.
+E           Call log:
+E             - waiting for get_by_test_id("btn-alert")
+
+.pipeline/venv/lib/python3.12/site-packages/playwright/_impl/_connection.py:632: TimeoutError</failure></testcase><testcase classname="verify.test_ui_sim" name="test_c_2_4_resolve_returns_to_idle_no_current" time="30.328"><failure message="playwright._impl._errors.TimeoutError: Locator.click: Timeout 30000ms exceeded.&#10;Call log:&#10;  - waiting for get_by_test_id(&quot;btn-alert&quot;)">page = &lt;Page url='http://127.0.0.1:59237/'&gt;
+
+    def test_c_2_4_resolve_returns_to_idle_no_current(page):
+        # Alert -&gt; Resolve returns to idle and removes current element
+        goto_sim(page)
+&gt;       page.get_by_test_id("btn-alert").click()
+
+verify/test_ui_sim.py:62: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+.pipeline/venv/lib/python3.12/site-packages/playwright/sync_api/_generated.py:17876: in click
+    self._sync(
+.pipeline/venv/lib/python3.12/site-packages/playwright/_impl/_locator.py:165: in click
+    return await self._frame._click(self._selector, strict=True, **params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.pipeline/venv/lib/python3.12/site-packages/playwright/_impl/_frame.py:593: in _click
+    await self._channel.send("click", self._timeout, locals_to_params(locals()))
+.pipeline/venv/lib/python3.12/site-packages/playwright/_impl/_connection.py:76: in send
+    return await self._connection.wrap_api_call(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;playwright._impl._connection.Connection object at 0x7300edd4a690&gt;
+cb = &lt;function Channel.send.&lt;locals&gt;.&lt;lambda&gt; at 0x7300eddedc60&gt;
+is_internal = False, title = None
+
+    async def wrap_api_call(
+        self, cb: Callable[[], Any], is_internal: bool = False, title: str = None
+    ) -&gt; Any:
+        if self._api_zone.get():
+            return await cb()
+        task = asyncio.current_task(self._loop)
+        parsed_st = _attach_api_call_information(
+            getattr(task, "__pw_stack__", None) or _capture_stack_trace(),
+            is_internal,
+            title,
+        )
+        self._api_zone.set(parsed_st)
+        try:
+            return await cb()
+        except Exception as error:
+&gt;           raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+E           playwright._impl._errors.TimeoutError: Locator.click: Timeout 30000ms exceeded.
+E           Call log:
+E             - waiting for get_by_test_id("btn-alert")
+
+.pipeline/venv/lib/python3.12/site-packages/playwright/_impl/_connection.py:632: TimeoutError</failure></testcase><testcase classname="verify.test_ui_sim" name="test_c_2_5_timeout_at_end_shows_error_and_keeps_chen" time="30.307"><failure message="playwright._impl._errors.TimeoutError: Locator.click: Timeout 30000ms exceeded.&#10;Call log:&#10;  - waiting for get_by_test_id(&quot;btn-alert&quot;)">page = &lt;Page url='http://127.0.0.1:59237/'&gt;
+
+    def test_c_2_5_timeout_at_end_shows_error_and_keeps_chen(page):
+        # Alert -&gt; Timeout -&gt; Timeout reaches Chen, next timeout errors and stays Chen
+        goto_sim(page)
+&gt;       page.get_by_test_id("btn-alert").click()
+
+verify/test_ui_sim.py:71: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+.pipeline/venv/lib/python3.12/site-packages/playwright/sync_api/_generated.py:17876: in click
+    self._sync(
+.pipeline/venv/lib/python3.12/site-packages/playwright/_impl/_locator.py:165: in click
+    return await self._frame._click(self._selector, strict=True, **params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.pipeline/venv/lib/python3.12/site-packages/playwright/_impl/_frame.py:593: in _click
+    await self._channel.send("click", self._timeout, locals_to_params(locals()))
+.pipeline/venv/lib/python3.12/site-packages/playwright/_impl/_connection.py:76: in send
+    return await self._connection.wrap_api_call(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;playwright._impl._connection.Connection object at 0x7300edfffb90&gt;
+cb = &lt;function Channel.send.&lt;locals&gt;.&lt;lambda&gt; at 0x7300ee0d4540&gt;
+is_internal = False, title = None
+
+    async def wrap_api_call(
+        self, cb: Callable[[], Any], is_internal: bool = False, title: str = None
+    ) -&gt; Any:
+        if self._api_zone.get():
+            return await cb()
+        task = asyncio.current_task(self._loop)
+        parsed_st = _attach_api_call_information(
+            getattr(task, "__pw_stack__", None) or _capture_stack_trace(),
+            is_internal,
+            title,
+        )
+        self._api_zone.set(parsed_st)
+        try:
+            return await cb()
+        except Exception as error:
+&gt;           raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+E           playwright._impl._errors.TimeoutError: Locator.click: Timeout 30000ms exceeded.
+E           Call log:
+E             - waiting for get_by_test_id("btn-alert")
+
+.pipeline/venv/lib/python3.12/site-packages/playwright/_impl/_connection.py:632: TimeoutError</failure></testcase></testsuite></testsuites>

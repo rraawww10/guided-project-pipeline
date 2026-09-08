@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="11" skipped="0" tests="17" time="148.675" timestamp="2026-09-08T02:14:01.867574+05:30" hostname="HERO"><testcase classname="verify.test_api_core" name="test_c_1_1_post_games_creates_and_echoes_seed" time="3.728" /><testcase classname="verify.test_api_core" name="test_c_1_2_post_guess_persists_code_black_white_unscored_or_present" time="3.551"><failure message="AssertionError: assert None == [0, 1, 2, 3]&#10; +  where None = &lt;built-in method get of dict object at 0x000001FE270A7740&gt;('code')&#10; +    where &lt;built-in method get of dict object at 0x000001FE270A7740&gt; = {'ok': False}.get">http_client = &lt;httpx.Client object at 0x000001FE26E6E990&gt;
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="11" skipped="0" tests="17" time="85.216" timestamp="2026-09-08T12:15:05.106853+05:30" hostname="nxtwave-Z790-D-AX"><testcase classname="verify.test_api_core" name="test_c_1_1_post_games_creates_and_echoes_seed" time="0.454" /><testcase classname="verify.test_api_core" name="test_c_1_2_post_guess_persists_code_black_white_unscored_or_present" time="0.393"><failure message="AssertionError: assert None == [0, 1, 2, 3]&#10; +  where None = &lt;built-in method get of dict object at 0x7b1a1c3b6ec0&gt;('code')&#10; +    where &lt;built-in method get of dict object at 0x7b1a1c3b6ec0&gt; = {'ok': False}.get">http_client = &lt;httpx.Client object at 0x7b1a1c5ea2a0&gt;
 
     def test_c_1_2_post_guess_persists_code_black_white_unscored_or_present(http_client):
         # Note: The spec's session-1 text says black/white are null (no scoring yet),
@@ -12,10 +12,10 @@
         body = res.json()
 &gt;       assert body.get("code") == code
 E       AssertionError: assert None == [0, 1, 2, 3]
-E        +  where None = &lt;built-in method get of dict object at 0x000001FE270A7740&gt;('code')
-E        +    where &lt;built-in method get of dict object at 0x000001FE270A7740&gt; = {'ok': False}.get
+E        +  where None = &lt;built-in method get of dict object at 0x7b1a1c3b6ec0&gt;('code')
+E        +    where &lt;built-in method get of dict object at 0x7b1a1c3b6ec0&gt; = {'ok': False}.get
 
-verify\test_api_core.py:31: AssertionError</failure></testcase><testcase classname="verify.test_api_core" name="test_c_2_1_get_game_returns_seed_and_empty_guesses_for_new_game" time="3.523" /><testcase classname="verify.test_api_core" name="test_c_2_2_post_guess_equal_to_secret_returns_black4_white0" time="3.631"><failure message="AssertionError: assert None == 4&#10; +  where None = &lt;built-in method get of dict object at 0x000001FE26F9C800&gt;('black')&#10; +    where &lt;built-in method get of dict object at 0x000001FE26F9C800&gt; = {'ok': False}.get">http_client = &lt;httpx.Client object at 0x000001FE26E52C40&gt;
+verify/test_api_core.py:31: AssertionError</failure></testcase><testcase classname="verify.test_api_core" name="test_c_2_1_get_game_returns_seed_and_empty_guesses_for_new_game" time="0.404" /><testcase classname="verify.test_api_core" name="test_c_2_2_post_guess_equal_to_secret_returns_black4_white0" time="0.413"><failure message="AssertionError: assert None == 4&#10; +  where None = &lt;built-in method get of dict object at 0x7b1a1c3e4800&gt;('black')&#10; +    where &lt;built-in method get of dict object at 0x7b1a1c3e4800&gt; = {'ok': False}.get">http_client = &lt;httpx.Client object at 0x7b1a1bf238c0&gt;
 
     def test_c_2_2_post_guess_equal_to_secret_returns_black4_white0(http_client):
         # Choose a seed and compute its secret per spec's xorshift32.
@@ -27,10 +27,10 @@ verify\test_api_core.py:31: AssertionError</failure></testcase><testcase classna
         body = res.json()
 &gt;       assert body.get("black") == 4
 E       AssertionError: assert None == 4
-E        +  where None = &lt;built-in method get of dict object at 0x000001FE26F9C800&gt;('black')
-E        +    where &lt;built-in method get of dict object at 0x000001FE26F9C800&gt; = {'ok': False}.get
+E        +  where None = &lt;built-in method get of dict object at 0x7b1a1c3e4800&gt;('black')
+E        +    where &lt;built-in method get of dict object at 0x7b1a1c3e4800&gt; = {'ok': False}.get
 
-verify\test_api_core.py:58: AssertionError</failure></testcase><testcase classname="verify.test_api_core" name="test_c_2_3_permuted_all_colours_black0_white4" time="3.551"><failure message="AssertionError: assert None == 0&#10; +  where None = &lt;built-in method get of dict object at 0x000001FE26F65DC0&gt;('black')&#10; +    where &lt;built-in method get of dict object at 0x000001FE26F65DC0&gt; = {'ok': False}.get">http_client = &lt;httpx.Client object at 0x000001FE2716C510&gt;
+verify/test_api_core.py:58: AssertionError</failure></testcase><testcase classname="verify.test_api_core" name="test_c_2_3_permuted_all_colours_black0_white4" time="0.399"><failure message="AssertionError: assert None == 0&#10; +  where None = &lt;built-in method get of dict object at 0x7b1a1c375280&gt;('black')&#10; +    where &lt;built-in method get of dict object at 0x7b1a1c375280&gt; = {'ok': False}.get">http_client = &lt;httpx.Client object at 0x7b1a1bf53c80&gt;
 
     def test_c_2_3_permuted_all_colours_black0_white4(http_client):
         # Find a seed whose secret has 4 distinct colours so a derangement exists.
@@ -43,10 +43,10 @@ verify\test_api_core.py:58: AssertionError</failure></testcase><testcase classna
         body = res.json()
 &gt;       assert body.get("black") == 0
 E       AssertionError: assert None == 0
-E        +  where None = &lt;built-in method get of dict object at 0x000001FE26F65DC0&gt;('black')
-E        +    where &lt;built-in method get of dict object at 0x000001FE26F65DC0&gt; = {'ok': False}.get
+E        +  where None = &lt;built-in method get of dict object at 0x7b1a1c375280&gt;('black')
+E        +    where &lt;built-in method get of dict object at 0x7b1a1c375280&gt; = {'ok': False}.get
 
-verify\test_api_core.py:71: AssertionError</failure></testcase><testcase classname="verify.test_api_core" name="test_c_2_4_get_game_returns_guesses_with_numeric_scores" time="3.620"><failure message="assert (True and 0 &gt;= 2)&#10; +  where True = isinstance([], list)&#10; +  and   0 = len([])">http_client = &lt;httpx.Client object at 0x000001FE27120B90&gt;
+verify/test_api_core.py:71: AssertionError</failure></testcase><testcase classname="verify.test_api_core" name="test_c_2_4_get_game_returns_guesses_with_numeric_scores" time="0.419"><failure message="assert (True and 0 &gt;= 2)&#10; +  where True = isinstance([], list)&#10; +  and   0 = len([])">http_client = &lt;httpx.Client object at 0x7b1a1bf51c70&gt;
 
     def test_c_2_4_get_game_returns_guesses_with_numeric_scores(http_client):
         seed = 97531
@@ -68,7 +68,7 @@ E       assert (True and 0 &gt;= 2)
 E        +  where True = isinstance([], list)
 E        +  and   0 = len([])
 
-verify\test_api_core.py:90: AssertionError</failure></testcase><testcase classname="verify.test_api_hint" name="test_c_3_1_hint_no_guesses_remaining_1296_and_suggestion_zeros" time="3.462" /><testcase classname="verify.test_api_hint" name="test_c_3_2_hint_remaining_matches_consistent_set_for_one_guess" time="3.524"><failure message="AssertionError: assert 1296 == 252&#10; +  where 1296 = &lt;built-in method get of dict object at 0x000001FE2707A940&gt;('remaining')&#10; +    where &lt;built-in method get of dict object at 0x000001FE2707A940&gt; = {'remaining': 1296, 'suggestion': [0, 0, 0, 0]}.get">http_client = &lt;httpx.Client object at 0x000001FE27126140&gt;
+verify/test_api_core.py:90: AssertionError</failure></testcase><testcase classname="verify.test_api_hint" name="test_c_3_1_hint_no_guesses_remaining_1296_and_suggestion_zeros" time="0.396" /><testcase classname="verify.test_api_hint" name="test_c_3_2_hint_remaining_matches_consistent_set_for_one_guess" time="0.399"><failure message="AssertionError: assert 1296 == 252&#10; +  where 1296 = &lt;built-in method get of dict object at 0x7b1a1c39bf80&gt;('remaining')&#10; +    where &lt;built-in method get of dict object at 0x7b1a1c39bf80&gt; = {'remaining': 1296, 'suggestion': [0, 0, 0, 0]}.get">http_client = &lt;httpx.Client object at 0x7b1a1bf20980&gt;
 
     def test_c_3_2_hint_remaining_matches_consistent_set_for_one_guess(http_client):
         seed = 221144
@@ -92,10 +92,10 @@ verify\test_api_core.py:90: AssertionError</failure></testcase><testcase classna
         expected_remaining = sum(1 for code in space if score_guess(code, guess) == (b, w))
 &gt;       assert body.get("remaining") == expected_remaining
 E       AssertionError: assert 1296 == 252
-E        +  where 1296 = &lt;built-in method get of dict object at 0x000001FE2707A940&gt;('remaining')
-E        +    where &lt;built-in method get of dict object at 0x000001FE2707A940&gt; = {'remaining': 1296, 'suggestion': [0, 0, 0, 0]}.get
+E        +  where 1296 = &lt;built-in method get of dict object at 0x7b1a1c39bf80&gt;('remaining')
+E        +    where &lt;built-in method get of dict object at 0x7b1a1c39bf80&gt; = {'remaining': 1296, 'suggestion': [0, 0, 0, 0]}.get
 
-verify\test_api_hint.py:37: AssertionError</failure></testcase><testcase classname="verify.test_api_hint" name="test_c_3_4_two_games_identical_histories_same_suggestion" time="3.527" /><testcase classname="verify.test_api_list_branch" name="test_c_4_1_games_list_returns_summaries_with_guess_counts" time="3.455"><failure message="AssertionError: assert 0 == 2&#10; +  where 0 = &lt;built-in method get of dict object at 0x000001FE26FC64C0&gt;('guessCount')&#10; +    where &lt;built-in method get of dict object at 0x000001FE26FC64C0&gt; = {'id': 'cmtrplhiz000a6xvwy8puvppa', 'seed': 1001, 'guessCount': 0}.get">http_client = &lt;httpx.Client object at 0x000001FE27133750&gt;
+verify/test_api_hint.py:37: AssertionError</failure></testcase><testcase classname="verify.test_api_hint" name="test_c_3_4_two_games_identical_histories_same_suggestion" time="0.403" /><testcase classname="verify.test_api_list_branch" name="test_c_4_1_games_list_returns_summaries_with_guess_counts" time="0.405"><failure message="AssertionError: assert 0 == 2&#10; +  where 0 = &lt;built-in method get of dict object at 0x7b1a1c32bf00&gt;('guessCount')&#10; +    where &lt;built-in method get of dict object at 0x7b1a1c32bf00&gt; = {'id': 'cmtsb1rsj000a73n61j8nfb2b', 'seed': 1001, 'guessCount': 0}.get">http_client = &lt;httpx.Client object at 0x7b1a1bf59af0&gt;
 
     def test_c_4_1_games_list_returns_summaries_with_guess_counts(http_client):
         # Create two games, add differing numbers of guesses
@@ -116,10 +116,10 @@ verify\test_api_hint.py:37: AssertionError</failure></testcase><testcase classna
         assert by_id[g2["id"]].get("seed") == 1002
 &gt;       assert by_id[g1["id"]].get("guessCount") == 2
 E       AssertionError: assert 0 == 2
-E        +  where 0 = &lt;built-in method get of dict object at 0x000001FE26FC64C0&gt;('guessCount')
-E        +    where &lt;built-in method get of dict object at 0x000001FE26FC64C0&gt; = {'id': 'cmtrplhiz000a6xvwy8puvppa', 'seed': 1001, 'guessCount': 0}.get
+E        +  where 0 = &lt;built-in method get of dict object at 0x7b1a1c32bf00&gt;('guessCount')
+E        +    where &lt;built-in method get of dict object at 0x7b1a1c32bf00&gt; = {'id': 'cmtsb1rsj000a73n61j8nfb2b', 'seed': 1001, 'guessCount': 0}.get
 
-verify\test_api_list_branch.py:22: AssertionError</failure></testcase><testcase classname="verify.test_api_list_branch" name="test_c_4_4_branch_endpoint_creates_new_game_with_k_copied_guesses" time="3.401"><failure message="assert (True and 0 == 2)&#10; +  where True = isinstance([], list)&#10; +  and   0 = len([])">http_client = &lt;httpx.Client object at 0x000001FE27162D50&gt;
+verify/test_api_list_branch.py:22: AssertionError</failure></testcase><testcase classname="verify.test_api_list_branch" name="test_c_4_4_branch_endpoint_creates_new_game_with_k_copied_guesses" time="0.394"><failure message="assert (True and 0 == 2)&#10; +  where True = isinstance([], list)&#10; +  and   0 = len([])">http_client = &lt;httpx.Client object at 0x7b1a1bf763f0&gt;
 
     def test_c_4_4_branch_endpoint_creates_new_game_with_k_copied_guesses(http_client):
         # Create a source game with 3 guesses
@@ -143,9 +143,9 @@ E       assert (True and 0 == 2)
 E        +  where True = isinstance([], list)
 E        +  and   0 = len([])
 
-verify\test_api_list_branch.py:43: AssertionError</failure></testcase><testcase classname="verify.test_ui_games" name="test_c_4_2_games_list_renders_one_row_per_game" time="5.233" /><testcase classname="verify.test_ui_games" name="test_c_4_3_resume_navigates_to_board_with_correct_guess_rows" time="21.121"><failure message="AssertionError: Locator expected to have count '3'&#10;Actual value: 0 &#10;Call log:&#10;  - Expect &quot;to_have_count&quot; with timeout 15000ms&#10;  - waiting for locator(&quot;[data-testid^=\&quot;guess-row-\&quot;]&quot;)&#10;    33 × locator resolved to 0 elements&#10;       - unexpected value &quot;0&quot;">page = &lt;Page url='http://127.0.0.1:54226/?game=cmtrplrv3000g6xvww623e3rz'&gt;
-base_url = 'http://127.0.0.1:54226'
-http_client = &lt;httpx.Client object at 0x000001FE27175010&gt;
+verify/test_api_list_branch.py:43: AssertionError</failure></testcase><testcase classname="verify.test_ui_games" name="test_c_4_2_games_list_renders_one_row_per_game" time="0.780" /><testcase classname="verify.test_ui_games" name="test_c_4_3_resume_navigates_to_board_with_correct_guess_rows" time="15.817"><failure message="AssertionError: Locator expected to have count '3'&#10;Actual value: 0 &#10;Call log:&#10;  - Expect &quot;to_have_count&quot; with timeout 15000ms&#10;  - waiting for locator(&quot;[data-testid^=\&quot;guess-row-\&quot;]&quot;)&#10;    34 × locator resolved to 0 elements&#10;       - unexpected value &quot;0&quot;">page = &lt;Page url='http://127.0.0.1:60479/?game=cmtsb1t6q000g73n643abbj6d'&gt;
+base_url = 'http://127.0.0.1:60479'
+http_client = &lt;httpx.Client object at 0x7b1a1bf501a0&gt;
 
     def test_c_4_3_resume_navigates_to_board_with_correct_guess_rows(page, base_url: str, http_client):
         # Prepare a game with k guesses
@@ -165,24 +165,53 @@ E       Actual value: 0
 E       Call log:
 E         - Expect "to_have_count" with timeout 15000ms
 E         - waiting for locator("[data-testid^=\"guess-row-\"]")
-E           33 × locator resolved to 0 elements
+E           34 × locator resolved to 0 elements
 E              - unexpected value "0"
 
-verify\test_ui_games.py:35: AssertionError</failure></testcase><testcase classname="verify.test_ui_play" name="test_c_1_3_submit_one_guess_renders_exactly_one_row" time="20.687"><failure message="AssertionError: Locator expected to have count '1'&#10;Actual value: 0 &#10;Call log:&#10;  - Expect &quot;to_have_count&quot; with timeout 15000ms&#10;  - waiting for locator(&quot;[data-testid^=\&quot;guess-row-\&quot;]&quot;)&#10;    33 × locator resolved to 0 elements&#10;       - unexpected value &quot;0&quot;">page = &lt;Page url='http://127.0.0.1:54226/?game=cmtrpm88g000h6xvwv7v9mlvl'&gt;
-base_url = 'http://127.0.0.1:54226'
+verify/test_ui_games.py:35: AssertionError</failure></testcase><testcase classname="verify.test_ui_play" name="test_c_1_3_submit_one_guess_renders_exactly_one_row" time="16.131"><failure message="AssertionError: Locator expected to have count '1'&#10;Actual value: 0 &#10;Call log:&#10;  - Expect &quot;to_have_count&quot; with timeout 15000ms&#10;  - waiting for locator(&quot;[data-testid^=\&quot;guess-row-\&quot;]&quot;)&#10;    34 × locator resolved to 0 elements&#10;       - unexpected value &quot;0&quot;">page = &lt;Page url='http://127.0.0.1:60479/?game=cmtsb25jl000h73n68826pi92'&gt;
+base_url = 'http://127.0.0.1:60479'
 
     def test_c_1_3_submit_one_guess_renders_exactly_one_row(page, base_url: str):
         seed = 3001
+    
+        # Install a strict network gate BEFORE creating the game so any fallback
+        # re-read path cannot populate rows. We only allow GET /api/games/:id calls
+        # and force them to return an empty guesses array; everything else continues.
+        seen_refetch = {"seen": False}
+    
+        def handle(route, request):
+            url = request.url
+            # Intercept any GET to /api/games/&lt;id&gt; (but not /api/games or /hint)
+            if request.method == "GET" and re.search(r"/api/games/[^/]+(?:[/?#]|$)", url):
+                seen_refetch["seen"] = True
+                # Extract an id-shaped suffix to echo back; fall back to a stub.
+                m = re.search(r"/api/games/([^/?#]+)", url)
+                gid = m.group(1) if m else "stub"
+                # Always answer with an empty guess list so only the client append
+                # can produce a visible row.
+                body = json.dumps({"id": gid, "seed": seed, "guesses": []})
+                route.fulfill(status=200, content_type="application/json", body=body)
+            else:
+                route.continue_()
+    
+        page.route("**/api/games/**", handle)
+    
         _ui_new_game(page, base_url, seed)
-        _ui_pick_code(page, [0, 1, 2, 3])
+        # Capture the created game id from the URL (sanity check only).
+        m = re.search(r"[?&amp;]game=([^&amp;#]+)", page.url)
+        assert m, "game id not found in URL after New Game"
+    
+        code = [0, 1, 2, 3]
+        _ui_pick_code(page, code)
         _ui_submit_guess(page)
-        # Assert exactly one prior guess row renders
+    
+        # Assert exactly one prior guess row renders, driven by the client append.
 &gt;       _expect_guess_rows(page, 1)
 
-verify\test_ui_play.py:50: 
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+verify/test_ui_play.py:80: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
 
-page = &lt;Page url='http://127.0.0.1:54226/?game=cmtrpm88g000h6xvwv7v9mlvl'&gt;
+page = &lt;Page url='http://127.0.0.1:60479/?game=cmtsb25jl000h73n68826pi92'&gt;
 n = 1
 
     def _expect_guess_rows(page, n: int) -&gt; None:
@@ -192,11 +221,11 @@ E       Actual value: 0
 E       Call log:
 E         - Expect "to_have_count" with timeout 15000ms
 E         - waiting for locator("[data-testid^=\"guess-row-\"]")
-E           33 × locator resolved to 0 elements
+E           34 × locator resolved to 0 elements
 E              - unexpected value "0"
 
-verify\test_ui_play.py:39: AssertionError</failure></testcase><testcase classname="verify.test_ui_play" name="test_c_2_5_row_shows_black_and_white_counts_matching_secret" time="21.256"><failure message="AssertionError: Locator expected to have count '1'&#10;Actual value: 0 &#10;Call log:&#10;  - Expect &quot;to_have_count&quot; with timeout 15000ms&#10;  - waiting for locator(&quot;[data-testid^=\&quot;guess-row-\&quot;]&quot;)&#10;    33 × locator resolved to 0 elements&#10;       - unexpected value &quot;0&quot;">page = &lt;Page url='http://127.0.0.1:54226/?game=cmtrpmo9r000i6xvwwmd3fwpe'&gt;
-base_url = 'http://127.0.0.1:54226'
+verify/test_ui_play.py:40: AssertionError</failure></testcase><testcase classname="verify.test_ui_play" name="test_c_2_5_row_shows_black_and_white_counts_matching_secret" time="16.061"><failure message="AssertionError: Locator expected to have count '1'&#10;Actual value: 0 &#10;Call log:&#10;  - Expect &quot;to_have_count&quot; with timeout 15000ms&#10;  - waiting for locator(&quot;[data-testid^=\&quot;guess-row-\&quot;]&quot;)&#10;    34 × locator resolved to 0 elements&#10;       - unexpected value &quot;0&quot;">page = &lt;Page url='http://127.0.0.1:60479/?game=cmtsb2hyx000i73n6dinucdt3'&gt;
+base_url = 'http://127.0.0.1:60479'
 
     def test_c_2_5_row_shows_black_and_white_counts_matching_secret(page, base_url: str):
         # Choose a seed and compute its secret, then submit that exact guess.
@@ -208,10 +237,10 @@ base_url = 'http://127.0.0.1:54226'
         # Expect black=4 and white=0 shown in their testids
 &gt;       _expect_guess_rows(page, 1)
 
-verify\test_ui_play.py:63: 
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+verify/test_ui_play.py:103: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
 
-page = &lt;Page url='http://127.0.0.1:54226/?game=cmtrpmo9r000i6xvwwmd3fwpe'&gt;
+page = &lt;Page url='http://127.0.0.1:60479/?game=cmtsb2hyx000i73n6dinucdt3'&gt;
 n = 1
 
     def _expect_guess_rows(page, n: int) -&gt; None:
@@ -221,12 +250,12 @@ E       Actual value: 0
 E       Call log:
 E         - Expect "to_have_count" with timeout 15000ms
 E         - waiting for locator("[data-testid^=\"guess-row-\"]")
-E           33 × locator resolved to 0 elements
+E           34 × locator resolved to 0 elements
 E              - unexpected value "0"
 
-verify\test_ui_play.py:39: AssertionError</failure></testcase><testcase classname="verify.test_ui_play" name="test_c_3_3_page_shows_hint_remaining_and_suggestion" time="4.962" /><testcase classname="verify.test_ui_play" name="test_c_4_5_branch_here_button_renders_k_rows" time="35.840"><failure message="playwright._impl._errors.TimeoutError: Locator.click: Timeout 30000ms exceeded.&#10;Call log:&#10;  - waiting for get_by_test_id(&quot;branch-here-2&quot;)">page = &lt;Page url='http://127.0.0.1:54226/?game=cmtrpn85z000k6xvwaubcghld'&gt;
-base_url = 'http://127.0.0.1:54226'
-http_client = &lt;httpx.Client object at 0x000001FE285AA970&gt;
+verify/test_ui_play.py:40: AssertionError</failure></testcase><testcase classname="verify.test_ui_play" name="test_c_3_3_page_shows_hint_remaining_and_suggestion" time="0.918" /><testcase classname="verify.test_ui_play" name="test_c_4_5_branch_here_button_renders_k_rows" time="30.835"><failure message="playwright._impl._errors.TimeoutError: Locator.click: Timeout 30000ms exceeded.&#10;Call log:&#10;  - waiting for get_by_test_id(&quot;branch-here-2&quot;)">page = &lt;Page url='http://127.0.0.1:60479/?game=cmtsb2v0c000k73n6e18nftd9'&gt;
+base_url = 'http://127.0.0.1:60479'
+http_client = &lt;httpx.Client object at 0x7b1a1bcf2780&gt;
 
     def test_c_4_5_branch_here_button_renders_k_rows(page, base_url: str, http_client):
         # Prepare a game with three guesses via API, then resume it in UI and branch at k=2.
@@ -240,21 +269,21 @@ http_client = &lt;httpx.Client object at 0x000001FE285AA970&gt;
         # Click Branch Here on row k=2 (two rows should remain)
 &gt;       page.get_by_test_id("branch-here-2").click()
 
-verify\test_ui_play.py:98: 
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
-.pipeline\venv\Lib\site-packages\playwright\sync_api\_generated.py:17876: in click
+verify/test_ui_play.py:138: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+.pipeline/venv/lib/python3.12/site-packages/playwright/sync_api/_generated.py:17876: in click
     self._sync(
-.pipeline\venv\Lib\site-packages\playwright\_impl\_locator.py:165: in click
+.pipeline/venv/lib/python3.12/site-packages/playwright/_impl/_locator.py:165: in click
     return await self._frame._click(self._selector, strict=True, **params)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.pipeline\venv\Lib\site-packages\playwright\_impl\_frame.py:593: in _click
+.pipeline/venv/lib/python3.12/site-packages/playwright/_impl/_frame.py:593: in _click
     await self._channel.send("click", self._timeout, locals_to_params(locals()))
-.pipeline\venv\Lib\site-packages\playwright\_impl\_connection.py:76: in send
+.pipeline/venv/lib/python3.12/site-packages/playwright/_impl/_connection.py:76: in send
     return await self._connection.wrap_api_call(
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
 
-self = &lt;playwright._impl._connection.Connection object at 0x000001FE284E4CB0&gt;
-cb = &lt;function Channel.send.&lt;locals&gt;.&lt;lambda&gt; at 0x000001FE286EE980&gt;
+self = &lt;playwright._impl._connection.Connection object at 0x7b1a1bcf2240&gt;
+cb = &lt;function Channel.send.&lt;locals&gt;.&lt;lambda&gt; at 0x7b1a1bc44a40&gt;
 is_internal = False, title = None
 
     async def wrap_api_call(
@@ -277,4 +306,4 @@ E           playwright._impl._errors.TimeoutError: Locator.click: Timeout 30000m
 E           Call log:
 E             - waiting for get_by_test_id("branch-here-2")
 
-.pipeline\venv\Lib\site-packages\playwright\_impl\_connection.py:632: TimeoutError</failure></testcase></testsuite></testsuites>
+.pipeline/venv/lib/python3.12/site-packages/playwright/_impl/_connection.py:632: TimeoutError</failure></testcase></testsuite></testsuites>

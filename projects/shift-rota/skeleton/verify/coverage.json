@@ -1,0 +1,16 @@
+{
+  "c-1-1": {"test": "verify/test_ui_sim.py::test_c_1_1_initial_idle_no_current"},
+  "c-1-2": {"test": "verify/test_ui_sim.py::test_c_1_2_alert_sets_current_and_mode"},
+  "c-2-1": {"test": "verify/test_ui_sim.py::test_c_2_1_ack_by_alex_logs_and_keeps_current"},
+  "c-2-2": {"test": "verify/test_ui_sim.py::test_c_2_2_timeout_escalates_to_beth"},
+  "c-2-3": {"test": "verify/test_ui_sim.py::test_c_2_3_wrong_actor_ack_shows_error_and_keeps_current"},
+  "c-2-4": {"test": "verify/test_ui_sim.py::test_c_2_4_resolve_returns_to_idle_no_current"},
+  "c-2-5": {"test": "verify/test_ui_sim.py::test_c_2_5_timeout_at_end_shows_error_and_keeps_chen"},
+  "c-2-6": {"test": "verify/test_api_state.py::test_c_2_6_post_state_alerting_round_trips"},
+  "c-3-1": {"test": "verify/test_ui_script.py::test_c_3_1_script_happy_path_runs_and_logs_4"},
+  "c-3-2": {"test": "verify/test_ui_script.py::test_c_3_2_script_unknown_actor_errors"},
+  "c-3-3": {"test": "verify/test_ui_script.py::test_c_3_3_script_illegal_transition_resolve_errors"},
+  "c-3-4": {"test": "verify/test_ui_script.py::test_c_3_4_script_wrong_actor_ack_errors"},
+  "c-3-5": {"test": "verify/test_ui_script.py::test_c_3_5_script_stops_on_first_error_after_alert"},
+  "c-3-6": {"test": "verify/test_api_state.py::test_c_3_6_get_state_seed_is_idle_and_contacts"}
+}

@@ -1,0 +1,60 @@
+{
+  "ok": true,
+  "errors": [],
+  "warnings": [
+    {
+      "code": "G021",
+      "where": "pack",
+      "message": "requirement c-1-1 is never mentioned in the guide"
+    },
+    {
+      "code": "G033",
+      "where": "session-1.md",
+      "message": "session 1 has no '**Time:**' line, so its planned total was guessed as 40 - the largest duration mentioned anywhere in the file. State the plan's total on a Time line"
+    },
+    {
+      "code": "G033",
+      "where": "session-2.md",
+      "message": "session 2 has no '**Time:**' line, so its planned total was guessed as 40 - the largest duration mentioned anywhere in the file. State the plan's total on a Time line"
+    },
+    {
+      "code": "G033",
+      "where": "session-3.md",
+      "message": "session 3 has no '**Time:**' line, so its planned total was guessed as 40 - the largest duration mentioned anywhere in the file. State the plan's total on a Time line"
+    }
+  ],
+  "counts": {
+    "errors": 0,
+    "warnings": 4
+  },
+  "files": [
+    "README.md",
+    "session-1.md",
+    "session-2.md",
+    "session-3.md",
+    "troubleshooting.md"
+  ],
+  "sessions": [
+    {
+      "n": 1,
+      "file": "session-1.md",
+      "minutes": 40,
+      "over_cap": false,
+      "disclosed": false
+    },
+    {
+      "n": 2,
+      "file": "session-2.md",
+      "minutes": 40,
+      "over_cap": false,
+      "disclosed": false
+    },
+    {
+      "n": 3,
+      "file": "session-3.md",
+      "minutes": 40,
+      "over_cap": false,
+      "disclosed": false
+    }
+  ]
+}

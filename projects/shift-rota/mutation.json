@@ -1,0 +1,176 @@
+{
+  "ok": true,
+  "ungraded_tasks": [],
+  "inconclusive_tasks": [],
+  "target": "app",
+  "dead_cuts": [],
+  "checked": 7,
+  "of_total": 7,
+  "seconds": 437.7,
+  "results": [
+    {
+      "task": "cut-ep-state-get",
+      "ok": true,
+      "inconclusive": false,
+      "lines_removed": 18,
+      "graded_by": [
+        "c-3-6"
+      ],
+      "went_red": [
+        "c-3-6"
+      ],
+      "stayed_green": [],
+      "collateral": [
+        "c-1-1",
+        "c-1-2",
+        "c-2-1",
+        "c-2-2",
+        "c-2-3",
+        "c-2-4",
+        "c-2-5",
+        "c-3-1",
+        "c-3-2",
+        "c-3-3",
+        "c-3-4",
+        "c-3-5"
+      ],
+      "why": "removing it turns its requirements red"
+    },
+    {
+      "task": "cut-ep-state-post",
+      "ok": true,
+      "inconclusive": false,
+      "lines_removed": 11,
+      "graded_by": [
+        "c-2-6"
+      ],
+      "went_red": [
+        "c-2-6"
+      ],
+      "stayed_green": [],
+      "collateral": [],
+      "why": "removing it turns its requirements red"
+    },
+    {
+      "task": "cut-logic-escalate-index",
+      "ok": true,
+      "inconclusive": false,
+      "lines_removed": 3,
+      "graded_by": [
+        "c-2-2",
+        "c-2-5"
+      ],
+      "went_red": [
+        "c-2-2",
+        "c-2-5"
+      ],
+      "stayed_green": [],
+      "collateral": [
+        "c-3-1"
+      ],
+      "why": "removing it turns its requirements red"
+    },
+    {
+      "task": "cut-logic-initial-alert",
+      "ok": true,
+      "inconclusive": false,
+      "lines_removed": 15,
+      "graded_by": [
+        "c-1-2"
+      ],
+      "went_red": [
+        "c-1-2"
+      ],
+      "stayed_green": [],
+      "collateral": [
+        "c-2-1",
+        "c-2-2",
+        "c-2-3",
+        "c-2-5",
+        "c-3-1",
+        "c-3-4",
+        "c-3-5"
+      ],
+      "why": "removing it turns its requirements red"
+    },
+    {
+      "task": "cut-logic-reducer-apply",
+      "ok": true,
+      "inconclusive": false,
+      "lines_removed": 41,
+      "graded_by": [
+        "c-2-1",
+        "c-2-2",
+        "c-2-3",
+        "c-2-4",
+        "c-2-5",
+        "c-3-1",
+        "c-3-3",
+        "c-3-4"
+      ],
+      "went_red": [
+        "c-2-1",
+        "c-2-2",
+        "c-2-3",
+        "c-2-5",
+        "c-3-1",
+        "c-3-4"
+      ],
+      "stayed_green": [
+        "c-2-4",
+        "c-3-3"
+      ],
+      "collateral": [
+        "c-1-2",
+        "c-3-5"
+      ],
+      "why": "removing it turns its requirements red"
+    },
+    {
+      "task": "cut-parse-line",
+      "ok": true,
+      "inconclusive": false,
+      "lines_removed": 18,
+      "graded_by": [
+        "c-3-1",
+        "c-3-2",
+        "c-3-5"
+      ],
+      "went_red": [
+        "c-3-1",
+        "c-3-2",
+        "c-3-5"
+      ],
+      "stayed_green": [],
+      "collateral": [
+        "c-3-3",
+        "c-3-4"
+      ],
+      "why": "removing it turns its requirements red"
+    },
+    {
+      "task": "cut-run-script",
+      "ok": true,
+      "inconclusive": false,
+      "lines_removed": 31,
+      "graded_by": [
+        "c-3-1",
+        "c-3-3",
+        "c-3-4",
+        "c-3-5"
+      ],
+      "went_red": [
+        "c-3-1",
+        "c-3-3",
+        "c-3-4",
+        "c-3-5"
+      ],
+      "stayed_green": [],
+      "collateral": [
+        "c-3-2"
+      ],
+      "why": "removing it turns its requirements red"
+    }
+  ],
+  "rule": "every student task must turn at least one of its requirements red when it alone is removed"
+}

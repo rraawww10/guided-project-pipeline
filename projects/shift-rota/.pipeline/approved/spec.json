@@ -1,0 +1,73 @@
+{
+  "slug": "shift-rota",
+  "title": "Escalation Simulator: On‑Call as a State Machine",
+  "track": "fullstack",
+  "sessions_planned": 3,
+  "stack": ["next", "react", "typescript"],
+  "source": null,
+  "code_checks": [],
+  "endpoints": [
+    {"id": "ep-state-get", "method": "GET", "path": "/api/state", "request": null, "response": "State", "status": [200]},
+    {"id": "ep-state-save", "method": "POST", "path": "/api/state", "request": "State", "response": "State", "status": [200]}
+  ],
+  "screens": [
+    {"id": "sc-sim", "route": "/", "elements": ["mode text (data-testid=mode)", "current contact text (data-testid=current)", "actor select (data-testid=actor-select)", "buttons (data-testid=btn-alert, btn-ack, btn-timeout, btn-resolve)", "log list chronological (data-testid^=log-row-)"] , "states": ["empty", "loaded-idle", "loaded-alerting"]},
+    {"id": "sc-script", "route": "/script", "elements": ["textarea (data-testid=script-input)", "run button (data-testid=btn-run-script)", "error text (data-testid=script-error)", "mode text (data-testid=mode)", "current contact text (data-testid=current)", "log count (data-testid=log-count)", "log list chronological (data-testid^=log-row-)"] , "states": ["ready", "running", "error", "finished"]}
+  ],
+  "sessions": [
+    {
+      "n": 1,
+      "title": "Setup and manual stepper",
+      "goal": "Seed contacts and show the current contact after Alert on the manual stepper.",
+      "teaches": ["React state/effect for loading", "Using a pure function from UI"],
+      "builds": ["sc-sim", "ep-state-get"],
+      "criteria": [
+        {"id": "c-1-1", "check": "On sc-sim initial load, the page shows data-testid=\\\"mode\\\" with text \"idle\" and no element with data-testid=\\\"current\\\"", "target": "sc-sim", "cuts": []},
+        {"id": "c-1-2", "check": "On sc-sim, after clicking btn-alert, the page shows data-testid=\\\"current\\\" with text \"Alex\" and data-testid=\\\"mode\\\" with text \"alerting\"", "target": "sc-sim", "cuts": ["cut-logic-initial-alert"]}
+      ],
+      "cuts": [
+        {"id": "cut-logic-initial-alert", "file": "app/lib/fsm.ts", "writes_into": "next", "hint": "Build the next State in `next` by setting mode to \"alerting\", currentIndex to 0, and appending a log entry {step: previous log length + 1, event: \"alert\", reason: \"alert raised; current \" + first contact}; preserve existing contacts and earlier log entries"},
+        {"id": "cut-ep-state-get", "file": "app/api/state/route.ts", "writes_into": "body", "hint": "Read data/state.json when it exists, otherwise read data/state.seed.json, write the parsed State object into `body` and set `status` to 200"}
+      ]
+    },
+    {
+      "n": 2,
+      "title": "Reducer with guards and escalation",
+      "goal": "Implement a pure reducer that enforces guards and updates State and log; manual stepper drives it.",
+      "teaches": ["Pure reducer with guards", "Deriving the next index"],
+      "builds": ["ep-state-save"],
+      "criteria": [
+        {"id": "c-2-1", "check": "On sc-sim, after clicking Alert and selecting Alex in actor-select then clicking btn-ack, the page shows mode=\\\"alerting\\\", current=\\\"Alex\\\", and a new last log row includes \"ack by Alex\"", "target": "sc-sim", "cuts": ["cut-logic-reducer-apply"]},
+        {"id": "c-2-2", "check": "On sc-sim, after clicking Alert then btn-timeout, the page shows current contact \"Beth\"", "target": "sc-sim", "cuts": ["cut-logic-reducer-apply", "cut-logic-escalate-index"]},
+        {"id": "c-2-3", "check": "On sc-sim, after clicking Alert, selecting Beth in actor-select and clicking btn-ack, the page shows an error containing \"only Alex can ack\" and still shows current \"Alex\"", "target": "sc-sim", "cuts": ["cut-logic-reducer-apply"]},
+        {"id": "c-2-4", "check": "On sc-sim, after clicking Alert then btn-resolve, the page shows mode=\\\"idle\\\" and no element with data-testid=\\\"current\\\"", "target": "sc-sim", "cuts": ["cut-logic-reducer-apply"]},
+        {"id": "c-2-5", "check": "On sc-sim, after clicking Alert, then btn-timeout twice to reach \"Chen\", clicking btn-timeout again shows an error containing \"no further escalation\" and still shows current \"Chen\"", "target": "sc-sim", "cuts": ["cut-logic-reducer-apply", "cut-logic-escalate-index"]},
+        {"id": "c-2-6", "check": "POST /api/state with a JSON body where mode is \"alerting\" returns 200 with a JSON object whose mode equals \"alerting\"", "target": "ep-state-save", "cuts": ["cut-ep-state-post"]}
+      ],
+      "cuts": [
+        {"id": "cut-logic-escalate-index", "file": "app/lib/fsm.ts", "writes_into": "nextIndex", "hint": "Compute `nextIndex` as currentIndex + 1 when a later contact exists, otherwise keep the currentIndex unchanged"},
+        {"id": "cut-logic-reducer-apply", "file": "app/lib/fsm.ts", "writes_into": "out", "hint": "Fill `out` by applying one event with guards: when State.mode is \"idle\", only \"alert\" is allowed and must set mode to \"alerting\", currentIndex to 0, and append a log entry; when mode is \"alerting\": an \"ack\" is allowed only when event.actor equals the current contact and must append a log entry without changing currentIndex; a \"timeout\" moves to the next contact using escalateIndex unless already at the last, in which case set ok false with a message naming \"no further escalation\" and leave the index unchanged; a \"resolve\" sets mode to \"idle\", clears currentIndex to null, and appends a log entry; for any other combination set ok false with a message that names the illegal transition; always carry forward contacts and the existing log into out.next"},
+        {"id": "cut-ep-state-post", "file": "app/api/state/route.ts", "writes_into": "body", "hint": "Read the request JSON into a typed State object, write that object to data/state.json, copy it into `body` and set `status` to 200"}
+      ]
+    },
+    {
+      "n": 3,
+      "title": "Script parser and runner",
+      "goal": "Parse a tiny command language and run it end-to-end through the reducer; surface reducer errors in the UI.",
+      "teaches": ["Line parser over a tiny grammar", "Driver that stops on first error", "Surfacing reducer errors", "Persist JSON under APP_DIR"],
+      "builds": ["sc-script"],
+      "criteria": [
+        {"id": "c-3-1", "check": "On sc-script, entering 'alert\n timeout\n ack Beth\n resolve' then clicking btn-run-script shows mode=\\\"idle\\\", log-count \"4\", first log row includes \"alert\" and last row includes \"resolve\"", "target": "sc-script", "cuts": ["cut-parse-line", "cut-logic-reducer-apply", "cut-run-script"]},
+        {"id": "c-3-2", "check": "On sc-script, entering 'ack Dana' then clicking btn-run-script shows script-error containing \"unknown actor Dana\"", "target": "sc-script", "cuts": ["cut-parse-line"]},
+        {"id": "c-3-3", "check": "On sc-script, entering 'resolve' then clicking btn-run-script shows script-error containing \"illegal transition\"", "target": "sc-script", "cuts": ["cut-logic-reducer-apply", "cut-run-script"]},
+        {"id": "c-3-4", "check": "On sc-script, entering 'alert\n ack Beth' then clicking btn-run-script shows script-error containing \"only Alex can ack\"", "target": "sc-script", "cuts": ["cut-logic-reducer-apply", "cut-run-script"]},
+        {"id": "c-3-5", "check": "On sc-script, entering 'alert\n ack Dana\n timeout' then clicking btn-run-script shows log-count \"1\" and script-error containing \"unknown actor Dana\"", "target": "sc-script", "cuts": ["cut-run-script", "cut-parse-line"]},
+        {"id": "c-3-6", "check": "GET /api/state returns 200 with a JSON object whose contacts equal [\"Alex\", \"Beth\", \"Chen\"], mode is \"idle\", and log is an empty array", "target": "ep-state-get", "cuts": ["cut-ep-state-get"]}
+      ],
+      "cuts": [
+        {"id": "cut-parse-line", "file": "app/lib/parse.ts", "writes_into": "event", "hint": "From one trimmed input line, set `event` to one of: {type: \"alert\"}, {type: \"timeout\"}, {type: \"resolve\"}, or {type: \"ack\", actor: <name>} when the line matches exactly \"ack \" + a non-empty name; reject any other shape with an error message that includes the bad line; do not validate the actor against contacts here"},
+        {"id": "cut-run-script", "file": "app/lib/runScript.ts", "writes_into": "result", "hint": "Walk the lines in order; for each, obtain an event from the parser; if the parser yields an error, stop immediately and write that message into `result.error`; otherwise apply the reducer to the current State, append any new log entry the reducer indicates, and continue; after the final successful line, write the final State and full log into `result` with ok true"}
+      ]
+    }
+  ]
+}

@@ -1,1 +1,62 @@
-<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="0" skipped="0" tests="17" time="74.609" timestamp="2026-09-08T02:47:27.325062+05:30" hostname="HERO"><testcase classname="verify.test_api_core" name="test_c_1_1_post_games_creates_and_echoes_seed" time="5.863" /><testcase classname="verify.test_api_core" name="test_c_1_2_post_guess_persists_code_black_white_unscored_or_present" time="3.148" /><testcase classname="verify.test_api_core" name="test_c_2_1_get_game_returns_seed_and_empty_guesses_for_new_game" time="3.272" /><testcase classname="verify.test_api_core" name="test_c_2_2_post_guess_equal_to_secret_returns_black4_white0" time="3.447" /><testcase classname="verify.test_api_core" name="test_c_2_3_permuted_all_colours_black0_white4" time="3.252" /><testcase classname="verify.test_api_core" name="test_c_2_4_get_game_returns_guesses_with_numeric_scores" time="3.324" /><testcase classname="verify.test_api_hint" name="test_c_3_1_hint_no_guesses_remaining_1296_and_suggestion_zeros" time="3.506" /><testcase classname="verify.test_api_hint" name="test_c_3_2_hint_remaining_matches_consistent_set_for_one_guess" time="3.310" /><testcase classname="verify.test_api_hint" name="test_c_3_4_two_games_identical_histories_same_suggestion" time="3.309" /><testcase classname="verify.test_api_list_branch" name="test_c_4_1_games_list_returns_summaries_with_guess_counts" time="3.719" /><testcase classname="verify.test_api_list_branch" name="test_c_4_4_branch_endpoint_creates_new_game_with_k_copied_guesses" time="3.772" /><testcase classname="verify.test_ui_games" name="test_c_4_2_games_list_renders_one_row_per_game" time="7.490" /><testcase classname="verify.test_ui_games" name="test_c_4_3_resume_navigates_to_board_with_correct_guess_rows" time="5.215" /><testcase classname="verify.test_ui_play" name="test_c_1_3_submit_one_guess_renders_exactly_one_row" time="5.956" /><testcase classname="verify.test_ui_play" name="test_c_2_5_row_shows_black_and_white_counts_matching_secret" time="4.845" /><testcase classname="verify.test_ui_play" name="test_c_3_3_page_shows_hint_remaining_and_suggestion" time="4.720" /><testcase classname="verify.test_ui_play" name="test_c_4_5_branch_here_button_renders_k_rows" time="6.225" /></testsuite></testsuites>
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="17" time="10.071" timestamp="2026-09-08T14:52:19.240972+05:30" hostname="nxtwave-Z790-D-AX"><testcase classname="verify.test_api_core" name="test_c_1_1_post_games_creates_and_echoes_seed" time="0.423" /><testcase classname="verify.test_api_core" name="test_c_1_2_post_guess_persists_code_black_white_unscored_or_present" time="0.394" /><testcase classname="verify.test_api_core" name="test_c_2_1_get_game_returns_seed_and_empty_guesses_for_new_game" time="0.386" /><testcase classname="verify.test_api_core" name="test_c_2_2_post_guess_equal_to_secret_returns_black4_white0" time="0.404" /><testcase classname="verify.test_api_core" name="test_c_2_3_permuted_all_colours_black0_white4" time="0.423" /><testcase classname="verify.test_api_core" name="test_c_2_4_get_game_returns_guesses_with_numeric_scores" time="0.395" /><testcase classname="verify.test_api_hint" name="test_c_3_1_hint_no_guesses_remaining_1296_and_suggestion_zeros" time="0.407" /><testcase classname="verify.test_api_hint" name="test_c_3_2_hint_remaining_matches_consistent_set_for_one_guess" time="0.393" /><testcase classname="verify.test_api_hint" name="test_c_3_4_two_games_identical_histories_same_suggestion" time="0.427" /><testcase classname="verify.test_api_list_branch" name="test_c_4_1_games_list_returns_summaries_with_guess_counts" time="0.418" /><testcase classname="verify.test_api_list_branch" name="test_c_4_4_branch_endpoint_creates_new_game_with_k_copied_guesses" time="0.404" /><testcase classname="verify.test_ui_games" name="test_c_4_2_games_list_renders_one_row_per_game" time="0.754" /><testcase classname="verify.test_ui_games" name="test_c_4_3_resume_navigates_to_board_with_correct_guess_rows" time="0.835" /><testcase classname="verify.test_ui_play" name="test_c_1_3_submit_one_guess_renders_exactly_one_row" time="1.064"><failure message="AssertionError: UI re-fetched /api/games/cmtsgo1b2001ovrpuwtaedxlr; the row must come from the client append. Games read during this test: ['cmtsgo1b2001ovrpuwtaedxlr', 'cmtsgo1b2001ovrpuwtaedxlr', 'cmtsgo1b2001ovrpuwtaedxlr']&#10;assert 'cmtsgo1b2001ovrpuwtaedxlr' not in ['cmtsgo1b2001ovrpuwtaedxlr', 'cmtsgo1b2001ovrpuwtaedxlr', 'cmtsgo1b2001ovrpuwtaedxlr']">page = &lt;Page url='http://127.0.0.1:39399/?game=cmtsgo1b2001ovrpuwtaedxlr'&gt;
+base_url = 'http://127.0.0.1:39399'
+
+    def test_c_1_3_submit_one_guess_renders_exactly_one_row(page, base_url: str):
+        seed = 3001
+    
+        # Install a strict network gate BEFORE creating the game so any fallback
+        # re-read path cannot populate rows. We only allow GET /api/games/:id calls
+        # and force them to return an empty guesses array; everything else continues.
+        # Which games were re-read, not merely whether any were. The seed holds a
+        # fixture game (seed-game-1) for c-2-1's benefit, and a page that reads
+        # some OTHER game is not the defect this guards against - papering over a
+        # missing client append by re-reading THE GAME UNDER TEST is.
+        refetched: List[str] = []
+        seen_refetch = {"seen": False}
+    
+        def handle(route, request):
+            url = request.url
+            # Intercept any GET to /api/games/&lt;id&gt; (but not /api/games or /hint)
+            if request.method == "GET" and re.search(r"/api/games/[^/]+(?:[/?#]|$)", url):
+                seen_refetch["seen"] = True
+                # Extract an id-shaped suffix to echo back; fall back to a stub.
+                m = re.search(r"/api/games/([^/?#]+)", url)
+                gid = m.group(1) if m else "stub"
+                refetched.append(gid)
+                # Always answer with an empty guess list so only the client append
+                # can produce a visible row.
+                body = json.dumps({"id": gid, "seed": seed, "guesses": []})
+                route.fulfill(status=200, content_type="application/json", body=body)
+            else:
+                route.continue_()
+    
+        page.route("**/api/games/**", handle)
+    
+        _ui_new_game(page, base_url, seed)
+        # Capture the created game id from the URL (sanity check only).
+        m = re.search(r"[?&amp;]game=([^&amp;#]+)", page.url)
+        assert m, "game id not found in URL after New Game"
+    
+        code = [0, 1, 2, 3]
+        _ui_pick_code(page, code)
+        _ui_submit_guess(page)
+    
+        # Assert exactly one prior guess row renders, driven by the client append.
+        _expect_guess_rows(page, 1)
+        # And the row shows the four chosen values in its slots.
+        row = _guess_rows(page).nth(0)
+        for i, v in enumerate(code):
+            txt = row.get_by_test_id(f"slot-{i}").inner_text().strip()
+            assert txt == str(v)
+    
+        # Guardrail: the UI must NOT have re-fetched the game to populate the row.
+        # This makes the test fail if an implementation papers over the missing
+        # client append by re-reading from the server.
+        game_id = m.group(1)
+&gt;       assert game_id not in refetched, (
+            f"UI re-fetched /api/games/{game_id}; the row must come from the client "
+            f"append. Games read during this test: {refetched}")
+E       AssertionError: UI re-fetched /api/games/cmtsgo1b2001ovrpuwtaedxlr; the row must come from the client append. Games read during this test: ['cmtsgo1b2001ovrpuwtaedxlr', 'cmtsgo1b2001ovrpuwtaedxlr', 'cmtsgo1b2001ovrpuwtaedxlr']
+E       assert 'cmtsgo1b2001ovrpuwtaedxlr' not in ['cmtsgo1b2001ovrpuwtaedxlr', 'cmtsgo1b2001ovrpuwtaedxlr', 'cmtsgo1b2001ovrpuwtaedxlr']
+
+verify/test_ui_play.py:97: AssertionError</failure></testcase><testcase classname="verify.test_ui_play" name="test_c_2_5_row_shows_black_and_white_counts_matching_secret" time="1.040" /><testcase classname="verify.test_ui_play" name="test_c_3_3_page_shows_hint_remaining_and_suggestion" time="0.862" /><testcase classname="verify.test_ui_play" name="test_c_4_5_branch_here_button_renders_k_rows" time="0.981" /></testsuite></testsuites>

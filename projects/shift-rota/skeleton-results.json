@@ -1,0 +1,122 @@
+{
+  "ok": false,
+  "target": "skeleton",
+  "code_checks": {
+    "ok": true,
+    "checks": {}
+  },
+  "stack_check": {
+    "ok": true,
+    "violations": []
+  },
+  "seconds": 116.3,
+  "counts": {
+    "pass": 1,
+    "fail": 13,
+    "skip": 0,
+    "missing": 0
+  },
+  "criteria": {
+    "c-1-1": {
+      "status": "pass",
+      "check": "On sc-sim initial load, the page shows data-testid=\\\"mode\\\" with text \"idle\" and no element with data-testid=\\\"current\\\"",
+      "session": 1,
+      "test": "verify/test_ui_sim.py::test_c_1_1_initial_idle_no_current",
+      "message": ""
+    },
+    "c-1-2": {
+      "status": "fail",
+      "check": "On sc-sim, after clicking btn-alert, the page shows data-testid=\\\"current\\\" with text \"Alex\" and data-testid=\\\"mode\\\" with text \"alerting\"",
+      "session": 1,
+      "test": "verify/test_ui_sim.py::test_c_1_2_alert_sets_current_and_mode",
+      "message": "AssertionError: Locator expected to have text 'Alex'\nActual value: None\nError: element(s) not found \nCall log:\n  - Expect \"to_have_text\" with timeout 5000ms\n  - waiting for get_by_test_id(\"current\")\n\nAria snapshot:\n- navigation:\n  - link \"Sim\":\n    - /url: /\n  - link \"Script\":\n    - /url: /script\n- heading \"Escalation Simulator\" [level=1]\n- text: \"idle Actor:\"\n- combobox \"Actor:\"\n- button \"Alert\"\n- button \"Ack\"\n- button \"Timeout\"\n- button \"Resolve\"\n- text: illegal transition\n- heading \"Log\" [level=2]\n- list\n- alert"
+    },
+    "c-2-1": {
+      "status": "fail",
+      "check": "On sc-sim, after clicking Alert and selecting Alex in actor-select then clicking btn-ack, the page shows mode=\\\"alerting\\\", current=\\\"Alex\\\", and a new last log row includes \"ack by Alex\"",
+      "session": 2,
+      "test": "verify/test_ui_sim.py::test_c_2_1_ack_by_alex_logs_and_keeps_current",
+      "message": "playwright._impl._errors.TimeoutError: Locator.select_option: Timeout 30000ms exceeded.\nCall log:\n  - waiting for get_by_test_id(\"actor-select\")\n    - locator resolved to <select data-testid=\"actor-select\"></select>\n  - attempting select option action\n    2 \u00d7 waiting for element to be visible and enabled\n      - did not find some options\n    - retrying select option action\n    - waiting 20ms\n    2 \u00d7 waiting for element to be visible and enabled\n      - did not find some options\n    - retrying select option action\n      - waiting 100ms\n    59 \u00d7 waiting for element to be visible and enabled\n       - did not find some options\n     - retrying select option action\n       - waiting 500ms"
+    },
+    "c-2-2": {
+      "status": "fail",
+      "check": "On sc-sim, after clicking Alert then btn-timeout, the page shows current contact \"Beth\"",
+      "session": 2,
+      "test": "verify/test_ui_sim.py::test_c_2_2_timeout_escalates_to_beth",
+      "message": "AssertionError: Locator expected to have text 'Beth'\nActual value: None\nError: element(s) not found \nCall log:\n  - Expect \"to_have_text\" with timeout 5000ms\n  - waiting for get_by_test_id(\"current\")\n\nAria snapshot:\n- navigation:\n  - link \"Sim\":\n    - /url: /\n  - link \"Script\":\n    - /url: /script\n- heading \"Escalation Simulator\" [level=1]\n- text: \"idle Actor:\"\n- combobox \"Actor:\"\n- button \"Alert\"\n- button \"Ack\"\n- button \"Timeout\"\n- button \"Resolve\"\n- text: illegal transition\n- heading \"Log\" [level=2]\n- list\n- alert"
+    },
+    "c-2-3": {
+      "status": "fail",
+      "check": "On sc-sim, after clicking Alert, selecting Beth in actor-select and clicking btn-ack, the page shows an error containing \"only Alex can ack\" and still shows current \"Alex\"",
+      "session": 2,
+      "test": "verify/test_ui_sim.py::test_c_2_3_wrong_actor_ack_shows_error_and_keeps_current",
+      "message": "playwright._impl._errors.TimeoutError: Locator.select_option: Timeout 30000ms exceeded.\nCall log:\n  - waiting for get_by_test_id(\"actor-select\")\n    - locator resolved to <select data-testid=\"actor-select\"></select>\n  - attempting select option action\n    2 \u00d7 waiting for element to be visible and enabled\n      - did not find some options\n    - retrying select option action\n    - waiting 20ms\n    2 \u00d7 waiting for element to be visible and enabled\n      - did not find some options\n    - retrying select option action\n      - waiting 100ms\n    60 \u00d7 waiting for element to be visible and enabled\n       - did not find some options\n     - retrying select option action\n       - waiting 500ms"
+    },
+    "c-2-4": {
+      "status": "fail",
+      "check": "On sc-sim, after clicking Alert then btn-resolve, the page shows mode=\\\"idle\\\" and no element with data-testid=\\\"current\\\"",
+      "session": 2,
+      "test": "verify/test_ui_sim.py::test_c_2_4_resolve_returns_to_idle_no_current",
+      "message": "AssertionError: Locator expected to have text 'alerting'\nActual value: idle \nCall log:\n  - Expect \"to_have_text\" with timeout 5000ms\n  - waiting for get_by_test_id(\"mode\")\n    14 \u00d7 locator resolved to <div data-testid=\"mode\">idle</div>\n       - unexpected value \"idle\"\n\nAria snapshot:\n- text: idle"
+    },
+    "c-2-5": {
+      "status": "fail",
+      "check": "On sc-sim, after clicking Alert, then btn-timeout twice to reach \"Chen\", clicking btn-timeout again shows an error containing \"no further escalation\" and still shows current \"Chen\"",
+      "session": 2,
+      "test": "verify/test_ui_sim.py::test_c_2_5_timeout_at_end_shows_error_and_keeps_chen",
+      "message": "AssertionError: Locator expected to be visible\nActual value: None\nError: element(s) not found \nCall log:\n  - Expect \"to_be_visible\" with timeout 5000ms\n  - waiting for get_by_text(\"no further escalation\")\n\nAria snapshot:\n- navigation:\n  - link \"Sim\":\n    - /url: /\n  - link \"Script\":\n    - /url: /script\n- heading \"Escalation Simulator\" [level=1]\n- text: \"idle Actor:\"\n- combobox \"Actor:\"\n- button \"Alert\"\n- button \"Ack\"\n- button \"Timeout\"\n- button \"Resolve\"\n- text: illegal transition\n- heading \"Log\" [level=2]\n- list\n- alert"
+    },
+    "c-2-6": {
+      "status": "fail",
+      "check": "POST /api/state with a JSON body where mode is \"alerting\" returns 200 with a JSON object whose mode equals \"alerting\"",
+      "session": 2,
+      "test": "verify/test_api_state.py::test_c_2_6_post_state_alerting_round_trips",
+      "message": "assert 501 == 200\n +  where 501 = <Response [501 Not Implemented]>.status_code"
+    },
+    "c-3-1": {
+      "status": "fail",
+      "check": "On sc-script, entering 'alert\n timeout\n ack Beth\n resolve' then clicking btn-run-script shows mode=\\\"idle\\\", log-count \"4\", first log row includes \"alert\" and last row includes \"resolve\"",
+      "session": 3,
+      "test": "verify/test_ui_script.py::test_c_3_1_script_happy_path_runs_and_logs_4",
+      "message": "AssertionError: Locator expected to have text '4'\nActual value: 0 \nCall log:\n  - Expect \"to_have_text\" with timeout 5000ms\n  - waiting for get_by_test_id(\"log-count\")\n    14 \u00d7 locator resolved to <div data-testid=\"log-count\">0</div>\n       - unexpected value \"0\"\n\nAria snapshot:\n- text: \"0\""
+    },
+    "c-3-2": {
+      "status": "fail",
+      "check": "On sc-script, entering 'ack Dana' then clicking btn-run-script shows script-error containing \"unknown actor Dana\"",
+      "session": 3,
+      "test": "verify/test_ui_script.py::test_c_3_2_script_unknown_actor_errors",
+      "message": "AssertionError: Locator expected to contain text 'unknown actor Dana'\nActual value: None\nError: element(s) not found \nCall log:\n  - Expect \"to_contain_text\" with timeout 5000ms\n  - waiting for get_by_test_id(\"script-error\")\n\nAria snapshot:\n- navigation:\n  - link \"Sim\":\n    - /url: /\n  - link \"Script\":\n    - /url: /script\n- heading \"Script Runner\" [level=1]\n- textbox: ack Dana\n- button \"Run Script\"\n- text: idle 0\n- heading \"Log\" [level=2]\n- list\n- alert"
+    },
+    "c-3-3": {
+      "status": "fail",
+      "check": "On sc-script, entering 'resolve' then clicking btn-run-script shows script-error containing \"illegal transition\"",
+      "session": 3,
+      "test": "verify/test_ui_script.py::test_c_3_3_script_illegal_transition_resolve_errors",
+      "message": "AssertionError: Locator expected to contain text 'illegal transition'\nActual value: None\nError: element(s) not found \nCall log:\n  - Expect \"to_contain_text\" with timeout 5000ms\n  - waiting for get_by_test_id(\"script-error\")\n\nAria snapshot:\n- navigation:\n  - link \"Sim\":\n    - /url: /\n  - link \"Script\":\n    - /url: /script\n- heading \"Script Runner\" [level=1]\n- textbox: resolve\n- button \"Run Script\"\n- text: idle 0\n- heading \"Log\" [level=2]\n- list\n- alert"
+    },
+    "c-3-4": {
+      "status": "fail",
+      "check": "On sc-script, entering 'alert\n ack Beth' then clicking btn-run-script shows script-error containing \"only Alex can ack\"",
+      "session": 3,
+      "test": "verify/test_ui_script.py::test_c_3_4_script_wrong_actor_ack_errors",
+      "message": "AssertionError: Locator expected to contain text 'only Alex can ack'\nActual value: None\nError: element(s) not found \nCall log:\n  - Expect \"to_contain_text\" with timeout 5000ms\n  - waiting for get_by_test_id(\"script-error\")\n\nAria snapshot:\n- navigation:\n  - link \"Sim\":\n    - /url: /\n  - link \"Script\":\n    - /url: /script\n- heading \"Script Runner\" [level=1]\n- textbox: alert ack Beth\n- button \"Run Script\"\n- text: idle 0\n- heading \"Log\" [level=2]\n- list\n- alert"
+    },
+    "c-3-5": {
+      "status": "fail",
+      "check": "On sc-script, entering 'alert\n ack Dana\n timeout' then clicking btn-run-script shows log-count \"1\" and script-error containing \"unknown actor Dana\"",
+      "session": 3,
+      "test": "verify/test_ui_script.py::test_c_3_5_script_stops_on_first_error_after_alert",
+      "message": "AssertionError: Locator expected to have text '1'\nActual value: 0 \nCall log:\n  - Expect \"to_have_text\" with timeout 5000ms\n  - waiting for get_by_test_id(\"log-count\")\n    14 \u00d7 locator resolved to <div data-testid=\"log-count\">0</div>\n       - unexpected value \"0\"\n\nAria snapshot:\n- text: \"0\""
+    },
+    "c-3-6": {
+      "status": "fail",
+      "check": "GET /api/state returns 200 with a JSON object whose contacts equal [\"Alex\", \"Beth\", \"Chen\"], mode is \"idle\", and log is an empty array",
+      "session": 3,
+      "test": "verify/test_api_state.py::test_c_3_6_get_state_seed_is_idle_and_contacts",
+      "message": "assert 501 == 200\n +  where 501 = <Response [501 Not Implemented]>.status_code"
+    }
+  },
+  "pytest_returncode": 1,
+  "stdout_tail": "ue: idle \nE       Call log:\nE         - Expect \"to_have_text\" with timeout 5000ms\nE         - waiting for get_by_test_id(\"mode\")\nE           14 \u00d7 locator resolved to <div data-testid=\"mode\">idle</div>\nE              - unexpected value \"idle\"\nE       \nE       Aria snapshot:\nE       - text: idle\n\nskeleton/verify/test_ui_sim.py:71: AssertionError\n_____________ test_c_2_5_timeout_at_end_shows_error_and_keeps_chen _____________\n\npage = <Page url='http://127.0.0.1:60313/'>\n\n    def test_c_2_5_timeout_at_end_shows_error_and_keeps_chen(page):\n        # Alert -> Timeout -> Timeout reaches Chen, next timeout errors and stays Chen\n        goto_sim(page)\n        page.get_by_test_id(\"btn-alert\").click()\n        page.get_by_test_id(\"btn-timeout\").click()  # Alex -> Beth\n        page.get_by_test_id(\"btn-timeout\").click()  # Beth -> Chen\n        page.get_by_test_id(\"btn-timeout\").click()  # No further escalation\n>       expect(page.get_by_text(\"no further escalation\")).to_be_visible()\nE       AssertionError: Locator expected to be visible\nE       Actual value: None\nE       Error: element(s) not found \nE       Call log:\nE         - Expect \"to_be_visible\" with timeout 5000ms\nE         - waiting for get_by_text(\"no further escalation\")\nE       \nE       Aria snapshot:\nE       - navigation:\nE         - link \"Sim\":\nE           - /url: /\nE         - link \"Script\":\nE           - /url: /script\nE       - heading \"Escalation Simulator\" [level=1]\nE       - text: \"idle Actor:\"\nE       - combobox \"Actor:\"\nE       - button \"Alert\"\nE       - button \"Ack\"\nE       - button \"Timeout\"\nE       - button \"Resolve\"\nE       - text: illegal transition\nE       - heading \"Log\" [level=2]\nE       - list\nE       - alert\n\nskeleton/verify/test_ui_sim.py:85: AssertionError\n=========================== short test summary info ============================\nFAILED skeleton/verify/test_api_state.py::test_c_2_6_post_state_alerting_round_trips\nFAILED skeleton/verify/test_api_state.py::test_c_3_6_get_state_seed_is_idle_and_contacts\nFAILED skeleton/verify/test_ui_script.py::test_c_3_1_script_happy_path_runs_and_logs_4\nFAILED skeleton/verify/test_ui_script.py::test_c_3_2_script_unknown_actor_errors\nFAILED skeleton/verify/test_ui_script.py::test_c_3_3_script_illegal_transition_resolve_errors\nFAILED skeleton/verify/test_ui_script.py::test_c_3_4_script_wrong_actor_ack_errors\nFAILED skeleton/verify/test_ui_script.py::test_c_3_5_script_stops_on_first_error_after_alert\nFAILED skeleton/verify/test_ui_sim.py::test_c_1_2_alert_sets_current_and_mode\nFAILED skeleton/verify/test_ui_sim.py::test_c_2_1_ack_by_alex_logs_and_keeps_current\nFAILED skeleton/verify/test_ui_sim.py::test_c_2_2_timeout_escalates_to_beth\nFAILED skeleton/verify/test_ui_sim.py::test_c_2_3_wrong_actor_ack_shows_error_and_keeps_current\nFAILED skeleton/verify/test_ui_sim.py::test_c_2_4_resolve_returns_to_idle_no_current\nFAILED skeleton/verify/test_ui_sim.py::test_c_2_5_timeout_at_end_shows_error_and_keeps_chen\n13 failed, 1 passed in 110.20s (0:01:50)\n",
+  "stderr_tail": ""
+}

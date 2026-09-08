@@ -1,0 +1,109 @@
+{
+  "ok": true,
+  "errors": [],
+  "warnings": [
+    {
+      "code": "W112",
+      "where": "session 1",
+      "message": "estimated 40.4 teaching minutes against a 40 minute cap. Nothing before step 9 measures this, so decide it here: 2 cuts, 2 builds, 2 concepts plus the project setup."
+    },
+    {
+      "code": "W112",
+      "where": "session 2",
+      "message": "estimated 47 teaching minutes against a 40 minute cap. Nothing before step 9 measures this, so decide it here: 3 cuts, 1 builds, 2 concepts."
+    },
+    {
+      "code": "W114",
+      "where": "session 2",
+      "message": "cut cut-logic-reducer-apply is 50% of the session's 31.04 cut minutes (15.64 against siblings at 6, 9.4) - over the 45% cap, on 4 stated decisions and 126 hint words. Five projects have overrun on this shape. Split cut-logic-reducer-apply so each half states fewer decisions, or name a drop candidate inside this session. Do NOT move it into the setup session - that is E113. Shortening the hint does not make the cut smaller."
+    }
+  ],
+  "counts": {
+    "errors": 0,
+    "warnings": 3
+  },
+  "session_minutes": [
+    {
+      "n": 1,
+      "minutes": 40.4,
+      "cuts": 2,
+      "builds": 2,
+      "concepts": 2,
+      "carries_setup": true,
+      "over_cap": true,
+      "weighted": true,
+      "cut_minutes": [
+        {
+          "id": "cut-ep-state-get",
+          "minutes": 9.4,
+          "decisions": 2,
+          "hint_words": 20
+        },
+        {
+          "id": "cut-logic-initial-alert",
+          "minutes": 6.0,
+          "decisions": 0,
+          "hint_words": 42
+        }
+      ],
+      "largest_cut_share": 0.61
+    },
+    {
+      "n": 2,
+      "minutes": 47.0,
+      "cuts": 3,
+      "builds": 1,
+      "concepts": 2,
+      "carries_setup": false,
+      "over_cap": true,
+      "weighted": true,
+      "cut_minutes": [
+        {
+          "id": "cut-logic-reducer-apply",
+          "minutes": 15.6,
+          "decisions": 4,
+          "hint_words": 126
+        },
+        {
+          "id": "cut-logic-escalate-index",
+          "minutes": 9.4,
+          "decisions": 2,
+          "hint_words": 16
+        },
+        {
+          "id": "cut-ep-state-post",
+          "minutes": 6.0,
+          "decisions": 0,
+          "hint_words": 23
+        }
+      ],
+      "largest_cut_share": 0.5
+    },
+    {
+      "n": 3,
+      "minutes": 36.4,
+      "cuts": 2,
+      "builds": 1,
+      "concepts": 4,
+      "carries_setup": false,
+      "over_cap": false,
+      "weighted": true,
+      "cut_minutes": [
+        {
+          "id": "cut-run-script",
+          "minutes": 9.7,
+          "decisions": 2,
+          "hint_words": 62
+        },
+        {
+          "id": "cut-parse-line",
+          "minutes": 7.7,
+          "decisions": 1,
+          "hint_words": 53
+        }
+      ],
+      "largest_cut_share": 0.56
+    }
+  ],
+  "spec_hash": "b0096939782c5093aace8c859df2ab0a120648398476b247915614f8d644ee0d"
+}

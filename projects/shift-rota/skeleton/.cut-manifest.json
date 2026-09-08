@@ -1,0 +1,78 @@
+{
+  "slug": "shift-rota",
+  "cuts": [
+    {
+      "id": "cut-ep-state-get",
+      "file": "api/state/route.ts",
+      "line": 22,
+      "lines_removed": 18
+    },
+    {
+      "id": "cut-ep-state-post",
+      "file": "api/state/route.ts",
+      "line": 48,
+      "lines_removed": 11
+    },
+    {
+      "id": "cut-logic-initial-alert",
+      "file": "lib/fsm.ts",
+      "line": 11,
+      "lines_removed": 15
+    },
+    {
+      "id": "cut-logic-escalate-index",
+      "file": "lib/fsm.ts",
+      "line": 34,
+      "lines_removed": 3
+    },
+    {
+      "id": "cut-logic-reducer-apply",
+      "file": "lib/fsm.ts",
+      "line": 44,
+      "lines_removed": 41
+    },
+    {
+      "id": "cut-parse-line",
+      "file": "lib/parse.ts",
+      "line": 12,
+      "lines_removed": 18
+    },
+    {
+      "id": "cut-run-script",
+      "file": "lib/runScript.ts",
+      "line": 14,
+      "lines_removed": 31
+    }
+  ],
+  "count": 7,
+  "by_session": {
+    "1": [
+      "cut-ep-state-get",
+      "cut-logic-initial-alert"
+    ],
+    "2": [
+      "cut-ep-state-post",
+      "cut-logic-escalate-index",
+      "cut-logic-reducer-apply"
+    ],
+    "3": [
+      "cut-parse-line",
+      "cut-run-script"
+    ]
+  },
+  "return_safety": {
+    "ok": true,
+    "checked": 7,
+    "violations": []
+  },
+  "partial_state_risks": [],
+  "typecheck": {
+    "ran": true,
+    "ok": true,
+    "error_count": 0,
+    "errors": [],
+    "missing_return": [],
+    "hint": ""
+  },
+  "ok": true
+}

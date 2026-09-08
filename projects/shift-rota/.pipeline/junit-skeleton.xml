@@ -1,0 +1,391 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="13" skipped="0" tests="14" time="110.191" timestamp="2026-09-08T16:34:40.568008+05:30" hostname="nxtwave-Z790-D-AX"><testcase classname="skeleton.verify.test_api_state" name="test_c_2_6_post_state_alerting_round_trips" time="0.048"><failure message="assert 501 == 200&#10; +  where 501 = &lt;Response [501 Not Implemented]&gt;.status_code">http_client = &lt;httpx.Client object at 0x741483119580&gt;
+
+    def test_c_2_6_post_state_alerting_round_trips(http_client):
+        payload = {
+            "contacts": ["Alex", "Beth", "Chen"],
+            "mode": "alerting",
+            "currentIndex": 0,
+            "log": [],
+        }
+        resp = http_client.post("/api/state", json=payload)
+&gt;       assert resp.status_code == 200
+E       assert 501 == 200
+E        +  where 501 = &lt;Response [501 Not Implemented]&gt;.status_code
+
+skeleton/verify/test_api_state.py:12: AssertionError</failure></testcase><testcase classname="skeleton.verify.test_api_state" name="test_c_3_6_get_state_seed_is_idle_and_contacts" time="0.013"><failure message="assert 501 == 200&#10; +  where 501 = &lt;Response [501 Not Implemented]&gt;.status_code">http_client = &lt;httpx.Client object at 0x7414823a4800&gt;
+
+    def test_c_3_6_get_state_seed_is_idle_and_contacts(http_client):
+        resp = http_client.get("/api/state")
+&gt;       assert resp.status_code == 200
+E       assert 501 == 200
+E        +  where 501 = &lt;Response [501 Not Implemented]&gt;.status_code
+
+skeleton/verify/test_api_state.py:19: AssertionError</failure></testcase><testcase classname="skeleton.verify.test_ui_script" name="test_c_3_1_script_happy_path_runs_and_logs_4" time="5.373"><failure message="AssertionError: Locator expected to have text '4'&#10;Actual value: 0 &#10;Call log:&#10;  - Expect &quot;to_have_text&quot; with timeout 5000ms&#10;  - waiting for get_by_test_id(&quot;log-count&quot;)&#10;    14 × locator resolved to &lt;div data-testid=&quot;log-count&quot;&gt;0&lt;/div&gt;&#10;       - unexpected value &quot;0&quot;&#10;&#10;Aria snapshot:&#10;- text: &quot;0&quot;">page = &lt;Page url='http://127.0.0.1:60313/script'&gt;
+
+    def test_c_3_1_script_happy_path_runs_and_logs_4(page):
+        # Enter a 4-line script and run; expect idle, log-count 4, first row contains alert, last contains resolve
+        goto_script(page)
+        page.get_by_test_id("script-input").fill("alert\ntimeout\nack Beth\nresolve")
+        page.get_by_test_id("btn-run-script").click()
+        expect(page.get_by_test_id("mode")).to_have_text("idle")
+&gt;       expect(page.get_by_test_id("log-count")).to_have_text("4")
+E       AssertionError: Locator expected to have text '4'
+E       Actual value: 0 
+E       Call log:
+E         - Expect "to_have_text" with timeout 5000ms
+E         - waiting for get_by_test_id("log-count")
+E           14 × locator resolved to &lt;div data-testid="log-count"&gt;0&lt;/div&gt;
+E              - unexpected value "0"
+E       
+E       Aria snapshot:
+E       - text: "0"
+
+skeleton/verify/test_ui_script.py:14: AssertionError</failure></testcase><testcase classname="skeleton.verify.test_ui_script" name="test_c_3_2_script_unknown_actor_errors" time="5.411"><failure message="AssertionError: Locator expected to contain text 'unknown actor Dana'&#10;Actual value: None&#10;Error: element(s) not found &#10;Call log:&#10;  - Expect &quot;to_contain_text&quot; with timeout 5000ms&#10;  - waiting for get_by_test_id(&quot;script-error&quot;)&#10;&#10;Aria snapshot:&#10;- navigation:&#10;  - link &quot;Sim&quot;:&#10;    - /url: /&#10;  - link &quot;Script&quot;:&#10;    - /url: /script&#10;- heading &quot;Script Runner&quot; [level=1]&#10;- textbox: ack Dana&#10;- button &quot;Run Script&quot;&#10;- text: idle 0&#10;- heading &quot;Log&quot; [level=2]&#10;- list&#10;- alert">page = &lt;Page url='http://127.0.0.1:60313/script'&gt;
+
+    def test_c_3_2_script_unknown_actor_errors(page):
+        goto_script(page)
+        page.get_by_test_id("script-input").fill("ack Dana")
+        page.get_by_test_id("btn-run-script").click()
+&gt;       expect(page.get_by_test_id("script-error")).to_contain_text("unknown actor Dana")
+E       AssertionError: Locator expected to contain text 'unknown actor Dana'
+E       Actual value: None
+E       Error: element(s) not found 
+E       Call log:
+E         - Expect "to_contain_text" with timeout 5000ms
+E         - waiting for get_by_test_id("script-error")
+E       
+E       Aria snapshot:
+E       - navigation:
+E         - link "Sim":
+E           - /url: /
+E         - link "Script":
+E           - /url: /script
+E       - heading "Script Runner" [level=1]
+E       - textbox: ack Dana
+E       - button "Run Script"
+E       - text: idle 0
+E       - heading "Log" [level=2]
+E       - list
+E       - alert
+
+skeleton/verify/test_ui_script.py:26: AssertionError</failure></testcase><testcase classname="skeleton.verify.test_ui_script" name="test_c_3_3_script_illegal_transition_resolve_errors" time="5.408"><failure message="AssertionError: Locator expected to contain text 'illegal transition'&#10;Actual value: None&#10;Error: element(s) not found &#10;Call log:&#10;  - Expect &quot;to_contain_text&quot; with timeout 5000ms&#10;  - waiting for get_by_test_id(&quot;script-error&quot;)&#10;&#10;Aria snapshot:&#10;- navigation:&#10;  - link &quot;Sim&quot;:&#10;    - /url: /&#10;  - link &quot;Script&quot;:&#10;    - /url: /script&#10;- heading &quot;Script Runner&quot; [level=1]&#10;- textbox: resolve&#10;- button &quot;Run Script&quot;&#10;- text: idle 0&#10;- heading &quot;Log&quot; [level=2]&#10;- list&#10;- alert">page = &lt;Page url='http://127.0.0.1:60313/script'&gt;
+
+    def test_c_3_3_script_illegal_transition_resolve_errors(page):
+        goto_script(page)
+        page.get_by_test_id("script-input").fill("resolve")
+        page.get_by_test_id("btn-run-script").click()
+&gt;       expect(page.get_by_test_id("script-error")).to_contain_text("illegal transition")
+E       AssertionError: Locator expected to contain text 'illegal transition'
+E       Actual value: None
+E       Error: element(s) not found 
+E       Call log:
+E         - Expect "to_contain_text" with timeout 5000ms
+E         - waiting for get_by_test_id("script-error")
+E       
+E       Aria snapshot:
+E       - navigation:
+E         - link "Sim":
+E           - /url: /
+E         - link "Script":
+E           - /url: /script
+E       - heading "Script Runner" [level=1]
+E       - textbox: resolve
+E       - button "Run Script"
+E       - text: idle 0
+E       - heading "Log" [level=2]
+E       - list
+E       - alert
+
+skeleton/verify/test_ui_script.py:33: AssertionError</failure></testcase><testcase classname="skeleton.verify.test_ui_script" name="test_c_3_4_script_wrong_actor_ack_errors" time="5.406"><failure message="AssertionError: Locator expected to contain text 'only Alex can ack'&#10;Actual value: None&#10;Error: element(s) not found &#10;Call log:&#10;  - Expect &quot;to_contain_text&quot; with timeout 5000ms&#10;  - waiting for get_by_test_id(&quot;script-error&quot;)&#10;&#10;Aria snapshot:&#10;- navigation:&#10;  - link &quot;Sim&quot;:&#10;    - /url: /&#10;  - link &quot;Script&quot;:&#10;    - /url: /script&#10;- heading &quot;Script Runner&quot; [level=1]&#10;- textbox: alert ack Beth&#10;- button &quot;Run Script&quot;&#10;- text: idle 0&#10;- heading &quot;Log&quot; [level=2]&#10;- list&#10;- alert">page = &lt;Page url='http://127.0.0.1:60313/script'&gt;
+
+    def test_c_3_4_script_wrong_actor_ack_errors(page):
+        goto_script(page)
+        page.get_by_test_id("script-input").fill("alert\nack Beth")
+        page.get_by_test_id("btn-run-script").click()
+&gt;       expect(page.get_by_test_id("script-error")).to_contain_text("only Alex can ack")
+E       AssertionError: Locator expected to contain text 'only Alex can ack'
+E       Actual value: None
+E       Error: element(s) not found 
+E       Call log:
+E         - Expect "to_contain_text" with timeout 5000ms
+E         - waiting for get_by_test_id("script-error")
+E       
+E       Aria snapshot:
+E       - navigation:
+E         - link "Sim":
+E           - /url: /
+E         - link "Script":
+E           - /url: /script
+E       - heading "Script Runner" [level=1]
+E       - textbox: alert ack Beth
+E       - button "Run Script"
+E       - text: idle 0
+E       - heading "Log" [level=2]
+E       - list
+E       - alert
+
+skeleton/verify/test_ui_script.py:40: AssertionError</failure></testcase><testcase classname="skeleton.verify.test_ui_script" name="test_c_3_5_script_stops_on_first_error_after_alert" time="5.405"><failure message="AssertionError: Locator expected to have text '1'&#10;Actual value: 0 &#10;Call log:&#10;  - Expect &quot;to_have_text&quot; with timeout 5000ms&#10;  - waiting for get_by_test_id(&quot;log-count&quot;)&#10;    14 × locator resolved to &lt;div data-testid=&quot;log-count&quot;&gt;0&lt;/div&gt;&#10;       - unexpected value &quot;0&quot;&#10;&#10;Aria snapshot:&#10;- text: &quot;0&quot;">page = &lt;Page url='http://127.0.0.1:60313/script'&gt;
+
+    def test_c_3_5_script_stops_on_first_error_after_alert(page):
+        goto_script(page)
+        page.get_by_test_id("script-input").fill("alert\nack Dana\ntimeout")
+        page.get_by_test_id("btn-run-script").click()
+&gt;       expect(page.get_by_test_id("log-count")).to_have_text("1")
+E       AssertionError: Locator expected to have text '1'
+E       Actual value: 0 
+E       Call log:
+E         - Expect "to_have_text" with timeout 5000ms
+E         - waiting for get_by_test_id("log-count")
+E           14 × locator resolved to &lt;div data-testid="log-count"&gt;0&lt;/div&gt;
+E              - unexpected value "0"
+E       
+E       Aria snapshot:
+E       - text: "0"
+
+skeleton/verify/test_ui_script.py:47: AssertionError</failure></testcase><testcase classname="skeleton.verify.test_ui_sim" name="test_c_1_1_initial_idle_no_current" time="0.341" /><testcase classname="skeleton.verify.test_ui_sim" name="test_c_1_2_alert_sets_current_and_mode" time="5.431"><failure message="AssertionError: Locator expected to have text 'Alex'&#10;Actual value: None&#10;Error: element(s) not found &#10;Call log:&#10;  - Expect &quot;to_have_text&quot; with timeout 5000ms&#10;  - waiting for get_by_test_id(&quot;current&quot;)&#10;&#10;Aria snapshot:&#10;- navigation:&#10;  - link &quot;Sim&quot;:&#10;    - /url: /&#10;  - link &quot;Script&quot;:&#10;    - /url: /script&#10;- heading &quot;Escalation Simulator&quot; [level=1]&#10;- text: &quot;idle Actor:&quot;&#10;- combobox &quot;Actor:&quot;&#10;- button &quot;Alert&quot;&#10;- button &quot;Ack&quot;&#10;- button &quot;Timeout&quot;&#10;- button &quot;Resolve&quot;&#10;- text: illegal transition&#10;- heading &quot;Log&quot; [level=2]&#10;- list&#10;- alert">page = &lt;Page url='http://127.0.0.1:60313/'&gt;
+
+    def test_c_1_2_alert_sets_current_and_mode(page):
+        # After clicking Alert, current is Alex and mode is alerting
+        goto_sim(page)
+        page.get_by_test_id("btn-alert").click()
+        current = page.get_by_test_id("current")
+&gt;       expect(current).to_have_text("Alex")
+E       AssertionError: Locator expected to have text 'Alex'
+E       Actual value: None
+E       Error: element(s) not found 
+E       Call log:
+E         - Expect "to_have_text" with timeout 5000ms
+E         - waiting for get_by_test_id("current")
+E       
+E       Aria snapshot:
+E       - navigation:
+E         - link "Sim":
+E           - /url: /
+E         - link "Script":
+E           - /url: /script
+E       - heading "Escalation Simulator" [level=1]
+E       - text: "idle Actor:"
+E       - combobox "Actor:"
+E       - button "Alert"
+E       - button "Ack"
+E       - button "Timeout"
+E       - button "Resolve"
+E       - text: illegal transition
+E       - heading "Log" [level=2]
+E       - list
+E       - alert
+
+skeleton/verify/test_ui_sim.py:22: AssertionError</failure></testcase><testcase classname="skeleton.verify.test_ui_sim" name="test_c_2_1_ack_by_alex_logs_and_keeps_current" time="30.375"><failure message="playwright._impl._errors.TimeoutError: Locator.select_option: Timeout 30000ms exceeded.&#10;Call log:&#10;  - waiting for get_by_test_id(&quot;actor-select&quot;)&#10;    - locator resolved to &lt;select data-testid=&quot;actor-select&quot;&gt;&lt;/select&gt;&#10;  - attempting select option action&#10;    2 × waiting for element to be visible and enabled&#10;      - did not find some options&#10;    - retrying select option action&#10;    - waiting 20ms&#10;    2 × waiting for element to be visible and enabled&#10;      - did not find some options&#10;    - retrying select option action&#10;      - waiting 100ms&#10;    59 × waiting for element to be visible and enabled&#10;       - did not find some options&#10;     - retrying select option action&#10;       - waiting 500ms">page = &lt;Page url='http://127.0.0.1:60313/'&gt;
+
+    def test_c_2_1_ack_by_alex_logs_and_keeps_current(page):
+        # Alert -&gt; select Alex -&gt; Ack keeps current Alex, mode alerting, and logs ack by Alex
+        goto_sim(page)
+        page.get_by_test_id("btn-alert").click()
+        actor = page.get_by_test_id("actor-select")
+&gt;       actor.select_option(label="Alex")
+
+skeleton/verify/test_ui_sim.py:32: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+.pipeline/venv/lib/python3.12/site-packages/playwright/sync_api/_generated.py:20069: in select_option
+    self._sync(
+.pipeline/venv/lib/python3.12/site-packages/playwright/_impl/_locator.py:633: in select_option
+    return await self._frame.select_option(
+.pipeline/venv/lib/python3.12/site-packages/playwright/_impl/_frame.py:814: in select_option
+    return await self._channel.send("selectOption", self._timeout, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.pipeline/venv/lib/python3.12/site-packages/playwright/_impl/_connection.py:76: in send
+    return await self._connection.wrap_api_call(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;playwright._impl._connection.Connection object at 0x741481ee4bf0&gt;
+cb = &lt;function Channel.send.&lt;locals&gt;.&lt;lambda&gt; at 0x741481ee39c0&gt;
+is_internal = False, title = None
+
+    async def wrap_api_call(
+        self, cb: Callable[[], Any], is_internal: bool = False, title: str = None
+    ) -&gt; Any:
+        if self._api_zone.get():
+            return await cb()
+        task = asyncio.current_task(self._loop)
+        parsed_st = _attach_api_call_information(
+            getattr(task, "__pw_stack__", None) or _capture_stack_trace(),
+            is_internal,
+            title,
+        )
+        self._api_zone.set(parsed_st)
+        try:
+            return await cb()
+        except Exception as error:
+&gt;           raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+E           playwright._impl._errors.TimeoutError: Locator.select_option: Timeout 30000ms exceeded.
+E           Call log:
+E             - waiting for get_by_test_id("actor-select")
+E               - locator resolved to &lt;select data-testid="actor-select"&gt;&lt;/select&gt;
+E             - attempting select option action
+E               2 × waiting for element to be visible and enabled
+E                 - did not find some options
+E               - retrying select option action
+E               - waiting 20ms
+E               2 × waiting for element to be visible and enabled
+E                 - did not find some options
+E               - retrying select option action
+E                 - waiting 100ms
+E               59 × waiting for element to be visible and enabled
+E                  - did not find some options
+E                - retrying select option action
+E                  - waiting 500ms
+
+.pipeline/venv/lib/python3.12/site-packages/playwright/_impl/_connection.py:632: TimeoutError</failure></testcase><testcase classname="skeleton.verify.test_ui_sim" name="test_c_2_2_timeout_escalates_to_beth" time="5.425"><failure message="AssertionError: Locator expected to have text 'Beth'&#10;Actual value: None&#10;Error: element(s) not found &#10;Call log:&#10;  - Expect &quot;to_have_text&quot; with timeout 5000ms&#10;  - waiting for get_by_test_id(&quot;current&quot;)&#10;&#10;Aria snapshot:&#10;- navigation:&#10;  - link &quot;Sim&quot;:&#10;    - /url: /&#10;  - link &quot;Script&quot;:&#10;    - /url: /script&#10;- heading &quot;Escalation Simulator&quot; [level=1]&#10;- text: &quot;idle Actor:&quot;&#10;- combobox &quot;Actor:&quot;&#10;- button &quot;Alert&quot;&#10;- button &quot;Ack&quot;&#10;- button &quot;Timeout&quot;&#10;- button &quot;Resolve&quot;&#10;- text: illegal transition&#10;- heading &quot;Log&quot; [level=2]&#10;- list&#10;- alert">page = &lt;Page url='http://127.0.0.1:60313/'&gt;
+
+    def test_c_2_2_timeout_escalates_to_beth(page):
+        # Alert -&gt; Timeout escalates current to Beth
+        goto_sim(page)
+        page.get_by_test_id("btn-alert").click()
+        page.get_by_test_id("btn-timeout").click()
+&gt;       expect(page.get_by_test_id("current")).to_have_text("Beth")
+E       AssertionError: Locator expected to have text 'Beth'
+E       Actual value: None
+E       Error: element(s) not found 
+E       Call log:
+E         - Expect "to_have_text" with timeout 5000ms
+E         - waiting for get_by_test_id("current")
+E       
+E       Aria snapshot:
+E       - navigation:
+E         - link "Sim":
+E           - /url: /
+E         - link "Script":
+E           - /url: /script
+E       - heading "Escalation Simulator" [level=1]
+E       - text: "idle Actor:"
+E       - combobox "Actor:"
+E       - button "Alert"
+E       - button "Ack"
+E       - button "Timeout"
+E       - button "Resolve"
+E       - text: illegal transition
+E       - heading "Log" [level=2]
+E       - list
+E       - alert
+
+skeleton/verify/test_ui_sim.py:45: AssertionError</failure></testcase><testcase classname="skeleton.verify.test_ui_sim" name="test_c_2_3_wrong_actor_ack_shows_error_and_keeps_current" time="30.406"><failure message="playwright._impl._errors.TimeoutError: Locator.select_option: Timeout 30000ms exceeded.&#10;Call log:&#10;  - waiting for get_by_test_id(&quot;actor-select&quot;)&#10;    - locator resolved to &lt;select data-testid=&quot;actor-select&quot;&gt;&lt;/select&gt;&#10;  - attempting select option action&#10;    2 × waiting for element to be visible and enabled&#10;      - did not find some options&#10;    - retrying select option action&#10;    - waiting 20ms&#10;    2 × waiting for element to be visible and enabled&#10;      - did not find some options&#10;    - retrying select option action&#10;      - waiting 100ms&#10;    60 × waiting for element to be visible and enabled&#10;       - did not find some options&#10;     - retrying select option action&#10;       - waiting 500ms">page = &lt;Page url='http://127.0.0.1:60313/'&gt;
+
+    def test_c_2_3_wrong_actor_ack_shows_error_and_keeps_current(page):
+        # Alert -&gt; select Beth -&gt; Ack shows error and current stays Alex
+        goto_sim(page)
+        page.get_by_test_id("btn-alert").click()
+&gt;       page.get_by_test_id("actor-select").select_option(label="Beth")
+
+skeleton/verify/test_ui_sim.py:52: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+.pipeline/venv/lib/python3.12/site-packages/playwright/sync_api/_generated.py:20069: in select_option
+    self._sync(
+.pipeline/venv/lib/python3.12/site-packages/playwright/_impl/_locator.py:633: in select_option
+    return await self._frame.select_option(
+.pipeline/venv/lib/python3.12/site-packages/playwright/_impl/_frame.py:814: in select_option
+    return await self._channel.send("selectOption", self._timeout, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.pipeline/venv/lib/python3.12/site-packages/playwright/_impl/_connection.py:76: in send
+    return await self._connection.wrap_api_call(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;playwright._impl._connection.Connection object at 0x7414823402f0&gt;
+cb = &lt;function Channel.send.&lt;locals&gt;.&lt;lambda&gt; at 0x741481f82020&gt;
+is_internal = False, title = None
+
+    async def wrap_api_call(
+        self, cb: Callable[[], Any], is_internal: bool = False, title: str = None
+    ) -&gt; Any:
+        if self._api_zone.get():
+            return await cb()
+        task = asyncio.current_task(self._loop)
+        parsed_st = _attach_api_call_information(
+            getattr(task, "__pw_stack__", None) or _capture_stack_trace(),
+            is_internal,
+            title,
+        )
+        self._api_zone.set(parsed_st)
+        try:
+            return await cb()
+        except Exception as error:
+&gt;           raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+E           playwright._impl._errors.TimeoutError: Locator.select_option: Timeout 30000ms exceeded.
+E           Call log:
+E             - waiting for get_by_test_id("actor-select")
+E               - locator resolved to &lt;select data-testid="actor-select"&gt;&lt;/select&gt;
+E             - attempting select option action
+E               2 × waiting for element to be visible and enabled
+E                 - did not find some options
+E               - retrying select option action
+E               - waiting 20ms
+E               2 × waiting for element to be visible and enabled
+E                 - did not find some options
+E               - retrying select option action
+E                 - waiting 100ms
+E               60 × waiting for element to be visible and enabled
+E                  - did not find some options
+E                - retrying select option action
+E                  - waiting 500ms
+
+.pipeline/venv/lib/python3.12/site-packages/playwright/_impl/_connection.py:632: TimeoutError</failure></testcase><testcase classname="skeleton.verify.test_ui_sim" name="test_c_2_4_resolve_returns_to_idle_no_current" time="5.382"><failure message="AssertionError: Locator expected to have text 'alerting'&#10;Actual value: idle &#10;Call log:&#10;  - Expect &quot;to_have_text&quot; with timeout 5000ms&#10;  - waiting for get_by_test_id(&quot;mode&quot;)&#10;    14 × locator resolved to &lt;div data-testid=&quot;mode&quot;&gt;idle&lt;/div&gt;&#10;       - unexpected value &quot;idle&quot;&#10;&#10;Aria snapshot:&#10;- text: idle">page = &lt;Page url='http://127.0.0.1:60313/'&gt;
+
+    def test_c_2_4_resolve_returns_to_idle_no_current(page):
+        """Alert -&gt; Resolve returns to idle and removes the current element.
+    
+        The end state asserted here - idle, no current - is also the STARTING
+        state, so asserting it alone passes on a skeleton where neither click does
+        anything: the page simply never left idle. Pinning the alerting state in
+        between is what makes the return to idle a transition rather than a
+        coincidence.
+        """
+        goto_sim(page)
+        page.get_by_test_id("btn-alert").click()
+        # the alert must actually have taken effect, or "back to idle" proves nothing
+&gt;       expect(page.get_by_test_id("mode")).to_have_text("alerting")
+E       AssertionError: Locator expected to have text 'alerting'
+E       Actual value: idle 
+E       Call log:
+E         - Expect "to_have_text" with timeout 5000ms
+E         - waiting for get_by_test_id("mode")
+E           14 × locator resolved to &lt;div data-testid="mode"&gt;idle&lt;/div&gt;
+E              - unexpected value "idle"
+E       
+E       Aria snapshot:
+E       - text: idle
+
+skeleton/verify/test_ui_sim.py:71: AssertionError</failure></testcase><testcase classname="skeleton.verify.test_ui_sim" name="test_c_2_5_timeout_at_end_shows_error_and_keeps_chen" time="5.554"><failure message="AssertionError: Locator expected to be visible&#10;Actual value: None&#10;Error: element(s) not found &#10;Call log:&#10;  - Expect &quot;to_be_visible&quot; with timeout 5000ms&#10;  - waiting for get_by_text(&quot;no further escalation&quot;)&#10;&#10;Aria snapshot:&#10;- navigation:&#10;  - link &quot;Sim&quot;:&#10;    - /url: /&#10;  - link &quot;Script&quot;:&#10;    - /url: /script&#10;- heading &quot;Escalation Simulator&quot; [level=1]&#10;- text: &quot;idle Actor:&quot;&#10;- combobox &quot;Actor:&quot;&#10;- button &quot;Alert&quot;&#10;- button &quot;Ack&quot;&#10;- button &quot;Timeout&quot;&#10;- button &quot;Resolve&quot;&#10;- text: illegal transition&#10;- heading &quot;Log&quot; [level=2]&#10;- list&#10;- alert">page = &lt;Page url='http://127.0.0.1:60313/'&gt;
+
+    def test_c_2_5_timeout_at_end_shows_error_and_keeps_chen(page):
+        # Alert -&gt; Timeout -&gt; Timeout reaches Chen, next timeout errors and stays Chen
+        goto_sim(page)
+        page.get_by_test_id("btn-alert").click()
+        page.get_by_test_id("btn-timeout").click()  # Alex -&gt; Beth
+        page.get_by_test_id("btn-timeout").click()  # Beth -&gt; Chen
+        page.get_by_test_id("btn-timeout").click()  # No further escalation
+&gt;       expect(page.get_by_text("no further escalation")).to_be_visible()
+E       AssertionError: Locator expected to be visible
+E       Actual value: None
+E       Error: element(s) not found 
+E       Call log:
+E         - Expect "to_be_visible" with timeout 5000ms
+E         - waiting for get_by_text("no further escalation")
+E       
+E       Aria snapshot:
+E       - navigation:
+E         - link "Sim":
+E           - /url: /
+E         - link "Script":
+E           - /url: /script
+E       - heading "Escalation Simulator" [level=1]
+E       - text: "idle Actor:"
+E       - combobox "Actor:"
+E       - button "Alert"
+E       - button "Ack"
+E       - button "Timeout"
+E       - button "Resolve"
+E       - text: illegal transition
+E       - heading "Log" [level=2]
+E       - list
+E       - alert
+
+skeleton/verify/test_ui_sim.py:85: AssertionError</failure></testcase></testsuite></testsuites>

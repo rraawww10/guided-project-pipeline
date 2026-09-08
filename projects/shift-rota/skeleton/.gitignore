@@ -1,0 +1,3 @@
+# Runtime state - must not ship
+/data/state.json
+!/data/state.seed.json

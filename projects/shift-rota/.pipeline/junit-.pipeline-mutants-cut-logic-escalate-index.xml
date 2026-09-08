@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="3" skipped="0" tests="14" time="20.553" timestamp="2026-09-08T16:04:04.061468+05:30" hostname="nxtwave-Z790-D-AX"><testcase classname="verify.test_api_state" name="test_c_2_6_post_state_alerting_round_trips" time="0.048" /><testcase classname="verify.test_api_state" name="test_c_3_6_get_state_seed_is_idle_and_contacts" time="0.013" /><testcase classname="verify.test_ui_script" name="test_c_3_1_script_happy_path_runs_and_logs_4" time="5.389"><failure message="AssertionError: Locator expected to have text 'idle'&#10;Actual value: alerting &#10;Call log:&#10;  - Expect &quot;to_have_text&quot; with timeout 5000ms&#10;  - waiting for get_by_test_id(&quot;mode&quot;)&#10;    14 × locator resolved to &lt;div data-testid=&quot;mode&quot;&gt;alerting&lt;/div&gt;&#10;       - unexpected value &quot;alerting&quot;&#10;&#10;Aria snapshot:&#10;- text: alerting">page = &lt;Page url='http://127.0.0.1:51155/script'&gt;
+
+    def test_c_3_1_script_happy_path_runs_and_logs_4(page):
+        # Enter a 4-line script and run; expect idle, log-count 4, first row contains alert, last contains resolve
+        goto_script(page)
+        page.get_by_test_id("script-input").fill("alert\ntimeout\nack Beth\nresolve")
+        page.get_by_test_id("btn-run-script").click()
+&gt;       expect(page.get_by_test_id("mode")).to_have_text("idle")
+E       AssertionError: Locator expected to have text 'idle'
+E       Actual value: alerting 
+E       Call log:
+E         - Expect "to_have_text" with timeout 5000ms
+E         - waiting for get_by_test_id("mode")
+E           14 × locator resolved to &lt;div data-testid="mode"&gt;alerting&lt;/div&gt;
+E              - unexpected value "alerting"
+E       
+E       Aria snapshot:
+E       - text: alerting
+
+verify/test_ui_script.py:13: AssertionError</failure></testcase><testcase classname="verify.test_ui_script" name="test_c_3_2_script_unknown_actor_errors" time="0.425" /><testcase classname="verify.test_ui_script" name="test_c_3_3_script_illegal_transition_resolve_errors" time="0.431" /><testcase classname="verify.test_ui_script" name="test_c_3_4_script_wrong_actor_ack_errors" time="0.419" /><testcase classname="verify.test_ui_script" name="test_c_3_5_script_stops_on_first_error_after_alert" time="0.436" /><testcase classname="verify.test_ui_sim" name="test_c_1_1_initial_idle_no_current" time="0.349" /><testcase classname="verify.test_ui_sim" name="test_c_1_2_alert_sets_current_and_mode" time="0.442" /><testcase classname="verify.test_ui_sim" name="test_c_2_1_ack_by_alex_logs_and_keeps_current" time="0.494" /><testcase classname="verify.test_ui_sim" name="test_c_2_2_timeout_escalates_to_beth" time="5.502"><failure message="AssertionError: Locator expected to have text 'Beth'&#10;Actual value: Alex &#10;Call log:&#10;  - Expect &quot;to_have_text&quot; with timeout 5000ms&#10;  - waiting for get_by_test_id(&quot;current&quot;)&#10;    14 × locator resolved to &lt;div data-testid=&quot;current&quot;&gt;Alex&lt;/div&gt;&#10;       - unexpected value &quot;Alex&quot;&#10;&#10;Aria snapshot:&#10;- text: Alex">page = &lt;Page url='http://127.0.0.1:51155/'&gt;
+
+    def test_c_2_2_timeout_escalates_to_beth(page):
+        # Alert -&gt; Timeout escalates current to Beth
+        goto_sim(page)
+        page.get_by_test_id("btn-alert").click()
+        page.get_by_test_id("btn-timeout").click()
+&gt;       expect(page.get_by_test_id("current")).to_have_text("Beth")
+E       AssertionError: Locator expected to have text 'Beth'
+E       Actual value: Alex 
+E       Call log:
+E         - Expect "to_have_text" with timeout 5000ms
+E         - waiting for get_by_test_id("current")
+E           14 × locator resolved to &lt;div data-testid="current"&gt;Alex&lt;/div&gt;
+E              - unexpected value "Alex"
+E       
+E       Aria snapshot:
+E       - text: Alex
+
+verify/test_ui_sim.py:45: AssertionError</failure></testcase><testcase classname="verify.test_ui_sim" name="test_c_2_3_wrong_actor_ack_shows_error_and_keeps_current" time="0.504" /><testcase classname="verify.test_ui_sim" name="test_c_2_4_resolve_returns_to_idle_no_current" time="0.474" /><testcase classname="verify.test_ui_sim" name="test_c_2_5_timeout_at_end_shows_error_and_keeps_chen" time="5.574"><failure message="AssertionError: Locator expected to have text 'Chen'&#10;Actual value: Alex &#10;Call log:&#10;  - Expect &quot;to_have_text&quot; with timeout 5000ms&#10;  - waiting for get_by_test_id(&quot;current&quot;)&#10;    14 × locator resolved to &lt;div data-testid=&quot;current&quot;&gt;Alex&lt;/div&gt;&#10;       - unexpected value &quot;Alex&quot;&#10;&#10;Aria snapshot:&#10;- text: Alex">page = &lt;Page url='http://127.0.0.1:51155/'&gt;
+
+    def test_c_2_5_timeout_at_end_shows_error_and_keeps_chen(page):
+        # Alert -&gt; Timeout -&gt; Timeout reaches Chen, next timeout errors and stays Chen
+        goto_sim(page)
+        page.get_by_test_id("btn-alert").click()
+        page.get_by_test_id("btn-timeout").click()  # Alex -&gt; Beth
+        page.get_by_test_id("btn-timeout").click()  # Beth -&gt; Chen
+        page.get_by_test_id("btn-timeout").click()  # No further escalation
+        expect(page.get_by_text("no further escalation")).to_be_visible()
+&gt;       expect(page.get_by_test_id("current")).to_have_text("Chen")
+E       AssertionError: Locator expected to have text 'Chen'
+E       Actual value: Alex 
+E       Call log:
+E         - Expect "to_have_text" with timeout 5000ms
+E         - waiting for get_by_test_id("current")
+E           14 × locator resolved to &lt;div data-testid="current"&gt;Alex&lt;/div&gt;
+E              - unexpected value "Alex"
+E       
+E       Aria snapshot:
+E       - text: Alex
+
+verify/test_ui_sim.py:76: AssertionError</failure></testcase></testsuite></testsuites>

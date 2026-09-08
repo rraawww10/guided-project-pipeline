@@ -1,0 +1,272 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="16" skipped="0" tests="17" time="54.271" timestamp="2026-09-08T14:46:28.484971+05:30" hostname="nxtwave-Z790-D-AX"><testcase classname="skeleton.verify.test_api_core" name="test_c_1_1_post_games_creates_and_echoes_seed" time="0.426"><failure message="AssertionError: expected 201, got 501: {&quot;ok&quot;:false}&#10;assert 501 == 201&#10; +  where 501 = &lt;Response [501 Not Implemented]&gt;.status_code">http_client = &lt;httpx.Client object at 0x7b2b399e2c60&gt;
+
+    def test_c_1_1_post_games_creates_and_echoes_seed(http_client):
+        seed = 123456
+        res = http_client.post("/api/games", json={"seed": seed})
+&gt;       assert res.status_code == 201, f"expected 201, got {res.status_code}: {res.text}"
+E       AssertionError: expected 201, got 501: {"ok":false}
+E       assert 501 == 201
+E        +  where 501 = &lt;Response [501 Not Implemented]&gt;.status_code
+
+skeleton/verify/test_api_core.py:15: AssertionError</failure></testcase><testcase classname="skeleton.verify.test_api_core" name="test_c_1_2_post_guess_persists_code_black_white_unscored_or_present" time="0.415"><failure message="KeyError: 'id'">http_client = &lt;httpx.Client object at 0x7b2b393165a0&gt;
+
+    def test_c_1_2_post_guess_persists_code_black_white_unscored_or_present(http_client):
+        # Note: The spec's session-1 text says black/white are null (no scoring yet),
+        # but session 2 adds scoring to the same endpoint. We assert invariants that
+        # survive both: code is echoed and black/white fields are present (nullable or numeric).
+        seed = 24680
+        game = http_client.post("/api/games", json={"seed": seed}).json()
+        code = [0, 1, 2, 3]
+&gt;       res = http_client.post(f"/api/games/{game['id']}/guesses", json={"code": code})
+                                             ^^^^^^^^^^
+E       KeyError: 'id'
+
+skeleton/verify/test_api_core.py:28: KeyError</failure></testcase><testcase classname="skeleton.verify.test_api_core" name="test_c_2_1_get_game_returns_seed_and_empty_guesses_for_new_game" time="0.421" /><testcase classname="skeleton.verify.test_api_core" name="test_c_2_2_post_guess_equal_to_secret_returns_black4_white0" time="0.404"><failure message="KeyError: 'id'">http_client = &lt;httpx.Client object at 0x7b2b39317b90&gt;
+
+    def test_c_2_2_post_guess_equal_to_secret_returns_black4_white0(http_client):
+        # Choose a seed and compute its secret per spec's xorshift32.
+        seed = 778899
+        game = http_client.post("/api/games", json={"seed": seed}).json()
+        secret = derive_secret(seed)
+&gt;       res = http_client.post(f"/api/games/{game['id']}/guesses", json={"code": secret})
+                                             ^^^^^^^^^^
+E       KeyError: 'id'
+
+skeleton/verify/test_api_core.py:61: KeyError</failure></testcase><testcase classname="skeleton.verify.test_api_core" name="test_c_2_3_permuted_all_colours_black0_white4" time="0.406"><failure message="KeyError: 'id'">http_client = &lt;httpx.Client object at 0x7b2b39316ff0&gt;
+
+    def test_c_2_3_permuted_all_colours_black0_white4(http_client):
+        # Find a seed whose secret has 4 distinct colours so a derangement exists.
+        seed, secret = find_seed_with_distinct_secret(start=4242)
+        game = http_client.post("/api/games", json={"seed": seed}).json()
+        # A simple rotation is a derangement when all values are distinct.
+        guess = [secret[1], secret[2], secret[3], secret[0]]
+&gt;       res = http_client.post(f"/api/games/{game['id']}/guesses", json={"code": guess})
+                                             ^^^^^^^^^^
+E       KeyError: 'id'
+
+skeleton/verify/test_api_core.py:74: KeyError</failure></testcase><testcase classname="skeleton.verify.test_api_core" name="test_c_2_4_get_game_returns_guesses_with_numeric_scores" time="0.411"><failure message="KeyError: 'id'">http_client = &lt;httpx.Client object at 0x7b2b39340830&gt;
+
+    def test_c_2_4_get_game_returns_guesses_with_numeric_scores(http_client):
+        seed = 97531
+        game = http_client.post("/api/games", json={"seed": seed}).json()
+        secret = derive_secret(seed)
+        # Make two guesses: one equal to secret and one permuted/all-colours if possible
+        g1 = secret
+&gt;       http_client.post(f"/api/games/{game['id']}/guesses", json={"code": g1})
+                                       ^^^^^^^^^^
+E       KeyError: 'id'
+
+skeleton/verify/test_api_core.py:87: KeyError</failure></testcase><testcase classname="skeleton.verify.test_api_hint" name="test_c_3_1_hint_no_guesses_remaining_1296_and_suggestion_zeros" time="0.401"><failure message="KeyError: 'id'">http_client = &lt;httpx.Client object at 0x7b2b39343740&gt;
+
+    def test_c_3_1_hint_no_guesses_remaining_1296_and_suggestion_zeros(http_client):
+        seed = 112233
+        game = http_client.post("/api/games", json={"seed": seed}).json()
+&gt;       res = http_client.get(f"/api/games/{game['id']}/hint")
+                                            ^^^^^^^^^^
+E       KeyError: 'id'
+
+skeleton/verify/test_api_hint.py:10: KeyError</failure></testcase><testcase classname="skeleton.verify.test_api_hint" name="test_c_3_2_hint_remaining_matches_consistent_set_for_one_guess" time="0.429"><failure message="KeyError: 'id'">http_client = &lt;httpx.Client object at 0x7b2b39342a50&gt;
+
+    def test_c_3_2_hint_remaining_matches_consistent_set_for_one_guess(http_client):
+        seed = 221144
+        game = http_client.post("/api/games", json={"seed": seed}).json()
+        secret = derive_secret(seed)
+        # Choose a non-trivial guess (not equal to secret); tweak if needed.
+        guess = [0, 1, 2, 3]
+        if guess == secret:
+            guess = [0, 1, 2, 4]
+        # Record the guess so the server has a history.
+&gt;       r = http_client.post(f"/api/games/{game['id']}/guesses", json={"code": guess})
+                                           ^^^^^^^^^^
+E       KeyError: 'id'
+
+skeleton/verify/test_api_hint.py:26: KeyError</failure></testcase><testcase classname="skeleton.verify.test_api_hint" name="test_c_3_4_two_games_identical_histories_same_suggestion" time="0.452"><failure message="KeyError: 'id'">http_client = &lt;httpx.Client object at 0x7b2b39342660&gt;
+
+    def test_c_3_4_two_games_identical_histories_same_suggestion(http_client):
+        # Use the same seed and the same recorded guess so histories match.
+        seed = 54321
+        g1 = http_client.post("/api/games", json={"seed": seed}).json()
+        g2 = http_client.post("/api/games", json={"seed": seed}).json()
+        # Record the same guess in both
+        guess = [1, 2, 3, 4]
+&gt;       http_client.post(f"/api/games/{g1['id']}/guesses", json={"code": guess})
+                                       ^^^^^^^^
+E       KeyError: 'id'
+
+skeleton/verify/test_api_hint.py:47: KeyError</failure></testcase><testcase classname="skeleton.verify.test_api_list_branch" name="test_c_4_1_games_list_returns_summaries_with_guess_counts" time="0.399"><failure message="KeyError: 'id'">http_client = &lt;httpx.Client object at 0x7b2b39361e50&gt;
+
+    def test_c_4_1_games_list_returns_summaries_with_guess_counts(http_client):
+        # Create two games, add differing numbers of guesses
+        g1 = http_client.post("/api/games", json={"seed": 1001}).json()
+        g2 = http_client.post("/api/games", json={"seed": 1002}).json()
+        # Add two guesses to g1, one to g2
+&gt;       http_client.post(f"/api/games/{g1['id']}/guesses", json={"code": [0, 0, 0, 0]})
+                                       ^^^^^^^^
+E       KeyError: 'id'
+
+skeleton/verify/test_api_list_branch.py:10: KeyError</failure></testcase><testcase classname="skeleton.verify.test_api_list_branch" name="test_c_4_4_branch_endpoint_creates_new_game_with_k_copied_guesses" time="0.406"><failure message="KeyError: 'id'">http_client = &lt;httpx.Client object at 0x7b2b39362f90&gt;
+
+    def test_c_4_4_branch_endpoint_creates_new_game_with_k_copied_guesses(http_client):
+        # Create a source game with 3 guesses
+        src = http_client.post("/api/games", json={"seed": 2024}).json()
+        g_codes = [[0, 1, 2, 3], [3, 2, 1, 0], [5, 4, 3, 2]]
+        for code in g_codes:
+&gt;           http_client.post(f"/api/games/{src['id']}/guesses", json={"code": code})
+                                           ^^^^^^^^^
+E           KeyError: 'id'
+
+skeleton/verify/test_api_list_branch.py:31: KeyError</failure></testcase><testcase classname="skeleton.verify.test_ui_games" name="test_c_4_2_games_list_renders_one_row_per_game" time="0.666"><failure message="KeyError: 'id'">page = &lt;Page url='about:blank'&gt;, base_url = 'http://127.0.0.1:46739'
+http_client = &lt;httpx.Client object at 0x7b2b393166c0&gt;
+
+    def test_c_4_2_games_list_renders_one_row_per_game(page, base_url: str, http_client):
+        # Create two games via API so the list has content.
+        g1 = http_client.post("/api/games", json={"seed": 4001}).json()
+        g2 = http_client.post("/api/games", json={"seed": 4002}).json()
+        # Add differing numbers of guesses so guessCount can display.
+&gt;       http_client.post(f"/api/games/{g1['id']}/guesses", json={"code": [0, 1, 2, 3]})
+                                       ^^^^^^^^
+E       KeyError: 'id'
+
+skeleton/verify/test_ui_games.py:13: KeyError</failure></testcase><testcase classname="skeleton.verify.test_ui_games" name="test_c_4_3_resume_navigates_to_board_with_correct_guess_rows" time="0.641"><failure message="KeyError: 'id'">page = &lt;Page url='about:blank'&gt;, base_url = 'http://127.0.0.1:46739'
+http_client = &lt;httpx.Client object at 0x7b2b39363a40&gt;
+
+    def test_c_4_3_resume_navigates_to_board_with_correct_guess_rows(page, base_url: str, http_client):
+        # Prepare a game with k guesses
+        k = 3
+        game = http_client.post("/api/games", json={"seed": 4003}).json()
+        for code in ([0, 0, 0, 0], [1, 2, 3, 4], [2, 2, 2, 2]):
+&gt;           http_client.post(f"/api/games/{game['id']}/guesses", json={"code": code})
+                                           ^^^^^^^^^^
+E           KeyError: 'id'
+
+skeleton/verify/test_ui_games.py:35: KeyError</failure></testcase><testcase classname="skeleton.verify.test_ui_play" name="test_c_1_3_submit_one_guess_renders_exactly_one_row" time="15.809"><failure message="playwright._impl._errors.TimeoutError: Timeout 15000ms exceeded.&#10;=========================== logs ===========================&#10;waiting for navigation to &quot;re.compile('[?&amp;]game=')&quot; until 'load'&#10;============================================================">page = &lt;Page url='http://127.0.0.1:46739/'&gt;, base_url = 'http://127.0.0.1:46739'
+
+    def test_c_1_3_submit_one_guess_renders_exactly_one_row(page, base_url: str):
+        seed = 3001
+    
+        # Install a strict network gate BEFORE creating the game so any fallback
+        # re-read path cannot populate rows. We only allow GET /api/games/:id calls
+        # and force them to return an empty guesses array; everything else continues.
+        # Which games were re-read, not merely whether any were. The seed holds a
+        # fixture game (seed-game-1) for c-2-1's benefit, and a page that reads
+        # some OTHER game is not the defect this guards against - papering over a
+        # missing client append by re-reading THE GAME UNDER TEST is.
+        refetched: List[str] = []
+        seen_refetch = {"seen": False}
+    
+        def handle(route, request):
+            url = request.url
+            # Intercept any GET to /api/games/&lt;id&gt; (but not /api/games or /hint)
+            if request.method == "GET" and re.search(r"/api/games/[^/]+(?:[/?#]|$)", url):
+                seen_refetch["seen"] = True
+                # Extract an id-shaped suffix to echo back; fall back to a stub.
+                m = re.search(r"/api/games/([^/?#]+)", url)
+                gid = m.group(1) if m else "stub"
+                refetched.append(gid)
+                # Always answer with an empty guess list so only the client append
+                # can produce a visible row.
+                body = json.dumps({"id": gid, "seed": seed, "guesses": []})
+                route.fulfill(status=200, content_type="application/json", body=body)
+            else:
+                route.continue_()
+    
+        page.route("**/api/games/**", handle)
+    
+&gt;       _ui_new_game(page, base_url, seed)
+
+skeleton/verify/test_ui_play.py:76: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+skeleton/verify/test_ui_play.py:22: in _ui_new_game
+    page.wait_for_url(re.compile(r"[?&amp;]game="), timeout=UI_TIMEOUT)
+.pipeline/venv/lib/python3.12/site-packages/playwright/sync_api/_generated.py:10029: in wait_for_url
+    self._sync(
+.pipeline/venv/lib/python3.12/site-packages/playwright/_impl/_page.py:588: in wait_for_url
+    return await self._main_frame.wait_for_url(**locals_to_params(locals()))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.pipeline/venv/lib/python3.12/site-packages/playwright/_impl/_frame.py:288: in wait_for_url
+    async with self.expect_navigation(
+.pipeline/venv/lib/python3.12/site-packages/playwright/_impl/_event_context_manager.py:33: in __aexit__
+    await self._future
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    async def continuation() -&gt; Optional[Response]:
+&gt;       event = await waiter.result()
+                ^^^^^^^^^^^^^^^^^^^^^
+E       playwright._impl._errors.TimeoutError: Timeout 15000ms exceeded.
+E       =========================== logs ===========================
+E       waiting for navigation to "re.compile('[?&amp;]game=')" until 'load'
+E       ============================================================
+
+.pipeline/venv/lib/python3.12/site-packages/playwright/_impl/_frame.py:264: TimeoutError</failure></testcase><testcase classname="skeleton.verify.test_ui_play" name="test_c_2_5_row_shows_black_and_white_counts_matching_secret" time="15.768"><failure message="playwright._impl._errors.TimeoutError: Timeout 15000ms exceeded.&#10;=========================== logs ===========================&#10;waiting for navigation to &quot;re.compile('[?&amp;]game=')&quot; until 'load'&#10;============================================================">page = &lt;Page url='http://127.0.0.1:46739/'&gt;, base_url = 'http://127.0.0.1:46739'
+
+    def test_c_2_5_row_shows_black_and_white_counts_matching_secret(page, base_url: str):
+        # Choose a seed and compute its secret, then submit that exact guess.
+        seed = 3002
+        secret = derive_secret(seed)
+&gt;       _ui_new_game(page, base_url, seed)
+
+skeleton/verify/test_ui_play.py:108: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+skeleton/verify/test_ui_play.py:22: in _ui_new_game
+    page.wait_for_url(re.compile(r"[?&amp;]game="), timeout=UI_TIMEOUT)
+.pipeline/venv/lib/python3.12/site-packages/playwright/sync_api/_generated.py:10029: in wait_for_url
+    self._sync(
+.pipeline/venv/lib/python3.12/site-packages/playwright/_impl/_page.py:588: in wait_for_url
+    return await self._main_frame.wait_for_url(**locals_to_params(locals()))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.pipeline/venv/lib/python3.12/site-packages/playwright/_impl/_frame.py:288: in wait_for_url
+    async with self.expect_navigation(
+.pipeline/venv/lib/python3.12/site-packages/playwright/_impl/_event_context_manager.py:33: in __aexit__
+    await self._future
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    async def continuation() -&gt; Optional[Response]:
+&gt;       event = await waiter.result()
+                ^^^^^^^^^^^^^^^^^^^^^
+E       playwright._impl._errors.TimeoutError: Timeout 15000ms exceeded.
+E       =========================== logs ===========================
+E       waiting for navigation to "re.compile('[?&amp;]game=')" until 'load'
+E       ============================================================
+
+.pipeline/venv/lib/python3.12/site-packages/playwright/_impl/_frame.py:264: TimeoutError</failure></testcase><testcase classname="skeleton.verify.test_ui_play" name="test_c_3_3_page_shows_hint_remaining_and_suggestion" time="15.813"><failure message="playwright._impl._errors.TimeoutError: Timeout 15000ms exceeded.&#10;=========================== logs ===========================&#10;waiting for navigation to &quot;re.compile('[?&amp;]game=')&quot; until 'load'&#10;============================================================">page = &lt;Page url='http://127.0.0.1:46739/'&gt;, base_url = 'http://127.0.0.1:46739'
+
+    def test_c_3_3_page_shows_hint_remaining_and_suggestion(page, base_url: str):
+        # New game, no guesses yet.
+        seed = 3003
+&gt;       _ui_new_game(page, base_url, seed)
+
+skeleton/verify/test_ui_play.py:124: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+skeleton/verify/test_ui_play.py:22: in _ui_new_game
+    page.wait_for_url(re.compile(r"[?&amp;]game="), timeout=UI_TIMEOUT)
+.pipeline/venv/lib/python3.12/site-packages/playwright/sync_api/_generated.py:10029: in wait_for_url
+    self._sync(
+.pipeline/venv/lib/python3.12/site-packages/playwright/_impl/_page.py:588: in wait_for_url
+    return await self._main_frame.wait_for_url(**locals_to_params(locals()))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.pipeline/venv/lib/python3.12/site-packages/playwright/_impl/_frame.py:288: in wait_for_url
+    async with self.expect_navigation(
+.pipeline/venv/lib/python3.12/site-packages/playwright/_impl/_event_context_manager.py:33: in __aexit__
+    await self._future
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    async def continuation() -&gt; Optional[Response]:
+&gt;       event = await waiter.result()
+                ^^^^^^^^^^^^^^^^^^^^^
+E       playwright._impl._errors.TimeoutError: Timeout 15000ms exceeded.
+E       =========================== logs ===========================
+E       waiting for navigation to "re.compile('[?&amp;]game=')" until 'load'
+E       ============================================================
+
+.pipeline/venv/lib/python3.12/site-packages/playwright/_impl/_frame.py:264: TimeoutError</failure></testcase><testcase classname="skeleton.verify.test_ui_play" name="test_c_4_5_branch_here_button_renders_k_rows" time="0.667"><failure message="KeyError: 'id'">page = &lt;Page url='about:blank'&gt;, base_url = 'http://127.0.0.1:46739'
+http_client = &lt;httpx.Client object at 0x7b2b39362690&gt;
+
+    def test_c_4_5_branch_here_button_renders_k_rows(page, base_url: str, http_client):
+        # Prepare a game with three guesses via API, then resume it in UI and branch at k=2.
+        src = http_client.post("/api/games", json={"seed": 3004}).json()
+        for code in ([0, 1, 2, 3], [1, 2, 3, 4], [2, 3, 4, 5]):
+&gt;           http_client.post(f"/api/games/{src['id']}/guesses", json={"code": code})
+                                           ^^^^^^^^^
+E           KeyError: 'id'
+
+skeleton/verify/test_ui_play.py:141: KeyError</failure></testcase></testsuite></testsuites>

@@ -1,0 +1,13 @@
+{
+  "stack": [
+    "next",
+    "react",
+    "typescript"
+  ],
+  "sessions": 3,
+  "minutes_per_session": 40,
+  "track": "fullstack",
+  "limits": " No database. Hold state in React state and a JSON file under APP_DIR; the tests reset that file, so it must be the only persistent store.  The logic is the substance. Every cut point must be a calculation, a constraint check, a state transition, or a validation rule - never rendering, styling, wiring a button to a setter, or a fetch that only moves data. If a session's cuts are mostly wiring, the session is too thin.  At least one acceptance criterion must drive the whole feature end to end in the browser - from first input through to the final computed result - and must fail if any step in that chain breaks. Per-endpoint and per-element criteria alone are not enough: a project can pass every one of them and still be unusable.  Input is typed numbers and text. No colour pickers, no drag and drop, no canvas, no criterion whose correctness is a picture.  Nothing may read the real clock or the real date. Any \"today\" is an explicit input with a fixed value in the tests.  Seed data must differ from every order the spec asks for, so a missing sort or ranking cannot pass by coincidence.",
+  "given_by": "priya",
+  "at": "2026-09-08T09:37:44+00:00"
+}

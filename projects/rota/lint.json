@@ -1,0 +1,139 @@
+{
+  "ok": false,
+  "errors": [
+    {
+      "code": "E111",
+      "where": "session 1",
+      "message": "estimated 56.1 teaching minutes against a 40 minute cap - over the 50 minute ceiling no live session absorbs. 3 cuts, 1 builds, 2 concepts plus the project setup. Move a cut or a build to another session."
+    },
+    {
+      "code": "E111",
+      "where": "session 2",
+      "message": "estimated 53.2 teaching minutes against a 40 minute cap - over the 50 minute ceiling no live session absorbs. 4 cuts, 2 builds, 2 concepts. Move a cut or a build to another session."
+    },
+    {
+      "code": "E111",
+      "where": "session 3",
+      "message": "estimated 51.5 teaching minutes against a 40 minute cap - over the 50 minute ceiling no live session absorbs. 4 cuts, 2 builds, 2 concepts. Move a cut or a build to another session."
+    }
+  ],
+  "warnings": [
+    {
+      "code": "W114",
+      "where": "session 1",
+      "message": "cut cut-lib-check-minima is 55% of the session's 34.1 cut minutes (18.7 against siblings at 6, 9.4) - over the 45% cap, on 7 stated decisions and 75 hint words. Five projects have overrun on this shape. Split cut-lib-check-minima so each half states fewer decisions, or name a drop candidate inside this session. Do NOT move it into the setup session - that is E113. Shortening the hint does not make the cut smaller."
+    }
+  ],
+  "counts": {
+    "errors": 3,
+    "warnings": 1
+  },
+  "session_minutes": [
+    {
+      "n": 1,
+      "minutes": 56.1,
+      "cuts": 3,
+      "builds": 1,
+      "concepts": 2,
+      "carries_setup": true,
+      "over_cap": true,
+      "weighted": true,
+      "cut_minutes": [
+        {
+          "id": "cut-lib-check-minima",
+          "minutes": 18.7,
+          "decisions": 7,
+          "hint_words": 75
+        },
+        {
+          "id": "cut-lib-validate-range",
+          "minutes": 9.4,
+          "decisions": 2,
+          "hint_words": 26
+        },
+        {
+          "id": "cut-ep-apply-assign",
+          "minutes": 6.0,
+          "decisions": 0,
+          "hint_words": 22
+        }
+      ],
+      "largest_cut_share": 0.55
+    },
+    {
+      "n": 2,
+      "minutes": 53.2,
+      "cuts": 4,
+      "builds": 2,
+      "concepts": 2,
+      "carries_setup": false,
+      "over_cap": true,
+      "weighted": true,
+      "cut_minutes": [
+        {
+          "id": "cut-ep-apply-upsert",
+          "minutes": 12.8,
+          "decisions": 4,
+          "hint_words": 53
+        },
+        {
+          "id": "cut-ui-submit-merge",
+          "minutes": 7.7,
+          "decisions": 1,
+          "hint_words": 34
+        },
+        {
+          "id": "cut-ep-state-read-or-init",
+          "minutes": 7.7,
+          "decisions": 1,
+          "hint_words": 38
+        },
+        {
+          "id": "cut-ui-hydrate-state",
+          "minutes": 6.0,
+          "decisions": 0,
+          "hint_words": 27
+        }
+      ],
+      "largest_cut_share": 0.37
+    },
+    {
+      "n": 3,
+      "minutes": 51.5,
+      "cuts": 4,
+      "builds": 2,
+      "concepts": 2,
+      "carries_setup": false,
+      "over_cap": true,
+      "weighted": true,
+      "cut_minutes": [
+        {
+          "id": "cut-lib-overlaps",
+          "minutes": 9.4,
+          "decisions": 2,
+          "hint_words": 25
+        },
+        {
+          "id": "cut-ep-undo-last",
+          "minutes": 9.4,
+          "decisions": 2,
+          "hint_words": 51
+        },
+        {
+          "id": "cut-ui-undo-apply",
+          "minutes": 7.7,
+          "decisions": 1,
+          "hint_words": 23
+        },
+        {
+          "id": "cut-ep-overlaps-build",
+          "minutes": 6.0,
+          "decisions": 0,
+          "hint_words": 26
+        }
+      ],
+      "largest_cut_share": 0.29
+    }
+  ],
+  "spec_hash": "29d4841de4c291000055faadc83101decabbf0d0304fc7a8773d073f34a81492"
+}

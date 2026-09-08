@@ -1,0 +1,274 @@
+{
+  "ok": true,
+  "verdict": "approve-eligible",
+  "spec_hash": "b0096939782c5093aace8c859df2ab0a120648398476b247915614f8d644ee0d",
+  "findings": [
+    {
+      "id": "A1",
+      "title": "No error hook defined on sc-sim but criteria require showing an error",
+      "section": "blocking",
+      "owner": "test-runner",
+      "line": "\"Elements: a text element data-testid=\\\"mode\\\" ...; [no error element named]\" and \"... shows an error containing \\\"only Alex can ack\\\"\" / \"... shows an error message containing \\\"no further escalation\\\"\"",
+      "where": "spec.md, Screens -> sc-sim elements; spec.md Session 2 criteria c-2-3 and c-2-5",
+      "line_key": "990a3a63c686ff93",
+      "subject": [
+        "c-2-3",
+        "c-2-5",
+        "sc-sim"
+      ],
+      "blocking": true,
+      "owner_declared": "test-runner",
+      "owner_valid": true,
+      "owner_downgraded": null,
+      "fail_open": false,
+      "caught_by": "step 6 - the Builder/test-runner loop fixes this for free",
+      "must_fix_now": false
+    },
+    {
+      "id": "A2",
+      "title": "Parser vs runner responsibility for unknown actors contradicts",
+      "section": "blocking",
+      "owner": "test-runner",
+      "line": "\"do not validate the actor against contacts here\" (cut-parse-line hint) versus c-3-2 \"shows ... \\\"unknown actor Dana\\\"\" with cuts only [cut-parse-line]",
+      "where": "spec.json, Session 3, criterion c-3-2 (cuts: [\"cut-parse-line\"]; error \"unknown actor Dana\"); spec.md/spec.json cut-parse-line hint (\"do not validate the actor against contacts here\"); spec.md c-3-5 (cuts: [\"cut-run-script\", \"cut-parse-line\"])",
+      "line_key": "150806d593c1a607",
+      "subject": [
+        "c-3-2",
+        "c-3-5",
+        "cut-parse-line",
+        "cut-run-script"
+      ],
+      "blocking": true,
+      "owner_declared": "test-runner",
+      "owner_valid": true,
+      "owner_downgraded": null,
+      "fail_open": false,
+      "caught_by": "step 6 - the Builder/test-runner loop fixes this for free",
+      "must_fix_now": false
+    },
+    {
+      "id": "A3",
+      "title": "Reducer result shape and log ownership are unspecified and internally inconsistent",
+      "section": "blocking",
+      "owner": "test-runner",
+      "line": "\"writes_into: out \u2014 Hint: Fill `out` by applying one event ... append a log entry ... always carry forward ... into out.next\" and \"cut-run-script ... append any new log entry the reducer indicates\"",
+      "where": "spec.md Session 2 cut-logic-reducer-apply hint; spec.md Session 3 cut-run-script hint",
+      "line_key": "3fd2dddade4ab2e2",
+      "subject": [
+        "cut-logic-reducer-apply",
+        "cut-run-script"
+      ],
+      "blocking": true,
+      "owner_declared": "test-runner",
+      "owner_valid": true,
+      "owner_downgraded": null,
+      "fail_open": false,
+      "caught_by": "step 6 - the Builder/test-runner loop fixes this for free",
+      "must_fix_now": false
+    },
+    {
+      "id": "A4",
+      "title": "Script runner starting state is not defined (seed vs persisted)",
+      "section": "blocking",
+      "owner": "test-runner",
+      "line": "No statement of initial State for the script run; c-3-1/5 talk only about the entered lines and \"log-count\".",
+      "where": "spec.md, Screens -> sc-script elements (\"log-count showing the number of log rows produced\"); Session 3 criteria c-3-1 and c-3-5",
+      "line_key": "378098a9f153b7c5",
+      "subject": [
+        "c-3-1",
+        "c-3-5",
+        "sc-script"
+      ],
+      "blocking": true,
+      "owner_declared": "test-runner",
+      "owner_valid": true,
+      "owner_downgraded": null,
+      "fail_open": false,
+      "caught_by": "step 6 - the Builder/test-runner loop fixes this for free",
+      "must_fix_now": false
+    },
+    {
+      "id": "A5",
+      "title": "File path base for data/state.json is ambiguous (APP_DIR vs relative)",
+      "section": "blocking",
+      "owner": "test-runner",
+      "line": "\"exposes simple endpoints to load/save State as JSON under APP_DIR\" vs hints that omit APP_DIR and name bare paths",
+      "where": "spec.md Outcome (\"under APP_DIR\"); spec.json/spec.md cut-ep-state-get and cut-ep-state-post hints (\"Read data/state.json ... write that object to data/state.json\")",
+      "line_key": "7f419d2c236d5dac",
+      "subject": [
+        "cut-ep-state-get",
+        "cut-ep-state-post"
+      ],
+      "blocking": true,
+      "owner_declared": "test-runner",
+      "owner_valid": true,
+      "owner_downgraded": null,
+      "fail_open": false,
+      "caught_by": "step 6 - the Builder/test-runner loop fixes this for free",
+      "must_fix_now": false
+    },
+    {
+      "id": "W1",
+      "title": "State names differ between spec.md and spec.json for sc-sim",
+      "section": "worth a look",
+      "owner": "nothing",
+      "line": "Two different namings of the same states.",
+      "where": "spec.md Screens -> sc-sim states (\"loaded (idle)\", \"loaded (alerting)\"); spec.json screens[0].states ([\"loaded-idle\", \"loaded-alerting\"]).",
+      "line_key": "89c4f0fff08ce192",
+      "subject": [
+        "sc-sim"
+      ],
+      "blocking": false,
+      "owner_declared": "nothing",
+      "owner_valid": true,
+      "owner_downgraded": null,
+      "fail_open": false,
+      "caught_by": "NO downstream checker sees this - it ships as written",
+      "must_fix_now": false
+    },
+    {
+      "id": "W2",
+      "title": "Example script in c-3-1 includes stray leading spaces in spec.json",
+      "section": "worth a look",
+      "owner": "nothing",
+      "line": "spec.json shows \"'alert\\n timeout\\n ack Beth\\n resolve'\" while spec.md shows \"\"alert\\ntimeout\\nack Beth\\nresolve\"\".",
+      "where": "spec.json c-3-1 check string vs spec.md c-3-1",
+      "line_key": "2683f43618ac7862",
+      "subject": [
+        "c-3-1"
+      ],
+      "blocking": false,
+      "owner_declared": "nothing",
+      "owner_valid": true,
+      "owner_downgraded": null,
+      "fail_open": false,
+      "caught_by": "NO downstream checker sees this - it ships as written",
+      "must_fix_now": false
+    },
+    {
+      "id": "W3",
+      "title": "Function name vs cut id: \"using escalateIndex\" vs cut-logic-escalate-index",
+      "section": "worth a look",
+      "owner": "nothing",
+      "line": "\"using `escalateIndex`\" (unquoted function) while the cut id is \"cut-logic-escalate-index\".",
+      "where": "spec.md Session 2 c-2-2 and cut list",
+      "line_key": "6687b8e42b936079",
+      "subject": [
+        "c-2-2",
+        "cut-logic-escalate-index"
+      ],
+      "blocking": false,
+      "owner_declared": "nothing",
+      "owner_valid": true,
+      "owner_downgraded": null,
+      "fail_open": false,
+      "caught_by": "NO downstream checker sees this - it ships as written",
+      "must_fix_now": false
+    },
+    {
+      "id": "W4",
+      "title": "Idea/session drift on when persistence is built",
+      "section": "worth a look",
+      "owner": "nothing",
+      "line": "Idea asks for persistence in Session 1; spec defers writes to Session 2.",
+      "where": "idea.md Session 1 (\"Persist the log to a JSON file.\"); spec.json/spec.md place POST /api/state (ep-state-save) in Session 2.",
+      "line_key": "e4b7d40ff9bec974",
+      "subject": [
+        "ep-state-save"
+      ],
+      "blocking": false,
+      "owner_declared": "nothing",
+      "owner_valid": true,
+      "owner_downgraded": null,
+      "fail_open": false,
+      "caught_by": "NO downstream checker sees this - it ships as written",
+      "must_fix_now": false
+    },
+    {
+      "id": "W5",
+      "title": "Option order in actor-select not specified",
+      "section": "worth a look",
+      "owner": "test-runner",
+      "line": "\"a select data-testid=\\\"actor-select\\\" listing the contacts\"",
+      "where": "spec.md Screens -> sc-sim elements (actor select listing the contacts)",
+      "line_key": "91d3d261220275bd",
+      "subject": [
+        "sc-sim"
+      ],
+      "blocking": false,
+      "owner_declared": "test-runner",
+      "owner_valid": true,
+      "owner_downgraded": null,
+      "fail_open": false,
+      "caught_by": "step 6 - the Builder/test-runner loop fixes this for free",
+      "must_fix_now": false
+    },
+    {
+      "id": "W6",
+      "title": "Case sensitivity for actor names not stated",
+      "section": "worth a look",
+      "owner": "test-runner",
+      "line": "No rule for case matching in parser/validation.",
+      "where": "spec.md Data model (Contact: string); script examples use capitalized names",
+      "line_key": "acd87dc7cb48036b",
+      "subject": [],
+      "blocking": false,
+      "owner_declared": "test-runner",
+      "owner_valid": true,
+      "owner_downgraded": null,
+      "fail_open": false,
+      "caught_by": "step 6 - the Builder/test-runner loop fixes this for free",
+      "must_fix_now": false
+    },
+    {
+      "id": "W7",
+      "title": "Directory creation behavior for data/ not declared",
+      "section": "worth a look",
+      "owner": "test-runner",
+      "line": "No instruction to create data/ if missing.",
+      "where": "spec.md/spec.json cut-ep-state-post hint (write to data/state.json)",
+      "line_key": "b5faee428daf2e28",
+      "subject": [
+        "cut-ep-state-post"
+      ],
+      "blocking": false,
+      "owner_declared": "test-runner",
+      "owner_valid": true,
+      "owner_downgraded": null,
+      "fail_open": false,
+      "caught_by": "step 6 - the Builder/test-runner loop fixes this for free",
+      "must_fix_now": false
+    },
+    {
+      "id": "W8",
+      "title": "Reducer error messaging: log on illegal transitions?",
+      "section": "worth a look",
+      "owner": "test-runner",
+      "line": "No guidance on whether failed transitions also append a log entry.",
+      "where": "spec.md cut-logic-reducer-apply hint (\"set ok false with a message ...\") and multiple criteria that assert errors but not log effects",
+      "line_key": "547a26c360841bc5",
+      "subject": [
+        "cut-logic-reducer-apply"
+      ],
+      "blocking": false,
+      "owner_declared": "test-runner",
+      "owner_valid": true,
+      "owner_downgraded": null,
+      "fail_open": false,
+      "caught_by": "step 6 - the Builder/test-runner loop fixes this for free",
+      "must_fix_now": false
+    }
+  ],
+  "counts": {
+    "blocking": 5,
+    "worth_a_look": 8,
+    "unowned_blocking": 0
+  },
+  "reasons": [
+    "5 blocking finding(s), all owned by a downstream checker; 8 worth a look. Nothing here escapes to the shipped project."
+  ],
+  "rule": "reject when any blocking finding is owned by 'nothing'; approve when every remaining finding sits in a column a downstream checker owns. An owner that can pass by not running is owned only conditionally: it approves, and the confirmation it actually ran is listed in verify_later",
+  "reviewed_spec_hash": "b0096939782c5093aace8c859df2ab0a120648398476b247915614f8d644ee0d",
+  "drift": [],
+  "verify_later": []
+}

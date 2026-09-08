@@ -34,8 +34,8 @@ export function scoreGuess(secret: Code, guess: Code): Score {
   const cg = new Array(6).fill(0)
   for (const v of secret) cs[v]++
   for (const v of guess) cg[v]++
-  const overlap = cs.reduce((acc, _v, i) => acc + Math.min(cs[i], cg[i]), 0)
-  white = overlap - black
+  const totalMatches = cs.reduce((acc, _v, i) => acc + Math.min(cs[i], cg[i]), 0)
+  white = totalMatches - black
   // <<< CUT cut-score-count-white
   return { black, white }
 }

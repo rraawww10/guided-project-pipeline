@@ -1,6 +1,58 @@
-<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="17" time="84.728" timestamp="2026-09-08T02:28:39.210063+05:30" hostname="HERO"><testcase classname="verify.test_api_core" name="test_c_1_1_post_games_creates_and_echoes_seed" time="3.283" /><testcase classname="verify.test_api_core" name="test_c_1_2_post_guess_persists_code_black_white_unscored_or_present" time="3.248" /><testcase classname="verify.test_api_core" name="test_c_2_1_get_game_returns_seed_and_empty_guesses_for_new_game" time="3.799" /><testcase classname="verify.test_api_core" name="test_c_2_2_post_guess_equal_to_secret_returns_black4_white0" time="3.245" /><testcase classname="verify.test_api_core" name="test_c_2_3_permuted_all_colours_black0_white4" time="3.334" /><testcase classname="verify.test_api_core" name="test_c_2_4_get_game_returns_guesses_with_numeric_scores" time="3.920" /><testcase classname="verify.test_api_hint" name="test_c_3_1_hint_no_guesses_remaining_1296_and_suggestion_zeros" time="3.139" /><testcase classname="verify.test_api_hint" name="test_c_3_2_hint_remaining_matches_consistent_set_for_one_guess" time="3.252" /><testcase classname="verify.test_api_hint" name="test_c_3_4_two_games_identical_histories_same_suggestion" time="3.943" /><testcase classname="verify.test_api_list_branch" name="test_c_4_1_games_list_returns_summaries_with_guess_counts" time="3.608" /><testcase classname="verify.test_api_list_branch" name="test_c_4_4_branch_endpoint_creates_new_game_with_k_copied_guesses" time="4.228" /><testcase classname="verify.test_ui_games" name="test_c_4_2_games_list_renders_one_row_per_game" time="5.166" /><testcase classname="verify.test_ui_games" name="test_c_4_3_resume_navigates_to_board_with_correct_guess_rows" time="4.596" /><testcase classname="verify.test_ui_play" name="test_c_1_3_submit_one_guess_renders_exactly_one_row" time="4.800" /><testcase classname="verify.test_ui_play" name="test_c_2_5_row_shows_black_and_white_counts_matching_secret" time="4.686" /><testcase classname="verify.test_ui_play" name="test_c_3_3_page_shows_hint_remaining_and_suggestion" time="4.629" /><testcase classname="verify.test_ui_play" name="test_c_4_5_branch_here_button_renders_k_rows" time="21.569"><failure message="AssertionError: Locator expected to have count '2'&#10;Actual value: 3 &#10;Call log:&#10;  - Expect &quot;to_have_count&quot; with timeout 15000ms&#10;  - waiting for locator(&quot;[data-testid^=\&quot;guess-row-\&quot;]&quot;)&#10;    33 × locator resolved to 3 elements&#10;       - unexpected value &quot;3&quot;">page = &lt;Page url='http://127.0.0.1:63547/?game=cmtrq4zqr00237y9519f7y4sj'&gt;
-base_url = 'http://127.0.0.1:63547'
-http_client = &lt;httpx.Client object at 0x0000027DA078BAF0&gt;
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="17" time="25.343" timestamp="2026-09-08T12:19:14.415868+05:30" hostname="nxtwave-Z790-D-AX"><testcase classname="verify.test_api_core" name="test_c_1_1_post_games_creates_and_echoes_seed" time="0.449" /><testcase classname="verify.test_api_core" name="test_c_1_2_post_guess_persists_code_black_white_unscored_or_present" time="0.438" /><testcase classname="verify.test_api_core" name="test_c_2_1_get_game_returns_seed_and_empty_guesses_for_new_game" time="0.429" /><testcase classname="verify.test_api_core" name="test_c_2_2_post_guess_equal_to_secret_returns_black4_white0" time="0.409" /><testcase classname="verify.test_api_core" name="test_c_2_3_permuted_all_colours_black0_white4" time="0.401" /><testcase classname="verify.test_api_core" name="test_c_2_4_get_game_returns_guesses_with_numeric_scores" time="0.428" /><testcase classname="verify.test_api_hint" name="test_c_3_1_hint_no_guesses_remaining_1296_and_suggestion_zeros" time="0.409" /><testcase classname="verify.test_api_hint" name="test_c_3_2_hint_remaining_matches_consistent_set_for_one_guess" time="0.419" /><testcase classname="verify.test_api_hint" name="test_c_3_4_two_games_identical_histories_same_suggestion" time="0.430" /><testcase classname="verify.test_api_list_branch" name="test_c_4_1_games_list_returns_summaries_with_guess_counts" time="0.410" /><testcase classname="verify.test_api_list_branch" name="test_c_4_4_branch_endpoint_creates_new_game_with_k_copied_guesses" time="0.413" /><testcase classname="verify.test_ui_games" name="test_c_4_2_games_list_renders_one_row_per_game" time="0.779" /><testcase classname="verify.test_ui_games" name="test_c_4_3_resume_navigates_to_board_with_correct_guess_rows" time="0.868" /><testcase classname="verify.test_ui_play" name="test_c_1_3_submit_one_guess_renders_exactly_one_row" time="1.085"><failure message="AssertionError: UI re-fetched /api/games/:id; row must come from client append&#10;assert not True">page = &lt;Page url='http://127.0.0.1:33475/?game=cmtsb76ey001p14mj5s59w9is'&gt;
+base_url = 'http://127.0.0.1:33475'
+
+    def test_c_1_3_submit_one_guess_renders_exactly_one_row(page, base_url: str):
+        seed = 3001
+    
+        # Install a strict network gate BEFORE creating the game so any fallback
+        # re-read path cannot populate rows. We only allow GET /api/games/:id calls
+        # and force them to return an empty guesses array; everything else continues.
+        seen_refetch = {"seen": False}
+    
+        def handle(route, request):
+            url = request.url
+            # Intercept any GET to /api/games/&lt;id&gt; (but not /api/games or /hint)
+            if request.method == "GET" and re.search(r"/api/games/[^/]+(?:[/?#]|$)", url):
+                seen_refetch["seen"] = True
+                # Extract an id-shaped suffix to echo back; fall back to a stub.
+                m = re.search(r"/api/games/([^/?#]+)", url)
+                gid = m.group(1) if m else "stub"
+                # Always answer with an empty guess list so only the client append
+                # can produce a visible row.
+                body = json.dumps({"id": gid, "seed": seed, "guesses": []})
+                route.fulfill(status=200, content_type="application/json", body=body)
+            else:
+                route.continue_()
+    
+        page.route("**/api/games/**", handle)
+    
+        _ui_new_game(page, base_url, seed)
+        # Capture the created game id from the URL (sanity check only).
+        m = re.search(r"[?&amp;]game=([^&amp;#]+)", page.url)
+        assert m, "game id not found in URL after New Game"
+    
+        code = [0, 1, 2, 3]
+        _ui_pick_code(page, code)
+        _ui_submit_guess(page)
+    
+        # Assert exactly one prior guess row renders, driven by the client append.
+        _expect_guess_rows(page, 1)
+        # And the row shows the four chosen values in its slots.
+        row = _guess_rows(page).nth(0)
+        for i, v in enumerate(code):
+            txt = row.get_by_test_id(f"slot-{i}").inner_text().strip()
+            assert txt == str(v)
+    
+        # Guardrail: the UI must NOT have re-fetched the game to populate the row.
+        # This makes the test fail if an implementation papers over the missing
+        # client append by re-reading from the server.
+&gt;       assert not seen_refetch["seen"], "UI re-fetched /api/games/:id; row must come from client append"
+E       AssertionError: UI re-fetched /api/games/:id; row must come from client append
+E       assert not True
+
+verify/test_ui_play.py:90: AssertionError</failure></testcase><testcase classname="verify.test_ui_play" name="test_c_2_5_row_shows_black_and_white_counts_matching_secret" time="1.050" /><testcase classname="verify.test_ui_play" name="test_c_3_3_page_shows_hint_remaining_and_suggestion" time="0.867" /><testcase classname="verify.test_ui_play" name="test_c_4_5_branch_here_button_renders_k_rows" time="15.988"><failure message="AssertionError: Locator expected to have count '2'&#10;Actual value: 3 &#10;Call log:&#10;  - Expect &quot;to_have_count&quot; with timeout 15000ms&#10;  - waiting for locator(&quot;[data-testid^=\&quot;guess-row-\&quot;]&quot;)&#10;    34 × locator resolved to 3 elements&#10;       - unexpected value &quot;3&quot;">page = &lt;Page url='http://127.0.0.1:33475/?game=cmtsb78wm002314mjlrwbcmg4'&gt;
+base_url = 'http://127.0.0.1:33475'
+http_client = &lt;httpx.Client object at 0x7bbec024b380&gt;
 
     def test_c_4_5_branch_here_button_renders_k_rows(page, base_url: str, http_client):
         # Prepare a game with three guesses via API, then resume it in UI and branch at k=2.
@@ -16,10 +68,10 @@ http_client = &lt;httpx.Client object at 0x0000027DA078BAF0&gt;
         # After branching, the board reloads to exactly k rows.
 &gt;       _expect_guess_rows(page, 2)
 
-verify\test_ui_play.py:100: 
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+verify/test_ui_play.py:140: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
 
-page = &lt;Page url='http://127.0.0.1:63547/?game=cmtrq4zqr00237y9519f7y4sj'&gt;
+page = &lt;Page url='http://127.0.0.1:33475/?game=cmtsb78wm002314mjlrwbcmg4'&gt;
 n = 2
 
     def _expect_guess_rows(page, n: int) -&gt; None:
@@ -29,7 +81,7 @@ E       Actual value: 3
 E       Call log:
 E         - Expect "to_have_count" with timeout 15000ms
 E         - waiting for locator("[data-testid^=\"guess-row-\"]")
-E           33 × locator resolved to 3 elements
+E           34 × locator resolved to 3 elements
 E              - unexpected value "3"
 
-verify\test_ui_play.py:39: AssertionError</failure></testcase></testsuite></testsuites>
+verify/test_ui_play.py:40: AssertionError</failure></testcase></testsuite></testsuites>

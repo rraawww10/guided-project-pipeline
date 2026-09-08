@@ -1,86 +1,77 @@
 # Ambiguity report - game-arcade
 
-**Verdict:** 4 blocking, 5 worth a look
+**Verdict:** 3 blocking, 5 worth a look
 
 ## Blocking
-### A1 - Xorshift32 not fully specified
-- **Where:** spec.md, Data model → Notes
+### A1 - POST /guesses returns null vs scored fields across sessions
+- **Where:** spec.md c-1-2 vs c-2-2/c-2-3; spec.json c-1-2 vs c-2-2/c-2-3
 - **Owner:** test-runner
-- **The line:** "Secret generation is fixed: start from `Game.seed` as a 32‑bit unsigned integer, run xorshift32, and map each successive output to 0..5 by `output % 6`; the first 4 values form the secret."
-- **Reading one:** Use Marsaglia's standard xorshift32 with the sequence `x ^= x << 13; x ^= x >> 17; x ^= x << 5`, take the first output after one iteration (not the raw seed), and treat all steps in uint32.
-- **Reading two:** Treat the seed itself as the first output (so `output_0 = seed`), or use a different xorshift32 variant/order of shifts, or mix signed/float semantics; each choice yields a different secret for the same seed.
-- **Why it matters:** Session 2 criteria c-2-2 and c-2-3 depend on deriving the exact same secret in tests and in the app. A different variant or “seed-as-first-output” choice makes those assertions disagree and sinks the run.
-- **Suggested wording:** "Derive the secret by applying Marsaglia xorshift32 to `seed` (uint32) using `x ^= x << 13; x ^= x >> 17; x ^= x << 5` in that order, taking `x` after the first iteration as `output_1`, then `output_2..` from subsequent iterations; map each `output_i & 0xffffffff` to 0..5 with `output_i % 6`; the first 4 mapped values form the secret."
+- **The line:** "c-1-2: POST /api/games/:id/guesses with body { code: [0,1,2,3] } returns 201 JSON Guess whose code equals the body and black/white are null (no scoring yet)."
+- **Reading one:** The POST always returns a Guess with black/white = null (as per Session 1), and scoring only appears on GET later.
+- **Reading two:** The same POST returns a Guess with computed black/white numbers (as per Session 2's c-2-2 and c-2-3) in the final app.
+- **Why it matters:** The suite runs all sessions against one final app. Both readings cannot be true simultaneously; one session's criterion will fail no matter how the Builder implements the endpoint, and the loop cannot converge.
+- **Suggested wording:** Make the Session 1 criterion avoid pinning nulls and defer scoring semantics to Session 2, e.g. "returns 201 with a JSON Guess echoing the posted code"; Session 2 then states the scored response.
 
-### A2 - "Branch Here" row index vs upto=k is off-by-one ambiguous
-- **Where:** spec.md, Screens → sc-play elements; Session 4 c-4-4 and c-4-5
+### A2 - Branching index k and row indexing are unstated
+- **Where:** spec.md, Session 4, criteria c-4-4 and c-4-5
 - **Owner:** test-runner
-- **The line:** "Branch Here buttons next to each prior row (data-testid=\"branch-here-<n>\")." and "POST /api/games/:id/branch with body { upto: k } … GET that game shows exactly k guesses copied" and "after clicking the Branch Here button for row k, the page renders exactly k guess rows"
-- **Reading one:** `<n>` is the 1-based row number shown to the user; clicking `branch-here-1` sends `{ upto: 1 }` and yields 1 row.
-- **Reading two:** `<n>` is a 0-based index; clicking `branch-here-0` sends `{ upto: 0 }` (keeping zero guesses), while the phrase "row k" elsewhere refers to a 1-based count; the two usages disagree.
-- **Why it matters:** The same click can reasonably be wired to `{ upto: index }` or `{ upto: index + 1 }`. One produces k rows and the other k+1, so c-4-5 fails in one reading.
-- **Suggested wording:** "Use 1-based row numbers in testids: `branch-here-1` keeps the first guess, …, `branch-here-k` sends `{ upto: k }` and the branched game renders exactly k rows."
+- **The line:** "POST /api/games/:id/branch with body { upto: k } returns 201 with a new Game; GET that game shows exactly k guesses copied from the source." / "After Branch Here is clicked for row k, the page renders exactly k guess rows"
+- **Reading one:** k is a count (1-based): clicking the 1st row branches to 1 guess; clicking the 3rd row branches to 3 guesses, regardless of whether rows are 0- or 1-indexed in their DOM ids.
+- **Reading two:** k is a 0-based row index: clicking row 3 (data-testid="guess-row-3") copies 4 guesses, i.e. index + 1, or alternatively copies guesses up to but not including that row.
+- **Why it matters:** The UI ids use <n> but the spec never fixes the list's order or whether <n> is 0- or 1-based. Endpoint behavior and UI wiring can both be implemented plausibly yet disagree with the tests' chosen convention.
+- **Suggested wording:** State both the list order and the convention explicitly, e.g. "Rows are ordered from the start of the game (oldest first). The k in { upto: k } and in branch-here-<k> is a 1-based count including the clicked row."
 
-### A3 - "first k guesses" ordering basis is unstated
-- **Where:** spec.md, Session 4 c-4-4
-- **Owner:** test-runner
-- **The line:** "copy the first `upto` guesses into it (including black/white)"
-- **Reading one:** "first" means chronological order by `createdAt` ascending (and rows are rendered in that same order).
-- **Reading two:** "first" means insertion order as returned by the database default (often unspecified), or by `id` ordering; render order might then differ from copy order.
-- **Why it matters:** Branch semantics and UI expectations (which row is "row k") depend on a fixed ordering. Different choices produce different subsets for the same `upto`, making c-4-4 and c-4-5 disagree with the tests.
-- **Suggested wording:** "Define guess order as `createdAt` ascending; branching with `{ upto: k }` copies the first k guesses in that order, and the board renders rows in the same order."
-
-### A4 - Hint suggestion display format is not pinned
-- **Where:** spec.md, Session 3 c-3-3 and c-3-1
-- **Owner:** test-runner
-- **The line:** "the page shows … a suggested 4‑number guess (data-testid=\"hint-suggestion\")" and "suggestion = [0,0,0,0]"
-- **Reading one:** The UI renders the array literally as "[0,0,0,0]" (including brackets and commas).
-- **Reading two:** The UI renders a human string like "0 0 0 0" or "0000" or coloured pegs, with no literal brackets/commas.
-- **Why it matters:** Tests that assert an exact string can pass in one rendering and fail in the other. The API shape is clear; the on-screen representation is not.
-- **Suggested wording:** "Render `suggestion` text as the literal JSON array, e.g. "[0,0,0,0]", inside the element with data-testid=hint-suggestion."
+### A3 - cut-ui-append-guess can be made toothless by a refetch
+- **Where:** spec.md, Session 1, cut-ui-append-guess (and Session 2 sc-play rendering from saved guesses)
+- **Owner:** mutation
+- **The line:** "Hint: Append the just‑submitted 4‑number code to `guessesState` so a new guess row appears on the board."
+- **Reading one:** The board updates by appending client state after POST; no immediate refetch occurs, so removing this cut leaves the row absent and a criterion fails.
+- **Reading two:** The page refetches the game (or list) right after submit and re-renders from saved guesses, so removing the append has no observable effect and every criterion still passes.
+- **Why it matters:** A cut that can be left empty while all criteria stay green ships broken grading. Mutation would report this as NOT GRADED and no later step can repair it.
+- **Suggested wording:** Pin the update path: e.g. "Do not refetch after submit; update the UI by appending to `guessesState` and rely on the next navigation to reload from the server" (or explicitly require the refetch and remove the append task).
 
 ## Worth a look
-### W1 - "reflecting the chosen colours" lacks a stable assertion hook
-- **Where:** spec.md, Session 1 c-1-3
+### W1 - xorshift32 variant and seed edge cases are not fully specified
+- **Where:** spec.md, Data model → Notes (secret generation)
 - **Owner:** test-runner
-- **The line:** "shows 4 peg slots reflecting the chosen colours"
-- **Reading one:** Slots display numeric labels 0..5 that tests can read as text.
-- **Reading two:** Slots display only coloured swatches via CSS with no text, needing a data attribute or inline style to assert.
-- **Why it matters:** Without a pinned attribute or text, the Verifier may have to guess at markup or styles to assert the colours.
-- **Suggested wording:** "Each slot element carries `data-color="0..5"` matching the saved code so tests can assert colours without reading styles."
+- **The line:** "Secret generation is fixed: start from `Game.seed` as a 32‑bit unsigned integer, run xorshift32, and map each successive output to 0..5 by `output % 6`; the first 4 values form the secret."
+- **Reading one:** Use Marsaglia xorshift32 with shifts (13, 17, 5), treat seed as `seed >>> 0`, and if seed is 0, substitute 1 to avoid the all-zero stream.
+- **Reading two:** Any xorshift32 variant is acceptable (different shift triplets or zero allowed), producing a different secret for the same seed.
+- **Why it matters:** The tests will compute a specific secret from a seed; a different variant or seed-0 handling will desync every score and hint expectation.
+- **Suggested wording:** "Use Marsaglia xorshift32 with shifts (13,17,5). Initialize `state = (seed >>> 0) || 1` and after each step take `state % 6`."
 
-### W2 - Null vs omitted fields for unscored guesses
-- **Where:** spec.md, Session 1 c-1-2
+### W2 - UI hint formatting is unspecified
+- **Where:** spec.md, Session 3, c-3-3 (sc-play)
 - **Owner:** test-runner
-- **The line:** "black/white are null (no scoring yet)"
-- **Reading one:** Response includes explicit `"black": null` and `"white": null` keys.
-- **Reading two:** Response omits those keys entirely until scoring is implemented.
-- **Why it matters:** Tests that assert `is None/null` vs `key not present` diverge here.
-- **Suggested wording:** "Include `black: null` and `white: null` explicitly in the JSON until scoring populates numbers."
+- **The line:** "the page shows the remaining count (data-testid=\"hint-remaining\") and a suggested 4‑number guess (data-testid=\"hint-suggestion\")."
+- **Reading one:** The suggestion renders as a JSON-like string "[0,0,0,0]".
+- **Reading two:** It renders as four tokens (e.g. "0 0 0 0" or coloured pegs) with no brackets or commas.
+- **Why it matters:** Without a pinned text format or hook per digit, a test author cannot write a stable assertion.
+- **Suggested wording:** "Render the suggestion as the exact string "[a,b,c,d]" (e.g. "[0,0,0,0]") inside hint-suggestion."
 
-### W3 - Row testids are not unique per row
-- **Where:** spec.md, Screens → sc-play elements; Session 2 c-2-5
+### W3 - Guess row ordering is unstated
+- **Where:** spec.md, Screens → sc-play (prior guess rows)
 - **Owner:** test-runner
-- **The line:** "per‑row score badges (data-testid=\"score-black\" and \"score-white\")"
-- **Reading one:** Multiple rows reuse the same `score-black`/`score-white` testids and tests select them within each row container.
-- **Reading two:** Test code queries globally by testid and is sensitive to multiple matches.
-- **Why it matters:** The test shape must scope queries by row or pin per-row ids; the spec does not say which.
-- **Suggested wording:** "Within each `guess-row-*`, render children with `data-testid="score-black"` and `data-testid="score-white"`, and tests will scope queries within the row."
+- **The line:** "prior guess rows (data-testid=\"guess-row-<n>\")"
+- **Reading one:** Rows render oldest-first (from the start of the game).
+- **Reading two:** Rows render most-recent-first.
+- **Why it matters:** Tests that click "branch-here-<n>" or read row counts alongside indexes must assume one; the spec does not state which. No criterion currently asserts order, but later interactions (branching) depend on it.
+- **Suggested wording:** "Render rows in chronological order from the first guess to the most recent (oldest first)."
 
-### W4 - Session 2 "Builds" vs criteria targets
-- **Where:** spec.json, Session 2 `builds` and criteria list
-- **Owner:** spec-linter
-- **The line:** `"builds": ["ep-games-get"]` while criteria include targets on `ep-guesses-create`.
-- **Reading one:** "Builds" lists only the newly introduced endpoint; modifying an existing endpoint for scoring is implied and acceptable.
-- **Reading two:** "Builds" is meant to enumerate everything a session delivers; omitting `ep-guesses-create` is an oversight.
-- **Why it matters:** The session plan can mislead the Pack Writer about what is taught in the session.
-- **Suggested wording:** "List both `ep-games-get` and `ep-guesses-create` in Session 2 `builds`, since the POST now enriches its response."
+### W4 - Game list ordering is unstated
+- **Where:** spec.md, Session 4, c-4-2 (sc-games)
+- **Owner:** test-runner
+- **The line:** "the list renders one row per saved game (data-testid=\"game-row\")"
+- **Reading one:** Order by createdAt descending (most recent first).
+- **Reading two:** Order by createdAt ascending or by id (database default).
+- **Why it matters:** If any test reads a specific row by position, the outcome depends on ordering; the spec is silent. If tests assert only counts, this is harmless but worth pinning for consistency.
+- **Suggested wording:** "Order the list by createdAt descending (most recent first)."
 
-### W5 - sc-games declared in Session 3 but exercised in Session 4
-- **Where:** spec.json, Session 3 `builds` and Session 4 criteria
-- **Owner:** pack-writer
-- **The line:** Session 3 `builds` includes `sc-games`, while its first criteria appear in Session 4.
-- **Reading one:** Session 3 scaffolds the screen with no fetch; it becomes functional in Session 4.
-- **Reading two:** Session 3 was meant to include list/resume behaviour and the criteria drifted a session later.
-- **Why it matters:** The teaching flow and guide timing depend on whether a screen is introduced earlier than it is graded.
-- **Suggested wording:** "Either move `sc-games` to Session 4 `builds` or add a Session 3 criterion that the screen scaffolds without data, to match the plan."
+### W5 - White-peg subtraction could be read per-colour or total
+- **Where:** spec.md, Session 2, cut-score-count-white (hint)
+- **Owner:** test-runner
+- **The line:** "for each colour 0..5, add the minimum of its frequency in secret and in guess, then subtract `black`."
+- **Reading one:** Compute total min-frequency across colours and subtract the total black count once at the end.
+- **Reading two:** Subtract the black count per-colour while accumulating, which can undercount when multiple blacks exist.
+- **Why it matters:** Different readings give different whites on repeated-colour cases; only one matches Mastermind's rules.
+- **Suggested wording:** "Let total = Σ_c min(freq_secret[c], freq_guess[c]); set `white = total - black`."
