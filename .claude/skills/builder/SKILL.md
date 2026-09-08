@@ -62,6 +62,22 @@ stack, the AI does not choose it.**
   says what it needs.
 - If you cannot make the stack work, **stop and say so**, naming the exact
   error. Do not substitute something adjacent that happens to pass the tests.
+- **A route handler is registered only where it is DECLARED.** Next reads the
+  file under its app directory; `export { GET, POST } from "../elsewhere"`
+  builds cleanly, lists no route, and 404s at run time. 2026-09-08,
+  shift-rota: `next build` printed only /, /_not-found and /script, the missing
+  /api/state 404'd, and because the page throws on a failed mount fetch, no
+  testid rendered - **all 14 criteria failed on one unregistered route**, and
+  three Builder attempts chased the UI locators instead. If spec.json places a
+  cut marker in a file outside the app directory, keep the implementation there
+  and declare a real handler in the route file that calls it:
+
+      // app/api/state/route.ts  <- app dir, declares the handler
+      import { GET as impl } from "../../../api/state/route"
+      export async function GET(): Promise<Response> { return impl() }
+
+  `stack_check` S009 now fails the step when a declared endpoint has no
+  declared handler, so this costs you a retry if you skip it.
 - **Every time you touch `package.json`, regenerate the lock.** `npm ci`
   refuses outright when the two disagree, and the tree that finds out is not
   yours: `app/` keeps a populated `node_modules` from earlier steps, so the

@@ -136,6 +136,48 @@ def read_json(path: Path) -> tuple[dict | None, str]:
         return None, f"cannot read {path.name}: {exc}"
 
 
+# Next registers a route handler only when the file under its app directory
+# DECLARES it. `export { GET, POST } from "../elsewhere"` is not picked up:
+# 2026-09-08, shift-rota shipped exactly that and `next build` listed only /,
+# /_not-found and /script. The missing /api/state 404'd, and because the page
+# throws "failed to load" on mount when the fetch is not ok, no testid ever
+# rendered - all 14 criteria failed on one unregistered route, and the Builder
+# spent three attempts chasing the UI locators.
+RE_DECLARES = (
+    "export async function {m}", "export function {m}", "export const {m}",
+)
+
+
+def _next_app_dir(root: Path) -> Path | None:
+    """Next's app directory under the project root, or None if there is none."""
+    for rel in ("app", "src/app"):
+        d = root / rel
+        if d.is_dir():
+            return d
+    return None
+
+
+def route_file_for(app_dir: Path, url_path: str) -> Path:
+    """The App Router file that must serve url_path. :id -> [id]."""
+    parts = []
+    for seg in url_path.strip("/").split("/"):
+        if not seg:
+            continue
+        parts.append(f"[{seg[1:]}]" if seg.startswith(":") else seg)
+    return app_dir.joinpath(*parts, "route.ts")
+
+
+def declares_method(path: Path, method: str) -> bool:
+    """Is `method` declared in this file, rather than re-exported from another?"""
+    for cand in (path, path.with_suffix(".tsx"), path.with_suffix(".js")):
+        if not cand.exists():
+            continue
+        text = cand.read_text(encoding="utf-8", errors="replace")
+        if any(f.format(m=method) in text for f in RE_DECLARES):
+            return True
+    return False
+
+
 def check(project: Path, target: str = "app") -> dict:
     """Compare the stack the human gave against what app/ actually declares."""
     stack_data, why = read_json(project / "stack.json")
@@ -278,6 +320,40 @@ def check(project: Path, target: str = "app") -> dict:
                                    + f"{target}/ and commit the lock with the "
                                    + "package.json change.",
                     })
+
+    # S008 and S009 are both local. S009 only applies to a Next app - it is the
+    # App Router's own rule about where a handler must be declared.
+    if "next" in stack:
+        app_dir = _next_app_dir(root)
+        endpoints = []
+        spec_path = project / "spec.json"
+        if app_dir is not None and spec_path.exists():
+            spec, _ = read_json(spec_path)
+            endpoints = (spec or {}).get("endpoints") or []
+        unregistered = []
+        for ep in endpoints:
+            method = str(ep.get("method") or "").upper()
+            url = str(ep.get("path") or "")
+            if not method or not url.startswith("/"):
+                continue
+            rf = route_file_for(app_dir, url)
+            if not declares_method(rf, method):
+                unregistered.append(
+                    f"{method} {url} ({ep.get('id')}) - expected {method} declared in "
+                    f"{rf.relative_to(root)}")
+        if unregistered:
+            violations.append({
+                "code": "S009",
+                "message": "spec.json declares endpoints that Next will not serve. A "
+                           "handler is registered only where it is DECLARED under the "
+                           "app directory - re-exporting it from another file "
+                           "(`export { GET } from ...`) builds cleanly and 404s at "
+                           "run time. " + "; ".join(unregistered)
+                           + ". Declare the handler in the route file; if the "
+                             "implementation must live elsewhere (a cut marker the "
+                             "spec places in another file), declare a real handler "
+                             "here that calls it.",
+            })
 
     # S007 last: it is the only rule that reaches the network, and a project that
     # already fails S001-S006 does not need it to make the point.

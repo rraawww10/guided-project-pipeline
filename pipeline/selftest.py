@@ -26,7 +26,7 @@ from pathlib import Path
 
 from . import (cli, code_check, cutter, deploy_check, gate1, guard, guide_linter,
                leak_scan, mutation, redfirst, spec_linter, stack_check,
-               test_runner, ui_core, watchdog)
+               postmortem, test_runner, ui_core, watchdog)
 from .deploy_check import find_advisories
 from .spec_linter import Lint, _scan_placeholder, _scan_vague, lint_spec
 from .state import (GATES_BY_FLOW, PHASES_BY_FLOW, RETRY_LIMIT, STEP_RUN_LIMIT,
@@ -2546,6 +2546,88 @@ def test_linter_no_report(tmp: Path) -> None:
     check("a bad argument count is still refused", quiet("x"), 2)
 
 
+def test_endpoint_registration(tmp: Path) -> None:
+    """A re-exported route handler is not registered, and 404s at run time.
+
+    2026-09-08, shift-rota: `export { GET, POST } from "../elsewhere"` under the
+    app directory built cleanly, listed no route, and failed all 14 criteria -
+    the two API ones on 404 and the twelve UI ones because the page throws on a
+    failed mount fetch. Three Builder attempts went to the UI locators.
+    """
+    print("endpoint registration")
+    proj = tmp / "p"
+    app = proj / "app" / "app" / "api" / "state"
+    app.mkdir(parents=True, exist_ok=True)
+    (proj / "stack.json").write_text(json.dumps({"stack": ["next"]}), encoding="utf-8")
+    (proj / "spec.json").write_text(json.dumps({"endpoints": [
+        {"id": "ep-state-get", "method": "GET", "path": "/api/state"}]}), encoding="utf-8")
+    (proj / "app" / "package.json").write_text(json.dumps({
+        "dependencies": {"next": "16.1.1"},
+        "scripts": {"build": "next build", "start": "next start"}}), encoding="utf-8")
+
+    route = app / "route.ts"
+    route.write_text('export { GET } from "../../../api/state/route"\n', encoding="utf-8")
+    codes = [v["code"] for v in stack_check.check(proj, "app")["violations"]]
+    check("a re-exported handler is not registered", "S009" in codes, True)
+
+    route.write_text("export async function GET(): Promise<Response> { return new Response() }\n",
+                     encoding="utf-8")
+    codes = [v["code"] for v in stack_check.check(proj, "app")["violations"]]
+    check("a declared handler is", "S009" in codes, False)
+
+    dyn = proj / "app" / "app" / "api" / "games" / "[id]"
+    dyn.mkdir(parents=True, exist_ok=True)
+    (dyn / "route.ts").write_text("export const GET = async () => new Response()\n", encoding="utf-8")
+    (proj / "spec.json").write_text(json.dumps({"endpoints": [
+        {"id": "ep-games-get", "method": "GET", "path": "/api/games/:id"}]}), encoding="utf-8")
+    codes = [v["code"] for v in stack_check.check(proj, "app")["violations"]]
+    check("a :id segment maps to the [id] route file", "S009" in codes, False)
+
+
+def test_postmortem(tmp: Path) -> None:
+    """A red checker that never goes green is the thing worth counting.
+
+    Rule 6 stops a churning step, but it stops it as "this project is stuck"
+    rather than "this class has no checker", so the finding lived in whoever
+    happened to be watching. 2026-09-08: `cut` was routed back to `cut` in two
+    separate projects and could converge in neither, because the fault was a
+    criterion whose test needed cut code - re-cutting copies it every time.
+    """
+    print("postmortem")
+    proj = tmp / "p" / ".pipeline"
+    proj.mkdir(parents=True, exist_ok=True)
+
+    def ledger(steps):
+        (proj / "state.json").write_text(json.dumps({
+            "slug": "p", "flow": 2, "phase": "pack", "retries": {},
+            "steps": steps}), encoding="utf-8")
+        return postmortem.analyse(proj.parent)
+
+    r = ledger([
+        {"step": "lint", "ok": False, "at": "2026-01-01T00:00:00+00:00"},
+        {"step": "lint", "ok": True, "at": "2026-01-01T00:01:00+00:00"},
+    ])
+    check("a red that later goes green has converged",
+          [e["converged"] for e in r["episodes"]], [True])
+    check("and is not reported as unconverged", r["unconverged"], [])
+
+    r = ledger([
+        {"step": "cut", "ok": False, "at": "2026-01-01T00:00:00+00:00"},
+        {"step": "cut", "ok": False, "at": "2026-01-01T00:01:00+00:00"},
+        {"step": "cut", "ok": False, "at": "2026-01-01T00:02:00+00:00"},
+    ])
+    check("a red that never goes green is unconverged",
+          [e["step"] for e in r["unconverged"]], ["cut"])
+    check("three reds are counted as churn", [e["step"] for e in r["churn"]], ["cut"])
+    check("and the owner it was routed to is named",
+          r["unconverged"][0]["owner"], "script:cut")
+
+    r = ledger([
+        {"step": "test", "ok": True, "at": "2026-01-01T00:00:00+00:00"},
+    ])
+    check("a step that never went red is not an episode", r["episodes"], [])
+
+
 def main() -> int:
     tmp = Path(tempfile.mkdtemp(prefix="gp-selftest-"))
     try:
@@ -2561,7 +2643,8 @@ def main() -> int:
                   test_lock_sync_and_skeleton_owner,
                   test_guide_timing_disclosure,
                   test_dead_cuts, test_unwaited_assertions,
-                  test_order_agreement, test_linter_no_report):
+                  test_order_agreement, test_linter_no_report,
+                  test_endpoint_registration, test_postmortem):
             t(tmp / t.__name__)
         test_readme_count()
     finally:

@@ -48,7 +48,8 @@ pipeline/           # orchestrator + every script (Python)
   code_check.py     # shape checks a criterion can name (e.g. utc-dates)
   guard.py          # PreToolUse hook - write locks and the frozen spec
   watchdog.py       # nightly replay of shipped test suites
-  selftest.py       # 460 deterministic checks on the scripts
+  postmortem.py     # which red checkers never converged - promotion candidates
+  selftest.py       # 469 deterministic checks on the scripts
   templates/        # CONTRACT.md (spec.json shape), idea_template.md
   ui_core.py        # UI read model - what the pipeline's files mean, events, run ledger
   ui_runner.py      # UI execution - one script (CLI subprocess) or one agent (OpenRouter)
@@ -90,7 +91,8 @@ python3 -m pipeline dryrun <slug> --session N --minutes M --by <who>   # step 13
 python3 -m pipeline ship <slug>
 python3 -m pipeline watch                     # nightly watchdog
 python3 -m pipeline feedback <slug> -m ".."   # step 15, re-enters at step 3
-python3 -m pipeline.selftest                  # run 460 deterministic checks
+python3 -m pipeline.postmortem --all          # red checkers that never converged
+python3 -m pipeline.selftest                  # run 469 deterministic checks
 python3 -m pipeline.ui                        # the UI, http://127.0.0.1:8765
 ```
 

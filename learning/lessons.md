@@ -118,6 +118,21 @@ gets a strikethrough and a date.
   the two disagree. Exactly what step 12 exists to catch - regenerate the lock
   with `npm install --package-lock-only` whenever package.json changes.
 
+- **One unregistered route can fail every criterion, including the UI ones.**
+  2026-09-08, shift-rota: the Builder wrote
+  `export { GET, POST } from "../../../api/state/route"` in the app-directory
+  route file. A re-export is not a declaration, so Next registered nothing -
+  `next build` listed /, /_not-found and /script only. The two API criteria
+  404'd, and the twelve UI criteria died earlier still, because page.tsx does
+  `fetchState()` on mount and throws "failed to load" when the response is not
+  ok, so no testid ever rendered. **14 of 14 red from one cause.** Nothing
+  pointed at it: `stack_check` passed (package.json and the stack were fine),
+  the test runner reported missing locators, and the Builder spent three
+  attempts on the UI. Fixed by `stack_check` S009, which checks that every
+  endpoint in spec.json has its method DECLARED in the route file Next would
+  serve it from. **When every criterion in a suite fails at once, look for one
+  shared cause before reading any individual failure** - the count is the clue.
+
 ## Cut points
 
 - **A cut whose effect nothing reads grades nothing, and no test can save it.**
