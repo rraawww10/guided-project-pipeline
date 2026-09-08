@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="17" time="73.833" timestamp="2026-09-08T02:21:59.724896+05:30" hostname="HERO"><testcase classname="verify.test_api_core" name="test_c_1_1_post_games_creates_and_echoes_seed" time="3.741" /><testcase classname="verify.test_api_core" name="test_c_1_2_post_guess_persists_code_black_white_unscored_or_present" time="3.612" /><testcase classname="verify.test_api_core" name="test_c_2_1_get_game_returns_seed_and_empty_guesses_for_new_game" time="3.530" /><testcase classname="verify.test_api_core" name="test_c_2_2_post_guess_equal_to_secret_returns_black4_white0" time="3.822" /><testcase classname="verify.test_api_core" name="test_c_2_3_permuted_all_colours_black0_white4" time="3.842" /><testcase classname="verify.test_api_core" name="test_c_2_4_get_game_returns_guesses_with_numeric_scores" time="3.713" /><testcase classname="verify.test_api_hint" name="test_c_3_1_hint_no_guesses_remaining_1296_and_suggestion_zeros" time="3.554"><failure message="AssertionError: assert None == [0, 0, 0, 0]&#10; +  where None = &lt;built-in method get of dict object at 0x000001CBCDC39B80&gt;('suggestion')&#10; +    where &lt;built-in method get of dict object at 0x000001CBCDC39B80&gt; = {'remaining': 1296, 'suggestion': None}.get">http_client = &lt;httpx.Client object at 0x000001CBCDC8D370&gt;
+
+    def test_c_3_1_hint_no_guesses_remaining_1296_and_suggestion_zeros(http_client):
+        seed = 112233
+        game = http_client.post("/api/games", json={"seed": seed}).json()
+        res = http_client.get(f"/api/games/{game['id']}/hint")
+        assert res.status_code == 200
+        body = res.json()
+        assert body.get("remaining") == 1296
+&gt;       assert body.get("suggestion") == [0, 0, 0, 0]
+E       AssertionError: assert None == [0, 0, 0, 0]
+E        +  where None = &lt;built-in method get of dict object at 0x000001CBCDC39B80&gt;('suggestion')
+E        +    where &lt;built-in method get of dict object at 0x000001CBCDC39B80&gt; = {'remaining': 1296, 'suggestion': None}.get
+
+verify\test_api_hint.py:14: AssertionError</failure></testcase><testcase classname="verify.test_api_hint" name="test_c_3_2_hint_remaining_matches_consistent_set_for_one_guess" time="3.728" /><testcase classname="verify.test_api_hint" name="test_c_3_4_two_games_identical_histories_same_suggestion" time="3.825" /><testcase classname="verify.test_api_list_branch" name="test_c_4_1_games_list_returns_summaries_with_guess_counts" time="3.890" /><testcase classname="verify.test_api_list_branch" name="test_c_4_4_branch_endpoint_creates_new_game_with_k_copied_guesses" time="4.124" /><testcase classname="verify.test_ui_games" name="test_c_4_2_games_list_renders_one_row_per_game" time="5.227" /><testcase classname="verify.test_ui_games" name="test_c_4_3_resume_navigates_to_board_with_correct_guess_rows" time="5.403" /><testcase classname="verify.test_ui_play" name="test_c_1_3_submit_one_guess_renders_exactly_one_row" time="5.479" /><testcase classname="verify.test_ui_play" name="test_c_2_5_row_shows_black_and_white_counts_matching_secret" time="5.414" /><testcase classname="verify.test_ui_play" name="test_c_3_3_page_shows_hint_remaining_and_suggestion" time="5.074"><failure message="assert 0 == 4&#10; +  where 0 = len([])">page = &lt;Page url='http://127.0.0.1:57047/?game=cmtrpwf5a001v5wk3c8vlojnl'&gt;
+base_url = 'http://127.0.0.1:57047'
+
+    def test_c_3_3_page_shows_hint_remaining_and_suggestion(page, base_url: str):
+        # New game, no guesses yet.
+        seed = 3003
+        _ui_new_game(page, base_url, seed)
+        # Expect hint remaining and suggestion elements to exist with expected values.
+        page.wait_for_selector('[data-testid="hint-remaining"]')
+        remaining_text = page.get_by_test_id("hint-remaining").inner_text().strip()
+        suggestion_text = page.get_by_test_id("hint-suggestion").inner_text().strip()
+        assert remaining_text == "1296"
+        # Allow any reasonable formatting; ensure it conveys four zeros.
+        zeros = re.findall(r"0", suggestion_text)
+&gt;       assert len(zeros) == 4
+E       assert 0 == 4
+E        +  where 0 = len([])
+
+verify\test_ui_play.py:83: AssertionError</failure></testcase><testcase classname="verify.test_ui_play" name="test_c_4_5_branch_here_button_renders_k_rows" time="5.532" /></testsuite></testsuites>

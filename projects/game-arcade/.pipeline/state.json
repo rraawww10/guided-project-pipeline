@@ -1,0 +1,200 @@
+{
+  "slug": "game-arcade",
+  "created": "2026-09-07T18:32:51+00:00",
+  "flow": 2,
+  "phase": "code",
+  "retries": {
+    "idea": 0,
+    "spec": 2,
+    "code": 9,
+    "pack": 0
+  },
+  "step_runs": {
+    "stack": 1,
+    "ideas": 1,
+    "pick": 1,
+    "lint": 4,
+    "breaker": 2,
+    "redfirst": 2,
+    "revise:round-1": 1,
+    "test:app": 6,
+    "mutation": 4
+  },
+  "gates": {
+    "gate0": {
+      "approved": true,
+      "at": "2026-09-07T18:39:33+00:00",
+      "note": "picked idea-05",
+      "picked": "idea-05.md"
+    },
+    "gate1": {
+      "approved": true,
+      "at": "2026-09-07T19:28:11+00:00",
+      "note": "",
+      "spec_hash": "ef4030f864d7e323df9fdf474b29ef421e03784988d7aed58523607d3799443a",
+      "verify_hash": "2b49609202e53ac8dc38c14ade5159a2529b5fa9e43ccbc738a891af4ee7ca6b",
+      "override": false
+    },
+    "gate2": null,
+    "gate3": null
+  },
+  "steps": [
+    {
+      "step": "stack",
+      "ok": true,
+      "at": "2026-09-07T18:33:04+00:00",
+      "detail": "next, react, typescript, prisma, sqlite",
+      "run": 1
+    },
+    {
+      "step": "ideas",
+      "ok": true,
+      "at": "2026-09-07T18:36:59+00:00",
+      "detail": "5 ideas",
+      "run": 1
+    },
+    {
+      "step": "pick",
+      "ok": true,
+      "at": "2026-09-07T18:39:33+00:00",
+      "detail": "idea-05.md",
+      "run": 1
+    },
+    {
+      "step": "lint",
+      "ok": false,
+      "at": "2026-09-07T18:43:33+00:00",
+      "detail": "",
+      "run": 1
+    },
+    {
+      "step": "lint",
+      "ok": true,
+      "at": "2026-09-07T18:45:39+00:00",
+      "detail": "",
+      "run": 2
+    },
+    {
+      "step": "breaker",
+      "ok": true,
+      "at": "2026-09-07T18:48:35+00:00",
+      "detail": "633f15079cf5",
+      "run": 1
+    },
+    {
+      "step": "redfirst",
+      "ok": true,
+      "at": "2026-09-07T18:54:58+00:00",
+      "detail": "",
+      "run": 1
+    },
+    {
+      "step": "revise:round-1",
+      "ok": true,
+      "at": "2026-09-07T19:04:26+00:00",
+      "detail": "spec.md, spec.json, lint.json, ambiguity.md, gate1.json, redfirst.json, verify",
+      "run": 1
+    },
+    {
+      "step": "lint",
+      "ok": false,
+      "at": "2026-09-07T19:10:10+00:00",
+      "detail": "",
+      "run": 3
+    },
+    {
+      "step": "lint",
+      "ok": true,
+      "at": "2026-09-07T19:14:09+00:00",
+      "detail": "",
+      "run": 4
+    },
+    {
+      "step": "breaker",
+      "ok": true,
+      "at": "2026-09-07T19:16:44+00:00",
+      "detail": "ef4030f864d7",
+      "run": 2
+    },
+    {
+      "step": "redfirst",
+      "ok": true,
+      "at": "2026-09-07T19:22:04+00:00",
+      "detail": "",
+      "run": 2
+    },
+    {
+      "step": "test:app",
+      "ok": false,
+      "at": "2026-09-07T19:35:13+00:00",
+      "detail": "",
+      "run": 1
+    },
+    {
+      "step": "test:app",
+      "ok": false,
+      "at": "2026-09-07T19:39:55+00:00",
+      "detail": "",
+      "run": 2
+    },
+    {
+      "step": "test:app",
+      "ok": false,
+      "at": "2026-09-07T19:42:35+00:00",
+      "detail": "",
+      "run": 3
+    },
+    {
+      "step": "test:app",
+      "ok": false,
+      "at": "2026-09-07T19:48:13+00:00",
+      "detail": "",
+      "run": 4
+    },
+    {
+      "step": "test:app",
+      "ok": false,
+      "at": "2026-09-07T20:03:12+00:00",
+      "detail": "",
+      "run": 5
+    },
+    {
+      "step": "test:app",
+      "ok": true,
+      "at": "2026-09-07T20:07:15+00:00",
+      "detail": "",
+      "run": 6
+    },
+    {
+      "step": "mutation",
+      "ok": false,
+      "at": "2026-09-07T20:09:19+00:00",
+      "detail": "",
+      "run": 1
+    },
+    {
+      "step": "mutation",
+      "ok": false,
+      "at": "2026-09-07T20:14:36+00:00",
+      "detail": "",
+      "run": 2
+    },
+    {
+      "step": "mutation",
+      "ok": false,
+      "at": "2026-09-07T20:19:39+00:00",
+      "detail": "",
+      "run": 3
+    },
+    {
+      "step": "mutation",
+      "ok": false,
+      "at": "2026-09-07T21:10:35+00:00",
+      "detail": "",
+      "run": 4
+    }
+  ],
+  "ticket": null,
+  "dry_run": null,
+  "feedback": []
+}

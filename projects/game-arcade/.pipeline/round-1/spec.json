@@ -1,0 +1,95 @@
+{
+  "slug": "game-arcade",
+  "title": "Mastermind Arcade – Seeded, Scored, and Replayed",
+  "track": "fullstack",
+  "sessions_planned": 4,
+  "stack": ["next", "react", "typescript", "prisma", "sqlite"],
+  "source": null,
+  "code_checks": [],
+  "endpoints": [
+    {"id": "ep-game-create", "method": "POST", "path": "/api/games", "request": "{ seed?: number }", "response": "{ id: string; seed: number }", "status": [201]},
+    {"id": "ep-game-detail", "method": "GET", "path": "/api/games/[id]", "request": null, "response": "{ id: string; seed: number; guesses: { turn: number; code: number[]; black: number; white: number }[] }", "status": [200]},
+    {"id": "ep-guess-create", "method": "POST", "path": "/api/games/[id]/guesses", "request": "{ code: number[4] }", "response": "{ id: string; turn: number; code: number[]; black: number; white: number }", "status": [201]},
+    {"id": "ep-games-list", "method": "GET", "path": "/api/games", "request": null, "response": "{ id: string; seed: number; guessCount: number; status: string }[]", "status": [200]},
+    {"id": "ep-hint", "method": "GET", "path": "/api/games/[id]/hint", "request": null, "response": "{ remaining: number; suggested: number[] | null }", "status": [200]}
+  ],
+  "screens": [
+    {"id": "sc-board", "route": "/game/[id]", "elements": ["peg picker", "submit button", "previous guesses list", "feedback pegs", "Hint:", "Remaining N", "Turn control", "Branch button"], "states": ["empty", "loaded", "with-feedback", "hint-visible", "replay-stepped"]},
+    {"id": "sc-games", "route": "/games", "elements": ["games list", "Resume link"], "states": ["empty", "loaded"]}
+  ],
+  "sessions": [
+    {
+      "n": 1,
+      "title": "Seeded game + board UI",
+      "goal": "Persist games and guesses with Prisma, render the board, and submit guesses (feedback comes in session 2).",
+      "teaches": ["Prisma models", "Next route handlers", "seed-based reproducibility", "React controlled state", "list rendering"],
+      "builds": ["ep-game-create", "ep-game-detail", "ep-guess-create", "sc-board"],
+      "criteria": [
+        {"id": "c-1-1", "check": "POST /api/games returns 201 with a JSON object containing id and seed", "target": "ep-game-create", "cuts": []},
+        {"id": "c-1-2", "check": "GET /api/games/[id] returns 200 with guesses as an empty array for a fresh game", "target": "ep-game-detail", "cuts": []},
+        {"id": "c-1-3", "check": "Screen sc-board accepts four colour picks and Submit then shows one new guess row with four coloured pegs", "target": "sc-board", "cuts": ["cut-ui-build-guess-payload", "cut-ep-guess-create-persist"]},
+        {"id": "c-1-4", "check": "POST /api/games/[id]/guesses with a 4-number code returns 201 with a JSON object echoing that code and a turn number", "target": "ep-guess-create", "cuts": ["cut-ep-guess-create-persist"]}
+      ],
+      "cuts": [
+        {"id": "cut-ui-build-guess-payload", "file": "app/game/[id]/page.tsx", "writes_into": "payload", "hint": "Write the four currently selected colour ids into `payload` as { code: [d0,d1,d2,d3] } in slot order so the body you POST holds exactly those four numbers."},
+        {"id": "cut-ep-guess-create-persist", "file": "app/api/games/[id]/guesses/route.ts", "writes_into": "created", "hint": "Create the Guess for this game by writing the posted 4-number code into `created` with the next turn number, then let the handler answer 201 with it."}
+      ]
+    },
+    {
+      "n": 2,
+      "title": "Scoring and feedback pegs",
+      "goal": "Score guesses deterministically and show black/white pegs per row.",
+      "teaches": ["Pure functions", "exact vs colour-only matches", "avoiding double counting", "UI feedback mapping"],
+      "builds": [],
+      "criteria": [
+        {"id": "c-2-1", "check": "Submitting the exact secret yields black=4 and white=0 on the last row in GET /api/games/[id]", "target": "ep-guess-create", "cuts": ["cut-lib-score-black"]},
+        {"id": "c-2-2", "check": "After submitting a rotation of the secret (no positions match), GET /api/games/[id] returns 200 and the last guess shows black=0 and white=4", "target": "ep-guess-create", "cuts": ["cut-lib-score-white"]},
+        {"id": "c-2-3", "check": "When the secret has repeats, after submitting a suitable guess, GET /api/games/[id] returns 200 and the last guess shows black+white equal to the count of matching colours after removing exact matches (no white double-counting)", "target": "ep-guess-create", "cuts": ["cut-lib-score-black", "cut-lib-score-white"]},
+        {"id": "c-2-4", "check": "Screen sc-board renders the exact number of black and white pegs per row based on stored black and white", "target": "sc-board", "cuts": ["cut-ui-render-feedback"]},
+        {"id": "c-2-5", "check": "After two submissions, sc-board renders two rows (one per guess)", "target": "sc-board", "cuts": ["cut-ui-render-rows"]}
+      ],
+      "cuts": [
+        {"id": "cut-lib-score-black", "file": "lib/score.ts", "writes_into": "black", "hint": "Set `black` to the count of positions i in 0..3 where secret[i] equals guess[i]."},
+        {"id": "cut-lib-score-white", "file": "lib/score.ts", "writes_into": "white", "hint": "Set `white` to the count of colour-only matches after removing all exact matches so no colour is counted twice."},
+        {"id": "cut-ui-render-feedback", "file": "app/game/[id]/page.tsx", "writes_into": "feedback", "hint": "Build `feedback` for the visible row with exactly the stored `black` black pegs and `white` white pegs."},
+        {"id": "cut-ui-render-rows", "file": "app/game/[id]/page.tsx", "writes_into": "rows", "hint": "Map the game’s stored guesses into `rows` with one entry per guess in most-recent-first order and keep the four colours for each row."}
+      ]
+    },
+    {
+      "n": 3,
+      "title": "Deterministic hint and remaining count",
+      "goal": "Filter the 6^4 code space against the history and suggest the next guess deterministically.",
+      "teaches": ["finite search space", "constraint filtering", "deterministic ordering (lexicographic)", "fetch and render derived data"],
+      "builds": ["ep-hint"],
+      "criteria": [
+        {"id": "c-3-1", "check": "GET /api/games/[id]/hint with no guesses returns 200 with remaining = 1296", "target": "ep-hint", "cuts": ["cut-lib-candidates-filter"]},
+        {"id": "c-3-2", "check": "GET /api/games/[id]/hint with no guesses suggests [0,0,0,0]", "target": "ep-hint", "cuts": ["cut-lib-next-candidate"]},
+        {"id": "c-3-3", "check": "After submitting [0,0,0,0] that scores 0 blacks and 0 whites, GET /api/games/[id]/hint returns remaining = 625", "target": "ep-hint", "cuts": ["cut-lib-candidates-filter"]},
+        {"id": "c-3-4", "check": "Screen sc-board shows \"Hint: 1 1 1 1 • Remaining 625\" after that zero-score first guess", "target": "sc-board", "cuts": ["cut-ui-show-hint"]}
+      ],
+      "cuts": [
+        {"id": "cut-lib-candidates-filter", "file": "lib/solver.ts", "writes_into": "out", "hint": "Fill `out` with every 4-long code from 0..5 whose score against each past guess equals that guess’s recorded black and white."},
+        {"id": "cut-lib-next-candidate", "file": "lib/solver.ts", "writes_into": "out", "hint": "Put the first code in lexicographic ascending order from `candidates` into `out`, or null when no candidates remain."},
+        {"id": "cut-ui-show-hint", "file": "app/game/[id]/page.tsx", "writes_into": "hintText", "hint": "Write the next hint code and remaining count into `hintText` as \"Hint: d0 d1 d2 d3 • Remaining N\"."}
+      ]
+    },
+    {
+      "n": 4,
+      "title": "Replay, resume, and branch",
+      "goal": "List saved games, resume play, scrub through a game’s history, and branch a new line of play from any earlier turn.",
+      "teaches": ["index/list pages", "navigation", "replay scrubbing", "branching via seed + prefix"],
+      "builds": ["ep-games-list", "sc-games"],
+      "criteria": [
+        {"id": "c-4-1", "check": "GET /api/games returns 200 with an array of entries that include id, seed, guessCount, and status", "target": "ep-games-list", "cuts": []},
+        {"id": "c-4-2", "check": "Screen sc-games renders one row per saved game with its id, seed and guessCount; clicking a row resumes that game at /game/[id]", "target": "sc-games", "cuts": ["cut-ui-games-list-rows"]},
+        {"id": "c-4-3", "check": "On sc-board, moving the Turn control to K shows exactly K guess rows from the start of the game", "target": "sc-board", "cuts": ["cut-ui-replay-apply"]},
+        {"id": "c-4-4", "check": "On sc-board, \"Branch from turn K\" creates a new game with the same seed and replays the first K guesses into it; after navigation the board shows exactly K rows", "target": "sc-board", "cuts": ["cut-ui-branch-build"]}
+      ],
+      "cuts": [
+        {"id": "cut-ui-replay-apply", "file": "app/game/[id]/page.tsx", "writes_into": "shownGuesses", "hint": "Set `shownGuesses` to the first `step` guesses from the game’s history in order of play."},
+        {"id": "cut-ui-branch-build", "file": "app/game/[id]/page.tsx", "writes_into": "batch", "hint": "Populate `batch` with the codes of the first `step` guesses so the UI can POST them to the new game in order."},
+        {"id": "cut-ui-games-list-rows", "file": "app/games/page.tsx", "writes_into": "rows", "hint": "Produce one `rows` entry per saved game with its id, seed, and guessCount; newest first."}
+      ]
+    }
+  ]
+}

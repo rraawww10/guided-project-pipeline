@@ -1,0 +1,15 @@
+{
+  "stack": [
+    "next",
+    "react",
+    "typescript",
+    "prisma",
+    "sqlite"
+  ],
+  "sessions": 4,
+  "minutes_per_session": 40,
+  "track": "fullstack",
+  "limits": "MUST be visual and interactive: a board the player clicks and watches change, with immediate visible feedback on screen. Explicitly NOT a form-and-table CRUD app - do not propose a list with an add form, a settings page, or a report table. The student should want to show it to someone. Turn-based only: every state change is discrete and assertable, no real-time animation or timing loop as an acceptance criterion. Any randomness MUST come from a fixed seed or hand-authored fixtures, so a test gets the identical board every run. No network at run time, no API key, no external services. Use Prisma and SQLite for a real write path: a game, board or replay must survive a restart. Spread the five ideas across genuinely different game shapes - a grid, a turn engine, a scoring pass, a solver, a replay - not five skins on one board.",
+  "given_by": "Rishuraj",
+  "at": "2026-09-07T18:32:51+00:00"
+}

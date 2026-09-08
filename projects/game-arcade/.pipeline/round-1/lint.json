@@ -1,0 +1,142 @@
+{
+  "ok": true,
+  "errors": [],
+  "warnings": [
+    {
+      "code": "W112",
+      "where": "session 1",
+      "message": "estimated 49.2 teaching minutes against a 40 minute cap. Nothing before step 9 measures this, so decide it here: 2 cuts, 4 builds, 5 concepts plus the project setup."
+    }
+  ],
+  "counts": {
+    "errors": 0,
+    "warnings": 1
+  },
+  "session_minutes": [
+    {
+      "n": 1,
+      "minutes": 49.2,
+      "cuts": 2,
+      "builds": 4,
+      "concepts": 5,
+      "carries_setup": true,
+      "over_cap": true,
+      "weighted": true,
+      "cut_minutes": [
+        {
+          "id": "cut-ep-guess-create-persist",
+          "minutes": 7.7,
+          "decisions": 1,
+          "hint_words": 27
+        },
+        {
+          "id": "cut-ui-build-guess-payload",
+          "minutes": 6.0,
+          "decisions": 0,
+          "hint_words": 27
+        }
+      ],
+      "largest_cut_share": 0.56
+    },
+    {
+      "n": 2,
+      "minutes": 40.0,
+      "cuts": 4,
+      "builds": 0,
+      "concepts": 4,
+      "carries_setup": false,
+      "over_cap": false,
+      "weighted": true,
+      "cut_minutes": [
+        {
+          "id": "cut-ui-render-rows",
+          "minutes": 6.0,
+          "decisions": 0,
+          "hint_words": 23
+        },
+        {
+          "id": "cut-ui-render-feedback",
+          "minutes": 6.0,
+          "decisions": 0,
+          "hint_words": 17
+        },
+        {
+          "id": "cut-lib-score-white",
+          "minutes": 6.0,
+          "decisions": 0,
+          "hint_words": 19
+        },
+        {
+          "id": "cut-lib-score-black",
+          "minutes": 6.0,
+          "decisions": 0,
+          "hint_words": 14
+        }
+      ],
+      "largest_cut_share": 0.25
+    },
+    {
+      "n": 3,
+      "minutes": 38.7,
+      "cuts": 3,
+      "builds": 1,
+      "concepts": 4,
+      "carries_setup": false,
+      "over_cap": false,
+      "weighted": true,
+      "cut_minutes": [
+        {
+          "id": "cut-lib-next-candidate",
+          "minutes": 7.7,
+          "decisions": 1,
+          "hint_words": 18
+        },
+        {
+          "id": "cut-ui-show-hint",
+          "minutes": 6.0,
+          "decisions": 0,
+          "hint_words": 19
+        },
+        {
+          "id": "cut-lib-candidates-filter",
+          "minutes": 6.0,
+          "decisions": 0,
+          "hint_words": 21
+        }
+      ],
+      "largest_cut_share": 0.39
+    },
+    {
+      "n": 4,
+      "minutes": 40.0,
+      "cuts": 3,
+      "builds": 2,
+      "concepts": 4,
+      "carries_setup": false,
+      "over_cap": false,
+      "weighted": true,
+      "cut_minutes": [
+        {
+          "id": "cut-ui-replay-apply",
+          "minutes": 6.0,
+          "decisions": 0,
+          "hint_words": 15
+        },
+        {
+          "id": "cut-ui-games-list-rows",
+          "minutes": 6.0,
+          "decisions": 0,
+          "hint_words": 15
+        },
+        {
+          "id": "cut-ui-branch-build",
+          "minutes": 6.0,
+          "decisions": 0,
+          "hint_words": 22
+        }
+      ],
+      "largest_cut_share": 0.33
+    }
+  ],
+  "spec_hash": "633f15079cf52ab98a384c1d6a0e39838229c17752e161c0765fc4c8021c7126"
+}

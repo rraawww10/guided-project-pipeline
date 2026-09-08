@@ -1,0 +1,31 @@
+// Prisma schema for Mastermind game
+// SQLite database in file prisma/dev.db
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Game {
+  id        String   @id @default(cuid())
+  seed      Int
+  createdAt DateTime @default(now())
+  guesses   Guess[]
+}
+
+model Guess {
+  id        String   @id @default(cuid())
+  gameId    String
+  game      Game     @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  // Store the 4-number code as a JSON string for SQLite compatibility
+  code      String
+  black     Int?
+  white     Int?
+  createdAt DateTime @default(now())
+
+  @@index([gameId])
+}

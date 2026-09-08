@@ -1,0 +1,22 @@
+{
+  "c-1-1": {"test": "verify/test_api_games.py::test_c_1_1_post_games_returns_201_with_id_and_seed"},
+  "c-1-2": {"test": "verify/test_api_games.py::test_c_1_2_get_game_returns_empty_guesses_initially"},
+  "c-1-3": {"test": "verify/test_ui_board.py::test_c_1_3_ui_submit_creates_one_guess_row"},
+  "c-1-4": {"test": "verify/test_api_games.py::test_c_1_4_post_guess_echoes_code_and_turn"},
+
+  "c-2-1": {"test": "verify/test_api_scoring.py::test_c_2_1_exact_secret_scores_black4_white0"},
+  "c-2-2": {"test": "verify/test_api_scoring.py::test_c_2_2_rotation_scores_black0_white4"},
+  "c-2-3": {"test": "verify/test_api_scoring.py::test_c_2_3_repeats_no_double_counting_sum_matches"},
+  "c-2-4": {"test": "verify/test_ui_board.py::test_c_2_4_feedback_pegs_match_stored_counts"},
+  "c-2-5": {"test": "verify/test_ui_board.py::test_c_2_5_two_submissions_render_two_rows"},
+
+  "c-3-1": {"test": "verify/test_api_hint.py::test_c_3_1_hint_remaining_1296_no_guesses"},
+  "c-3-2": {"test": "verify/test_api_hint.py::test_c_3_2_hint_suggests_zeros_initially"},
+  "c-3-3": {"test": "verify/test_api_hint.py::test_c_3_3_hint_remaining_625_after_zero_score_guess"},
+  "c-3-4": {"test": "verify/test_ui_board.py::test_c_3_4_hint_text_shows_expected_remaining_after_zero_score"},
+
+  "c-4-1": {"test": "verify/test_api_games.py::test_c_4_1_get_games_lists_entries_with_fields"},
+  "c-4-2": {"test": "verify/test_ui_games.py::test_c_4_2_games_list_renders_rows_and_resume_navigates"},
+  "c-4-3": {"test": "verify/test_ui_board.py::test_c_4_3_turn_control_limits_rows_to_k"},
+  "c-4-4": {"test": "verify/test_ui_board.py::test_c_4_4_branch_from_turn_k_creates_new_game_with_prefix"}
+}

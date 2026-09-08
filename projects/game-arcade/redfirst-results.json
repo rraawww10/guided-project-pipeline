@@ -1,0 +1,154 @@
+{
+  "ok": false,
+  "target": "app",
+  "code_checks": {
+    "ok": true,
+    "target": "app",
+    "declared": [],
+    "unknown": [],
+    "checks": {}
+  },
+  "stack_check": {
+    "ok": true,
+    "skipped": "app/ has not been built yet",
+    "stack": [
+      "next",
+      "react",
+      "typescript",
+      "prisma",
+      "sqlite"
+    ],
+    "violations": []
+  },
+  "seconds": 0.0,
+  "counts": {
+    "pass": 0,
+    "fail": 0,
+    "skip": 0,
+    "missing": 17
+  },
+  "criteria": {
+    "c-1-1": {
+      "status": "missing",
+      "check": "POST /api/games returns 201 with a JSON Game that echoes the provided seed and a non-empty id",
+      "session": 1,
+      "test": "verify/test_api_core.py::test_c_1_1_post_games_creates_and_echoes_seed",
+      "message": "test did not run"
+    },
+    "c-1-2": {
+      "status": "missing",
+      "check": "POST /api/games/:id/guesses with body { code: [0,1,2,3] } returns 201 JSON Guess whose code equals the body and black/white are null",
+      "session": 1,
+      "test": "verify/test_api_core.py::test_c_1_2_post_guess_persists_code_black_white_unscored_or_present",
+      "message": "test did not run"
+    },
+    "c-1-3": {
+      "status": "missing",
+      "check": "On sc-play after one submission the page renders exactly 1 guess row and shows 4 peg slots reflecting the chosen colours",
+      "session": 1,
+      "test": "verify/test_ui_play.py::test_c_1_3_submit_one_guess_renders_exactly_one_row",
+      "message": "test did not run"
+    },
+    "c-2-1": {
+      "status": "missing",
+      "check": "GET /api/games/:id returns 200 with JSON { id, seed, guesses: [] } for a new game",
+      "session": 2,
+      "test": "verify/test_api_core.py::test_c_2_1_get_game_returns_seed_and_empty_guesses_for_new_game",
+      "message": "test did not run"
+    },
+    "c-2-2": {
+      "status": "missing",
+      "check": "POST /api/games/:id/guesses with a guess equal to the secret returns 201 with black = 4 and white = 0 in JSON Guess",
+      "session": 2,
+      "test": "verify/test_api_core.py::test_c_2_2_post_guess_equal_to_secret_returns_black4_white0",
+      "message": "test did not run"
+    },
+    "c-2-3": {
+      "status": "missing",
+      "check": "For a permuted-all-colours guess, POST /api/games/:id/guesses returns black = 0 and white = 4",
+      "session": 2,
+      "test": "verify/test_api_core.py::test_c_2_3_permuted_all_colours_black0_white4",
+      "message": "test did not run"
+    },
+    "c-2-4": {
+      "status": "missing",
+      "check": "GET /api/games/:id returns 200 with guesses[] items carrying numeric black and white fields",
+      "session": 2,
+      "test": "verify/test_api_core.py::test_c_2_4_get_game_returns_guesses_with_numeric_scores",
+      "message": "test did not run"
+    },
+    "c-2-5": {
+      "status": "missing",
+      "check": "On sc-play each rendered guess row shows its black (data-testid=score-black) and white (data-testid=score-white) counts matching the API",
+      "session": 2,
+      "test": "verify/test_ui_play.py::test_c_2_5_row_shows_black_and_white_counts_matching_secret",
+      "message": "test did not run"
+    },
+    "c-3-1": {
+      "status": "missing",
+      "check": "GET /api/games/:id/hint with no guesses returns 200 with remaining = 1296 and suggestion = [0,0,0,0]",
+      "session": 3,
+      "test": "verify/test_api_hint.py::test_c_3_1_hint_no_guesses_remaining_1296_and_suggestion_zeros",
+      "message": "test did not run"
+    },
+    "c-3-2": {
+      "status": "missing",
+      "check": "After one recorded guess, GET /api/games/:id/hint returns a remaining count matching the set consistent with that history",
+      "session": 3,
+      "test": "verify/test_api_hint.py::test_c_3_2_hint_remaining_matches_consistent_set_for_one_guess",
+      "message": "test did not run"
+    },
+    "c-3-3": {
+      "status": "missing",
+      "check": "On sc-play the page shows hint remaining and a suggested 4-number guess",
+      "session": 3,
+      "test": "verify/test_ui_play.py::test_c_3_3_page_shows_hint_remaining_and_suggestion",
+      "message": "test did not run"
+    },
+    "c-3-4": {
+      "status": "missing",
+      "check": "Two games with identical guess histories produce the same suggestion from GET /api/games/:id/hint",
+      "session": 3,
+      "test": "verify/test_api_hint.py::test_c_3_4_two_games_identical_histories_same_suggestion",
+      "message": "test did not run"
+    },
+    "c-4-1": {
+      "status": "missing",
+      "check": "GET /api/games returns 200 with an array of { id, seed, guessCount }",
+      "session": 4,
+      "test": "verify/test_api_list_branch.py::test_c_4_1_games_list_returns_summaries_with_guess_counts",
+      "message": "test did not run"
+    },
+    "c-4-2": {
+      "status": "missing",
+      "check": "On /games the list renders one row per saved game (data-testid=game-row) showing its id and guessCount",
+      "session": 4,
+      "test": "verify/test_ui_games.py::test_c_4_2_games_list_renders_one_row_per_game",
+      "message": "test did not run"
+    },
+    "c-4-3": {
+      "status": "missing",
+      "check": "Clicking Resume for a saved game shows the board with the correct number of guess rows for that game",
+      "session": 4,
+      "test": "verify/test_ui_games.py::test_c_4_3_resume_navigates_to_board_with_correct_guess_rows",
+      "message": "test did not run"
+    },
+    "c-4-4": {
+      "status": "missing",
+      "check": "POST /api/games/:id/branch with body { upto: k } returns 201 with a new Game; GET that id shows exactly k guesses copied",
+      "session": 4,
+      "test": "verify/test_api_list_branch.py::test_c_4_4_branch_endpoint_creates_new_game_with_k_copied_guesses",
+      "message": "test did not run"
+    },
+    "c-4-5": {
+      "status": "missing",
+      "check": "On sc-play, after clicking the Branch Here button for row k, the page renders exactly k guess rows (elements with data-testid^=guess-row-)",
+      "session": 4,
+      "test": "verify/test_ui_play.py::test_c_4_5_branch_here_button_renders_k_rows",
+      "message": "test did not run"
+    }
+  },
+  "pytest_returncode": 99,
+  "stdout_tail": "",
+  "stderr_tail": "[WinError 267] The directory name is invalid"
+}

@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="3" skipped="0" tests="17" time="75.599" timestamp="2026-09-08T02:25:19.945795+05:30" hostname="HERO"><testcase classname="verify.test_api_core" name="test_c_1_1_post_games_creates_and_echoes_seed" time="3.681" /><testcase classname="verify.test_api_core" name="test_c_1_2_post_guess_persists_code_black_white_unscored_or_present" time="3.700" /><testcase classname="verify.test_api_core" name="test_c_2_1_get_game_returns_seed_and_empty_guesses_for_new_game" time="3.594" /><testcase classname="verify.test_api_core" name="test_c_2_2_post_guess_equal_to_secret_returns_black4_white0" time="3.581" /><testcase classname="verify.test_api_core" name="test_c_2_3_permuted_all_colours_black0_white4" time="3.760"><failure message="AssertionError: assert 0 == 4&#10; +  where 0 = &lt;built-in method get of dict object at 0x000001D0C06F5480&gt;('white')&#10; +    where &lt;built-in method get of dict object at 0x000001D0C06F5480&gt; = {'id': 'cmtrpznf3000ao9wltvjeckb6', 'gameId': 'cmtrpznaw0008o9wl9g2ne18f', 'code': [3, 5, 4, 2], 'black': 0, ...}.get">http_client = &lt;httpx.Client object at 0x000001D0C07C2D70&gt;
+
+    def test_c_2_3_permuted_all_colours_black0_white4(http_client):
+        # Find a seed whose secret has 4 distinct colours so a derangement exists.
+        seed, secret = find_seed_with_distinct_secret(start=4242)
+        game = http_client.post("/api/games", json={"seed": seed}).json()
+        # A simple rotation is a derangement when all values are distinct.
+        guess = [secret[1], secret[2], secret[3], secret[0]]
+        res = http_client.post(f"/api/games/{game['id']}/guesses", json={"code": guess})
+        assert res.status_code == 201
+        body = res.json()
+        assert body.get("black") == 0
+&gt;       assert body.get("white") == 4
+E       AssertionError: assert 0 == 4
+E        +  where 0 = &lt;built-in method get of dict object at 0x000001D0C06F5480&gt;('white')
+E        +    where &lt;built-in method get of dict object at 0x000001D0C06F5480&gt; = {'id': 'cmtrpznf3000ao9wltvjeckb6', 'gameId': 'cmtrpznaw0008o9wl9g2ne18f', 'code': [3, 5, 4, 2], 'black': 0, ...}.get
+
+verify\test_api_core.py:72: AssertionError</failure></testcase><testcase classname="verify.test_api_core" name="test_c_2_4_get_game_returns_guesses_with_numeric_scores" time="3.802"><failure message="AssertionError: assert (2 == 2 and 0 == 2)&#10; +  where 2 = &lt;built-in method get of dict object at 0x000001D0C06053C0&gt;('black')&#10; +    where &lt;built-in method get of dict object at 0x000001D0C06053C0&gt; = {'id': 'cmtrpzqh8000fo9wlfauc1gwm', 'gameId': 'cmtrpzqcr000bo9wltszatdv7', 'code': [0, 4, 5, 1], 'black': 2, ...}.get&#10; +  and   0 = &lt;built-in method get of dict object at 0x000001D0C06053C0&gt;('white')&#10; +    where &lt;built-in method get of dict object at 0x000001D0C06053C0&gt; = {'id': 'cmtrpzqh8000fo9wlfauc1gwm', 'gameId': 'cmtrpzqcr000bo9wltszatdv7', 'code': [0, 4, 5, 1], 'black': 2, ...}.get">http_client = &lt;httpx.Client object at 0x000001D0C07C56D0&gt;
+
+    def test_c_2_4_get_game_returns_guesses_with_numeric_scores(http_client):
+        seed = 97531
+        game = http_client.post("/api/games", json={"seed": seed}).json()
+        secret = derive_secret(seed)
+        # Make two guesses: one equal to secret and one permuted/all-colours if possible
+        g1 = secret
+        http_client.post(f"/api/games/{game['id']}/guesses", json={"code": g1})
+        # Second guess: flip first two positions; may reduce blacks
+        g2 = [secret[1], secret[0], secret[2], secret[3]]
+        http_client.post(f"/api/games/{game['id']}/guesses", json={"code": g2})
+    
+        res = http_client.get(f"/api/games/{game['id']}")
+        assert res.status_code == 200
+        body = res.json()
+        guesses = body.get("guesses")
+        assert isinstance(guesses, list) and len(guesses) &gt;= 2
+        # Check scores are numeric and match the scoring function
+        seen = 0
+        for g in guesses:
+            if g.get("code") in (g1, g2):
+                b, w = score_guess(secret, g["code"])  # type: ignore[arg-type]
+                assert isinstance(g.get("black"), int) and isinstance(g.get("white"), int)
+&gt;               assert g.get("black") == b and g.get("white") == w
+E               AssertionError: assert (2 == 2 and 0 == 2)
+E                +  where 2 = &lt;built-in method get of dict object at 0x000001D0C06053C0&gt;('black')
+E                +    where &lt;built-in method get of dict object at 0x000001D0C06053C0&gt; = {'id': 'cmtrpzqh8000fo9wlfauc1gwm', 'gameId': 'cmtrpzqcr000bo9wltszatdv7', 'code': [0, 4, 5, 1], 'black': 2, ...}.get
+E                +  and   0 = &lt;built-in method get of dict object at 0x000001D0C06053C0&gt;('white')
+E                +    where &lt;built-in method get of dict object at 0x000001D0C06053C0&gt; = {'id': 'cmtrpzqh8000fo9wlfauc1gwm', 'gameId': 'cmtrpzqcr000bo9wltszatdv7', 'code': [0, 4, 5, 1], 'black': 2, ...}.get
+
+verify\test_api_core.py:97: AssertionError</failure></testcase><testcase classname="verify.test_api_hint" name="test_c_3_1_hint_no_guesses_remaining_1296_and_suggestion_zeros" time="3.692" /><testcase classname="verify.test_api_hint" name="test_c_3_2_hint_remaining_matches_consistent_set_for_one_guess" time="3.614"><failure message="AssertionError: assert 500 == 252&#10; +  where 500 = &lt;built-in method get of dict object at 0x000001D0C0705440&gt;('remaining')&#10; +    where &lt;built-in method get of dict object at 0x000001D0C0705440&gt; = {'remaining': 500, 'suggestion': [0, 0, 0, 0]}.get">http_client = &lt;httpx.Client object at 0x000001D0C07CA7A0&gt;
+
+    def test_c_3_2_hint_remaining_matches_consistent_set_for_one_guess(http_client):
+        seed = 221144
+        game = http_client.post("/api/games", json={"seed": seed}).json()
+        secret = derive_secret(seed)
+        # Choose a non-trivial guess (not equal to secret); tweak if needed.
+        guess = [0, 1, 2, 3]
+        if guess == secret:
+            guess = [0, 1, 2, 4]
+        # Record the guess so the server has a history.
+        r = http_client.post(f"/api/games/{game['id']}/guesses", json={"code": guess})
+        assert r.status_code == 201
+        b, w = score_guess(secret, guess)
+    
+        # Ask for the hint and compare remaining against a local filter of the space.
+        res = http_client.get(f"/api/games/{game['id']}/hint")
+        assert res.status_code == 200
+        body = res.json()
+        # Locally compute candidates: codes whose score against this guess equals (b,w)
+        space = all_codes()
+        expected_remaining = sum(1 for code in space if score_guess(code, guess) == (b, w))
+&gt;       assert body.get("remaining") == expected_remaining
+E       AssertionError: assert 500 == 252
+E        +  where 500 = &lt;built-in method get of dict object at 0x000001D0C0705440&gt;('remaining')
+E        +    where &lt;built-in method get of dict object at 0x000001D0C0705440&gt; = {'remaining': 500, 'suggestion': [0, 0, 0, 0]}.get
+
+verify\test_api_hint.py:37: AssertionError</failure></testcase><testcase classname="verify.test_api_hint" name="test_c_3_4_two_games_identical_histories_same_suggestion" time="3.803" /><testcase classname="verify.test_api_list_branch" name="test_c_4_1_games_list_returns_summaries_with_guess_counts" time="3.921" /><testcase classname="verify.test_api_list_branch" name="test_c_4_4_branch_endpoint_creates_new_game_with_k_copied_guesses" time="3.911" /><testcase classname="verify.test_ui_games" name="test_c_4_2_games_list_renders_one_row_per_game" time="5.829" /><testcase classname="verify.test_ui_games" name="test_c_4_3_resume_navigates_to_board_with_correct_guess_rows" time="5.480" /><testcase classname="verify.test_ui_play" name="test_c_1_3_submit_one_guess_renders_exactly_one_row" time="5.843" /><testcase classname="verify.test_ui_play" name="test_c_2_5_row_shows_black_and_white_counts_matching_secret" time="5.591" /><testcase classname="verify.test_ui_play" name="test_c_3_3_page_shows_hint_remaining_and_suggestion" time="5.464" /><testcase classname="verify.test_ui_play" name="test_c_4_5_branch_here_button_renders_k_rows" time="6.016" /></testsuite></testsuites>

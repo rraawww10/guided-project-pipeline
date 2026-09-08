@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="5" skipped="0" tests="17" time="76.008" timestamp="2026-09-08T02:18:33.351795+05:30" hostname="HERO"><testcase classname="verify.test_api_core" name="test_c_1_1_post_games_creates_and_echoes_seed" time="3.954" /><testcase classname="verify.test_api_core" name="test_c_1_2_post_guess_persists_code_black_white_unscored_or_present" time="3.690" /><testcase classname="verify.test_api_core" name="test_c_2_1_get_game_returns_seed_and_empty_guesses_for_new_game" time="3.572" /><testcase classname="verify.test_api_core" name="test_c_2_2_post_guess_equal_to_secret_returns_black4_white0" time="3.849"><failure message="AssertionError: assert 0 == 4&#10; +  where 0 = &lt;built-in method get of dict object at 0x00000252627D5DC0&gt;('black')&#10; +    where &lt;built-in method get of dict object at 0x00000252627D5DC0&gt; = {'id': 'cmtrpqv6h0007vci7p116i2pp', 'gameId': 'cmtrpquzd0005vci7pz7ldxxw', 'code': [3, 3, 1, 3], 'black': 0, ...}.get">http_client = &lt;httpx.Client object at 0x00000252625A2C40&gt;
+
+    def test_c_2_2_post_guess_equal_to_secret_returns_black4_white0(http_client):
+        # Choose a seed and compute its secret per spec's xorshift32.
+        seed = 778899
+        game = http_client.post("/api/games", json={"seed": seed}).json()
+        secret = derive_secret(seed)
+        res = http_client.post(f"/api/games/{game['id']}/guesses", json={"code": secret})
+        assert res.status_code == 201
+        body = res.json()
+&gt;       assert body.get("black") == 4
+E       AssertionError: assert 0 == 4
+E        +  where 0 = &lt;built-in method get of dict object at 0x00000252627D5DC0&gt;('black')
+E        +    where &lt;built-in method get of dict object at 0x00000252627D5DC0&gt; = {'id': 'cmtrpqv6h0007vci7p116i2pp', 'gameId': 'cmtrpquzd0005vci7pz7ldxxw', 'code': [3, 3, 1, 3], 'black': 0, ...}.get
+
+verify\test_api_core.py:58: AssertionError</failure></testcase><testcase classname="verify.test_api_core" name="test_c_2_3_permuted_all_colours_black0_white4" time="3.606"><failure message="AssertionError: assert 0 == 4&#10; +  where 0 = &lt;built-in method get of dict object at 0x00000252627B5540&gt;('white')&#10; +    where &lt;built-in method get of dict object at 0x00000252627B5540&gt; = {'id': 'cmtrpqy3e000avci7a2ham7td', 'gameId': 'cmtrpqy0u0008vci7vvkwdfmx', 'code': [3, 5, 4, 2], 'black': 0, ...}.get">http_client = &lt;httpx.Client object at 0x00000252628750F0&gt;
+
+    def test_c_2_3_permuted_all_colours_black0_white4(http_client):
+        # Find a seed whose secret has 4 distinct colours so a derangement exists.
+        seed, secret = find_seed_with_distinct_secret(start=4242)
+        game = http_client.post("/api/games", json={"seed": seed}).json()
+        # A simple rotation is a derangement when all values are distinct.
+        guess = [secret[1], secret[2], secret[3], secret[0]]
+        res = http_client.post(f"/api/games/{game['id']}/guesses", json={"code": guess})
+        assert res.status_code == 201
+        body = res.json()
+        assert body.get("black") == 0
+&gt;       assert body.get("white") == 4
+E       AssertionError: assert 0 == 4
+E        +  where 0 = &lt;built-in method get of dict object at 0x00000252627B5540&gt;('white')
+E        +    where &lt;built-in method get of dict object at 0x00000252627B5540&gt; = {'id': 'cmtrpqy3e000avci7a2ham7td', 'gameId': 'cmtrpqy0u0008vci7vvkwdfmx', 'code': [3, 5, 4, 2], 'black': 0, ...}.get
+
+verify\test_api_core.py:72: AssertionError</failure></testcase><testcase classname="verify.test_api_core" name="test_c_2_4_get_game_returns_guesses_with_numeric_scores" time="3.634"><failure message="AssertionError: assert (0 == 4)&#10; +  where 0 = &lt;built-in method get of dict object at 0x00000252627A43C0&gt;('black')&#10; +    where &lt;built-in method get of dict object at 0x00000252627A43C0&gt; = {'id': 'cmtrpr0ux000dvci7sl7rz0xm', 'gameId': 'cmtrpr0qk000bvci7tuvfyd7t', 'code': [4, 0, 5, 1], 'black': 0, ...}.get">http_client = &lt;httpx.Client object at 0x0000025262879130&gt;
+
+    def test_c_2_4_get_game_returns_guesses_with_numeric_scores(http_client):
+        seed = 97531
+        game = http_client.post("/api/games", json={"seed": seed}).json()
+        secret = derive_secret(seed)
+        # Make two guesses: one equal to secret and one permuted/all-colours if possible
+        g1 = secret
+        http_client.post(f"/api/games/{game['id']}/guesses", json={"code": g1})
+        # Second guess: flip first two positions; may reduce blacks
+        g2 = [secret[1], secret[0], secret[2], secret[3]]
+        http_client.post(f"/api/games/{game['id']}/guesses", json={"code": g2})
+    
+        res = http_client.get(f"/api/games/{game['id']}")
+        assert res.status_code == 200
+        body = res.json()
+        guesses = body.get("guesses")
+        assert isinstance(guesses, list) and len(guesses) &gt;= 2
+        # Check scores are numeric and match the scoring function
+        seen = 0
+        for g in guesses:
+            if g.get("code") in (g1, g2):
+                b, w = score_guess(secret, g["code"])  # type: ignore[arg-type]
+                assert isinstance(g.get("black"), int) and isinstance(g.get("white"), int)
+&gt;               assert g.get("black") == b and g.get("white") == w
+E               AssertionError: assert (0 == 4)
+E                +  where 0 = &lt;built-in method get of dict object at 0x00000252627A43C0&gt;('black')
+E                +    where &lt;built-in method get of dict object at 0x00000252627A43C0&gt; = {'id': 'cmtrpr0ux000dvci7sl7rz0xm', 'gameId': 'cmtrpr0qk000bvci7tuvfyd7t', 'code': [4, 0, 5, 1], 'black': 0, ...}.get
+
+verify\test_api_core.py:97: AssertionError</failure></testcase><testcase classname="verify.test_api_hint" name="test_c_3_1_hint_no_guesses_remaining_1296_and_suggestion_zeros" time="3.759" /><testcase classname="verify.test_api_hint" name="test_c_3_2_hint_remaining_matches_consistent_set_for_one_guess" time="3.613"><failure message="AssertionError: assert 16 == 252&#10; +  where 16 = &lt;built-in method get of dict object at 0x00000252626B7100&gt;('remaining')&#10; +    where &lt;built-in method get of dict object at 0x00000252626B7100&gt; = {'remaining': 16, 'suggestion': [4, 4, 4, 4]}.get">http_client = &lt;httpx.Client object at 0x000002526287E470&gt;
+
+    def test_c_3_2_hint_remaining_matches_consistent_set_for_one_guess(http_client):
+        seed = 221144
+        game = http_client.post("/api/games", json={"seed": seed}).json()
+        secret = derive_secret(seed)
+        # Choose a non-trivial guess (not equal to secret); tweak if needed.
+        guess = [0, 1, 2, 3]
+        if guess == secret:
+            guess = [0, 1, 2, 4]
+        # Record the guess so the server has a history.
+        r = http_client.post(f"/api/games/{game['id']}/guesses", json={"code": guess})
+        assert r.status_code == 201
+        b, w = score_guess(secret, guess)
+    
+        # Ask for the hint and compare remaining against a local filter of the space.
+        res = http_client.get(f"/api/games/{game['id']}/hint")
+        assert res.status_code == 200
+        body = res.json()
+        # Locally compute candidates: codes whose score against this guess equals (b,w)
+        space = all_codes()
+        expected_remaining = sum(1 for code in space if score_guess(code, guess) == (b, w))
+&gt;       assert body.get("remaining") == expected_remaining
+E       AssertionError: assert 16 == 252
+E        +  where 16 = &lt;built-in method get of dict object at 0x00000252626B7100&gt;('remaining')
+E        +    where &lt;built-in method get of dict object at 0x00000252626B7100&gt; = {'remaining': 16, 'suggestion': [4, 4, 4, 4]}.get
+
+verify\test_api_hint.py:37: AssertionError</failure></testcase><testcase classname="verify.test_api_hint" name="test_c_3_4_two_games_identical_histories_same_suggestion" time="3.835" /><testcase classname="verify.test_api_list_branch" name="test_c_4_1_games_list_returns_summaries_with_guess_counts" time="4.014" /><testcase classname="verify.test_api_list_branch" name="test_c_4_4_branch_endpoint_creates_new_game_with_k_copied_guesses" time="3.941" /><testcase classname="verify.test_ui_games" name="test_c_4_2_games_list_renders_one_row_per_game" time="5.669" /><testcase classname="verify.test_ui_games" name="test_c_4_3_resume_navigates_to_board_with_correct_guess_rows" time="5.488" /><testcase classname="verify.test_ui_play" name="test_c_1_3_submit_one_guess_renders_exactly_one_row" time="6.435" /><testcase classname="verify.test_ui_play" name="test_c_2_5_row_shows_black_and_white_counts_matching_secret" time="5.514"><failure message="AssertionError: assert '0' == '4'&#10;  &#10;  - 4&#10;  + 0">page = &lt;Page url='http://127.0.0.1:64015/?game=cmtrprx2c001svci71bbxx973'&gt;
+base_url = 'http://127.0.0.1:64015'
+
+    def test_c_2_5_row_shows_black_and_white_counts_matching_secret(page, base_url: str):
+        # Choose a seed and compute its secret, then submit that exact guess.
+        seed = 3002
+        secret = derive_secret(seed)
+        _ui_new_game(page, base_url, seed)
+        _ui_pick_code(page, secret)
+        _ui_submit_guess(page)
+        # Expect black=4 and white=0 shown in their testids
+        _expect_guess_rows(page, 1)
+        blk = page.get_by_test_id("score-black").inner_text().strip()
+        wht = page.get_by_test_id("score-white").inner_text().strip()
+&gt;       assert blk == "4"
+E       AssertionError: assert '0' == '4'
+E         
+E         - 4
+E         + 0
+
+verify\test_ui_play.py:66: AssertionError</failure></testcase><testcase classname="verify.test_ui_play" name="test_c_3_3_page_shows_hint_remaining_and_suggestion" time="5.099" /><testcase classname="verify.test_ui_play" name="test_c_4_5_branch_here_button_renders_k_rows" time="5.987" /></testsuite></testsuites>

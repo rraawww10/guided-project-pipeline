@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="17" time="104.112" timestamp="2026-09-08T02:33:26.330465+05:30" hostname="HERO"><testcase classname="verify.test_api_core" name="test_c_1_1_post_games_creates_and_echoes_seed" time="3.489" /><testcase classname="verify.test_api_core" name="test_c_1_2_post_guess_persists_code_black_white_unscored_or_present" time="3.702" /><testcase classname="verify.test_api_core" name="test_c_2_1_get_game_returns_seed_and_empty_guesses_for_new_game" time="3.683" /><testcase classname="verify.test_api_core" name="test_c_2_2_post_guess_equal_to_secret_returns_black4_white0" time="3.592" /><testcase classname="verify.test_api_core" name="test_c_2_3_permuted_all_colours_black0_white4" time="3.541" /><testcase classname="verify.test_api_core" name="test_c_2_4_get_game_returns_guesses_with_numeric_scores" time="3.909" /><testcase classname="verify.test_api_hint" name="test_c_3_1_hint_no_guesses_remaining_1296_and_suggestion_zeros" time="3.776" /><testcase classname="verify.test_api_hint" name="test_c_3_2_hint_remaining_matches_consistent_set_for_one_guess" time="3.529" /><testcase classname="verify.test_api_hint" name="test_c_3_4_two_games_identical_histories_same_suggestion" time="3.829" /><testcase classname="verify.test_api_list_branch" name="test_c_4_1_games_list_returns_summaries_with_guess_counts" time="3.899" /><testcase classname="verify.test_api_list_branch" name="test_c_4_4_branch_endpoint_creates_new_game_with_k_copied_guesses" time="3.985" /><testcase classname="verify.test_ui_games" name="test_c_4_2_games_list_renders_one_row_per_game" time="5.084" /><testcase classname="verify.test_ui_games" name="test_c_4_3_resume_navigates_to_board_with_correct_guess_rows" time="5.000" /><testcase classname="verify.test_ui_play" name="test_c_1_3_submit_one_guess_renders_exactly_one_row" time="5.509" /><testcase classname="verify.test_ui_play" name="test_c_2_5_row_shows_black_and_white_counts_matching_secret" time="5.456" /><testcase classname="verify.test_ui_play" name="test_c_3_3_page_shows_hint_remaining_and_suggestion" time="36.067"><failure message="playwright._impl._errors.TimeoutError: Page.wait_for_selector: Timeout 30000ms exceeded.&#10;Call log:&#10;  - waiting for locator(&quot;[data-testid=\&quot;hint-remaining\&quot;]&quot;) to be visible&#10;    62 × locator resolved to hidden &lt;span data-testid=&quot;hint-remaining&quot;&gt;&lt;/span&gt;">page = &lt;Page url='http://127.0.0.1:56734/?game=cmtrqb45f001vtw870ju8afm8'&gt;
+base_url = 'http://127.0.0.1:56734'
+
+    def test_c_3_3_page_shows_hint_remaining_and_suggestion(page, base_url: str):
+        # New game, no guesses yet.
+        seed = 3003
+        _ui_new_game(page, base_url, seed)
+        # Expect hint remaining and suggestion elements to exist with expected values.
+&gt;       page.wait_for_selector('[data-testid="hint-remaining"]')
+
+verify\test_ui_play.py:77: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+.pipeline\venv\Lib\site-packages\playwright\sync_api\_generated.py:9033: in wait_for_selector
+    self._sync(
+.pipeline\venv\Lib\site-packages\playwright\_impl\_page.py:427: in wait_for_selector
+    return await self._main_frame.wait_for_selector(**locals_to_params(locals()))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.pipeline\venv\Lib\site-packages\playwright\_impl\_frame.py:394: in wait_for_selector
+    await self._channel.send(
+.pipeline\venv\Lib\site-packages\playwright\_impl\_connection.py:76: in send
+    return await self._connection.wrap_api_call(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = &lt;playwright._impl._connection.Connection object at 0x0000025CC8DE4D60&gt;
+cb = &lt;function Channel.send.&lt;locals&gt;.&lt;lambda&gt; at 0x0000025CC8E4D170&gt;
+is_internal = False, title = None
+
+    async def wrap_api_call(
+        self, cb: Callable[[], Any], is_internal: bool = False, title: str = None
+    ) -&gt; Any:
+        if self._api_zone.get():
+            return await cb()
+        task = asyncio.current_task(self._loop)
+        parsed_st = _attach_api_call_information(
+            getattr(task, "__pw_stack__", None) or _capture_stack_trace(),
+            is_internal,
+            title,
+        )
+        self._api_zone.set(parsed_st)
+        try:
+            return await cb()
+        except Exception as error:
+&gt;           raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+E           playwright._impl._errors.TimeoutError: Page.wait_for_selector: Timeout 30000ms exceeded.
+E           Call log:
+E             - waiting for locator("[data-testid=\"hint-remaining\"]") to be visible
+E               62 × locator resolved to hidden &lt;span data-testid="hint-remaining"&gt;&lt;/span&gt;
+
+.pipeline\venv\Lib\site-packages\playwright\_impl\_connection.py:632: TimeoutError</failure></testcase><testcase classname="verify.test_ui_play" name="test_c_4_5_branch_here_button_renders_k_rows" time="5.378" /></testsuite></testsuites>

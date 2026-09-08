@@ -1,0 +1,156 @@
+{
+  "ok": true,
+  "verdict": "approve-eligible",
+  "spec_hash": "633f15079cf52ab98a384c1d6a0e39838229c17752e161c0765fc4c8021c7126",
+  "findings": [
+    {
+      "id": "A1",
+      "title": "What is \u201cthe last row\u201d in GET /api/games/[id]?",
+      "section": "blocking",
+      "owner": "test-runner",
+      "line": "\"POSTing the exact secret for a game (computed by secretFromSeed) produces black=4 and white=0 on the last row in GET /api/games/[id].\"",
+      "where": "spec.md, Session 2, criteria c-2-1 to c-2-3",
+      "line_key": "285e9c5e2ec99633",
+      "subject": [
+        "c-2-1",
+        "c-2-3"
+      ],
+      "blocking": true,
+      "owner_declared": "test-runner",
+      "owner_valid": true,
+      "owner_downgraded": null,
+      "fail_open": false,
+      "caught_by": "step 6 - the Builder/test-runner loop fixes this for free",
+      "must_fix_now": false
+    },
+    {
+      "id": "A2",
+      "title": "ep-guess-create response shape in S1: are black/white present?",
+      "section": "blocking",
+      "owner": "test-runner",
+      "line": "spec.md c-1-4: \"POST /api/games/[id]/guesses with a 4\u2011number code returns 201 with a JSON object whose code matches the body and includes a turn number.\"",
+      "where": "spec.md, Session 1, c-1-4; spec.json, endpoints[ep-guess-create].response",
+      "line_key": "3b01bd6f517971db",
+      "subject": [
+        "c-1-4",
+        "ep-guess-create"
+      ],
+      "blocking": true,
+      "owner_declared": "test-runner",
+      "owner_valid": true,
+      "owner_downgraded": null,
+      "fail_open": false,
+      "caught_by": "step 6 - the Builder/test-runner loop fixes this for free",
+      "must_fix_now": false
+    },
+    {
+      "id": "W1",
+      "title": "What happens when POST /api/games omits seed?",
+      "section": "worth a look",
+      "owner": "test-runner",
+      "line": "\"Request: { seed?: number }\"",
+      "where": "spec.md, Endpoints, ep-game-create",
+      "line_key": "00913eb33a0e8c9a",
+      "subject": [
+        "ep-game-create"
+      ],
+      "blocking": false,
+      "owner_declared": "test-runner",
+      "owner_valid": true,
+      "owner_downgraded": null,
+      "fail_open": false,
+      "caught_by": "step 6 - the Builder/test-runner loop fixes this for free",
+      "must_fix_now": false
+    },
+    {
+      "id": "W2",
+      "title": "UI list order vs replay prefix",
+      "section": "worth a look",
+      "owner": "test-runner",
+      "line": "\"Map the game\u2019s stored guesses into `rows` with one entry per guess in most\u2011recent\u2011first order\" and \"moving the Turn control to K shows exactly K guess rows from the start of the game.\"",
+      "where": "spec.md, Session 2, cut-ui-render-rows hint; spec.md, Session 4, c-4-3",
+      "line_key": "d225eaf84fdd7e83",
+      "subject": [
+        "c-4-3",
+        "cut-ui-render-rows"
+      ],
+      "blocking": false,
+      "owner_declared": "test-runner",
+      "owner_valid": true,
+      "owner_downgraded": null,
+      "fail_open": false,
+      "caught_by": "step 6 - the Builder/test-runner loop fixes this for free",
+      "must_fix_now": false
+    },
+    {
+      "id": "W3",
+      "title": "Games list sorting",
+      "section": "worth a look",
+      "owner": "test-runner",
+      "line": "\"newest first.\"",
+      "where": "spec.json, Session 4, cut-ui-games-list-rows hint",
+      "line_key": "a1b5dd5514b31d3f",
+      "subject": [
+        "cut-ui-games-list-rows"
+      ],
+      "blocking": false,
+      "owner_declared": "test-runner",
+      "owner_valid": true,
+      "owner_downgraded": null,
+      "fail_open": false,
+      "caught_by": "step 6 - the Builder/test-runner loop fixes this for free",
+      "must_fix_now": false
+    },
+    {
+      "id": "W4",
+      "title": "Branch control label vs element name",
+      "section": "worth a look",
+      "owner": "test-runner",
+      "line": "Elements: \"Branch button\"; criterion: \"clicking \\\"Branch from turn K\\\" creates a new game\u2026\"",
+      "where": "spec.md, Screens (sc-board elements) and Session 4, c-4-4",
+      "line_key": "191755a254ba73ee",
+      "subject": [
+        "c-4-4",
+        "sc-board"
+      ],
+      "blocking": false,
+      "owner_declared": "test-runner",
+      "owner_valid": true,
+      "owner_downgraded": null,
+      "fail_open": false,
+      "caught_by": "step 6 - the Builder/test-runner loop fixes this for free",
+      "must_fix_now": false
+    },
+    {
+      "id": "W5",
+      "title": "Replay slider indexing (off-by-one)",
+      "section": "worth a look",
+      "owner": "test-runner",
+      "line": "\"moving the Turn control to K shows exactly K guess rows from the start of the game.\"",
+      "where": "spec.md, Session 4, c-4-3",
+      "line_key": "ec8db0ad7e55ed69",
+      "subject": [
+        "c-4-3"
+      ],
+      "blocking": false,
+      "owner_declared": "test-runner",
+      "owner_valid": true,
+      "owner_downgraded": null,
+      "fail_open": false,
+      "caught_by": "step 6 - the Builder/test-runner loop fixes this for free",
+      "must_fix_now": false
+    }
+  ],
+  "counts": {
+    "blocking": 2,
+    "worth_a_look": 5,
+    "unowned_blocking": 0
+  },
+  "reasons": [
+    "2 blocking finding(s), all owned by a downstream checker; 5 worth a look. Nothing here escapes to the shipped project."
+  ],
+  "rule": "reject when any blocking finding is owned by 'nothing'; approve when every remaining finding sits in a column a downstream checker owns. An owner that can pass by not running is owned only conditionally: it approves, and the confirmation it actually ran is listed in verify_later",
+  "reviewed_spec_hash": "633f15079cf52ab98a384c1d6a0e39838229c17752e161c0765fc4c8021c7126",
+  "drift": [],
+  "verify_later": []
+}

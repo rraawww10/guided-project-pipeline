@@ -1,0 +1,329 @@
+{
+  "ok": false,
+  "ungraded_tasks": [
+    "cut-ui-append-guess"
+  ],
+  "inconclusive_tasks": [],
+  "target": "app",
+  "checked": 16,
+  "of_total": 16,
+  "seconds": 2052.6,
+  "results": [
+    {
+      "task": "cut-ep-games-branch",
+      "ok": true,
+      "inconclusive": false,
+      "lines_removed": 7,
+      "graded_by": [
+        "c-4-4"
+      ],
+      "went_red": [
+        "c-4-4"
+      ],
+      "stayed_green": [],
+      "collateral": [
+        "c-4-5"
+      ],
+      "why": "removing it turns its requirements red"
+    },
+    {
+      "task": "cut-ep-games-create-save",
+      "ok": true,
+      "inconclusive": false,
+      "lines_removed": 4,
+      "graded_by": [
+        "c-1-1"
+      ],
+      "went_red": [
+        "c-1-1"
+      ],
+      "stayed_green": [],
+      "collateral": [
+        "c-1-2",
+        "c-1-3",
+        "c-2-1",
+        "c-2-2",
+        "c-2-3",
+        "c-2-4",
+        "c-2-5",
+        "c-3-1",
+        "c-3-2",
+        "c-3-3",
+        "c-3-4",
+        "c-4-1",
+        "c-4-2",
+        "c-4-3",
+        "c-4-4",
+        "c-4-5"
+      ],
+      "why": "removing it turns its requirements red - every criterion in the project declares this task, so no criterion could stay green to prove the harness was alive; another mutant in this run produced a passing criterion, which proves it, and this mutant reported real per-test outcomes rather than the all-missing shape"
+    },
+    {
+      "task": "cut-ep-games-list",
+      "ok": true,
+      "inconclusive": false,
+      "lines_removed": 6,
+      "graded_by": [
+        "c-4-1"
+      ],
+      "went_red": [
+        "c-4-1"
+      ],
+      "stayed_green": [],
+      "collateral": [
+        "c-4-2",
+        "c-4-3",
+        "c-4-5"
+      ],
+      "why": "removing it turns its requirements red"
+    },
+    {
+      "task": "cut-ep-guesses-create-save",
+      "ok": true,
+      "inconclusive": false,
+      "lines_removed": 3,
+      "graded_by": [
+        "c-1-2"
+      ],
+      "went_red": [
+        "c-1-2"
+      ],
+      "stayed_green": [],
+      "collateral": [
+        "c-1-3",
+        "c-2-2",
+        "c-2-3",
+        "c-2-4",
+        "c-2-5",
+        "c-3-2",
+        "c-4-1",
+        "c-4-3",
+        "c-4-4",
+        "c-4-5"
+      ],
+      "why": "removing it turns its requirements red"
+    },
+    {
+      "task": "cut-ep-hint-build",
+      "ok": true,
+      "inconclusive": false,
+      "lines_removed": 5,
+      "graded_by": [
+        "c-3-1",
+        "c-3-2",
+        "c-3-4"
+      ],
+      "went_red": [
+        "c-3-1",
+        "c-3-2"
+      ],
+      "stayed_green": [
+        "c-3-4"
+      ],
+      "collateral": [
+        "c-3-3"
+      ],
+      "why": "removing it turns its requirements red"
+    },
+    {
+      "task": "cut-ep-score-on-submit",
+      "ok": true,
+      "inconclusive": false,
+      "lines_removed": 2,
+      "graded_by": [
+        "c-2-2",
+        "c-2-3",
+        "c-2-4"
+      ],
+      "went_red": [
+        "c-2-2",
+        "c-2-3",
+        "c-2-4"
+      ],
+      "stayed_green": [],
+      "collateral": [
+        "c-2-5",
+        "c-3-2"
+      ],
+      "why": "removing it turns its requirements red"
+    },
+    {
+      "task": "cut-filter-candidates",
+      "ok": true,
+      "inconclusive": false,
+      "lines_removed": 7,
+      "graded_by": [
+        "c-3-1",
+        "c-3-2"
+      ],
+      "went_red": [
+        "c-3-1",
+        "c-3-2"
+      ],
+      "stayed_green": [],
+      "collateral": [
+        "c-3-3"
+      ],
+      "why": "removing it turns its requirements red"
+    },
+    {
+      "task": "cut-next-candidate",
+      "ok": true,
+      "inconclusive": false,
+      "lines_removed": 7,
+      "graded_by": [
+        "c-3-1",
+        "c-3-4"
+      ],
+      "went_red": [
+        "c-3-1"
+      ],
+      "stayed_green": [
+        "c-3-4"
+      ],
+      "collateral": [
+        "c-3-3"
+      ],
+      "why": "removing it turns its requirements red"
+    },
+    {
+      "task": "cut-score-count-black",
+      "ok": true,
+      "inconclusive": false,
+      "lines_removed": 3,
+      "graded_by": [
+        "c-2-2",
+        "c-2-4"
+      ],
+      "went_red": [
+        "c-2-2",
+        "c-2-4"
+      ],
+      "stayed_green": [],
+      "collateral": [
+        "c-2-5",
+        "c-3-2"
+      ],
+      "why": "removing it turns its requirements red"
+    },
+    {
+      "task": "cut-score-count-white",
+      "ok": true,
+      "inconclusive": false,
+      "lines_removed": 6,
+      "graded_by": [
+        "c-2-3",
+        "c-2-4"
+      ],
+      "went_red": [
+        "c-2-3",
+        "c-2-4"
+      ],
+      "stayed_green": [],
+      "collateral": [
+        "c-3-2"
+      ],
+      "why": "removing it turns its requirements red"
+    },
+    {
+      "task": "cut-ui-append-guess",
+      "ok": false,
+      "inconclusive": false,
+      "lines_removed": 1,
+      "graded_by": [
+        "c-1-3"
+      ],
+      "went_red": [],
+      "stayed_green": [
+        "c-1-3"
+      ],
+      "collateral": [],
+      "why": "NOT GRADED: every requirement that declares this task still passes with it removed, so a student can leave it empty"
+    },
+    {
+      "task": "cut-ui-branch-here",
+      "ok": true,
+      "inconclusive": false,
+      "lines_removed": 1,
+      "graded_by": [
+        "c-4-5"
+      ],
+      "went_red": [
+        "c-4-5"
+      ],
+      "stayed_green": [],
+      "collateral": [],
+      "why": "removing it turns its requirements red"
+    },
+    {
+      "task": "cut-ui-games-fetch",
+      "ok": true,
+      "inconclusive": false,
+      "lines_removed": 1,
+      "graded_by": [
+        "c-4-2"
+      ],
+      "went_red": [
+        "c-4-2"
+      ],
+      "stayed_green": [],
+      "collateral": [
+        "c-4-3",
+        "c-4-5"
+      ],
+      "why": "removing it turns its requirements red"
+    },
+    {
+      "task": "cut-ui-hint-fetch",
+      "ok": true,
+      "inconclusive": false,
+      "lines_removed": 1,
+      "graded_by": [
+        "c-3-3"
+      ],
+      "went_red": [
+        "c-3-3"
+      ],
+      "stayed_green": [],
+      "collateral": [],
+      "why": "removing it turns its requirements red"
+    },
+    {
+      "task": "cut-ui-render-scores",
+      "ok": true,
+      "inconclusive": false,
+      "lines_removed": 12,
+      "graded_by": [
+        "c-2-5"
+      ],
+      "went_red": [
+        "c-2-5"
+      ],
+      "stayed_green": [],
+      "collateral": [
+        "c-1-3",
+        "c-4-3",
+        "c-4-5"
+      ],
+      "why": "removing it turns its requirements red"
+    },
+    {
+      "task": "cut-ui-resume-select",
+      "ok": true,
+      "inconclusive": false,
+      "lines_removed": 1,
+      "graded_by": [
+        "c-4-3"
+      ],
+      "went_red": [
+        "c-4-3"
+      ],
+      "stayed_green": [],
+      "collateral": [
+        "c-4-5"
+      ],
+      "why": "removing it turns its requirements red"
+    }
+  ],
+  "rule": "every student task must turn at least one of its requirements red when it alone is removed"
+}

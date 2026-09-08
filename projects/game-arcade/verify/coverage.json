@@ -1,0 +1,19 @@
+{
+  "c-1-1": {"test": "verify/test_api_core.py::test_c_1_1_post_games_creates_and_echoes_seed"},
+  "c-1-2": {"test": "verify/test_api_core.py::test_c_1_2_post_guess_persists_code_black_white_unscored_or_present"},
+  "c-1-3": {"test": "verify/test_ui_play.py::test_c_1_3_submit_one_guess_renders_exactly_one_row"},
+  "c-2-1": {"test": "verify/test_api_core.py::test_c_2_1_get_game_returns_seed_and_empty_guesses_for_new_game"},
+  "c-2-2": {"test": "verify/test_api_core.py::test_c_2_2_post_guess_equal_to_secret_returns_black4_white0"},
+  "c-2-3": {"test": "verify/test_api_core.py::test_c_2_3_permuted_all_colours_black0_white4"},
+  "c-2-4": {"test": "verify/test_api_core.py::test_c_2_4_get_game_returns_guesses_with_numeric_scores"},
+  "c-2-5": {"test": "verify/test_ui_play.py::test_c_2_5_row_shows_black_and_white_counts_matching_secret"},
+  "c-3-1": {"test": "verify/test_api_hint.py::test_c_3_1_hint_no_guesses_remaining_1296_and_suggestion_zeros"},
+  "c-3-2": {"test": "verify/test_api_hint.py::test_c_3_2_hint_remaining_matches_consistent_set_for_one_guess"},
+  "c-3-3": {"test": "verify/test_ui_play.py::test_c_3_3_page_shows_hint_remaining_and_suggestion"},
+  "c-3-4": {"test": "verify/test_api_hint.py::test_c_3_4_two_games_identical_histories_same_suggestion"},
+  "c-4-1": {"test": "verify/test_api_list_branch.py::test_c_4_1_games_list_returns_summaries_with_guess_counts"},
+  "c-4-2": {"test": "verify/test_ui_games.py::test_c_4_2_games_list_renders_one_row_per_game"},
+  "c-4-3": {"test": "verify/test_ui_games.py::test_c_4_3_resume_navigates_to_board_with_correct_guess_rows"},
+  "c-4-4": {"test": "verify/test_api_list_branch.py::test_c_4_4_branch_endpoint_creates_new_game_with_k_copied_guesses"},
+  "c-4-5": {"test": "verify/test_ui_play.py::test_c_4_5_branch_here_button_renders_k_rows"}
+}

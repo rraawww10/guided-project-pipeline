@@ -1,0 +1,181 @@
+{
+  "ok": true,
+  "errors": [],
+  "warnings": [
+    {
+      "code": "W112",
+      "where": "session 1",
+      "message": "estimated 49.2 teaching minutes against a 40 minute cap. Nothing before step 9 measures this, so decide it here: 3 cuts, 3 builds, 3 concepts plus the project setup."
+    },
+    {
+      "code": "W112",
+      "where": "session 2",
+      "message": "estimated 44.9 teaching minutes against a 40 minute cap. Nothing before step 9 measures this, so decide it here: 4 cuts, 1 builds, 3 concepts."
+    },
+    {
+      "code": "W112",
+      "where": "session 3",
+      "message": "estimated 46.2 teaching minutes against a 40 minute cap. Nothing before step 9 measures this, so decide it here: 4 cuts, 2 builds, 3 concepts."
+    },
+    {
+      "code": "W112",
+      "where": "session 4",
+      "message": "estimated 49 teaching minutes against a 40 minute cap. Nothing before step 9 measures this, so decide it here: 5 cuts, 2 builds, 2 concepts."
+    }
+  ],
+  "counts": {
+    "errors": 0,
+    "warnings": 4
+  },
+  "session_minutes": [
+    {
+      "n": 1,
+      "minutes": 49.2,
+      "cuts": 3,
+      "builds": 3,
+      "concepts": 3,
+      "carries_setup": true,
+      "over_cap": true,
+      "weighted": true,
+      "cut_minutes": [
+        {
+          "id": "cut-ep-guesses-create-save",
+          "minutes": 7.7,
+          "decisions": 1,
+          "hint_words": 32
+        },
+        {
+          "id": "cut-ui-append-guess",
+          "minutes": 6.0,
+          "decisions": 0,
+          "hint_words": 16
+        },
+        {
+          "id": "cut-ep-games-create-save",
+          "minutes": 6.0,
+          "decisions": 0,
+          "hint_words": 23
+        }
+      ],
+      "largest_cut_share": 0.39
+    },
+    {
+      "n": 2,
+      "minutes": 44.9,
+      "cuts": 4,
+      "builds": 1,
+      "concepts": 3,
+      "carries_setup": false,
+      "over_cap": true,
+      "weighted": true,
+      "cut_minutes": [
+        {
+          "id": "cut-score-count-white",
+          "minutes": 7.7,
+          "decisions": 1,
+          "hint_words": 26
+        },
+        {
+          "id": "cut-ep-score-on-submit",
+          "minutes": 7.7,
+          "decisions": 1,
+          "hint_words": 31
+        },
+        {
+          "id": "cut-ui-render-scores",
+          "minutes": 6.0,
+          "decisions": 0,
+          "hint_words": 24
+        },
+        {
+          "id": "cut-score-count-black",
+          "minutes": 6.0,
+          "decisions": 0,
+          "hint_words": 18
+        }
+      ],
+      "largest_cut_share": 0.28
+    },
+    {
+      "n": 3,
+      "minutes": 46.2,
+      "cuts": 4,
+      "builds": 2,
+      "concepts": 3,
+      "carries_setup": false,
+      "over_cap": true,
+      "weighted": true,
+      "cut_minutes": [
+        {
+          "id": "cut-next-candidate",
+          "minutes": 7.7,
+          "decisions": 1,
+          "hint_words": 26
+        },
+        {
+          "id": "cut-ui-hint-fetch",
+          "minutes": 6.0,
+          "decisions": 0,
+          "hint_words": 19
+        },
+        {
+          "id": "cut-filter-candidates",
+          "minutes": 6.0,
+          "decisions": 0,
+          "hint_words": 22
+        },
+        {
+          "id": "cut-ep-hint-build",
+          "minutes": 6.0,
+          "decisions": 0,
+          "hint_words": 25
+        }
+      ],
+      "largest_cut_share": 0.3
+    },
+    {
+      "n": 4,
+      "minutes": 49.0,
+      "cuts": 5,
+      "builds": 2,
+      "concepts": 2,
+      "carries_setup": false,
+      "over_cap": true,
+      "weighted": true,
+      "cut_minutes": [
+        {
+          "id": "cut-ui-resume-select",
+          "minutes": 6.0,
+          "decisions": 0,
+          "hint_words": 20
+        },
+        {
+          "id": "cut-ui-games-fetch",
+          "minutes": 6.0,
+          "decisions": 0,
+          "hint_words": 17
+        },
+        {
+          "id": "cut-ui-branch-here",
+          "minutes": 6.0,
+          "decisions": 0,
+          "hint_words": 27
+        },
+        {
+          "id": "cut-ep-games-list",
+          "minutes": 6.0,
+          "decisions": 0,
+          "hint_words": 22
+        },
+        {
+          "id": "cut-ep-games-branch",
+          "minutes": 6.0,
+          "decisions": 0,
+          "hint_words": 34
+        }
+      ],
+      "largest_cut_share": 0.2
+    }
+  ],
+  "spec_hash": "ef4030f864d7e323df9fdf474b29ef421e03784988d7aed58523607d3799443a"
+}

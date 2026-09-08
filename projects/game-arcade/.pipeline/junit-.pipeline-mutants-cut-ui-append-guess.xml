@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="17" time="115.702" timestamp="2026-09-08T02:49:19.687153+05:30" hostname="HERO"><testcase classname="verify.test_api_core" name="test_c_1_1_post_games_creates_and_echoes_seed" time="3.946" /><testcase classname="verify.test_api_core" name="test_c_1_2_post_guess_persists_code_black_white_unscored_or_present" time="3.864" /><testcase classname="verify.test_api_core" name="test_c_2_1_get_game_returns_seed_and_empty_guesses_for_new_game" time="3.641" /><testcase classname="verify.test_api_core" name="test_c_2_2_post_guess_equal_to_secret_returns_black4_white0" time="3.882" /><testcase classname="verify.test_api_core" name="test_c_2_3_permuted_all_colours_black0_white4" time="3.788" /><testcase classname="verify.test_api_core" name="test_c_2_4_get_game_returns_guesses_with_numeric_scores" time="3.927" /><testcase classname="verify.test_api_hint" name="test_c_3_1_hint_no_guesses_remaining_1296_and_suggestion_zeros" time="3.406" /><testcase classname="verify.test_api_hint" name="test_c_3_2_hint_remaining_matches_consistent_set_for_one_guess" time="3.741" /><testcase classname="verify.test_api_hint" name="test_c_3_4_two_games_identical_histories_same_suggestion" time="4.304" /><testcase classname="verify.test_api_list_branch" name="test_c_4_1_games_list_returns_summaries_with_guess_counts" time="5.258" /><testcase classname="verify.test_api_list_branch" name="test_c_4_4_branch_endpoint_creates_new_game_with_k_copied_guesses" time="5.514" /><testcase classname="verify.test_ui_games" name="test_c_4_2_games_list_renders_one_row_per_game" time="7.233" /><testcase classname="verify.test_ui_games" name="test_c_4_3_resume_navigates_to_board_with_correct_guess_rows" time="6.722" /><testcase classname="verify.test_ui_play" name="test_c_1_3_submit_one_guess_renders_exactly_one_row" time="22.465"><failure message="AssertionError: Locator expected to have count '1'&#10;Actual value: 0 &#10;Call log:&#10;  - Expect &quot;to_have_count&quot; with timeout 15000ms&#10;  - waiting for locator(&quot;[data-testid^=\&quot;guess-row-\&quot;]&quot;)&#10;    33 × locator resolved to 0 elements&#10;       - unexpected value &quot;0&quot;">page = &lt;Page url='http://127.0.0.1:51339/?game=cmtrqvhuu001p11f816vwu81b'&gt;
+base_url = 'http://127.0.0.1:51339'
+
+    def test_c_1_3_submit_one_guess_renders_exactly_one_row(page, base_url: str):
+        seed = 3001
+        _ui_new_game(page, base_url, seed)
+        # Capture the created game id from the URL.
+        m = re.search(r"[?&amp;]game=([^&amp;#]+)", page.url)
+        assert m, "game id not found in URL after New Game"
+        game_id = m.group(1)
+    
+        # Intercept the next GET /api/games/:id to return an empty guesses array.
+        # This forces the UI to show the just-submitted row WITHOUT relying on a
+        # refetch, which is what cut-ui-append-guess is meant to implement.
+        used = {"done": False}
+    
+        def handle(route, request):
+            if (not used["done"]) and request.method == "GET" and request.url.endswith(f"/api/games/{game_id}"):
+                used["done"] = True
+                body = json.dumps({"id": game_id, "seed": seed, "guesses": []})
+                route.fulfill(status=200, content_type="application/json", body=body)
+            else:
+                route.continue_()
+    
+        page.route("**/api/games/*", handle)
+    
+        code = [0, 1, 2, 3]
+        _ui_pick_code(page, code)
+        _ui_submit_guess(page)
+    
+        # Assert exactly one prior guess row renders, driven by the client append.
+&gt;       _expect_guess_rows(page, 1)
+
+verify\test_ui_play.py:73: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+page = &lt;Page url='http://127.0.0.1:51339/?game=cmtrqvhuu001p11f816vwu81b'&gt;
+n = 1
+
+    def _expect_guess_rows(page, n: int) -&gt; None:
+&gt;       expect(_guess_rows(page)).to_have_count(n, timeout=UI_TIMEOUT)
+E       AssertionError: Locator expected to have count '1'
+E       Actual value: 0 
+E       Call log:
+E         - Expect "to_have_count" with timeout 15000ms
+E         - waiting for locator("[data-testid^=\"guess-row-\"]")
+E           33 × locator resolved to 0 elements
+E              - unexpected value "0"
+
+verify\test_ui_play.py:40: AssertionError</failure></testcase><testcase classname="verify.test_ui_play" name="test_c_2_5_row_shows_black_and_white_counts_matching_secret" time="21.746"><failure message="AssertionError: Locator expected to have count '1'&#10;Actual value: 0 &#10;Call log:&#10;  - Expect &quot;to_have_count&quot; with timeout 15000ms&#10;  - waiting for locator(&quot;[data-testid^=\&quot;guess-row-\&quot;]&quot;)&#10;    33 × locator resolved to 0 elements&#10;       - unexpected value &quot;0&quot;">page = &lt;Page url='http://127.0.0.1:51339/?game=cmtrqvzdq001s11f8julci9hg'&gt;
+base_url = 'http://127.0.0.1:51339'
+
+    def test_c_2_5_row_shows_black_and_white_counts_matching_secret(page, base_url: str):
+        # Choose a seed and compute its secret, then submit that exact guess.
+        seed = 3002
+        secret = derive_secret(seed)
+        _ui_new_game(page, base_url, seed)
+        _ui_pick_code(page, secret)
+        _ui_submit_guess(page)
+        # Expect black=4 and white=0 shown in their testids
+&gt;       _expect_guess_rows(page, 1)
+
+verify\test_ui_play.py:91: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+page = &lt;Page url='http://127.0.0.1:51339/?game=cmtrqvzdq001s11f8julci9hg'&gt;
+n = 1
+
+    def _expect_guess_rows(page, n: int) -&gt; None:
+&gt;       expect(_guess_rows(page)).to_have_count(n, timeout=UI_TIMEOUT)
+E       AssertionError: Locator expected to have count '1'
+E       Actual value: 0 
+E       Call log:
+E         - Expect "to_have_count" with timeout 15000ms
+E         - waiting for locator("[data-testid^=\"guess-row-\"]")
+E           33 × locator resolved to 0 elements
+E              - unexpected value "0"
+
+verify\test_ui_play.py:40: AssertionError</failure></testcase><testcase classname="verify.test_ui_play" name="test_c_3_3_page_shows_hint_remaining_and_suggestion" time="5.075" /><testcase classname="verify.test_ui_play" name="test_c_4_5_branch_here_button_renders_k_rows" time="6.892" /></testsuite></testsuites>

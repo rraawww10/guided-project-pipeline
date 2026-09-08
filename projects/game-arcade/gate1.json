@@ -1,0 +1,193 @@
+{
+  "ok": true,
+  "verdict": "approve-eligible",
+  "spec_hash": "ef4030f864d7e323df9fdf474b29ef421e03784988d7aed58523607d3799443a",
+  "findings": [
+    {
+      "id": "A1",
+      "title": "Xorshift32 not fully specified",
+      "section": "blocking",
+      "owner": "test-runner",
+      "line": "\"Secret generation is fixed: start from `Game.seed` as a 32\u2011bit unsigned integer, run xorshift32, and map each successive output to 0..5 by `output % 6`; the first 4 values form the secret.\"",
+      "where": "spec.md, Data model \u2192 Notes",
+      "line_key": "d706e496d8eedff8",
+      "subject": [],
+      "blocking": true,
+      "owner_declared": "test-runner",
+      "owner_valid": true,
+      "owner_downgraded": null,
+      "fail_open": false,
+      "caught_by": "step 6 - the Builder/test-runner loop fixes this for free",
+      "must_fix_now": false
+    },
+    {
+      "id": "A2",
+      "title": "\"Branch Here\" row index vs upto=k is off-by-one ambiguous",
+      "section": "blocking",
+      "owner": "test-runner",
+      "line": "\"Branch Here buttons next to each prior row (data-testid=\\\"branch-here-<n>\\\").\" and \"POST /api/games/:id/branch with body { upto: k } \u2026 GET that game shows exactly k guesses copied\" and \"after clicking the Branch Here button for row k, the page renders exactly k guess rows\"",
+      "where": "spec.md, Screens \u2192 sc-play elements; Session 4 c-4-4 and c-4-5",
+      "line_key": "1dc7ca7fab767303",
+      "subject": [
+        "c-4-4",
+        "c-4-5",
+        "sc-play"
+      ],
+      "blocking": true,
+      "owner_declared": "test-runner",
+      "owner_valid": true,
+      "owner_downgraded": null,
+      "fail_open": false,
+      "caught_by": "step 6 - the Builder/test-runner loop fixes this for free",
+      "must_fix_now": false
+    },
+    {
+      "id": "A3",
+      "title": "\"first k guesses\" ordering basis is unstated",
+      "section": "blocking",
+      "owner": "test-runner",
+      "line": "\"copy the first `upto` guesses into it (including black/white)\"",
+      "where": "spec.md, Session 4 c-4-4",
+      "line_key": "515c05ae3b31cae8",
+      "subject": [
+        "c-4-4"
+      ],
+      "blocking": true,
+      "owner_declared": "test-runner",
+      "owner_valid": true,
+      "owner_downgraded": null,
+      "fail_open": false,
+      "caught_by": "step 6 - the Builder/test-runner loop fixes this for free",
+      "must_fix_now": false
+    },
+    {
+      "id": "A4",
+      "title": "Hint suggestion display format is not pinned",
+      "section": "blocking",
+      "owner": "test-runner",
+      "line": "\"the page shows \u2026 a suggested 4\u2011number guess (data-testid=\\\"hint-suggestion\\\")\" and \"suggestion = [0,0,0,0]\"",
+      "where": "spec.md, Session 3 c-3-3 and c-3-1",
+      "line_key": "546e1cf9274bd5a4",
+      "subject": [
+        "c-3-1",
+        "c-3-3"
+      ],
+      "blocking": true,
+      "owner_declared": "test-runner",
+      "owner_valid": true,
+      "owner_downgraded": null,
+      "fail_open": false,
+      "caught_by": "step 6 - the Builder/test-runner loop fixes this for free",
+      "must_fix_now": false
+    },
+    {
+      "id": "W1",
+      "title": "\"reflecting the chosen colours\" lacks a stable assertion hook",
+      "section": "worth a look",
+      "owner": "test-runner",
+      "line": "\"shows 4 peg slots reflecting the chosen colours\"",
+      "where": "spec.md, Session 1 c-1-3",
+      "line_key": "ffcbd36352b2b2de",
+      "subject": [
+        "c-1-3"
+      ],
+      "blocking": false,
+      "owner_declared": "test-runner",
+      "owner_valid": true,
+      "owner_downgraded": null,
+      "fail_open": false,
+      "caught_by": "step 6 - the Builder/test-runner loop fixes this for free",
+      "must_fix_now": false
+    },
+    {
+      "id": "W2",
+      "title": "Null vs omitted fields for unscored guesses",
+      "section": "worth a look",
+      "owner": "test-runner",
+      "line": "\"black/white are null (no scoring yet)\"",
+      "where": "spec.md, Session 1 c-1-2",
+      "line_key": "ffd46c7be9b93124",
+      "subject": [
+        "c-1-2"
+      ],
+      "blocking": false,
+      "owner_declared": "test-runner",
+      "owner_valid": true,
+      "owner_downgraded": null,
+      "fail_open": false,
+      "caught_by": "step 6 - the Builder/test-runner loop fixes this for free",
+      "must_fix_now": false
+    },
+    {
+      "id": "W3",
+      "title": "Row testids are not unique per row",
+      "section": "worth a look",
+      "owner": "test-runner",
+      "line": "\"per\u2011row score badges (data-testid=\\\"score-black\\\" and \\\"score-white\\\")\"",
+      "where": "spec.md, Screens \u2192 sc-play elements; Session 2 c-2-5",
+      "line_key": "ccd6c93208a93571",
+      "subject": [
+        "c-2-5",
+        "sc-play"
+      ],
+      "blocking": false,
+      "owner_declared": "test-runner",
+      "owner_valid": true,
+      "owner_downgraded": null,
+      "fail_open": false,
+      "caught_by": "step 6 - the Builder/test-runner loop fixes this for free",
+      "must_fix_now": false
+    },
+    {
+      "id": "W4",
+      "title": "Session 2 \"Builds\" vs criteria targets",
+      "section": "worth a look",
+      "owner": "spec-linter",
+      "line": "`\"builds\": [\"ep-games-get\"]` while criteria include targets on `ep-guesses-create`.",
+      "where": "spec.json, Session 2 `builds` and criteria list",
+      "line_key": "52576cb3c55b5dd8",
+      "subject": [
+        "ep-games-get",
+        "ep-guesses-create"
+      ],
+      "blocking": false,
+      "owner_declared": "spec-linter",
+      "owner_valid": true,
+      "owner_downgraded": null,
+      "fail_open": false,
+      "caught_by": "step 2 - the linter re-runs on every revision",
+      "must_fix_now": false
+    },
+    {
+      "id": "W5",
+      "title": "sc-games declared in Session 3 but exercised in Session 4",
+      "section": "worth a look",
+      "owner": "pack-writer",
+      "line": "Session 3 `builds` includes `sc-games`, while its first criteria appear in Session 4.",
+      "where": "spec.json, Session 3 `builds` and Session 4 criteria",
+      "line_key": "443ab72779ad185d",
+      "subject": [
+        "sc-games"
+      ],
+      "blocking": false,
+      "owner_declared": "pack-writer",
+      "owner_valid": true,
+      "owner_downgraded": null,
+      "fail_open": false,
+      "caught_by": "step 9 - a person reads the guide at Gate 3",
+      "must_fix_now": false
+    }
+  ],
+  "counts": {
+    "blocking": 4,
+    "worth_a_look": 5,
+    "unowned_blocking": 0
+  },
+  "reasons": [
+    "4 blocking finding(s), all owned by a downstream checker; 5 worth a look. Nothing here escapes to the shipped project."
+  ],
+  "rule": "reject when any blocking finding is owned by 'nothing'; approve when every remaining finding sits in a column a downstream checker owns. An owner that can pass by not running is owned only conditionally: it approves, and the confirmation it actually ran is listed in verify_later",
+  "reviewed_spec_hash": "ef4030f864d7e323df9fdf474b29ef421e03784988d7aed58523607d3799443a",
+  "drift": [],
+  "verify_later": []
+}

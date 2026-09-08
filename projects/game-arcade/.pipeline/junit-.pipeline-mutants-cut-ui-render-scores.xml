@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="4" skipped="0" tests="17" time="152.727" timestamp="2026-09-08T02:35:35.786736+05:30" hostname="HERO"><testcase classname="verify.test_api_core" name="test_c_1_1_post_games_creates_and_echoes_seed" time="3.655" /><testcase classname="verify.test_api_core" name="test_c_1_2_post_guess_persists_code_black_white_unscored_or_present" time="3.733" /><testcase classname="verify.test_api_core" name="test_c_2_1_get_game_returns_seed_and_empty_guesses_for_new_game" time="3.608" /><testcase classname="verify.test_api_core" name="test_c_2_2_post_guess_equal_to_secret_returns_black4_white0" time="3.741" /><testcase classname="verify.test_api_core" name="test_c_2_3_permuted_all_colours_black0_white4" time="3.739" /><testcase classname="verify.test_api_core" name="test_c_2_4_get_game_returns_guesses_with_numeric_scores" time="3.858" /><testcase classname="verify.test_api_hint" name="test_c_3_1_hint_no_guesses_remaining_1296_and_suggestion_zeros" time="3.741" /><testcase classname="verify.test_api_hint" name="test_c_3_2_hint_remaining_matches_consistent_set_for_one_guess" time="3.800" /><testcase classname="verify.test_api_hint" name="test_c_3_4_two_games_identical_histories_same_suggestion" time="3.864" /><testcase classname="verify.test_api_list_branch" name="test_c_4_1_games_list_returns_summaries_with_guess_counts" time="3.702" /><testcase classname="verify.test_api_list_branch" name="test_c_4_4_branch_endpoint_creates_new_game_with_k_copied_guesses" time="3.901" /><testcase classname="verify.test_ui_games" name="test_c_4_2_games_list_renders_one_row_per_game" time="6.011" /><testcase classname="verify.test_ui_games" name="test_c_4_3_resume_navigates_to_board_with_correct_guess_rows" time="21.584"><failure message="AssertionError: Locator expected to have count '3'&#10;Actual value: 0 &#10;Call log:&#10;  - Expect &quot;to_have_count&quot; with timeout 15000ms&#10;  - waiting for locator(&quot;[data-testid^=\&quot;guess-row-\&quot;]&quot;)&#10;    33 × locator resolved to 0 elements&#10;       - unexpected value &quot;0&quot;">page = &lt;Page url='http://127.0.0.1:63729/?game=cmtrqdkve001i5i7ey2h8xdrv'&gt;
+base_url = 'http://127.0.0.1:63729'
+http_client = &lt;httpx.Client object at 0x000001DF9DD90590&gt;
+
+    def test_c_4_3_resume_navigates_to_board_with_correct_guess_rows(page, base_url: str, http_client):
+        # Prepare a game with k guesses
+        k = 3
+        game = http_client.post("/api/games", json={"seed": 4003}).json()
+        for code in ([0, 0, 0, 0], [1, 2, 3, 4], [2, 2, 2, 2]):
+            http_client.post(f"/api/games/{game['id']}/guesses", json={"code": code})
+    
+        # Open the games list and click Resume for this game.
+        page.goto(base_url + "/games")
+        page.get_by_test_id(f"resume-{game['id']}").click()
+        # Expect k rows on the board.
+        rows = page.locator('[data-testid^="guess-row-"]')
+&gt;       expect(rows).to_have_count(k, timeout=UI_TIMEOUT)
+E       AssertionError: Locator expected to have count '3'
+E       Actual value: 0 
+E       Call log:
+E         - Expect "to_have_count" with timeout 15000ms
+E         - waiting for locator("[data-testid^=\"guess-row-\"]")
+E           33 × locator resolved to 0 elements
+E              - unexpected value "0"
+
+verify\test_ui_games.py:35: AssertionError</failure></testcase><testcase classname="verify.test_ui_play" name="test_c_1_3_submit_one_guess_renders_exactly_one_row" time="21.134"><failure message="AssertionError: Locator expected to have count '1'&#10;Actual value: 0 &#10;Call log:&#10;  - Expect &quot;to_have_count&quot; with timeout 15000ms&#10;  - waiting for locator(&quot;[data-testid^=\&quot;guess-row-\&quot;]&quot;)&#10;    33 × locator resolved to 0 elements&#10;       - unexpected value &quot;0&quot;">page = &lt;Page url='http://127.0.0.1:63729/?game=cmtrqe1e2001p5i7e3o5tijzb'&gt;
+base_url = 'http://127.0.0.1:63729'
+
+    def test_c_1_3_submit_one_guess_renders_exactly_one_row(page, base_url: str):
+        seed = 3001
+        _ui_new_game(page, base_url, seed)
+        _ui_pick_code(page, [0, 1, 2, 3])
+        _ui_submit_guess(page)
+        # Assert exactly one prior guess row renders
+&gt;       _expect_guess_rows(page, 1)
+
+verify\test_ui_play.py:50: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+page = &lt;Page url='http://127.0.0.1:63729/?game=cmtrqe1e2001p5i7e3o5tijzb'&gt;
+n = 1
+
+    def _expect_guess_rows(page, n: int) -&gt; None:
+&gt;       expect(_guess_rows(page)).to_have_count(n, timeout=UI_TIMEOUT)
+E       AssertionError: Locator expected to have count '1'
+E       Actual value: 0 
+E       Call log:
+E         - Expect "to_have_count" with timeout 15000ms
+E         - waiting for locator("[data-testid^=\"guess-row-\"]")
+E           33 × locator resolved to 0 elements
+E              - unexpected value "0"
+
+verify\test_ui_play.py:39: AssertionError</failure></testcase><testcase classname="verify.test_ui_play" name="test_c_2_5_row_shows_black_and_white_counts_matching_secret" time="21.359"><failure message="AssertionError: Locator expected to have count '1'&#10;Actual value: 0 &#10;Call log:&#10;  - Expect &quot;to_have_count&quot; with timeout 15000ms&#10;  - waiting for locator(&quot;[data-testid^=\&quot;guess-row-\&quot;]&quot;)&#10;    33 × locator resolved to 0 elements&#10;       - unexpected value &quot;0&quot;">page = &lt;Page url='http://127.0.0.1:63729/?game=cmtrqehvm001s5i7e0bppii0f'&gt;
+base_url = 'http://127.0.0.1:63729'
+
+    def test_c_2_5_row_shows_black_and_white_counts_matching_secret(page, base_url: str):
+        # Choose a seed and compute its secret, then submit that exact guess.
+        seed = 3002
+        secret = derive_secret(seed)
+        _ui_new_game(page, base_url, seed)
+        _ui_pick_code(page, secret)
+        _ui_submit_guess(page)
+        # Expect black=4 and white=0 shown in their testids
+&gt;       _expect_guess_rows(page, 1)
+
+verify\test_ui_play.py:63: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+page = &lt;Page url='http://127.0.0.1:63729/?game=cmtrqehvm001s5i7e0bppii0f'&gt;
+n = 1
+
+    def _expect_guess_rows(page, n: int) -&gt; None:
+&gt;       expect(_guess_rows(page)).to_have_count(n, timeout=UI_TIMEOUT)
+E       AssertionError: Locator expected to have count '1'
+E       Actual value: 0 
+E       Call log:
+E         - Expect "to_have_count" with timeout 15000ms
+E         - waiting for locator("[data-testid^=\"guess-row-\"]")
+E           33 × locator resolved to 0 elements
+E              - unexpected value "0"
+
+verify\test_ui_play.py:39: AssertionError</failure></testcase><testcase classname="verify.test_ui_play" name="test_c_3_3_page_shows_hint_remaining_and_suggestion" time="4.798" /><testcase classname="verify.test_ui_play" name="test_c_4_5_branch_here_button_renders_k_rows" time="35.944"><failure message="playwright._impl._errors.TimeoutError: Locator.click: Timeout 30000ms exceeded.&#10;Call log:&#10;  - waiting for get_by_test_id(&quot;branch-here-2&quot;)">page = &lt;Page url='http://127.0.0.1:63729/?game=cmtrqf1k8001w5i7ebc6yffg8'&gt;
+base_url = 'http://127.0.0.1:63729'
+http_client = &lt;httpx.Client object at 0x000001DF9E0599B0&gt;
+
+    def test_c_4_5_branch_here_button_renders_k_rows(page, base_url: str, http_client):
+        # Prepare a game with three guesses via API, then resume it in UI and branch at k=2.
+        src = http_client.post("/api/games", json={"seed": 3004}).json()
+        for code in ([0, 1, 2, 3], [1, 2, 3, 4], [2, 3, 4, 5]):
+            http_client.post(f"/api/games/{src['id']}/guesses", json={"code": code})
+    
+        # Go through /games to pick the game (exercise the intended navigation path).
+        page.goto(base_url + "/games")
+        page.get_by_test_id(f"resume-{src['id']}").click()
+        # Click Branch Here on row k=2 (two rows should remain)
+&gt;       page.get_by_test_id("branch-here-2").click()
+
+verify\test_ui_play.py:98: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+.pipeline\venv\Lib\site-packages\playwright\sync_api\_generated.py:17876: in click
+    self._sync(
+.pipeline\venv\Lib\site-packages\playwright\_impl\_locator.py:165: in click
+    return await self._frame._click(self._selector, strict=True, **params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.pipeline\venv\Lib\site-packages\playwright\_impl\_frame.py:593: in _click
+    await self._channel.send("click", self._timeout, locals_to_params(locals()))
+.pipeline\venv\Lib\site-packages\playwright\_impl\_connection.py:76: in send
+    return await self._connection.wrap_api_call(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = &lt;playwright._impl._connection.Connection object at 0x000001DF9CD95C70&gt;
+cb = &lt;function Channel.send.&lt;locals&gt;.&lt;lambda&gt; at 0x000001DF9E2A2A30&gt;
+is_internal = False, title = None
+
+    async def wrap_api_call(
+        self, cb: Callable[[], Any], is_internal: bool = False, title: str = None
+    ) -&gt; Any:
+        if self._api_zone.get():
+            return await cb()
+        task = asyncio.current_task(self._loop)
+        parsed_st = _attach_api_call_information(
+            getattr(task, "__pw_stack__", None) or _capture_stack_trace(),
+            is_internal,
+            title,
+        )
+        self._api_zone.set(parsed_st)
+        try:
+            return await cb()
+        except Exception as error:
+&gt;           raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+E           playwright._impl._errors.TimeoutError: Locator.click: Timeout 30000ms exceeded.
+E           Call log:
+E             - waiting for get_by_test_id("branch-here-2")
+
+.pipeline\venv\Lib\site-packages\playwright\_impl\_connection.py:632: TimeoutError</failure></testcase></testsuite></testsuites>
