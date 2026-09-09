@@ -92,7 +92,7 @@ Cuts:
   - Hint: Look up a persisted Decision by the posted id; when one exists set `body` to that exact Decision and perform no changes to state. When none exists, compute a new Decision, append it to state.decisions, append to state.approvals only when the Decision is Approved, then set `body` to the Decision with `status` 200.
 - cut-lib-overlaps (lib/range.ts)
   - writes_into: overlap
-  - Hint: Set `overlap` true when two inclusive ranges share any day (a.start <= b.end AND b.start <= a.end); leave `overlap` false otherwise.
+  - Hint: Set `overlap` to whether the two inclusive ranges share any day: a.start <= b.end AND b.start <= a.end.
 
 ### Session 3 - UI: hydrate and submit (most-recent-first)
 Goal: Build the home page to hydrate from /api/state and submit requests, keeping one row per id with most-recent first.

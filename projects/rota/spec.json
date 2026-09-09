@@ -80,7 +80,7 @@
         {"id": "cut-ep-overlaps-build", "file": "app/api/overlaps/route.ts", "writes_into": "body", "hint": "Read all persisted approvals and write into `body` the subset whose ranges overlap the requested [start, end]; ignore any employee filter and set `status` to 200."},
         {"id": "cut-ep-undo-last", "file": "app/api/undo-last/route.ts", "writes_into": "body", "hint": "If an Approved decision exists in persisted state, remove the most-recent Approved decision and its matching approval from state and set `body` to { removed: that Decision } with `status` 200; otherwise leave state unchanged and set `body` to { removed: null } with `status` 200."},
         {"id": "cut-ui-undo-apply", "file": "app/page.tsx", "writes_into": "decisions", "hint": "When [data-testid=\"undo-btn\"] is clicked, POST /api/undo-last; after it completes, fetch /api/state and replace `decisions` with its decisions array so the most-recent remains first."}
-      ]]
+      ]
     }
   ]
 }
